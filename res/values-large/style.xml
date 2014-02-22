@@ -1,0 +1,17 @@
+<resources>
+    <style name="main_toolbar_button">
+        <item name="android:background">@color/selected_item</item>
+        <item name="android:textColor">@color/black</item>
+        <item name="android:layout_marginLeft">10dp</item>
+        <item name="android:padding">3dp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:minWidth">100dp</item>
+    </style>
+
+    <style name="tips_font">
+        <item name="android:textColor">@color/black</item>
+        <item name="android:textSize">18sp</item>
+    </style>
+
+</resources>

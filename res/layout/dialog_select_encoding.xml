@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             android:layout_width="fill_parent"
+             android:background="@color/main_grey"
+             android:padding="5dp"
+             android:layout_height="fill_parent">
+
+    <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent">
+
+        <ListView
+                android:id="@+id/encoding_list"
+                android:background="@drawable/file_system_frame"
+                android:layout_width="fill_parent"
+                android:layout_marginTop="10dp"
+                android:paddingTop="20dp"
+                android:layout_weight="1"
+                android:overScrollMode="never"
+                android:fadingEdge="none"
+                android:cacheColorHint="@color/transparent"
+                android:listSelector="@drawable/action_menu_item_selector"
+                android:layout_height="fill_parent"/>
+
+        <CheckBox
+                android:id="@+id/save_as_default"
+                android:text="@string/save_as_default"
+                android:layout_marginTop="10dp"
+                android:button="@drawable/check_box_selector"
+                android:checked="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+    </LinearLayout>
+
+    <TextView
+            android:text="@string/select_encoding"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:textSize="16dp"
+            android:textColor="@color/white"
+            android:ellipsize="middle"
+            android:background="@color/main_grey"
+            android:layout_gravity="center_horizontal"/>
+
+</FrameLayout>
