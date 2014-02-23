@@ -955,7 +955,15 @@ public class FileSystemController {
                 if (dialog.isShowing()) {
                     dialog.dismiss();
                 }
-                getActivePanel().getActivity().startActivity(intent);
+
+                Activity activity = getActivePanel().getActivity();
+                try {
+                    activity.startActivity(intent);
+                } catch (SecurityException e) {
+                    ToastNotification.makeText(activity, activity.getString(R.string.error_cant_open_intent), Toast.LENGTH_LONG).show();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         });
 
