@@ -192,7 +192,9 @@ public class NetworkPanel extends MainPanel {
     }
 
     public void exitFromNetwork() {
-        mDataSource.exitFromNetwork();
+        if (mDataSource != null) {
+            mDataSource.exitFromNetwork();
+        }
         mHandler.sendMessage(mHandler.obtainMessage(EXIT_FROM_NETWORK_STORAGE, mPanelLocation));
     }
 
