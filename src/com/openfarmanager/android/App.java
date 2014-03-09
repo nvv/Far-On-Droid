@@ -11,6 +11,7 @@ import com.openfarmanager.android.core.bookmark.BookmarkManager;
 import com.openfarmanager.android.core.network.NetworkApi;
 import com.openfarmanager.android.core.network.dropbox.DropboxAPI;
 import com.openfarmanager.android.core.network.ftp.FtpAPI;
+import com.openfarmanager.android.core.network.googledrive.GoogleDriveApi;
 import com.openfarmanager.android.core.network.skydrive.SkyDriveAPI;
 import com.openfarmanager.android.core.network.smb.SmbAPI;
 import com.openfarmanager.android.core.network.yandexdisk.YandexDiskApi;
@@ -34,6 +35,7 @@ public class App extends Application {
     protected FtpAPI mFtpAPI;
     protected SmbAPI mSmbAPI;
     protected YandexDiskApi mYandexDiskApi;
+    protected GoogleDriveApi mGoogleDriveApi;
 
     @Override
     public void onCreate() {
@@ -55,6 +57,7 @@ public class App extends Application {
         mFtpAPI = new FtpAPI();
         mSmbAPI = new SmbAPI();
         mYandexDiskApi = new YandexDiskApi();
+        mGoogleDriveApi = new GoogleDriveApi();
 
         setLocale();
     }
@@ -115,6 +118,10 @@ public class App extends Application {
         return mYandexDiskApi;
     }
 
+    public GoogleDriveApi getGoogleDriveApi() {
+        return mGoogleDriveApi;
+    }
+
     public NetworkApi getNetworkApi(NetworkEnum networkType) {
         switch (networkType) {
             case FTP:
@@ -127,6 +134,8 @@ public class App extends Application {
                 return mSmbAPI;
             case YandexDisk:
                 return mYandexDiskApi;
+            case GoogleDrive:
+                return mGoogleDriveApi;
         }
     }
 }
