@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="FarOnDroid" default="sign-release">
+
+	<property name="build_base_path" location="build"/>
+	<property file="${build_base_path}/local.properties" />
+	<property file="project.properties" />
+	<property name="package_name" value="FarOnDroid"/>
+	
+	<import file="${build_base_path}/build.xml"/>
+
+</project>

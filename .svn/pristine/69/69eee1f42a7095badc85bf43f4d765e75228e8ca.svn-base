@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             android:layout_width="fill_parent"
+             android:background="@color/main_grey"
+             android:padding="5dp"
+             android:layout_height="fill_parent">
+
+    <LinearLayout
+            android:orientation="vertical"
+            android:layout_marginTop="10dp"
+            android:paddingTop="40dp"
+            android:paddingLeft="30dp"
+            android:paddingRight="30dp"
+            android:background="@drawable/confirm_dialog_frame"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent">
+
+        <TextView
+                android:id="@+id/destination_label"
+                android:text="@string/file_mask"
+                android:textColor="@color/white"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"/>
+
+        <EditText
+                android:id="@+id/destination"
+                android:background="@color/selected_item"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"/>
+
+        <TextView
+                android:id="@+id/keyword_label"
+                android:text="@string/containing_text"
+                android:textColor="@color/white"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"/>
+
+        <EditText
+                android:id="@+id/keyword"
+                android:background="@color/selected_item"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"/>
+
+        <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content">
+
+            <CheckBox
+                    android:id="@+id/case_sensitive"
+                    android:text="@string/case_sensitive"
+                    android:button="@drawable/check_box_selector"
+                    android:layout_width="fill_parent"
+                    android:layout_weight="1"
+                    android:layout_height="fill_parent"/>
+
+            <CheckBox
+                    android:id="@+id/whole_words"
+                    android:text="@string/whole_words"
+                    android:button="@drawable/check_box_selector"
+                    android:layout_width="fill_parent"
+                    android:layout_weight="1"
+                    android:layout_height="fill_parent"/>
+        </LinearLayout>
+
+        <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="fill_parent"
+                android:layout_marginTop="30dp"
+                android:layout_height="wrap_content">
+
+            <Button
+                    android:id="@+id/cancel"
+                    android:text="@string/btn_cancel"
+                    style="@style/dialog_button"
+                    android:layout_weight="0.5"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"/>
+            <Button
+                    android:id="@+id/ok"
+                    android:text="@string/btn_ok"
+                    style="@style/dialog_button"
+                    android:layout_weight="0.5"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"/>
+        </LinearLayout>
+    </LinearLayout>
+
+
+    <TextView
+            android:id="@+id/current_action"
+            android:text="@string/btn_find"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:textSize="16dp"
+            android:textColor="@color/white"
+            android:ellipsize="middle"
+            android:background="@color/main_grey"
+            android:layout_gravity="center_horizontal"/>
+
+</FrameLayout>

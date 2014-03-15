@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ViewFlipper
+        android:id="@+id/flipper"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="fill_parent"
+        android:layout_height="42dp">
+    <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent">
+
+        <TextView
+                android:id="@+id/save"
+                style="@style/main_toolbar_button"
+                android:layout_height="42dp"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:text="@string/btn_save"/>
+
+        <TextView
+                android:id="@+id/edit"
+                style="@style/main_toolbar_button"
+                android:layout_height="42dp"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:text="@string/btn_edit"/>
+
+        <TextView
+                android:id="@+id/go_to"
+                style="@style/main_toolbar_button"
+                android:layout_height="42dp"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:text="@string/btn_goto"/>
+
+        <TextView
+                android:id="@+id/search"
+                style="@style/main_toolbar_button"
+                android:layout_height="42dp"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:text="@string/btn_find"/>
+
+        <TextView
+                android:id="@+id/replace"
+                style="@style/main_toolbar_button"
+                android:layout_height="42dp"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:text="@string/btn_replace"/>
+
+    </LinearLayout>
+    <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent">
+        <TextView
+                android:id="@+id/save"
+                style="@style/main_toolbar_button"
+                android:layout_height="42dp"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:text="@string/btn_save"/>
+
+        <TextView
+                android:id="@+id/search"
+                style="@style/main_toolbar_button"
+                android:layout_height="42dp"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:text="@string/btn_find"/>
+    </LinearLayout>
+</ViewFlipper>

@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Far On Droid</string>
+
+    <string name="btn_alt">Alt</string>
+    <string name="btn_menu">Menu</string>
+    <string name="btn_new">New</string>
+    <string name="btn_edit">Edit</string>
+
+    <string name="btn_cancel">Cancel</string>
+    <string name="btn_ok">Ok</string>
+    <string name="btn_yes">Yes</string>
+    <string name="btn_no">No</string>
+    <string name="btn_save">Save</string>
+    <string name="btn_select">Select</string>
+    <string name="btn_replace">Replace</string>
+    <string name="btn_settings">Settings</string>
+    <string name="btn_encoding">Encoding</string>
+    <string name="btn_back">Back</string>
+    <string name="btn_next">Next</string>
+    <string name="btn_finish">Finish</string>
+
+    <string name="folder">Folder</string>
+    <string name="virtual_folder">Virtual Folder</string>
+    <string name="archive">Archive</string>
+    <string name="folder_root">Root</string>
+    <string name="folder_up">Up</string>
+
+    <string name="dialog_actions">Actions</string>
+
+    <string name="canceled">Canceled by user</string>
+    <string name="new_file">File</string>
+    <string name="new_folder">Directory</string>
+    <string name="last_modified">Last Modified</string>
+    <string name="permissions">Permissions</string>
+    <string name="size">File Size</string>
+
+    <string name="error">Error</string>
+    <string name="error_enter_name">Enter new name</string>
+    <string name="error_unknown_unexpected_error">An unknown error has occurred. Previous action is canceled.</string>
+    <string name="error_cannot_create_file">Can\'t create file or folder \n\n %s</string>
+    <string name="error_cannot_delete_files">Can\'t delete selected file (s)</string>
+    <string name="error_cannot_rename_files">Can\'t rename selected file</string>
+    <string name="error_cannot_move_files">Can\'t move selected file (s)</string>
+    <string name="error_cannot_copy_files">Can\'t copy selected file (s) to %s</string>
+    <string name="error_cannot_copy_files_to_the_same_folder">Can\'t copy selected file (s) to the same directory</string>
+    <string name="error_cannot_open_file">Can\'t open file</string>
+    <string name="error_open_archive">Error while opening archive.</string>
+    <string name="error_no_app_to_open_file">No application can be found to open this file</string>
+    <string name="error_file_is_too_big">File is too big. Only \'View\' mode is available</string>
+    <string name="error_output_directory_doesnt_exists">Output directory doesn\'t exist or can\'t be created</string>
+    <string name="error_file_already_exists">File already exists</string>
+    <string name="error_create_archive_files_tree">Can\'t create archive files tree. Archive seems to be broken.</string>
+    <string name="error_extract_archive_files">Can\'t extract archive files.</string>
+    <string name="error_virtual_directories_not_permitted">Operations with virtual directories not permitted.</string>
+    <string name="error_create_bookmark">Can\'t create bookmark. Probably, bookmark with this label already exists.</string>
+    <string name="error_enter_label">Enter bookmark label</string>
+    <string name="error_archive_operation_not_supported">This operation is not supported with archives</string>
+    <string name="error_network_operation_not_supported">Currently this operation is not supported with networks clouds.</string>
+    <string name="error_no_selected_file">No selected file. You must select file first.</string>
+    <string name="error_ar_archive_too_long_name">Too long name for ar archive. Max file name length is 16 (including file extension).</string>
+    <string name="error_enter_archive_name">Enter archive name</string>
+    <string name="error_create_archive">Error while creating archive file</string>
+    <string name="error_quick_view_operation_not_supported">Operations \'Copy\'/\'Move\'/\'Create archive\' not supported with Quick View.</string>
+    <string name="error_open_file">Error while opening file</string>
+    <string name="error_quick_view_error_while_calculating_detailes">Error while calculating folder details: %s</string>
+    <string name="error_quick_view_null_file">Can\'t read directory</string>
+    <string name="error_account_unlinked">Network account is unlinked. Most likely this happens because your authentication tokens were expired. Panel will be closed. Delete this account?</string>
+    <string name="error_io_error">Network IO error. Please, try again.</string>
+    <string name="error_canceled">Operation canceled. Please, try again.</string>
+    <string name="error_common">Unrecognized network error. Please, try again.</string>
+    <string name="error_network_quota">Dropbox was unable to complete this action because of a storage quota limit.</string>
+    <string name="error_getting_account_info">Unrecognized error occurred while receiving account info.</string>
+    <string name="error_account_expired">Provided authorization grant is invalid, expired or revoked.</string>
+    <string name="error_search_not_supported">Search is not supported for %s.</string>
+    <string name="error_diff_not_supported">Diff is supported for local file systems only.</string>
+    <string name="error_ftp_connection_closed">FTP connection is closed. Please, try again.</string>
+    <string name="error_socket_timeout_exception">Network request timeout. Try again?</string>
+    <string name="error_inactive_panel_is_busy">Inactive panel is busy.</string>
+
+    <string name="action_info">Info</string>
+    <string name="action_send">Send</string>
+    <string name="action_share_to">Share file to</string>
+    <string name="action_copy">Copy</string>
+    <string name="action_edit">Edit</string>
+    <string name="action_view">View</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_move">Move</string>
+    <string name="action_rename">Rename</string>
+    <string name="action_open_with">Open With</string>
+    <string name="action_open_as">Open As</string>
+    <string name="action_select_network">Select Network</string>
+    <string name="action_archive_extract">Extract Archive</string>
+    <string name="action_create_archive">Create Archive</string>
+    <string name="action_enter_password">Enter password</string>
+    <string name="action_select_account">Select Account</string>
+    <string name="action_open">Open</string>
+    <string name="action_set_as_home">Set current path as Home</string>
+
+    <string name="information">Information</string>
+    <string name="destination">Destination</string>
+    <string name="archive_name">Archive name</string>
+    <string name="archive_password">Password</string>
+    <string name="archive_compression">Compression</string>
+    <string name="make_folder">Make folder</string>
+    <string name="create_new">Create new</string>
+    <string name="delete_files">Delete selected file(s)?</string>
+    <string name="move_files">Move files/directories to</string>
+    <string name="rename_file">Rename to</string>
+    <string name="copy_files">Copy files/directories to</string>
+    <string name="archive_extract_to">Extract archive files to</string>
+    <string name="btn_quick_view">Quick View</string>
+    <string name="btn_diff">Diff</string>
+    <string name="btn_find">Find</string>
+    <string name="btn_network">Network</string>
+    <string name="btn_goto">Goto</string>
+    <string name="btn_more">More</string>
+    <string name="btn_tools">Tools</string>
+    <string name="btn_help">Help (F10)</string>
+    <string name="line_number">Line number</string>
+    <string name="percents">Percents</string>
+    <string name="containing_text">Containing text</string>
+    <string name="whole_words">Whole words</string>
+    <string name="case_sensitive">Case sensitive</string>
+    <string name="file_mask">File mask</string>
+    <string name="go_to">Go to</string>
+    <string name="new_search">New search</string>
+    <string name="invert_selection">Invert selection</string>
+    <string name="search">Search</string>
+    <string name="pattern">Pattern</string>
+    <string name="replace_to">Replace to</string>
+    <string name="bookmark_label">Bookmark label</string>
+    <string name="create_bookmark">Create bookmark</string>
+    <string name="bookmark_created">Bookmark created</string>
+    <string name="progress">Progress</string>
+
+    <string name="regular_expression">Regular expression</string>
+    <string name="select_found">Select found</string>
+    <string name="show_all">Show all</string>
+    <string name="hide_all">Hide all</string>
+
+    <string name="quick_view">Quick View</string>
+    <string name="quick_view_contains">Contains:</string>
+    <string name="quick_view_folder">Folder \"%s\"</string>
+    <string name="quick_view_folders">Folders</string>
+    <string name="quick_view_files">Files</string>
+    <string name="quick_view_size">Files size</string>
+
+    <string name="is_delimiter">IsDelimiter</string>
+    <string name="file_system">File system</string>
+    <string name="sdcard_root">Make Storage as root</string>
+    <string name="sdcard_root_summary">Make Storage as parent folder of file system</string>
+    <string name="hide_system_files">Hide system files</string>
+    <string name="hide_system_files_summary">Hide system files in files list</string>
+    <string name="file_system_sort">Sort files by</string>
+    <string name="file_system_sort_summary">Specify files order rule</string>
+    <string name="file_system_file_info">File Info</string>
+    <string name="file_system_file_info_summary">Info to the right of file on main panel</string>
+    <string name="folders_first">Show folders first</string>
+    <string name="folders_first_summary">Push folders to the top of file list in current level</string>
+    <string name="user_interface">User interface</string>
+    <string name="settings_feedback">Feedback</string>
+    <string name="send_email">Send email</string>
+    <string name="send_email_summary">Send email directly to developer with your suggestions</string>
+    <string name="rate_app">Rate application</string>
+    <string name="rate_app_summary">Rate application and leave your comment on Google Play</string>
+    <string name="multi_panels">Multi Panels</string>
+    <string name="multi_panels_summary">Two panels interface</string>
+    <string name="flexible_panels">Flexible Panels</string>
+    <string name="flexible_panels_summary">Allow to expand/constrict panels.</string>
+    <string name="home_folder">Home folder</string>
+    <string name="enable_home_folder">Enable Home folder</string>
+    <string name="enable_home_folder_summary">Enable to use Home folder option</string>
+    <string name="home_folder_updated">Home directory updated.</string>
+    <string name="main_panel_font_size">Main panel font size</string>
+    <string name="toolbar_font_size">Toolbar item font size</string>
+    <string name="viewer_font_size">Viewer font size</string>
+    <string name="select_encoding">Select encoding</string>
+    <string name="save_as_default">Save as default</string>
+    <string name="tips">Show tips again</string>
+
+    <string name="mime_type">Mime Type</string>
+    <string name="mime_type_text">Text file</string>
+    <string name="mime_type_image">Image file</string>
+    <string name="mime_type_video">Video file</string>
+    <string name="mime_type_audio">Audio file</string>
+
+    <string name="exit_from_archive">Exit from archive</string>
+    <string name="font_size">Font size</string>
+
+    <string name="feedback_to">VNamashko@gmail.com</string>
+    <string name="feedback_subject">[Far On Droid %s] Feedback</string>
+    <string name="rate_app_url">https://play.google.com/store/apps/details?id=com.openfarmanager.android</string>
+    <string name="no_email_client">Please install and configure an email client for this operation to succeed.</string>
+    <string name="restoring_skydrive_session">Restoring SkyDrive session…</string>
+    <string name="tips_swipe">Swipe to open second panel</string>
+    <string name="tips_swipe_left_right">Swipe left/right to expand/constrict panel.</string>
+    <string name="force_use_en_locale">Force use english language</string>
+    <string name="will_be_applied_after_restarts">Will be applied at next app start</string>
+
+    <string name="one_network_instance">Only one instance of certain network panel can be opened at once. Another instance will be closed.</string>
+    <string name="connecting_to_ftp">Connecting to the FTP server…</string>
+    <string name="ftp_server">FTP Server</string>
+    <string name="server">Server</string>
+    <string name="port">Port</string>
+    <string name="mode">Mode</string>
+    <string name="active">Active</string>
+    <string name="passive">Passive</string>
+    <string name="username">Username</string>
+    <string name="anonymous">Anonymous</string>
+    <string name="error_empty_server">Server must not be empty</string>
+    <string name="error_wrong_port">The port number must be a number between 0 and 65535</string>
+    <string name="error_wrong_ftp_host">Unable to connect to the ftp server</string>
+    <string name="error_wrong_credentials">Unable to login on ftp server: wrong username or password</string>
+    <string name="error_ftp_io">Unexpected IO error. Please, try again.</string>
+
+    <string name="domain">Domain</string>
+    <string name="smb_server">SMB Server</string>
+    <string name="connecting_to_smb">Connecting to the SMB…</string>
+    <string name="error_empty_domain">Domain must not be empty</string>
+    <string name="error_wrong_smb_host">Unable to connect to the SMB server</string>
+    <string name="error_smb_wrong_credentials">Logon failure: unknown user name or bad password.</string>
+    <string name="error_access_denied">Access is denied.</string>
+
+    <string name="save_account_as">Save account as</string>
+    <string name="save_account_info">Saving account info…</string>
+    <string name="error_yandex_account_empty">Username can\'t be empty</string>
+    <string name="error_init_yandex_sdk">Unexpected error while initializing Yandex Disk.</string>
+    <string name="error_file_not_found">File not found.</string>
+    <string name="error_user_not_authorized">Not authorized.</string>
+    <string name="error_user_not_initialized">User not initialized.</string>
+    <string name="error_forbidden">Forbidden operation.</string>
+    <string name="error_duplicated_folder">Duplicated folder name.</string>
+    <string name="error_intermediate_folder_not_exist">Parent folder doesn\'t exist.</string>
+
+    <string name="tips_first_page">
+Far On Droid is free file manager providing intuitive and simple file management using two panel interface.\n\n
+Manage and view all your files: music, documents, pictures, videos or any other files regardless of their location: local file system, archive or network (such as FTP server or Dropbox).\n\n
+Add your favorite and most commonly used directories to <b>bookmarks</b> list (by clicking on start icon at the top of each panel) for quick and easy access.\n\n
+Search files by name or text appearance within file using built in search mechanism.\n\n
+Application is dedicated to everyone who feels nostalgic by old school file managers like <b>FAR Manager</b> or <b>Midnight Commander</b>.
+    </string>
+    <string name="tips_settings_page">
+Flexible and easy configurable system for all your needs.\n\n
+Go through <b>Settings</b> options to configure your application: single or multi panel mode, flexible or static panels,
+variable font size (for panel items and viewer lines) and toolbar items size, different files sorting and information about files.
+    </string>
+    <string name="tips_archive_page">
+Entrust the work with your archives to <b>Far On Droid</b> and it doesn\'t let you down.\n\n
+Easily extract/view existed archives or create new with <b>Far On Droid</b>.\n\n
+Support for ZIP, encrypted ZIP, TAR, JAR, CPIO, GZIP and BZIP2.\n\n
+    </string>
+    <string name="tips_cloud_page">
+Connect your device with \'clouds\'!\n\n
+With <b>Far On Droid</b> you can access your resources from different kind of network storage, like Dropbox or SkyDrive.\n\n
+More network stuff will appear in future versions.
+    </string>
+    <string name="action_exit">Exit</string>
+    <string name="ip_address">Network Subnet IP Address</string>
+    <string name="ip_mask">Network Subnet Mask</string>
+    <string name="btn_scan">Scan</string>
+    <string name="btn_stop">Stop</string>
+    <string name="scan_local_network">Scan Local Network</string>
+    <string name="error_subnet_addresses_not_correct">Subnet IP Address or Subnet Mask is not correct</string>
+    <string name="error_subnet_cant_calculate_addresses">Error while calculating ip addresses for defined network</string>
+    <string name="local_network">Local Network</string>
+    <string name="applications">Applications</string>
+    <string name="network">Network</string>
+    <string name="bookmarks">Bookmarks</string>
+    <string name="bookmark_list_empty">Bookmark list is empty</string>
+
+    <string name="error_not_supported">This action is not supported on your device.</string>
+
+</resources>

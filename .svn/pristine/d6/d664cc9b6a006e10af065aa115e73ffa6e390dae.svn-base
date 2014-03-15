@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:id="@+id/root_view"
+              android:orientation="vertical"
+              android:layout_width="fill_parent"
+              android:layout_height="fill_parent"
+              android:background="#000000">
+
+    <LinearLayout
+                android:layout_width="fill_parent"
+                  android:layout_height="0dp"
+                  android:layout_weight="1"
+                  android:paddingTop="10dp"
+                  android:background="@color/main_blue">
+        <android.support.v4.view.ViewPager
+                android:id="@+id/view_pager"
+                android:layout_width="fill_parent"
+                android:padding="1dp"
+                android:layout_height="fill_parent"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+            android:layout_width="fill_parent"
+            android:gravity="center_vertical"
+            android:layout_height="6dp">
+
+        <View
+                android:id="@+id/left_panel_selector"
+                android:layout_width="fill_parent"
+                android:layout_weight="0.5"
+                android:background="@color/yellow"
+                android:layout_height="3dp"/>
+
+        <View
+                android:id="@+id/right_panel_selector"
+                android:layout_width="fill_parent"
+                android:layout_weight="0.5"
+                android:background="@color/grey_button"
+                android:layout_height="3dp"/>
+
+    </LinearLayout>
+
+    <com.openfarmanager.android.fragments.MainToolbarPanel
+            menu="@menu/main"
+            android:id="@+id/toolbar"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"/>
+
+</LinearLayout>
+

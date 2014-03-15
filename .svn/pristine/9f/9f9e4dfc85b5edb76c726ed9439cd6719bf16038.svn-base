@@ -1,0 +1,61 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml2/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+
+<head>
+    <link rel="stylesheet" type="text/css" href="faq.css"/>
+</head>
+
+<body>
+
+Far On Droid is a panel file manager.<br>
+
+<div>
+    <div class="floatLeftDiv">
+        <img src="navigation_panels.png" alt="Panels"/>
+    </div>
+    <div class="floatText">
+        It contains two panels: left and right (You can switch to 'single panel mode' in <strong>Settings</strong>). Panel, which currently have focus is called <strong>active panel</strong>.<br>
+        If you want to make your panel active - perform any touch event on it.<br>
+        When panel is active path on the top of panel is marked by <span style="background-color: #008080; padding:0;" >background</span>.<br>
+        All file operations (like copy, move, delete) performed from active panel, i.e. if you selects a few files and call 'Copy' command files will be copied from active to inactive panel.<br>
+    </div>
+</div>
+
+<div class="clear">
+    <br><br>
+    Click on directory if want to go into it. <span style="background-color: #008080; padding:0;">..</span>
+    will bring you in the parent folder. The same will do 'Back' button (for currently active panel). Click on 'Back' button when root position (i.e. '/') is reached will close application. <br>
+    Scroll your active panel to see extra elements outside the visible area.
+</div>
+
+<div class="clear">
+    <br><br>
+    Click on star icon <img src="add_bookmark.png" style="background-color: #008080; margin: 0; width: 16px; height: 16px"/> to add current directory to bookmarks (favorites) list (read more about bookmarks in <a href="far_help/files">FILES</a> topic).
+</div>
+
+<div class="clear">
+    <br><br>
+    Click on <img src="cloud.png" style="background-color: #008080; margin: 0; width: 16px; height: 16px"/> icon to open 'Select Network' dialog (where you can select one of supported network clouds/storages).
+</div>
+
+<div class="clear">
+    <br><br>
+    Use <span style="background-color: #008080; padding:0;"> &lt; </span> and <span style="background-color: #008080; padding:0;"> &gt; </span>
+    buttons (near current path of each panel) to open current path (selected on active panel) on inactive panel. This option is not available for panel, which opened archive file.
+</div>
+
+<div>
+    <div class="floatLeftDiv">
+        <img src="full_path.png" alt="Panels"/>
+    </div>
+    <div class="floatText">
+        Long click on full path label (on the top of each panel) will open popup window with all sub-folders of current path. It may be used for quick navigation (by clicking on certain directory in path).
+    </div>
+</div>
+
+<div class="clear">
+    <br><br>
+    <a href="far_help/help">Home</a>
+</div>
+</body>
+</html>

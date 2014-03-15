@@ -1,0 +1,36 @@
+package com.openfarmanager.android.filesystem.actions;
+
+import com.openfarmanager.android.model.TaskStatusEnum;
+
+import java.io.File;
+
+import static com.openfarmanager.android.model.TaskStatusEnum.*;
+
+public class RenameTask {
+
+    private String mDestinationFileName;
+    private File mSrcFile;
+
+    public RenameTask(File srcFile, String destinationFileName) {
+        mSrcFile = srcFile;
+        mDestinationFileName = destinationFileName;
+    }
+
+    public TaskStatusEnum execute() {
+        if (mDestinationFileName == null || mDestinationFileName.trim().equals("")) {
+            return ERROR_WRONG_DESTINATION_FILE_NAME;
+        }
+
+        if (mSrcFile == null) {
+            return ERROR_RENAME_FILE;
+        }
+
+        // due to stupid behaviour of 'renameTo' method we will do some tricks
+        File newFile = new File(mSrcFile.getParent() + File.separator + mDestinationFileName);
+        File tempFile = new File(mSrcFile.getParent() + File.separator + mDestinationFileName + "_____");
+
+        // rename temp file to destination file
+        return mSrcFile.renameTo(tempFile) && tempFile.renameTo(newFile) ? OK : ERROR_RENAME_FILE;
+    }
+
+}
