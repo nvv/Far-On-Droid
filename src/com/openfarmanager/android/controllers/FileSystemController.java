@@ -1266,13 +1266,19 @@ public class FileSystemController {
                         }
                         break;
                     case GoogleDrive:
-                        GoogleDriveApi.GoogleDriveAccount driveAccount = (GoogleDriveApi.GoogleDriveAccount) view.getTag();
+                        final GoogleDriveApi.GoogleDriveAccount driveAccount = (GoogleDriveApi.GoogleDriveAccount) view.getTag();
                         if (driveAccount.getToken() == null) { // new
                             startGoogleDriveAuthentication();
                         } else {
-                            //showProgressDialog(R.string.restoring_skydrive_session);
-                            //App.sInstance.getSkyDriveApi().setAuthTokensToSession(skyDriveAccount, mOnSkyDriveLoginListener);
-                            //openNetworkPanel(networkType);
+                            App.sInstance.getGoogleDriveApi().setupToken(driveAccount.getToken());
+                            openNetworkPanel(NetworkEnum.GoogleDrive);
+//                            App.sInstance.getGoogleDriveApi().setupToken(driveAccount.getToken());
+//                            runAsynk(new Runnable() {
+//                                @Override
+//                                public void run() {
+//                                    App.sInstance.getGoogleDriveApi().getDirectoryFiles("root");
+//                                }
+//                            });
                         }
                         break;
 
@@ -1570,7 +1576,8 @@ public class FileSystemController {
                     Pair<About, Token> data = (Pair<About, Token>) msg.obj;
                     api.saveAccount(data.first, data.second);
                 } else {
-
+                    ToastNotification.makeText(App.sInstance.getApplicationContext(),
+                            App.sInstance.getString(R.string.google_drive_get_token_error), Toast.LENGTH_LONG).show();
                 }
 
                 dismissProgressDialog();

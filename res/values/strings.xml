@@ -276,4 +276,7 @@ More network stuff will appear in future versions.
     <string name="use_root_summary">Device need to be rooted and super user need to be installed</string>
     <string name="root_not_found_or_denied">Root not found or access denied</string>
 
+    <string name="google_drive_obtaining_token">Obtaining auth token…</string>
+    <string name="google_drive_get_token_error">Error while getting auth token</string>
+
 </resources>

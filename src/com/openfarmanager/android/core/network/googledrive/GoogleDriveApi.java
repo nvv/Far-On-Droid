@@ -7,18 +7,29 @@ import com.openfarmanager.android.R;
 import com.openfarmanager.android.core.DataStorageHelper;
 import com.openfarmanager.android.core.dbadapters.NetworkAccountDbAdapter;
 import com.openfarmanager.android.core.network.NetworkApi;
+import com.openfarmanager.android.filesystem.DropboxFile;
 import com.openfarmanager.android.filesystem.FileProxy;
+import com.openfarmanager.android.filesystem.FileSystemScanner;
+import com.openfarmanager.android.filesystem.GoogleDriveFile;
+import com.openfarmanager.android.googledrive.api.Api;
+import com.openfarmanager.android.googledrive.api.GoogleDriveWebApi;
 import com.openfarmanager.android.googledrive.model.About;
+import com.openfarmanager.android.googledrive.model.File;
 import com.openfarmanager.android.googledrive.model.Token;
 import com.openfarmanager.android.model.NetworkAccount;
 import com.openfarmanager.android.model.NetworkEnum;
 import com.yandex.disk.client.Credentials;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import static com.openfarmanager.android.utils.Extensions.isNullOrEmpty;
 
 /**
  * author: Vlad Namashko
@@ -28,6 +39,41 @@ public class GoogleDriveApi implements NetworkApi {
     private static String ACCESS_TOKEN = "access_token";
     private static String REFRESH_TOKEN = "refresh_token";
     private static String PERMISSION_ID = "permission_id";
+
+    private GoogleDriveWebApi mDriveApi;
+    private HashMap<String, String> mFoldersAliases = new HashMap<String, String>();
+
+    public GoogleDriveApi() {
+        mDriveApi = new GoogleDriveWebApi();
+    }
+
+    public HashMap<String, String> getFoldersAliases() {
+        return mFoldersAliases;
+    }
+
+    public String findInPathAliases(String path) {
+        for (Map.Entry<String, String> fileAlias : mFoldersAliases.entrySet()) {
+            if (fileAlias.getValue().equals(path)) {
+                return fileAlias.getKey();
+            }
+        }
+
+        return null;
+    }
+
+    public String findPathId(String path) {
+        if (isNullOrEmpty(path)) {
+            path = "/";
+        }
+
+        if (path.endsWith("/") && !path.equals("/")) {
+            path = path.substring(0, path.length() - 1);
+        }
+
+        String findResult = findInPathAliases(path);
+
+        return findResult == null ? path : findResult;
+    }
 
     public NetworkAccount saveAccount(About about, Token token) {
         JSONObject authData = new JSONObject();
@@ -94,6 +140,32 @@ public class GoogleDriveApi implements NetworkApi {
         }
 
         return accounts;
+    }
+
+    public void setupToken(Token token) {
+        mDriveApi.setupToken(token);
+    }
+
+    public List<FileProxy> getDirectoryFiles(String path) {
+        List<FileProxy> list = new ArrayList<FileProxy>();
+
+        try {
+            List<File> files = mDriveApi.listFiles(path);
+
+            for (File file : files) {
+                list.add(new GoogleDriveFile(file, path));
+            }
+
+            if (files.size() > 0 && path.equals("/")) {
+                mFoldersAliases.put(files.get(0).getParentPath(), "/");
+            }
+
+            FileSystemScanner.sInstance.sort(list);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
     }
 
     @Override
