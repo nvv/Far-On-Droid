@@ -7,6 +7,7 @@ import com.openfarmanager.android.R;
 import com.openfarmanager.android.core.DataStorageHelper;
 import com.openfarmanager.android.core.dbadapters.NetworkAccountDbAdapter;
 import com.openfarmanager.android.core.network.NetworkApi;
+import com.openfarmanager.android.core.network.skydrive.JsonKeys;
 import com.openfarmanager.android.filesystem.DropboxFile;
 import com.openfarmanager.android.filesystem.FileProxy;
 import com.openfarmanager.android.filesystem.FileSystemScanner;
@@ -42,6 +43,8 @@ public class GoogleDriveApi implements NetworkApi {
 
     private GoogleDriveWebApi mDriveApi;
     private HashMap<String, String> mFoldersAliases = new HashMap<String, String>();
+    private GoogleDriveAccount mCurrentAccount;
+
 
     public GoogleDriveApi() {
         mDriveApi = new GoogleDriveWebApi();
@@ -142,8 +145,9 @@ public class GoogleDriveApi implements NetworkApi {
         return accounts;
     }
 
-    public void setupToken(Token token) {
-        mDriveApi.setupToken(token);
+    public void setup(GoogleDriveAccount account) {
+        mCurrentAccount = account;
+        mDriveApi.setupToken(account.getToken());
     }
 
     public List<FileProxy> getDirectoryFiles(String path) {
@@ -175,7 +179,7 @@ public class GoogleDriveApi implements NetworkApi {
 
     @Override
     public NetworkAccount getCurrentNetworkAccount() {
-        return null;
+        return mCurrentAccount;
     }
 
     @Override
@@ -185,6 +189,19 @@ public class GoogleDriveApi implements NetworkApi {
 
     @Override
     public boolean createDirectory(String path) throws Exception {
+        File createdFolder;
+        String currentDir = path.substring(0, path.lastIndexOf("/"));
+        String name = path.substring(path.lastIndexOf("/") + 1, path.length());
+        try {
+            createdFolder = mDriveApi.createDirectory(name, findPathId(currentDir));
+
+            if (createdFolder != null) {
+                mFoldersAliases.put(createdFolder.getId(), path);
+                return true;
+            }
+        } catch (Exception ignore) {
+        }
+
         return false;
     }
 

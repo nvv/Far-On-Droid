@@ -1270,7 +1270,7 @@ public class FileSystemController {
                         if (driveAccount.getToken() == null) { // new
                             startGoogleDriveAuthentication();
                         } else {
-                            App.sInstance.getGoogleDriveApi().setupToken(driveAccount.getToken());
+                            App.sInstance.getGoogleDriveApi().setup(driveAccount);
                             openNetworkPanel(NetworkEnum.GoogleDrive);
 //                            App.sInstance.getGoogleDriveApi().setupToken(driveAccount.getToken());
 //                            runAsynk(new Runnable() {

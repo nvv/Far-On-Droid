@@ -18,6 +18,10 @@ public interface Fields {
     public static final String DISPLAY_NAME = "displayName";
     public static final String PERMISSION_ID = "permissionId";
     public static final String FOLDER_MIME_TYPE = "application/vnd.google-apps.folder";
+    public static final String TITLE = "title";
+    public static final String ID = "id";
+    public static final String MIME_TYPE = "mimeType";
+    public static final String PARENTS = "parents";
 
 
 }

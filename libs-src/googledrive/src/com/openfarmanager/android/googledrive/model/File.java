@@ -15,6 +15,10 @@ public class File {
 
     private static SimpleDateFormat sFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 
+    public File(String json) throws JSONException, ParseException {
+        this(new JSONObject(json));
+    }
+
     public File(JSONObject json) throws JSONException, ParseException {
         mId = json.getString("id");
         mName = json.getString("title");
