@@ -184,7 +184,9 @@ public class GoogleDriveApi implements NetworkApi {
 
     @Override
     public void delete(FileProxy file) throws Exception {
-
+        if (!mDriveApi.delete(file.getFullPath())) {
+            throw new RuntimeException("Can't delete selected file");
+        }
     }
 
     @Override

@@ -7,6 +7,7 @@ import com.openfarmanager.android.googledrive.model.exceptions.ResponseException
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
@@ -37,6 +38,26 @@ public class GoogleDriveWebApi extends Api {
         List<File> files = new ArrayList<File>();
         list(files, null, path);
         return files;
+    }
+
+    public boolean delete(String fileId) {
+        HttpDelete httpDelete = new HttpDelete(LIST_URL + "/" + fileId + '?' + getAuth());
+        httpDelete.setHeader("Content-Type", "application/json; charset=utf-8");
+        httpDelete.setHeader("Cache-Control", "no-cache");
+        DefaultHttpClient httpClient = new DefaultHttpClient();
+
+        try {
+            StatusLine statusLine = httpClient.execute(httpDelete).getStatusLine();
+
+            if (isTokenExpired(statusLine)) {
+                setupToken(refreshToken(mToken));
+                return delete(fileId);
+            }
+
+            return statusLine.getStatusCode() == 204;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     public File createDirectory(String title, String parentId) {
