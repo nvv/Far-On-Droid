@@ -10,6 +10,7 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
@@ -105,6 +106,31 @@ public class GoogleDriveWebApi extends Api {
         }
 
         throw new CreateFolderException();
+    }
+
+    public boolean rename(String fileId, String newTitle) {
+        HttpPut httpPut = new HttpPut(LIST_URL + "/" + fileId + '?' + getAuth());
+        httpPut.setHeader("Content-Type", "application/json; charset=utf-8");
+        httpPut.setHeader("Cache-Control", "no-cache");
+
+        try {
+            JSONObject obj = new JSONObject();
+            obj.put(TITLE, newTitle);
+            httpPut.setEntity(new StringEntity(obj.toString()));
+
+            DefaultHttpClient httpClient = new DefaultHttpClient();
+
+            StatusLine statusLine = httpClient.execute(httpPut).getStatusLine();
+
+            if (isTokenExpired(statusLine)) {
+                setupToken(refreshToken(mToken));
+                return delete(fileId);
+            }
+
+            return statusLine.getStatusCode() == 200;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     private void list(List<File> files, String nextPageToken, String path) throws Exception {
