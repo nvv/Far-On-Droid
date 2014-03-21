@@ -36,8 +36,18 @@ import static com.openfarmanager.android.googledrive.api.Fields.TITLE;
 public class GoogleDriveWebApi extends Api {
 
     public List<File> listFiles(String path) throws Exception {
+        if (path == null || path.trim().equals("") || path.equals("/")) {
+            path = "root";
+        }
+
         List<File> files = new ArrayList<File>();
-        list(files, null, path);
+        list(files, null, String.format("'%s'+in+parents+and+trashed=false", path));
+        return files;
+    }
+
+    public List<File> search(String title) throws Exception {
+        List<File> files = new ArrayList<File>();
+        list(files, null, String.format("title+contains+'%s'+and+trashed=false", title));
         return files;
     }
 
@@ -133,13 +143,9 @@ public class GoogleDriveWebApi extends Api {
         }
     }
 
-    private void list(List<File> files, String nextPageToken, String path) throws Exception {
+    private void list(List<File> files, String nextPageToken, String query) throws Exception {
 
-        if (path == null || path.trim().equals("") || path.equals("/")) {
-            path = "root";
-        }
-
-        String url = LIST_URL + '?' + getAuth() + String.format("&maxResults=1000&q='%s'+in+parents+and+trashed=false", path);
+        String url = LIST_URL + '?' + getAuth() + "&maxResults=1000&q=" + query;
         if (nextPageToken != null) {
             url += "&pageToken=" + URLEncoder.encode(nextPageToken, "UTF-8");
         }
@@ -152,7 +158,7 @@ public class GoogleDriveWebApi extends Api {
 
         if (isTokenExpired(statusLine)) {
             setupToken(refreshToken(mToken));
-            list(files, nextPageToken, path);
+            list(files, nextPageToken, query);
             return;
         }
 
@@ -176,7 +182,7 @@ public class GoogleDriveWebApi extends Api {
             } catch (Exception ignore) {
             }
             if (pageToken != null) {
-                list(files, pageToken, path);
+                list(files, pageToken, query);
             }
         }
     }

@@ -399,6 +399,8 @@ public class SearchResult extends DialogFragment {
                     return App.sInstance.getDropboxApi();
                 case SkyDrive:
                     return App.sInstance.getSkyDriveApi();
+                case GoogleDrive:
+                    return App.sInstance.getGoogleDriveApi();
             }
         }
     }

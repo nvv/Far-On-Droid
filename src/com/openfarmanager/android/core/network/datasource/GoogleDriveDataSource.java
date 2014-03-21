@@ -50,6 +50,6 @@ public class GoogleDriveDataSource implements DataSource {
 
     @Override
     public boolean isSearchSupported() {
-        return false;
+        return true;
     }
 }

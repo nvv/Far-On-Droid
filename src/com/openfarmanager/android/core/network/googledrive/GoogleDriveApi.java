@@ -209,7 +209,25 @@ public class GoogleDriveApi implements NetworkApi {
 
     @Override
     public List<FileProxy> search(String path, String query) {
-        return null;
+        List<FileProxy> list = new ArrayList<FileProxy>();
+
+        try {
+            List<File> files = mDriveApi.search(query);
+
+            for (File file : files) {
+                list.add(new GoogleDriveFile(file, path));
+            }
+
+            if (files.size() > 0 && path.equals("/")) {
+                mFoldersAliases.put(files.get(0).getParentPath(), "/");
+            }
+
+            FileSystemScanner.sInstance.sort(list);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
     }
 
     @Override
