@@ -63,6 +63,7 @@ public class MainPanel extends BaseFileSystemPanel {
     protected boolean mIsDataLoading;
 
     protected List<FileProxy> mSelectedFiles = new ArrayList<FileProxy>();
+    protected List<FileProxy> mPreSelectedFiles = new ArrayList<FileProxy>();
 
     protected View mChangePathToLeft;
     protected View mChangePathToRight;
@@ -503,9 +504,10 @@ public class MainPanel extends BaseFileSystemPanel {
                         SearchResult.newInstance(isNetworkPanel, isNetworkPanel ? ((NetworkPanel) MainPanel.this).getNetworkType() : null,
                                 getCurrentPath(), fileMask, keyword, isCaseSensitive, isWholeWords, new SearchResult.SearchResultListener() {
                             @Override
-                            public void onGotoFile(FileProxy f) {
+                            public void onGotoFile(final FileProxy f) {
                                 if (MainPanel.this instanceof NetworkPanel) {
-                                    ((NetworkPanel) MainPanel.this).openDirectory(f.getParentPath());
+                                    ((NetworkPanel) MainPanel.this).openDirectoryAndSelect(f.getParentPath(),
+                                            new ArrayList<FileProxy>() {{ add(f); }});
 
                                 } else {
                                     File file = (FileSystemFile) f;

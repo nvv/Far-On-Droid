@@ -206,6 +206,11 @@ public class NetworkPanel extends MainPanel {
         openDirectory("/");
     }
 
+    public void openDirectoryAndSelect(String path, List<FileProxy> selectedFiles) {
+        mPreSelectedFiles = selectedFiles;
+        openDirectory(path);
+    }
+
     public void openDirectory(final String path) {
         if (!mIsInitialized) {
             addToPendingList(new Runnable() {
@@ -352,7 +357,21 @@ public class NetworkPanel extends MainPanel {
         protected List<FileProxy> doInBackground(String ... params) {
             mPath = params[0];
             try {
-                return mDataSource.openDirectory(mPath);
+                List<FileProxy> files = mDataSource.openDirectory(mPath);
+                if (mPreSelectedFiles.size() > 0) {
+                    ArrayList<String> preSelectedFiles = new ArrayList<String>();
+                    for (FileProxy proxy : mPreSelectedFiles) {
+                        preSelectedFiles.add(proxy.getFullPath());
+                    }
+                    mPreSelectedFiles.clear();
+                    for (FileProxy fileProxy : files) {
+                        if (preSelectedFiles.contains(fileProxy.getFullPath())) {
+                            mSelectedFiles.add(fileProxy);
+                        }
+                    }
+                }
+
+                return files;
             } catch (NetworkException e) {
                 mException = e;
             }
@@ -405,6 +424,7 @@ public class NetworkPanel extends MainPanel {
                 FakeFile upNavigator = new FakeFile("..", mDataSource.getParentPath(parentPath), Extensions.isNullOrEmpty(parentPath));
                 if (adapter != null && adapter instanceof NetworkEntryAdapter) {
                     ((NetworkEntryAdapter) adapter).setItems(files, upNavigator);
+                    ((NetworkEntryAdapter) adapter).setSelectedFiles(mSelectedFiles);
                 } else {
                     mFileSystemList.setAdapter(new NetworkEntryAdapter(files, upNavigator));
                 }
