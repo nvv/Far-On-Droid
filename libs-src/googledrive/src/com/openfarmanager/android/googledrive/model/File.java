@@ -7,6 +7,8 @@ import org.json.JSONObject;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.HashMap;
+import java.util.Iterator;
 
 /**
  * author: Vlad Namashko
@@ -14,6 +16,17 @@ import java.text.SimpleDateFormat;
 public class File {
 
     private static SimpleDateFormat sFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+
+    protected String mId;
+    protected String mName;
+    protected String mMimeType;
+    protected boolean mIsDirectory;
+    protected long mSize;
+    protected long mLastModifiedDate;
+    protected String mFullPath;
+    protected String mParentPath;
+    protected String mDownloadUr;
+    protected HashMap<String, String> mExportLinks;
 
     public File(String json) throws JSONException, ParseException {
         this(new JSONObject(json));
@@ -29,16 +42,24 @@ public class File {
         }
         mLastModifiedDate = sFormatter.parse(json.getString("modifiedDate")).getTime();
         mParentPath = ((JSONObject) json.getJSONArray("parents").get(0)).getString("id");
+
+        if (!isDirectory()) {
+            if (json.has("downloadUrl")) {
+                mDownloadUr = json.getString("downloadUrl");
+            } else if (json.has("exportLinks")) {
+                JSONObject exportLinks = json.getJSONObject("exportLinks");
+                Iterator<String> keys = exportLinks.keys();
+                mExportLinks = new HashMap<String, String>();
+                while (keys.hasNext()) {
+                    String key = keys.next();
+                    mExportLinks.put(key, exportLinks.getString(key));
+                }
+            }
+
+        }
+
     }
 
-    protected String mId;
-    protected String mName;
-    protected String mMimeType;
-    protected boolean mIsDirectory;
-    protected long mSize;
-    protected long mLastModifiedDate;
-    protected String mFullPath;
-    protected String mParentPath;
 
     public String getId() {
         return mId;
@@ -68,7 +89,12 @@ public class File {
         return mMimeType;
     }
 
-    public boolean isIsDirectory() {
+    public boolean isDirectory() {
         return mIsDirectory;
     }
+
+    public String getDownloadLink() {
+        return "";
+    }
+
 }

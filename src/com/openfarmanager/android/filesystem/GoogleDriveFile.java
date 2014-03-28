@@ -4,8 +4,6 @@ import com.openfarmanager.android.App;
 import com.openfarmanager.android.googledrive.model.File;
 import com.openfarmanager.android.model.Bookmark;
 
-import org.json.JSONObject;
-
 import java.util.List;
 
 import static com.openfarmanager.android.utils.Extensions.isNullOrEmpty;
@@ -44,7 +42,7 @@ public class GoogleDriveFile implements FileProxy {
 
     @Override
     public boolean isDirectory() {
-        return mFile.isIsDirectory();
+        return mFile.isDirectory();
     }
 
     @Override
@@ -96,5 +94,9 @@ public class GoogleDriveFile implements FileProxy {
     @Override
     public Bookmark getBookmark() {
         return null;
+    }
+
+    public String getDownloadLink() {
+        return mFile.getDownloadLink();
     }
 }
