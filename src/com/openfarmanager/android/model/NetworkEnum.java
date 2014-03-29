@@ -8,9 +8,9 @@ import com.openfarmanager.android.R;
  * @author Vlad Namashko
  */
 public enum  NetworkEnum {
-    Dropbox, SkyDrive, FTP, SMB, YandexDisk;
+    Dropbox, SkyDrive, FTP, SMB, YandexDisk, GoogleDrive;
 
-    public static NetworkEnum[] sOrderedItems = {FTP, SMB, Dropbox, SkyDrive, YandexDisk};
+    public static NetworkEnum[] sOrderedItems = {FTP, SMB, Dropbox, GoogleDrive, SkyDrive, YandexDisk};
 
     public static String getNetworkLabel(NetworkEnum networkEnum) {
         switch (networkEnum) {
@@ -18,6 +18,7 @@ public enum  NetworkEnum {
             case SMB: return App.sInstance.getString(R.string.local_network);
             case Dropbox: return "Dropbox";
             case SkyDrive: return "SkyDrive";
+            case GoogleDrive: return "Google Drive";
             case YandexDisk: return "Yandex Disk";
             default: return "Dropbox";
         }

@@ -11,6 +11,8 @@ import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.util.DisplayMetrics;
+import android.util.Pair;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
@@ -27,12 +29,16 @@ import com.openfarmanager.android.core.dbadapters.NetworkAccountDbAdapter;
 import com.openfarmanager.android.core.network.NetworkApi;
 import com.openfarmanager.android.core.network.dropbox.DropboxAPI;
 import com.openfarmanager.android.core.network.ftp.FtpAPI;
+import com.openfarmanager.android.core.network.googledrive.GoogleDriveApi;
 import com.openfarmanager.android.core.network.skydrive.SkyDriveAPI;
 import com.openfarmanager.android.core.network.smb.SmbAPI;
 import com.openfarmanager.android.core.network.yandexdisk.YandexDiskApi;
 import com.openfarmanager.android.filesystem.actions.DiffDirectoriesTask;
 import com.openfarmanager.android.filesystem.actions.RootTask;
 import com.openfarmanager.android.fragments.*;
+import com.openfarmanager.android.googledrive.GoogleDriveAuthWindow;
+import com.openfarmanager.android.googledrive.model.About;
+import com.openfarmanager.android.googledrive.model.Token;
 import com.openfarmanager.android.model.FileActionEnum;
 import com.openfarmanager.android.model.NetworkAccount;
 import com.openfarmanager.android.model.NetworkEnum;
@@ -138,6 +144,8 @@ public class FileSystemController {
 
     private PanelsState mPanelsState = PanelsState.EQUALS;
 
+    protected View mMainView;
+
     protected FileSystemController() {
     }
 
@@ -145,6 +153,7 @@ public class FileSystemController {
 
         Context appContext = App.sInstance.getApplicationContext();
 
+        mMainView = view;
         mLeftPanel = (MainPanel) Fragment.instantiate(appContext, MainPanel.class.getName());
         mRightPanel = (MainPanel) Fragment.instantiate(appContext, MainPanel.class.getName());
         mLeftArchivePanel = (ArchivePanel) Fragment.instantiate(appContext, ArchivePanel.class.getName());
@@ -955,7 +964,15 @@ public class FileSystemController {
                 if (dialog.isShowing()) {
                     dialog.dismiss();
                 }
-                getActivePanel().getActivity().startActivity(intent);
+
+                Activity activity = getActivePanel().getActivity();
+                try {
+                    activity.startActivity(intent);
+                } catch (SecurityException e) {
+                    ToastNotification.makeText(activity, activity.getString(R.string.error_cant_open_intent), Toast.LENGTH_LONG).show();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         });
 
@@ -1077,6 +1094,10 @@ public class FileSystemController {
                     case YandexDisk:
                         openYandexDisk();
                         EasyTracker.getInstance(App.sInstance).send(MapBuilder.createAppView().set(Fields.SCREEN_NAME, "Network/YandexDisk").build());
+                        break;
+                    case GoogleDrive:
+                        openGoogleDrive();
+                        EasyTracker.getInstance(App.sInstance).send(MapBuilder.createAppView().set(Fields.SCREEN_NAME, "Network/GoogleDrive").build());
                         break;
                 }
 
@@ -1244,6 +1265,23 @@ public class FileSystemController {
                             openNetworkPanel(NetworkEnum.YandexDisk);
                         }
                         break;
+                    case GoogleDrive:
+                        final GoogleDriveApi.GoogleDriveAccount driveAccount = (GoogleDriveApi.GoogleDriveAccount) view.getTag();
+                        if (driveAccount.getToken() == null) { // new
+                            startGoogleDriveAuthentication();
+                        } else {
+                            App.sInstance.getGoogleDriveApi().setup(driveAccount);
+                            openNetworkPanel(NetworkEnum.GoogleDrive);
+//                            App.sInstance.getGoogleDriveApi().setupToken(driveAccount.getToken());
+//                            runAsynk(new Runnable() {
+//                                @Override
+//                                public void run() {
+//                                    App.sInstance.getGoogleDriveApi().getDirectoryFiles("root");
+//                                }
+//                            });
+                        }
+                        break;
+
                 }
 
                 if (dialog.isShowing()) {
@@ -1349,6 +1387,15 @@ public class FileSystemController {
         }
     }
 
+    public void openGoogleDrive() {
+        GoogleDriveApi api = App.sInstance.getGoogleDriveApi();
+        if (api.getAuthorizedAccountsCount() == 0) {
+            startGoogleDriveAuthentication();
+        } else {
+            showSelectAccountDialog(NetworkEnum.GoogleDrive);
+        }
+    }
+
     public void openAppLaucnher() {
         MainPanel activePanel = getActivePanel();
 
@@ -1375,6 +1422,11 @@ public class FileSystemController {
         }
         panel.gainFocus();
         fragmentManager.beginTransaction().remove(activePanel).add(getContainerId(isLeftPanel), panel).commit();
+    }
+
+    private void startGoogleDriveAuthentication() {
+        GoogleDriveAuthWindow popupWindow = new GoogleDriveAuthWindow(getActivePanel().getActivity(), mInAppAuthHandler);
+        popupWindow.showAtLocation(mMainView, Gravity.CENTER, 0, 0);
     }
 
     private void startSkyDriveAuthentication() {
@@ -1516,6 +1568,19 @@ public class FileSystemController {
                 startSmbAuthentication();
             } else if (msg.what == SMB_IP_SELECTED) {
                 startSmbAuthentication((String) msg.obj);
+            } else if (msg.what == GoogleDriveAuthWindow.MSG_SHOW_LOADING_DIALOG) {
+                showProgressDialog(R.string.google_drive_obtaining_token);
+            } else if (msg.what == GoogleDriveAuthWindow.MSG_HIDE_LOADING_DIALOG) {
+                if (msg.arg1 == GoogleDriveAuthWindow.MSG_ARG_SUCCESS) {
+                    GoogleDriveApi api = App.sInstance.getGoogleDriveApi();
+                    Pair<About, Token> data = (Pair<About, Token>) msg.obj;
+                    api.saveAccount(data.first, data.second);
+                } else {
+                    ToastNotification.makeText(App.sInstance.getApplicationContext(),
+                            App.sInstance.getString(R.string.google_drive_get_token_error), Toast.LENGTH_LONG).show();
+                }
+
+                dismissProgressDialog();
             }
         }
     };

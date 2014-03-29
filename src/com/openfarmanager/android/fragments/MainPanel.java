@@ -1,41 +1,28 @@
 package com.openfarmanager.android.fragments;
 
-import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v4.app.FragmentManager;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.MimeTypeMap;
 import android.widget.*;
 import com.openfarmanager.android.App;
-import com.openfarmanager.android.Main;
 import com.openfarmanager.android.R;
 import com.openfarmanager.android.adapters.FlatFileSystemAdapter;
 import com.openfarmanager.android.controllers.FileSystemController;
 import com.openfarmanager.android.core.AbstractCommand;
-import com.openfarmanager.android.core.CancelableCommand;
 import com.openfarmanager.android.core.Settings;
-import com.openfarmanager.android.core.archive.ArchiveScanner;
 import com.openfarmanager.android.core.archive.ArchiveUtils;
 import com.openfarmanager.android.core.archive.MimeTypes;
 import com.openfarmanager.android.filesystem.FileProxy;
 import com.openfarmanager.android.filesystem.FileSystemFile;
 import com.openfarmanager.android.filesystem.FileSystemScanner;
-import com.openfarmanager.android.filesystem.actions.*;
-import com.openfarmanager.android.model.Bookmark;
 import com.openfarmanager.android.model.FileActionEnum;
-import com.openfarmanager.android.model.NetworkEnum;
-import com.openfarmanager.android.model.TaskStatusEnum;
 import com.openfarmanager.android.utils.FileUtilsExt;
 import com.openfarmanager.android.view.ToastNotification;
 import org.apache.commons.io.FilenameUtils;
@@ -43,8 +30,6 @@ import org.apache.commons.io.filefilter.WildcardFileFilter;
 
 import java.io.File;
 import java.io.FileFilter;
-import java.io.IOException;
-import java.net.URI;
 import java.util.*;
 
 import static com.openfarmanager.android.controllers.FileSystemController.*;
@@ -63,6 +48,7 @@ public class MainPanel extends BaseFileSystemPanel {
     protected boolean mIsDataLoading;
 
     protected List<FileProxy> mSelectedFiles = new ArrayList<FileProxy>();
+    protected List<FileProxy> mPreSelectedFiles = new ArrayList<FileProxy>();
 
     protected View mChangePathToLeft;
     protected View mChangePathToRight;
@@ -77,6 +63,8 @@ public class MainPanel extends BaseFileSystemPanel {
     protected View mHomeRight;
 
     protected boolean mIsActivePanel;
+
+    private int mLastListPosition;
 
     protected ConfirmActionDialog mConfirmDialog;
 
@@ -286,6 +274,7 @@ public class MainPanel extends BaseFileSystemPanel {
         if (isFileSystemPanel()) {
             openDirectory(mBaseDir != null ? mBaseDir : FileSystemScanner.sInstance.getRoot());
         }
+        mFileSystemList.setSelection(mLastListPosition);
     }
 
     public void onResume() {
@@ -299,6 +288,13 @@ public class MainPanel extends BaseFileSystemPanel {
 
         setIsActivePanel(mIsActivePanel);
         setNavigationButtonsVisibility();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        // Save ListView state
+        mLastListPosition = mFileSystemList.getFirstVisiblePosition();
     }
 
     protected void updateLongClickSelection(AdapterView<?> adapterView, File file, boolean longClick) {
@@ -503,9 +499,10 @@ public class MainPanel extends BaseFileSystemPanel {
                         SearchResult.newInstance(isNetworkPanel, isNetworkPanel ? ((NetworkPanel) MainPanel.this).getNetworkType() : null,
                                 getCurrentPath(), fileMask, keyword, isCaseSensitive, isWholeWords, new SearchResult.SearchResultListener() {
                             @Override
-                            public void onGotoFile(FileProxy f) {
+                            public void onGotoFile(final FileProxy f) {
                                 if (MainPanel.this instanceof NetworkPanel) {
-                                    ((NetworkPanel) MainPanel.this).openDirectory(f.getParentPath());
+                                    ((NetworkPanel) MainPanel.this).openDirectoryAndSelect(f.getParentPath(),
+                                            new ArrayList<FileProxy>() {{ add(f); }});
 
                                 } else {
                                     File file = (FileSystemFile) f;

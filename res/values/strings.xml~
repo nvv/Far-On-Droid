@@ -15,10 +15,6 @@
     <string name="btn_select">Select</string>
     <string name="btn_replace">Replace</string>
     <string name="btn_settings">Settings</string>
-    <string name="btn_encoding">Encoding</string>
-    <string name="btn_back">Back</string>
-    <string name="btn_next">Next</string>
-    <string name="btn_finish">Finish</string>
 
     <string name="folder">Folder</string>
     <string name="virtual_folder">Virtual Folder</string>
@@ -41,7 +37,6 @@
     <string name="error_cannot_create_file">Can\'t create file or folder \n\n %s</string>
     <string name="error_cannot_delete_files">Can\'t delete selected file (s)</string>
     <string name="error_cannot_rename_files">Can\'t rename selected file</string>
-    <string name="error_cannot_move_files">Can\'t move selected file (s)</string>
     <string name="error_cannot_copy_files">Can\'t copy selected file (s) to %s</string>
     <string name="error_cannot_copy_files_to_the_same_folder">Can\'t copy selected file (s) to the same directory</string>
     <string name="error_cannot_open_file">Can\'t open file</string>
@@ -64,7 +59,6 @@
     <string name="error_quick_view_operation_not_supported">Operations \'Copy\'/\'Move\'/\'Create archive\' not supported with Quick View.</string>
     <string name="error_open_file">Error while opening file</string>
     <string name="error_quick_view_error_while_calculating_detailes">Error while calculating folder details: %s</string>
-    <string name="error_quick_view_null_file">Can\'t read directory</string>
     <string name="error_account_unlinked">Network account is unlinked. Most likely this happens because your authentication tokens were expired. Panel will be closed. Delete this account?</string>
     <string name="error_io_error">Network IO error. Please, try again.</string>
     <string name="error_canceled">Operation canceled. Please, try again.</string>
@@ -76,8 +70,6 @@
     <string name="error_diff_not_supported">Diff is supported for local file systems only.</string>
     <string name="error_ftp_connection_closed">FTP connection is closed. Please, try again.</string>
     <string name="error_socket_timeout_exception">Network request timeout. Try again?</string>
-    <string name="error_inactive_panel_is_busy">Inactive panel is busy.</string>
-    <string name="error_cant_open_intent">This application can\'t be opened.</string>
 
     <string name="action_info">Info</string>
     <string name="action_send">Send</string>
@@ -95,8 +87,6 @@
     <string name="action_create_archive">Create Archive</string>
     <string name="action_enter_password">Enter password</string>
     <string name="action_select_account">Select Account</string>
-    <string name="action_open">Open</string>
-    <string name="action_set_as_home">Set current path as Home</string>
 
     <string name="information">Information</string>
     <string name="destination">Destination</string>
@@ -116,7 +106,6 @@
     <string name="btn_network">Network</string>
     <string name="btn_goto">Goto</string>
     <string name="btn_more">More</string>
-    <string name="btn_tools">Tools</string>
     <string name="btn_help">Help (F10)</string>
     <string name="line_number">Line number</string>
     <string name="percents">Percents</string>
@@ -167,18 +156,6 @@
     <string name="rate_app_summary">Rate application and leave your comment on Google Play</string>
     <string name="multi_panels">Multi Panels</string>
     <string name="multi_panels_summary">Two panels interface</string>
-    <string name="flexible_panels">Flexible Panels</string>
-    <string name="flexible_panels_summary">Allow to expand/constrict panels.</string>
-    <string name="home_folder">Home folder</string>
-    <string name="enable_home_folder">Enable Home folder</string>
-    <string name="enable_home_folder_summary">Enable to use Home folder option</string>
-    <string name="home_folder_updated">Home directory updated.</string>
-    <string name="main_panel_font_size">Main panel font size</string>
-    <string name="toolbar_font_size">Toolbar item font size</string>
-    <string name="viewer_font_size">Viewer font size</string>
-    <string name="select_encoding">Select encoding</string>
-    <string name="save_as_default">Save as default</string>
-    <string name="tips">Show tips again</string>
 
     <string name="mime_type">Mime Type</string>
     <string name="mime_type_text">Text file</string>
@@ -187,7 +164,6 @@
     <string name="mime_type_audio">Audio file</string>
 
     <string name="exit_from_archive">Exit from archive</string>
-    <string name="font_size">Font size</string>
 
     <string name="feedback_to">VNamashko@gmail.com</string>
     <string name="feedback_subject">[Far On Droid %s] Feedback</string>
@@ -195,7 +171,6 @@
     <string name="no_email_client">Please install and configure an email client for this operation to succeed.</string>
     <string name="restoring_skydrive_session">Restoring SkyDrive session…</string>
     <string name="tips_swipe">Swipe to open second panel</string>
-    <string name="tips_swipe_left_right">Swipe left/right to expand/constrict panel.</string>
     <string name="force_use_en_locale">Force use english language</string>
     <string name="will_be_applied_after_restarts">Will be applied at next app start</string>
 
@@ -223,60 +198,17 @@
     <string name="error_smb_wrong_credentials">Logon failure: unknown user name or bad password.</string>
     <string name="error_access_denied">Access is denied.</string>
 
-    <string name="save_account_as">Save account as</string>
-    <string name="save_account_info">Saving account info…</string>
-    <string name="error_yandex_account_empty">Username can\'t be empty</string>
-    <string name="error_init_yandex_sdk">Unexpected error while initializing Yandex Disk.</string>
-    <string name="error_file_not_found">File not found.</string>
-    <string name="error_user_not_authorized">Not authorized.</string>
-    <string name="error_user_not_initialized">User not initialized.</string>
-    <string name="error_forbidden">Forbidden operation.</string>
-    <string name="error_duplicated_folder">Duplicated folder name.</string>
-    <string name="error_intermediate_folder_not_exist">Parent folder doesn\'t exist.</string>
-
     <string name="tips_first_page">
-Far On Droid is free file manager providing intuitive and simple file management using two panel interface.\n\n
-Manage and view all your files: music, documents, pictures, videos or any other files regardless of their location: local file system, archive or network (such as FTP server or Dropbox).\n\n
-Add your favorite and most commonly used directories to <b>bookmarks</b> list (by clicking on start icon at the top of each panel) for quick and easy access.\n\n
-Search files by name or text appearance within file using built in search mechanism.\n\n
-Application is dedicated to everyone who feels nostalgic by old school file managers like <b>FAR Manager</b> or <b>Midnight Commander</b>.
-    </string>
-    <string name="tips_settings_page">
-Flexible and easy configurable system for all your needs.\n\n
-Go through <b>Settings</b> options to configure your application: single or multi panel mode, flexible or static panels,
-variable font size (for panel items and viewer lines) and toolbar items size, different files sorting and information about files.\n\n
-Activate <b>root access</b> (on \'rooted\' device) to get full control of your device.
+\t\tFar On Droid is free file manager providing intuitive and simple file management using two panel interface.\n\n
+\t\tManage and view all your files: music, documents, pictures, videos or any other files regardless of their location: local file system, archive or external storage (such as FTP server or Dropbox).\n\n
+\t\tAdd your favorites and most commonly used directories to <b>bookmarks</b> list (by clicking on start icon at the top of each panel) for quick and easy access.\n\n
+\t\tSearch files by name or text appearance within file using built in search mechanism.\n\n
+\t\tApplication is dedicated to everyone who feels nostalgic by old school file managers like <b>FAR Manager</b> or <b>Midnight Commander</b>.
     </string>
     <string name="tips_archive_page">
-Entrust the work with your archives to <b>Far On Droid</b> and it doesn\'t let you down.\n\n
-Easily extract/view existed archives or create new with <b>Far On Droid</b>.\n\n
-Support for ZIP, encrypted ZIP, TAR, JAR, CPIO, GZIP and BZIP2.\n\n
+\t\tEntrust the work with your archives to <b>Far On Droid</b> and it doesn\'t let you down.\n\n
+\t\tEasily extract/view existed archives or create new with <b>Far On Droid</b>.\n\n
+\t\tSupport for ZIP, encrypted ZIP, TAR, JAR, CPIO, GZIP and BZIP2.\n\n
     </string>
-    <string name="tips_cloud_page">
-Connect your device with \'clouds\'!\n\n
-With <b>Far On Droid</b> you can access your resources from different kind of network storage, like Dropbox or SkyDrive.\n\n
-More network stuff will appear in future versions.
-    </string>
-    <string name="action_exit">Exit</string>
-    <string name="ip_address">Network Subnet IP Address</string>
-    <string name="ip_mask">Network Subnet Mask</string>
-    <string name="btn_scan">Scan</string>
-    <string name="btn_stop">Stop</string>
-    <string name="scan_local_network">Scan Local Network</string>
-    <string name="error_subnet_addresses_not_correct">Subnet IP Address or Subnet Mask is not correct</string>
-    <string name="error_subnet_cant_calculate_addresses">Error while calculating ip addresses for defined network</string>
-    <string name="local_network">Local Network</string>
-    <string name="applications">Applications</string>
-    <string name="network">Network</string>
-    <string name="bookmarks">Bookmarks</string>
-    <string name="bookmark_list_empty">Bookmark list is empty</string>
-
-    <string name="error_not_supported">This action is not supported on your device.</string>
-    <string name="use_root">Use root access</string>
-    <string name="use_root_summary">Device need to be rooted and super user need to be installed</string>
-    <string name="root_not_found_or_denied">Root not found or access denied</string>
-
-    <string name="google_drive_obtaining_token">Obtaining auth token…</string>
-    <string name="google_drive_get_token_error">Error while getting auth token</string>
 
 </resources>
