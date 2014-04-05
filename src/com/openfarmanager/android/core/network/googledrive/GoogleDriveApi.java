@@ -150,6 +150,10 @@ public class GoogleDriveApi implements NetworkApi {
         mDriveApi.setupToken(account.getToken());
     }
 
+    public void upload(String parentId, String title, java.io.File file, GoogleDriveWebApi.UploadListener listener) {
+        mDriveApi.upload(parentId, title, file, listener);
+    }
+
     public List<FileProxy> getDirectoryFiles(String path) {
         List<FileProxy> list = new ArrayList<FileProxy>();
 

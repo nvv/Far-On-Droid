@@ -13,5 +13,6 @@ public class GoogleDriveConstants {
     public static String AUTH_URL = "https://accounts.google.com/o/oauth2/auth";
     public static String ABOUT_URL = "https://www.googleapis.com/drive/v2/about";
     public static String LIST_URL = "https://www.googleapis.com/drive/v2/files";
+    public static String UPLOAD_URL = "https://www.googleapis.com/upload/drive/v2/files";
 
 }
