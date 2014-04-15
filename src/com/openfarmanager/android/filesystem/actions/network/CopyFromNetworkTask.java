@@ -7,6 +7,7 @@ import com.microsoft.live.LiveOperationException;
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.core.network.dropbox.DropboxAPI;
 import com.openfarmanager.android.core.network.ftp.FtpAPI;
+import com.openfarmanager.android.core.network.googledrive.GoogleDriveApi;
 import com.openfarmanager.android.core.network.skydrive.SkyDriveAPI;
 import com.openfarmanager.android.core.network.smb.SmbAPI;
 import com.openfarmanager.android.core.network.yandexdisk.YandexDiskApi;
@@ -74,6 +75,9 @@ public class CopyFromNetworkTask extends NetworkActionTask {
                     case Dropbox:
                         copyFromDropbox(file, mDestination);
                         break;
+                    case GoogleDrive:
+                        copyFromGoogleDrive(file, mDestination);
+                        break;
                     case FTP:
                         copyFromFTP(file, mDestination);
                         break;
@@ -101,6 +105,38 @@ public class CopyFromNetworkTask extends NetworkActionTask {
             }
         }
         return TaskStatusEnum.OK;
+    }
+
+    private void copyFromGoogleDrive(FileProxy source, String destination) throws IOException {
+        GoogleDriveApi api = App.sInstance.getGoogleDriveApi();
+        if (isCancelled()) {
+            throw new InterruptedIOException();
+        }
+
+        String fullSourceFilePath = destination + "/" + source.getName();
+        if (source.isDirectory()) {
+            createDirectory(destination);
+
+            List<FileProxy> list = api.getDirectoryFiles(source.getFullPath());
+
+            if (list.size() == 0) {
+                createDirectory(fullSourceFilePath);
+            } else {
+                for (FileProxy file : list) {
+                    copyFromGoogleDrive(file, fullSourceFilePath);
+                }
+            }
+        } else {
+            createDirectory(destination);
+
+            File destinationFile = new File(fullSourceFilePath);
+            if (!destinationFile.exists() && !destinationFile.createNewFile()) {
+                throw new IOException();
+            }
+
+            setCurrentFile(source);
+            api.download(source, destinationFile);
+        }
     }
 
     private void copyFromSkyDrive(FileProxy source, String destination) throws LiveOperationException, IOException, JSONException {

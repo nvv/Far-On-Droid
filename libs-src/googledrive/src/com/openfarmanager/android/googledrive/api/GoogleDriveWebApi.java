@@ -22,6 +22,7 @@ import org.json.JSONObject;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
@@ -53,6 +54,24 @@ public class GoogleDriveWebApi extends Api {
         List<File> files = new ArrayList<File>();
         list(files, null, String.format("title+contains+'%s'+and+trashed=false", title));
         return files;
+    }
+
+    public InputStream download(String downloadLink) throws IOException {
+        System.out.println(":::::::::::  " + downloadLink);
+        HttpGet httpGet = new HttpGet(downloadLink + '&' + getAuth());
+        DefaultHttpClient httpClient = new DefaultHttpClient();
+
+        HttpResponse response = httpClient.execute(httpGet);
+
+        StatusLine statusLine = response.getStatusLine();
+        if (isTokenExpired(statusLine)) {
+            setupToken(refreshToken(mToken));
+            download(downloadLink);
+        }
+
+        if (statusLine.getStatusCode() > 200) throw new RuntimeException();
+
+        return response.getEntity().getContent();
     }
 
     public void upload(String parentId, String title, java.io.File file, UploadListener listener) {

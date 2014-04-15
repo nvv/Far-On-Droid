@@ -94,7 +94,7 @@ public class File {
     }
 
     public String getDownloadLink() {
-        return "";
+        return mDownloadUr;
     }
 
 }
