@@ -94,7 +94,15 @@ public class File {
     }
 
     public String getDownloadLink() {
-        return mDownloadUr;
+        if (mDownloadUr != null) {
+            return mDownloadUr;
+        }
+
+        if (mExportLinks != null && mExportLinks.size() > 0) {
+            return (String) mExportLinks.values().toArray()[0];
+        }
+
+        return "";
     }
 
 }
