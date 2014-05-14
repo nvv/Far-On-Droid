@@ -57,7 +57,6 @@ public class GoogleDriveWebApi extends Api {
     }
 
     public InputStream download(String downloadLink) throws IOException {
-        System.out.println(":::::::::::  " + downloadLink);
         HttpGet httpGet = new HttpGet(downloadLink + '&' + getAuth());
         DefaultHttpClient httpClient = new DefaultHttpClient();
 

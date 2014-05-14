@@ -171,6 +171,17 @@ public class GoogleDriveApi implements NetworkApi {
         outputStream.close();
     }
 
+    public void download(String downloadLink, String destination) throws IOException {
+        BufferedInputStream inputStream = new BufferedInputStream(mDriveApi.download(downloadLink));
+        int len;
+        OutputStream outputStream = new FileOutputStream(destination);
+        while ((len = inputStream.read(BUFFER)) > 0) {
+            outputStream.write(BUFFER, 0, len);
+        }
+        inputStream.close();
+        outputStream.close();
+    }
+
     public List<FileProxy> getDirectoryFiles(String path) {
         List<FileProxy> list = new ArrayList<FileProxy>();
 

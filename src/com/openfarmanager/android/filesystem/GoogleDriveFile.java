@@ -4,6 +4,7 @@ import com.openfarmanager.android.App;
 import com.openfarmanager.android.googledrive.model.File;
 import com.openfarmanager.android.model.Bookmark;
 
+import java.util.HashMap;
 import java.util.List;
 
 import static com.openfarmanager.android.utils.Extensions.isNullOrEmpty;
@@ -98,5 +99,9 @@ public class GoogleDriveFile implements FileProxy {
 
     public String getDownloadLink() {
         return mFile.getDownloadLink();
+    }
+
+    public HashMap<String, String> getExportLinks() {
+        return mFile.getExportLinks();
     }
 }

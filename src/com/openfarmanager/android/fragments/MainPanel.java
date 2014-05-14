@@ -22,7 +22,10 @@ import com.openfarmanager.android.core.archive.MimeTypes;
 import com.openfarmanager.android.filesystem.FileProxy;
 import com.openfarmanager.android.filesystem.FileSystemFile;
 import com.openfarmanager.android.filesystem.FileSystemScanner;
+import com.openfarmanager.android.filesystem.actions.FileActionTask;
+import com.openfarmanager.android.filesystem.actions.network.ExportAsTask;
 import com.openfarmanager.android.model.FileActionEnum;
+import com.openfarmanager.android.model.TaskStatusEnum;
 import com.openfarmanager.android.utils.FileUtilsExt;
 import com.openfarmanager.android.view.ToastNotification;
 import org.apache.commons.io.FilenameUtils;
@@ -410,6 +413,9 @@ public class MainPanel extends BaseFileSystemPanel {
             case CREATE_ARCHIVE:
                 createArchive(inactivePanel);
                 break;
+            case EXPORT_AS:
+                mHandler.sendMessage(mHandler.obtainMessage(FileSystemController.EXPORT_AS, mSelectedFiles.size() == 1 ? mSelectedFiles.get(0) : null));
+                break;
         }
     }
 
@@ -544,6 +550,34 @@ public class MainPanel extends BaseFileSystemPanel {
         }
     }
 
+    public void export(final MainPanel inactivePanel, String downloadLink, String destination) {
+        FileActionTask task = null;
+        try {
+            task = new ExportAsTask(fragmentManager(),
+                    new FileActionTask.OnActionListener() {
+                        @Override
+                        public void onActionFinish(TaskStatusEnum status) {
+                            try {
+                                if (status != TaskStatusEnum.OK) {
+                                    try {
+                                        String error = status.getNetworkErrorException().getLocalizedError();
+                                        ErrorDialog.newInstance(error).show(fragmentManager(), "errorDialog");
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                            invalidatePanels(inactivePanel);
+                        }
+                    }, downloadLink, destination);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        task.execute();
+    }
+
     public void extractArchive(final MainPanel inactivePanel) {
         String extractFileName = mLastSelectedFile.getName();
         try {
@@ -577,7 +611,11 @@ public class MainPanel extends BaseFileSystemPanel {
         invalidate();
         // inactivePanel may be null when 'quick view' is opened.
         if (inactivePanel != null) {
-            inactivePanel.invalidate();
+            try {
+                inactivePanel.invalidate();
+            } catch (Exception ignore) {
+
+            }
         }
     }
 

@@ -160,7 +160,7 @@ public abstract class BaseFileSystemPanel extends BasePanel {
             return mCopyToNetworkCommand;
         }
         if (this instanceof NetworkPanel) {
-            return mCopyFromDropboxCommand;
+            return mCopyFromNetworkCommand;
         }
 
         return mCopyCommand;
@@ -215,7 +215,7 @@ public abstract class BaseFileSystemPanel extends BasePanel {
     }
 
     @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
-    private void handleNetworkCopyActionResult(TaskStatusEnum status, Object[] args) {
+    protected void handleNetworkCopyActionResult(TaskStatusEnum status, Object[] args) {
         try {
             if (status != TaskStatusEnum.OK) {
                 String error = status == TaskStatusEnum.ERROR_COPY || status == TaskStatusEnum.ERROR_FILE_NOT_EXISTS ?
@@ -313,7 +313,7 @@ public abstract class BaseFileSystemPanel extends BasePanel {
         }
     };
 
-    protected AbstractCommand mCopyFromDropboxCommand = new AbstractCommand() {
+    protected AbstractCommand mCopyFromNetworkCommand = new AbstractCommand() {
 
         @Override
         public void execute(final Object ... args) {

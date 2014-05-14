@@ -176,7 +176,7 @@ public class NetworkPanel extends MainPanel {
     }
 
     protected FileActionEnum[] getAvailableActions() {
-        return FileActionEnum.getAvailableActionsForNetwork(mSelectedFiles, mLastSelectedFile);
+        return FileActionEnum.getAvailableActionsForNetwork(mDataSource.getNetworkTypeEnum(), mSelectedFiles);
     }
 
     public FileProxy getLastSelectedFile() {

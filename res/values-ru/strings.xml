@@ -76,6 +76,7 @@
     <string name="error_socket_timeout_exception">Превышен лимит ожидание сетевого запроса. Еще раз?</string>
     <string name="error_inactive_panel_is_busy">Неактивная панель занята.</string>
     <string name="error_cant_open_intent">Это приложение не может быть запущено.</string>
+    <string name="error_export_as">Ошибка при экспорте файла.</string>
 
     <string name="action_info">Инфо</string>
     <string name="action_send">Отправить</string>

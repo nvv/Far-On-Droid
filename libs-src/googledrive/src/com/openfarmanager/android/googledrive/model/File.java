@@ -9,6 +9,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 /**
  * author: Vlad Namashko
@@ -16,6 +17,28 @@ import java.util.Iterator;
 public class File {
 
     private static SimpleDateFormat sFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+
+    private static Map<String, String> sExportMimes;
+
+    static {
+        sExportMimes = new HashMap<String, String>();
+
+        sExportMimes.put("text/html", "HTML");
+        sExportMimes.put("text/plain", "Plain text");
+        sExportMimes.put("application/rtf", "Rich text");
+        sExportMimes.put("application/vnd.oasis.opendocument.text", "Open Office doc");
+        sExportMimes.put("application/pdf", "PDF");
+        sExportMimes.put("application/vnd.openxmlformats-officedocument.wordprocessingml.document", "MS Word document");
+        sExportMimes.put("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "MS Excel");
+        sExportMimes.put("application/x-vnd.oasis.opendocument.spreadsheet", "Open Office sheet");
+        sExportMimes.put("application/pdf", "PDF");
+        sExportMimes.put("image/jpeg", "JPEG");
+        sExportMimes.put("image/png", "PNG");
+        sExportMimes.put("image/svg+xml", "SVG");
+        sExportMimes.put("application/pdf", "PDF");
+        sExportMimes.put("application/vnd.openxmlformats-officedocument.presentationml.presentation", "MS PowerPoint");
+        sExportMimes.put("application/pdf", "Open Office, PDF");
+    }
 
     protected String mId;
     protected String mName;
@@ -105,4 +128,11 @@ public class File {
         return "";
     }
 
+    public HashMap<String, String> getExportLinks() {
+        return mExportLinks;
+    }
+
+    public static String getExportLinkAlias(String key) {
+        return sExportMimes.get(key);
+    }
 }

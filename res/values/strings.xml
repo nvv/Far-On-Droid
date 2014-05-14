@@ -78,6 +78,7 @@
     <string name="error_socket_timeout_exception">Network request timeout. Try again?</string>
     <string name="error_inactive_panel_is_busy">Inactive panel is busy.</string>
     <string name="error_cant_open_intent">This application can\'t be opened.</string>
+    <string name="error_export_as">Error while exporting file.</string>
 
     <string name="action_info">Info</string>
     <string name="action_send">Send</string>
@@ -278,5 +279,11 @@ More network stuff will appear in future versions.
 
     <string name="google_drive_obtaining_token">Obtaining auth token…</string>
     <string name="google_drive_get_token_error">Error while getting auth token</string>
+
+    <string name="documents">Documents</string>
+    <string name="spreadsheets">Spreadsheets</string>
+    <string name="drawings">Drawings</string>
+    <string name="presentations">Presentations</string>
+    <string name="export_as">Export As</string>
 
 </resources>

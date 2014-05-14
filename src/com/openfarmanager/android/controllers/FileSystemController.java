@@ -17,6 +17,7 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.webkit.URLUtil;
 import android.widget.*;
 import com.google.analytics.tracking.android.EasyTracker;
 import com.google.analytics.tracking.android.Fields;
@@ -33,6 +34,7 @@ import com.openfarmanager.android.core.network.googledrive.GoogleDriveApi;
 import com.openfarmanager.android.core.network.skydrive.SkyDriveAPI;
 import com.openfarmanager.android.core.network.smb.SmbAPI;
 import com.openfarmanager.android.core.network.yandexdisk.YandexDiskApi;
+import com.openfarmanager.android.filesystem.GoogleDriveFile;
 import com.openfarmanager.android.filesystem.actions.DiffDirectoriesTask;
 import com.openfarmanager.android.filesystem.actions.RootTask;
 import com.openfarmanager.android.fragments.*;
@@ -46,6 +48,7 @@ import static com.openfarmanager.android.utils.Extensions.*;
 
 import com.openfarmanager.android.model.exeptions.InAppAuthException;
 import com.openfarmanager.android.model.exeptions.InitYandexDiskException;
+import com.openfarmanager.android.utils.FileUtilsExt;
 import com.openfarmanager.android.utils.SystemUtils;
 import com.openfarmanager.android.view.BookmarksListDialog;
 import com.openfarmanager.android.view.ExpandPanelAnimation;
@@ -56,8 +59,11 @@ import com.openfarmanager.android.view.ToastNotification;
 import com.openfarmanager.android.view.YandexDiskNameRequestDialog;
 import com.yandex.disk.client.Credentials;
 
+import org.apache.commons.io.FileUtils;
+
 import java.io.File;
 import java.io.FileInputStream;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 
@@ -113,6 +119,7 @@ public class FileSystemController {
     public static final int SMB_IP_SELECTED = 121;
     public static final int EXPAND_PANEL = 122;
     public static final int OPEN_PATH = 123;
+    public static final int EXPORT_AS = 124;
 
     public static final int ARG_FORCE_OPEN_FILE_IN_EDITOR = 1000;
     public static final int ARG_EXPAND_LEFT_PANEL = 1001;
@@ -440,6 +447,14 @@ public class FileSystemController {
                     if (activePanel != null) {
                         activePanel.openDirectory(new File((String) msg.obj));
                     }
+                    break;
+                case EXPORT_AS:
+                    try {
+                        openExportAsDialog((GoogleDriveFile) msg.obj);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    break;
             }
         }
     };
@@ -1283,6 +1298,66 @@ public class FileSystemController {
                         break;
 
                 }
+
+                if (dialog.isShowing()) {
+                    dialog.dismiss();
+                }
+            }
+        });
+
+        dialog.setContentView(dialogView);
+        dialog.show();
+
+        adjustDialogSize(dialog);
+    }
+
+    private void openExportAsDialog(final GoogleDriveFile file) {
+        final Dialog dialog = new Dialog(getActivePanel().getActivity(), R.style.Action_Dialog_Invert);
+        View dialogView = View.inflate(App.sInstance.getApplicationContext(), R.layout.mime_type_chooser, null);
+
+        final ListView exportTypes = (ListView) dialogView.findViewById(R.id.mime_types);
+        final ExportAsAdapter adapter = new ExportAsAdapter(file.getExportLinks());
+        exportTypes.setAdapter(adapter);
+
+        dialogView.findViewById(R.id.cancel).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.dismiss();
+            }
+        });
+
+        ((TextView) dialogView.findViewById(R.id.title)).setText(App.sInstance.getString(R.string.export_as));
+        exportTypes.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                final String downloadLink = (String) view.getTag();
+
+                final MainPanel inactivePanel = getInactivePanel();
+
+                if (inactivePanel == null || inactivePanel.getActivity().isFinishing()) {
+                    return;
+                }
+
+                final String fileName = file.getName();
+
+                inactivePanel.export(getActivePanel(), downloadLink,
+                        inactivePanel.getCurrentPath() + File.separator + fileName + "." +
+                                downloadLink.substring(downloadLink.lastIndexOf('=') + 1));
+//
+//                runAsynk(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        try {
+//                            App.sInstance.getGoogleDriveApi().download(downloadLink,
+//                                    inactivePanel.getCurrentPath() + File.separator + fileName + "." +
+//                                            downloadLink.substring(downloadLink.lastIndexOf('=') + 1));
+//
+//                        } catch (Exception e) {
+//                            e.printStackTrace();
+//                        }
+//                    }
+//                });
 
                 if (dialog.isShowing()) {
                     dialog.dismiss();
