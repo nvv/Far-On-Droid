@@ -145,7 +145,7 @@ public class NetworkPanel extends MainPanel {
 
     protected boolean onLongClick(AdapterView<?> adapterView, int i) {
         FileProxy file = (FileProxy) adapterView.getItemAtPosition(i);
-        if (!file.isUpNavigator()) {
+        if (!file.isUpNavigator() && !file.isVirtualDirectory()) {
             mLastSelectedFile = file;
             updateLongClickSelection(adapterView, file, true);
             if (!file.isVirtualDirectory()) {

@@ -285,5 +285,7 @@ More network stuff will appear in future versions.
     <string name="drawings">Drawings</string>
     <string name="presentations">Presentations</string>
     <string name="export_as">Export As</string>
+    <string name="open_with">Open in browser</string>
+    <string name="error_no_browser">No application can handle this request, please, install a web browser</string>
 
 </resources>

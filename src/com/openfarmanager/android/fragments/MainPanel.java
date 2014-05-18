@@ -416,6 +416,9 @@ public class MainPanel extends BaseFileSystemPanel {
             case EXPORT_AS:
                 mHandler.sendMessage(mHandler.obtainMessage(FileSystemController.EXPORT_AS, mSelectedFiles.size() == 1 ? mSelectedFiles.get(0) : null));
                 break;
+            case OPEN_WEB:
+                mHandler.sendMessage(mHandler.obtainMessage(FileSystemController.OPEN_WEB, mSelectedFiles.size() == 1 ? mSelectedFiles.get(0) : null));
+                break;
         }
     }
 

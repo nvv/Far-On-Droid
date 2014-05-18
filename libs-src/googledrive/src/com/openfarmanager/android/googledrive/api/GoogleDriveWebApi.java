@@ -45,8 +45,14 @@ public class GoogleDriveWebApi extends Api {
             path = "root";
         }
 
+        boolean sharedFiles = path.equals(File.SHARED_FOLDER_ID);
+
+        System.out.println("::::::::::  " + path);
+
         List<File> files = new ArrayList<File>();
-        list(files, null, String.format("'%s'+in+parents+and+trashed=false", path));
+        list(files, null, sharedFiles ?
+                "sharedWithMe" :
+                String.format("'%s'+in+parents+and+trashed=false", path));
         return files;
     }
 

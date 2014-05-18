@@ -2,6 +2,7 @@ package com.openfarmanager.android.controllers;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
@@ -120,6 +121,7 @@ public class FileSystemController {
     public static final int EXPAND_PANEL = 122;
     public static final int OPEN_PATH = 123;
     public static final int EXPORT_AS = 124;
+    public static final int OPEN_WEB = 125;
 
     public static final int ARG_FORCE_OPEN_FILE_IN_EDITOR = 1000;
     public static final int ARG_EXPAND_LEFT_PANEL = 1001;
@@ -452,6 +454,16 @@ public class FileSystemController {
                     try {
                         openExportAsDialog((GoogleDriveFile) msg.obj);
                     } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    break;
+                case OPEN_WEB:
+                    GoogleDriveFile file = (GoogleDriveFile) msg.obj;
+                    try {
+                        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(file.getOpenWithLink()));
+                        activePanel.getActivity().startActivity(browserIntent);
+                    } catch (ActivityNotFoundException e) {
+                        ToastNotification.makeText(activePanel.getActivity(), App.sInstance.getString(R.string.error_no_browser),  Toast.LENGTH_LONG).show();
                         e.printStackTrace();
                     }
                     break;

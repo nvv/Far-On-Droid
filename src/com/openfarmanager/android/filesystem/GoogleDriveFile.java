@@ -84,7 +84,7 @@ public class GoogleDriveFile implements FileProxy {
 
     @Override
     public boolean isVirtualDirectory() {
-        return false;
+        return mFile.isVirtual();
     }
 
     @Override
@@ -103,5 +103,13 @@ public class GoogleDriveFile implements FileProxy {
 
     public HashMap<String, String> getExportLinks() {
         return mFile.getExportLinks();
+    }
+
+    public boolean hasOpenWithLink() {
+        return getOpenWithLink() != null;
+    }
+
+    public String getOpenWithLink() {
+        return mFile.getOpenWithLink();
     }
 }

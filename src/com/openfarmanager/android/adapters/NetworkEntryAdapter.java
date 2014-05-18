@@ -94,6 +94,8 @@ public class NetworkEntryAdapter extends FlatFileSystemAdapter {
             size.setText(R.string.folder_root);
         } else if (item.isUpNavigator() || (fakeFile != null && fakeFile.isUpNavigator())) {
             size.setText(R.string.folder_up);
+        } else if (item.isVirtualDirectory()) {
+            size.setText(R.string.virtual_folder);
         } else if (item.isDirectory()) {
             size.setText(R.string.folder);
         } else {

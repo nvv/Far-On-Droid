@@ -16,6 +16,8 @@ import java.util.Map;
  */
 public class File {
 
+    public static final String SHARED_FOLDER_ID = "shared_folder_id";
+
     private static SimpleDateFormat sFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 
     private static Map<String, String> sExportMimes;
@@ -44,12 +46,16 @@ public class File {
     protected String mName;
     protected String mMimeType;
     protected boolean mIsDirectory;
+    protected boolean mIsVirtual;
     protected long mSize;
     protected long mLastModifiedDate;
     protected String mFullPath;
     protected String mParentPath;
     protected String mDownloadUr;
+    protected String mOpenWithLink;
     protected HashMap<String, String> mExportLinks;
+
+    private File() {}
 
     public File(String json) throws JSONException, ParseException {
         this(new JSONObject(json));
@@ -64,7 +70,12 @@ public class File {
             mSize = json.getLong("fileSize");
         }
         mLastModifiedDate = sFormatter.parse(json.getString("modifiedDate")).getTime();
-        mParentPath = ((JSONObject) json.getJSONArray("parents").get(0)).getString("id");
+
+        try {
+            mParentPath = ((JSONObject) json.getJSONArray("parents").get(0)).getString("id");
+        } catch (Exception e) {
+            // ignore
+        }
 
         if (!isDirectory()) {
             if (json.has("downloadUrl")) {
@@ -79,10 +90,23 @@ public class File {
                 }
             }
 
+            if (json.has("alternateLink")) {
+                mOpenWithLink = json.getString("alternateLink");
+            }
         }
 
     }
 
+    public static File createSharedFolder() {
+        File sharedFolder = new File();
+        sharedFolder.mId = SHARED_FOLDER_ID;
+        sharedFolder.mName = "Shared with me";
+        sharedFolder.mIsDirectory = true;
+        sharedFolder.mIsVirtual = true;
+        sharedFolder.mParentPath = "root";
+
+        return sharedFolder;
+    }
 
     public String getId() {
         return mId;
@@ -135,4 +159,13 @@ public class File {
     public static String getExportLinkAlias(String key) {
         return sExportMimes.get(key);
     }
+
+    public String getOpenWithLink() {
+        return mOpenWithLink;
+    }
+
+    public boolean isVirtual() {
+        return mIsVirtual;
+    }
+
 }

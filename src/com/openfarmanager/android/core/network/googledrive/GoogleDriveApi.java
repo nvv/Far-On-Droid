@@ -196,6 +196,10 @@ public class GoogleDriveApi implements NetworkApi {
                 mFoldersAliases.put(files.get(0).getParentPath(), "/");
             }
 
+            if (path.equals("/") || mFoldersAliases.get(path).equals("/")) {
+                list.add(new GoogleDriveFile(File.createSharedFolder(), path));
+            }
+
             FileSystemScanner.sInstance.sort(list);
 
         } catch (Exception e) {
