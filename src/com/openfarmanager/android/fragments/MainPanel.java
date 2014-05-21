@@ -65,6 +65,9 @@ public class MainPanel extends BaseFileSystemPanel {
     protected View mHomeLeft;
     protected View mHomeRight;
 
+    protected View mCharsetLeft;
+    protected View mCharsetRight;
+
     protected boolean mIsActivePanel;
 
     private int mLastListPosition;
@@ -172,6 +175,9 @@ public class MainPanel extends BaseFileSystemPanel {
         mHomeLeft = view.findViewById(R.id.home_left);
         mHomeRight = view.findViewById(R.id.home_right);
 
+        mCharsetLeft = view.findViewById(R.id.charset_left);
+        mCharsetRight = view.findViewById(R.id.charset_right);
+
         mChangePathToRight.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -215,6 +221,22 @@ public class MainPanel extends BaseFileSystemPanel {
             public void onClick(View v) {
                 gainFocus();
                 mHandler.sendMessage(mHandler.obtainMessage(FileSystemController.OPEN_NETWORK));
+            }
+        });
+
+        mCharsetLeft.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                gainFocus();
+                mHandler.sendMessage(mHandler.obtainMessage(FileSystemController.OPEN_ENCODING_DIALOG));
+            }
+        });
+
+        mCharsetRight.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                gainFocus();
+                mHandler.sendMessage(mHandler.obtainMessage(FileSystemController.OPEN_ENCODING_DIALOG));
             }
         });
 
@@ -609,7 +631,7 @@ public class MainPanel extends BaseFileSystemPanel {
         }
     }
 
-    protected void invalidatePanels(MainPanel inactivePanel) {
+    public void invalidatePanels(MainPanel inactivePanel) {
         getSelectedFiles().clear();
         invalidate();
         // inactivePanel may be null when 'quick view' is opened.

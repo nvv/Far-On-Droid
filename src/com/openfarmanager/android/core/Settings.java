@@ -15,6 +15,7 @@ public class Settings {
     public static final String LEFT_PANEL_PATH = "left";
     public static final String RIGHT_PANEL_PATH = "right";
     public static final String ACTIVE_PANEL = "active_panel";
+    public static final String FTP_HOST_CHARSET = "ftp_host_charset";
 
     public static final String SDCARD_ROOT = "sdcard_root";
     public static final String HIDE_SYSTEM_FILES = "hide_system_files";
@@ -52,6 +53,18 @@ public class Settings {
         edit.putString(RIGHT_PANEL_PATH, rightPanelPath);
         edit.putBoolean(ACTIVE_PANEL, isLeftPanelActive);
         edit.commit();
+    }
+
+    public SharedPreferences getHostCharset() {
+        return App.sInstance.getSharedPreferences(FTP_HOST_CHARSET, 0);
+    }
+
+    public void saveCharset(String host, String charset) {
+        getHostCharset().edit().putString(host, charset).commit();
+    }
+
+    public String getCharset(String host) {
+        return getHostCharset().getString(host, null);
     }
 
     public SharedPreferences getPanelSettings() {

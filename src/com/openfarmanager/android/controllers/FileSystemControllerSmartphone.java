@@ -212,7 +212,12 @@ public class FileSystemControllerSmartphone extends FileSystemController {
             mRightVisibleFragment = panelToShow;
         }
 
-        mViewPager.getAdapter().notifyDataSetChanged();
+        // may be called for non ui thread
+        try {
+            mPanelToChange.getActivity().runOnUiThread(notifyDataSetChanged);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     protected void showDetails(MainPanel panel) {
@@ -226,6 +231,13 @@ public class FileSystemControllerSmartphone extends FileSystemController {
     protected boolean isDetailsPanelVisible() {
         return mLeftVisibleFragment instanceof DirectoryDetailsView || mRightVisibleFragment instanceof DirectoryDetailsView;
     }
+
+    private Runnable notifyDataSetChanged = new Runnable() {
+        @Override
+        public void run() {
+            mViewPager.getAdapter().notifyDataSetChanged();
+        }
+    };
 
     private class TabsAdapter extends FragmentStatePagerAdapter {
 

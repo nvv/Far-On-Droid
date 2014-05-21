@@ -100,6 +100,12 @@ public class NetworkPanel extends MainPanel {
         }
 
         mCurrentNetworkAccount = App.sInstance.getNetworkApi(getNetworkType()).getCurrentNetworkAccount();
+
+        if (mDataSource.getNetworkTypeEnum() == NetworkEnum.FTP) {
+            mCharsetLeft.setVisibility(mPanelLocation == LEFT_PANEL ? View.VISIBLE : View.GONE);
+            mCharsetRight.setVisibility(mPanelLocation == RIGHT_PANEL ? View.VISIBLE : View.GONE);
+        }
+
         return view;
     }
 
@@ -141,6 +147,13 @@ public class NetworkPanel extends MainPanel {
         }
 
         setIsActivePanel(mIsActivePanel);
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        mCharsetLeft.setVisibility(View.GONE);
+        mCharsetRight.setVisibility(View.GONE);
     }
 
     protected boolean onLongClick(AdapterView<?> adapterView, int i) {

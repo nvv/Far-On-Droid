@@ -100,7 +100,7 @@ public class File {
     public static File createSharedFolder() {
         File sharedFolder = new File();
         sharedFolder.mId = SHARED_FOLDER_ID;
-        sharedFolder.mName = "Shared with me";
+        sharedFolder.mName = "Shared with Me";
         sharedFolder.mIsDirectory = true;
         sharedFolder.mIsVirtual = true;
         sharedFolder.mParentPath = "root";
