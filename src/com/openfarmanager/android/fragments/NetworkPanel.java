@@ -106,6 +106,9 @@ public class NetworkPanel extends MainPanel {
             mCharsetRight.setVisibility(mPanelLocation == RIGHT_PANEL ? View.VISIBLE : View.GONE);
         }
 
+        mExitLeft.setVisibility(mPanelLocation == LEFT_PANEL ? View.VISIBLE : View.GONE);
+        mExitRight.setVisibility(mPanelLocation == RIGHT_PANEL ? View.VISIBLE : View.GONE);
+
         return view;
     }
 

@@ -68,6 +68,9 @@ public class MainPanel extends BaseFileSystemPanel {
     protected View mCharsetLeft;
     protected View mCharsetRight;
 
+    protected View mExitLeft;
+    protected View mExitRight;
+
     protected boolean mIsActivePanel;
 
     private int mLastListPosition;
@@ -178,6 +181,9 @@ public class MainPanel extends BaseFileSystemPanel {
         mCharsetLeft = view.findViewById(R.id.charset_left);
         mCharsetRight = view.findViewById(R.id.charset_right);
 
+        mExitLeft = view.findViewById(R.id.exit_left);
+        mExitRight = view.findViewById(R.id.exit_right);
+
         mChangePathToRight.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -237,6 +243,22 @@ public class MainPanel extends BaseFileSystemPanel {
             public void onClick(View v) {
                 gainFocus();
                 mHandler.sendMessage(mHandler.obtainMessage(FileSystemController.OPEN_ENCODING_DIALOG));
+            }
+        });
+
+        mExitLeft.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                gainFocus();
+                mHandler.sendMessage(mHandler.obtainMessage(EXIT_FROM_NETWORK_STORAGE, mPanelLocation));
+            }
+        });
+
+        mExitRight.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                gainFocus();
+                mHandler.sendMessage(mHandler.obtainMessage(EXIT_FROM_NETWORK_STORAGE, mPanelLocation));
             }
         });
 
