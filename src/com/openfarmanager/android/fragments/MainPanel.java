@@ -95,9 +95,11 @@ public class MainPanel extends BaseFileSystemPanel {
                 mSelectedFiles.clear();
                 File item = null;
                 FileSystemFile file = null;
+                Integer previousState = null;
                 if (!isRootDirectory()) {
                     if (i == 0) {
                         item = mBaseDir.getParentFile();
+                        previousState = mDirectorySelection.get(item.getAbsolutePath());
                     }
                 }
                 if (item == null) {
@@ -114,7 +116,10 @@ public class MainPanel extends BaseFileSystemPanel {
                 }
 
                 if (item.isDirectory()) {
-                    openDirectory(item);
+                    openDirectory(item, previousState);
+                    if (previousState == null) {
+                        mDirectorySelection.put(item.getParent(), mFileSystemList.getFirstVisiblePosition() + 1);
+                    }
                 }
                 if (item.isFile()) {
                     String mime = ArchiveUtils.getMimeType(item);
@@ -836,12 +841,22 @@ public class MainPanel extends BaseFileSystemPanel {
     }
 
     public void openDirectory(final File directory) {
+        openDirectory(directory, -1);
+    }
+
+    /**
+     * Open directory with "selection", i.e. scrolling file system list to certain position.
+     *
+     * @param directory folder to be opened.
+     * @param selection position in list to be selected (scrolled).
+     */
+    private void openDirectory(final File directory, final Integer selection) {
 
         if (!mIsInitialized) {
             addToPendingList(new Runnable() {
                 @Override
                 public void run() {
-                    openDirectory(directory);
+                    openDirectory(directory, selection);
                 }
             });
             return;
@@ -852,18 +867,25 @@ public class MainPanel extends BaseFileSystemPanel {
         mCurrentPathView.setText(mBaseDir.getAbsolutePath());
         FlatFileSystemAdapter adapter = (FlatFileSystemAdapter) mFileSystemList.getAdapter();
         if (adapter == null) {
-            mFileSystemList.setAdapter(new FlatFileSystemAdapter(mBaseDir));
+            mFileSystemList.setAdapter(new FlatFileSystemAdapter(mBaseDir, mOnFolderScannedListener));
         } else {
             adapter.resetFilter();
-            adapter.setBaseDir(mBaseDir);
-//            adapter.notifyDataSetChanged();
-            mFileSystemList.setSelection(0);
+            adapter.setBaseDir(mBaseDir, selection);
             sendEmptyMessage(DIRECTORY_CHANGED);
         }
         if(adapter != null && oldDir != null){
             mFileSystemList.setSelection(adapter.getItemPosition(oldDir));
         }
     }
+
+    FlatFileSystemAdapter.OnFolderScannedListener mOnFolderScannedListener = new FlatFileSystemAdapter.OnFolderScannedListener() {
+        @Override
+        public void onScanFinished(Integer selection) {
+            if (selection != null) {
+                mFileSystemList.setSelection(selection);
+            }
+        }
+    };
 
     private void sendEmptyMessage(int message) {
         if (mHandler != null) {

@@ -34,6 +34,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 
 import static com.openfarmanager.android.controllers.FileSystemController.*;
@@ -50,6 +53,8 @@ public abstract class BaseFileSystemPanel extends BasePanel {
 
     protected Handler mHandler;
     protected int mPanelLocation;
+
+    protected HashMap<String, Integer> mDirectorySelection = new HashMap<String, Integer>();
 
     public void setupGestures(View view) {
         view.setOnTouchListener(new OnSwipeTouchListener() {

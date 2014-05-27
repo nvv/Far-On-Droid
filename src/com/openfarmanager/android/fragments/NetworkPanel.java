@@ -71,10 +71,14 @@ public class NetworkPanel extends MainPanel {
                     } else {
                         openDirectory(file.getParentPath());
                     }
-                }
-
-                if (file.isDirectory()) {
+                } else if (file.isDirectory()) {
                     openDirectory(file.getFullPath());
+
+                    String pathKey = file.getParentPath();
+                    if (pathKey.endsWith("/") && !pathKey.equals("/")) {
+                        pathKey = pathKey.substring(0, pathKey.length() - 1);
+                    }
+                    mDirectorySelection.put(pathKey, mFileSystemList.getFirstVisiblePosition() + 1);
                 }
 
             }
@@ -428,11 +432,12 @@ public class NetworkPanel extends MainPanel {
                 setIsLoading(false);
 
                 mPath = mDataSource.getPath(mPath);
-                setCurrentPath(mPath);
 
                 if (mPath.endsWith("/")) {
                     mPath = mPath.substring(0, mPath.length() - 1);
                 }
+
+                setCurrentPath(mPath);
 
                 String parentPath = mPath.substring(0, mPath.lastIndexOf("/") + 1);
                 ListAdapter adapter = mFileSystemList.getAdapter();
@@ -444,8 +449,11 @@ public class NetworkPanel extends MainPanel {
                 } else {
                     mFileSystemList.setAdapter(new NetworkEntryAdapter(files, upNavigator));
                 }
-                mCurrentPath = new FakeFile(Extensions.isNullOrEmpty(mPath) ? "/" : mPath, mDataSource.getParentPath(parentPath), Extensions.isNullOrEmpty(parentPath));
-                mFileSystemList.setSelection(0);
+                mCurrentPath = new FakeFile(Extensions.isNullOrEmpty(mPath) ? "/" : mPath,
+                        mDataSource.getParentPath(parentPath), Extensions.isNullOrEmpty(parentPath));
+
+                Integer selection = mDirectorySelection.get(Extensions.isNullOrEmpty(mPath) ? "/" : mPath);
+                mFileSystemList.setSelection(selection != null ? selection : 0);
             }
         }
     }

@@ -2,6 +2,7 @@ package com.openfarmanager.android.adapters;
 
 import android.graphics.Color;
 import android.os.AsyncTask;
+import android.os.Handler;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -33,10 +34,12 @@ public class FlatFileSystemAdapter extends BaseAdapter {
     protected List<FileProxy> mFiles = new ArrayList<FileProxy>();
     boolean mIsRoot;
     private String mFilter;
+    private OnFolderScannedListener mListener;
 
     public static SimpleDateFormat sDateFormat = new SimpleDateFormat("dd MM yyyy HH:mm");
 
-    public FlatFileSystemAdapter(File baseDir) {
+    public FlatFileSystemAdapter(File baseDir, OnFolderScannedListener listener) {
+        mListener = listener;
         setBaseDir(baseDir);
     }
 
@@ -144,6 +147,10 @@ public class FlatFileSystemAdapter extends BaseAdapter {
     }
 
     public void setBaseDir(File baseDir) {
+        setBaseDir(baseDir, -1);
+    }
+
+    public void setBaseDir(File baseDir, final Integer selection) {
         if (baseDir == null) {
             return;
         }
@@ -179,6 +186,7 @@ public class FlatFileSystemAdapter extends BaseAdapter {
                 protected void onPostExecute(List<FileProxy> aVoid) {
                     mFiles = aVoid;
                     notifyDataSetChanged();
+                    mListener.onScanFinished(selection);
                 }
             }.execute();
 
@@ -213,5 +221,9 @@ public class FlatFileSystemAdapter extends BaseAdapter {
             }
         }
         return 0;
+    }
+
+    public static interface OnFolderScannedListener {
+        void onScanFinished(Integer selection);
     }
 }
