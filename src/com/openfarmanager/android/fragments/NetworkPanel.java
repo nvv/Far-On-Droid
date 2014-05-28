@@ -42,7 +42,7 @@ import static com.openfarmanager.android.controllers.FileSystemController.EXIT_F
 public class NetworkPanel extends MainPanel {
 
     private DataSource mDataSource;
-    private OpenDirectoryTask mOpenDirectoryTask = new OpenDirectoryTask();
+    private OpenDirectoryTask mOpenDirectoryTask;
     private FileProxy mCurrentPath;
 
     protected FileProxy mLastSelectedFile;
@@ -232,11 +232,15 @@ public class NetworkPanel extends MainPanel {
     }
 
     public void openDirectory(final String path) {
+        openDirectory(path, true);
+    }
+
+    public void openDirectory(final String path, final boolean restorePosition) {
         if (!mIsInitialized) {
             addToPendingList(new Runnable() {
                 @Override
                 public void run() {
-                    openDirectory(path);
+                    openDirectory(path, restorePosition);
                 }
             });
             return;
@@ -246,12 +250,12 @@ public class NetworkPanel extends MainPanel {
             mOpenDirectoryTask.cancel(true);
         }
 
-        mOpenDirectoryTask = new OpenDirectoryTask();
+        mOpenDirectoryTask = new OpenDirectoryTask(restorePosition);
         mOpenDirectoryTask.execute(path);
     }
 
     public void invalidate() {
-        openDirectory(mDataSource.getParentPath(getCurrentPath()));
+        openDirectory(mDataSource.getParentPath(getCurrentPath()), false);
     }
 
     private void setCurrentPath(String path) {
@@ -365,7 +369,12 @@ public class NetworkPanel extends MainPanel {
     private class OpenDirectoryTask extends AsyncTask<String, Void, List<FileProxy>> {
 
         private String mPath;
+        private boolean mRestorePosition;
         private NetworkException mException;
+
+        public OpenDirectoryTask(boolean restorePosition) {
+            mRestorePosition = restorePosition;
+        }
 
         @Override
         protected void onPreExecute() {
@@ -452,8 +461,10 @@ public class NetworkPanel extends MainPanel {
                 mCurrentPath = new FakeFile(Extensions.isNullOrEmpty(mPath) ? "/" : mPath,
                         mDataSource.getParentPath(parentPath), Extensions.isNullOrEmpty(parentPath));
 
-                Integer selection = mDirectorySelection.get(Extensions.isNullOrEmpty(mPath) ? "/" : mPath);
-                mFileSystemList.setSelection(selection != null ? selection : 0);
+                if (mRestorePosition) {
+                    Integer selection = mDirectorySelection.get(Extensions.isNullOrEmpty(mPath) ? "/" : mPath);
+                    mFileSystemList.setSelection(selection != null ? selection : 0);
+                }
             }
         }
     }

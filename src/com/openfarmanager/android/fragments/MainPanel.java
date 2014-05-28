@@ -118,7 +118,7 @@ public class MainPanel extends BaseFileSystemPanel {
                 if (item.isDirectory()) {
                     openDirectory(item, previousState);
                     if (previousState == null) {
-                        mDirectorySelection.put(item.getParent(), mFileSystemList.getFirstVisiblePosition() + 1);
+                        mDirectorySelection.put(item.getParent(), mFileSystemList.getFirstVisiblePosition());
                     }
                 }
                 if (item.isFile()) {
