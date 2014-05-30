@@ -234,6 +234,7 @@
     <string name="error_forbidden">Forbidden operation.</string>
     <string name="error_duplicated_folder">Duplicated folder name.</string>
     <string name="error_intermediate_folder_not_exist">Parent folder doesn\'t exist.</string>
+    <string name="error_can_t_open_app">Unexpected error while opening application.</string>
 
     <string name="tips_first_page">
 Far On Droid is free file manager providing intuitive and simple file management using two panel interface.\n\n

@@ -128,9 +128,15 @@ public class LauncherAdapter extends FlatFileSystemAdapter {
     }
 
     public void onItemClick(int i) {
-        final PackageManager manager = App.sInstance.getPackageManager();
-        Intent intent = manager.getLaunchIntentForPackage(getItem(i).getFullPath());
-        App.sInstance.startActivity(intent);
+        try {
+            final PackageManager manager = App.sInstance.getPackageManager();
+            Intent intent = manager.getLaunchIntentForPackage(getItem(i).getFullPath());
+            App.sInstance.startActivity(intent);
+        } catch (Exception e) {
+            e.printStackTrace();
+            ToastNotification.makeText(App.sInstance.getApplicationContext(),
+                    App.sInstance.getString(R.string.error_can_t_open_app), Toast.LENGTH_LONG).show();
+        }
     }
 
     public FileActionEnum[] getAvailableActions() {
