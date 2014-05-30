@@ -446,7 +446,11 @@ public class FileSystemController {
                     exitFromGenericPanel((Integer) msg.obj == MainPanel.LEFT_PANEL ? mLeftGenericPanel : mRightGenericPanel);
                     break;
                 case EXPAND_PANEL:
-                    expandPanel(msg.arg1 == ARG_EXPAND_LEFT_PANEL);
+                    try {
+                        expandPanel(msg.arg1 == ARG_EXPAND_LEFT_PANEL);
+                    } catch (Exception ignore) {
+                        // avoid very unexpected crash
+                    }
                     break;
                 case OPEN_PATH:
                     if (activePanel != null) {
