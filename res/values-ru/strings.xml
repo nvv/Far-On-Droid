@@ -189,6 +189,7 @@
     <string name="no_email_client">Пожалуйста, установите и настройте почтовый клиент для этой операции.</string>
     <string name="restoring_skydrive_session">Восстановление сессии SkyDrive…</string>
     <string name="tips_swipe">Проведите пальцем чтобы открыть вторую панель</string>
+    <string name="tips_swipe_left_right">Проведите пальцем (влево/вправо) чтобы увеличить/уменьшить панель.</string>
     <string name="force_use_en_locale">Принудительное использование англиского языка</string>
     <string name="will_be_applied_after_restarts">Будет примененено при следуещем запуске приложения</string>
 
@@ -226,7 +227,7 @@
     <string name="error_forbidden">Запрещенная операция.</string>
     <string name="error_duplicated_folder">Дублирующееся имя директории.</string>
     <string name="error_intermediate_folder_not_exist">Родительская директория не существует.</string>
-
+    <string name="error_can_t_open_app">Неопределенная ошибка при открытии приложения.</string>
 
     <string name="tips_first_page">
         Far On Droid - это бесплатный файловый менеджер с интуитивно понятным и простым двух-панельным интерфейсом управления файлами.
@@ -269,5 +270,16 @@
     <string name="use_root">Использовать суперпользователя</string>
     <string name="use_root_summary">Устройство должно \'рутованным\' и суперпользователь должен быть установлен</string>
     <string name="root_not_found_or_denied">Суперпользователь не найден или доступ запрещен</string>
+
+    <string name="google_drive_obtaining_token">Получение аутентификационного токена…</string>
+    <string name="google_drive_get_token_error">Ошибка при получении токена</string>
+
+    <string name="documents">Документы</string>
+    <string name="spreadsheets">Таблицы</string>
+    <string name="drawings">Рисунки</string>
+    <string name="presentations">Презентации</string>
+    <string name="export_as">Экспортировать в</string>
+    <string name="open_with">Открыть в браузере</string>
+    <string name="error_no_browser">Не найдено приложение для обработки данного запроса. Пожалуйста, установите браузер.</string>
 
 </resources>
