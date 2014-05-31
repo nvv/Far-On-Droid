@@ -1685,16 +1685,22 @@ public class FileSystemController {
             } else if (msg.what == GoogleDriveAuthWindow.MSG_SHOW_LOADING_DIALOG) {
                 showProgressDialog(R.string.google_drive_obtaining_token);
             } else if (msg.what == GoogleDriveAuthWindow.MSG_HIDE_LOADING_DIALOG) {
+                GoogleDriveApi.GoogleDriveAccount account = null;
                 if (msg.arg1 == GoogleDriveAuthWindow.MSG_ARG_SUCCESS) {
                     GoogleDriveApi api = App.sInstance.getGoogleDriveApi();
                     Pair<About, Token> data = (Pair<About, Token>) msg.obj;
-                    api.saveAccount(data.first, data.second);
+                    account = (GoogleDriveApi.GoogleDriveAccount) api.saveAccount(data.first, data.second);
                 } else {
                     ToastNotification.makeText(App.sInstance.getApplicationContext(),
                             App.sInstance.getString(R.string.google_drive_get_token_error), Toast.LENGTH_LONG).show();
                 }
 
                 dismissProgressDialog();
+
+                if (account != null) {
+                    App.sInstance.getGoogleDriveApi().setup(account);
+                    openNetworkPanel(NetworkEnum.GoogleDrive);
+                }
             }
         }
     };
