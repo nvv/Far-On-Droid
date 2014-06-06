@@ -99,7 +99,9 @@ public class MainPanel extends BaseFileSystemPanel {
                 if (!isRootDirectory()) {
                     if (i == 0) {
                         item = mBaseDir.getParentFile();
-                        previousState = mDirectorySelection.get(item.getAbsolutePath());
+                        if (item != null) {
+                            previousState = mDirectorySelection.get(item.getAbsolutePath());
+                        }
                     }
                 }
                 if (item == null) {
