@@ -1,6 +1,7 @@
 package com.openfarmanager.android.adapters;
 
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -73,6 +74,10 @@ public class NetworkEntryAdapter extends FlatFileSystemAdapter {
         int fontSize = App.sInstance.getSettings().getMainPanelFontSize();
         name.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize);
         size.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize);
+
+        Typeface typeface = App.sInstance.getSettings().getMainPanelFontType();
+        name.setTypeface(typeface);
+        size.setTypeface(typeface);
 
         if (mSelectedFiles.contains(item)) {
             name.setTextColor(Color.YELLOW);

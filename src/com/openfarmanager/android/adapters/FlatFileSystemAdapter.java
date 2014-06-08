@@ -1,6 +1,7 @@
 package com.openfarmanager.android.adapters;
 
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.util.TypedValue;
@@ -11,6 +12,7 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.R;
+import com.openfarmanager.android.core.FontManager;
 import com.openfarmanager.android.core.archive.ArchiveUtils;
 import com.openfarmanager.android.core.archive.MimeTypes;
 import com.openfarmanager.android.core.bookmark.BookmarkManager;
@@ -25,6 +27,7 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 public class FlatFileSystemAdapter extends BaseAdapter {
@@ -82,6 +85,10 @@ public class FlatFileSystemAdapter extends BaseAdapter {
         int size = App.sInstance.getSettings().getMainPanelFontSize();
         name.setTextSize(TypedValue.COMPLEX_UNIT_SP, size);
         info.setTextSize(TypedValue.COMPLEX_UNIT_SP, size);
+
+        Typeface typeface = App.sInstance.getSettings().getMainPanelFontType();
+        name.setTypeface(typeface);
+        info.setTypeface(typeface);
 
         File fileItem = (File) item;
 

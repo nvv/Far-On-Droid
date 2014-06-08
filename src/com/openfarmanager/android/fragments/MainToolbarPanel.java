@@ -1,6 +1,7 @@
 package com.openfarmanager.android.fragments;
 
 import android.content.Context;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.DialogFragment;
@@ -229,6 +230,7 @@ public class MainToolbarPanel extends Fragment {
             int threedip = (int) (3 * mDensity);
             int size = App.sInstance.getSettings().getBottomPanelFontSize();
             TextView view = new TextView(getContext());
+            view.setTypeface(App.sInstance.getSettings().getMainPanelFontType());
             view.setText(item.getTitle());
             view.setGravity(Gravity.CENTER);
             view.setTextSize(TypedValue.COMPLEX_UNIT_SP, size);

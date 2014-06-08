@@ -99,6 +99,14 @@
                 android:key="viewer_font_size"
                 android:title="@string/viewer_font_size"/>
 
+        <Preference
+                android:key="panel_font"
+                android:title="@string/main_panel_font"/>
+
+        <Preference
+                android:key="viewer_font"
+                android:title="@string/viewer_font"/>
+
     </PreferenceCategory>
     <PreferenceCategory
             android:title="@string/settings_feedback"

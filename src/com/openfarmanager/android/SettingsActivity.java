@@ -18,12 +18,16 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.openfarmanager.android.core.FontManager;
 import com.openfarmanager.android.core.Settings;
 import com.openfarmanager.android.filesystem.FileSystemScanner;
 import com.openfarmanager.android.filesystem.actions.RootTask;
 import com.openfarmanager.android.utils.SystemUtils;
 import com.openfarmanager.android.view.FontSetupDialog;
 import com.openfarmanager.android.view.ToastNotification;
+
+import java.util.HashMap;
 
 public class SettingsActivity extends PreferenceActivity {
 
@@ -136,6 +140,52 @@ public class SettingsActivity extends PreferenceActivity {
                 return true;
             }
         });
+
+        final HashMap<String, String> fonts = FontManager.enumerateFonts();
+        if (fonts != null) {
+
+            final String[] fontNames = new String[fonts.values().size()];
+            fonts.values().toArray(fontNames);
+
+            final String[] fontPathes = new String[fonts.keySet().size()];
+            fonts.keySet().toArray(fontPathes);
+
+            findPreference("panel_font").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+
+                    showSingleChoiceDialog(R.layout.preference_list_view, getString(R.string.main_panel_font),
+                            fontNames,
+                            fontPathes, App.sInstance.getSettings().getMainPanelFont(),
+                            new OnChooserValueSelectedListener() {
+                                @Override
+                                public void onValueSelected(int index) {
+                                    App.sInstance.getSettings().setMainPanelFont(fontPathes[index]);
+                                }
+                            }
+                    );
+                    return true;
+                }
+            });
+
+            findPreference("viewer_font").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+
+                    showSingleChoiceDialog(R.layout.preference_list_view, getString(R.string.viewer_font),
+                            fontNames,
+                            fontPathes, App.sInstance.getSettings().getViewerFont(),
+                            new OnChooserValueSelectedListener() {
+                                @Override
+                                public void onValueSelected(int index) {
+                                    App.sInstance.getSettings().setViewerFont(fontPathes[index]);
+                                }
+                            }
+                    );
+                    return true;
+                }
+            });
+        }
 
         Settings settings = App.sInstance.getSettings();
         CheckBoxPreference multiPanels = (CheckBoxPreference) findPreference("multi_panels");

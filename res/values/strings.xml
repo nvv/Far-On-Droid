@@ -180,6 +180,8 @@
     <string name="select_encoding">Select encoding</string>
     <string name="save_as_default">Save as default</string>
     <string name="tips">Show tips again</string>
+    <string name="main_panel_font">Main panel font</string>
+    <string name="viewer_font">Viewer font</string>
 
     <string name="mime_type">Mime Type</string>
     <string name="mime_type_text">Text file</string>

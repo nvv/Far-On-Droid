@@ -15,13 +15,16 @@
             android:layout_height="wrap_content"
             />
 
-    <RadioGroup
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:layout_weight="1"
+    <ScrollView
             android:padding="20dp"
-            android:id="@+id/items_list"/>
-
+            android:layout_weight="1"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent">
+        <RadioGroup
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:id="@+id/items_list"/>
+    </ScrollView>
 
     <Button
             android:id="@+id/cancel"

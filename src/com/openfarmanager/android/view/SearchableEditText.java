@@ -27,6 +27,7 @@ public class SearchableEditText extends EditText implements SearchableView {
         setTextColor(Color.CYAN);
         setPadding(0, 0, 0, 0);
         setTextSize(App.sInstance.getSettings().getViewerFontSize());
+        setTypeface(App.sInstance.getSettings().getViewerFontType());
         //setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
     }
 

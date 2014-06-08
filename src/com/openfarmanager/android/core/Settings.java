@@ -1,6 +1,7 @@
 package com.openfarmanager.android.core;
 
 import android.content.SharedPreferences;
+import android.graphics.Typeface;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import com.openfarmanager.android.App;
@@ -35,12 +36,21 @@ public class Settings {
     public static final String VIEWER_DEFAULT_CHARSET_NAME = "viewer_charset_name";
     public static final String ROOT_ENABLED = "root_enabled";
 
+    public static final String MAIN_PANEL_FONT_NAME = "main_panel_font";
+    public static final String VIEWER_FONT_NAME = "viewer_panel_font";
+
     private static File sSdCard;
     public static String sSdPath;
 
     private int mMainPanelFontSize = 0;
     private int mBottomPanelFontSize = 0;
     private int mViewerFontSize = 0;
+
+    private String mMainPanelFont;
+    private String mViewerFont;
+
+    private Typeface mMainPanelFontType;
+    private Typeface mViewerFontType;
 
     static {
         sSdCard = Environment.getExternalStorageDirectory();
@@ -208,4 +218,63 @@ public class Settings {
         return getSharedPreferences().getBoolean(ROOT_ENABLED, false);
     }
 
+    public Typeface getMainPanelFontType() {
+        if (mMainPanelFontType == null) {
+            setMainPanelFontType();
+        }
+
+        return mMainPanelFontType;
+    }
+
+    private void setMainPanelFontType() {
+        try {
+            mMainPanelFontType = Typeface.createFromFile(getMainPanelFont());
+        } catch (Exception e) {
+            mMainPanelFontType = Typeface.DEFAULT;
+        }
+    }
+
+    private void setViewerFontType() {
+        try {
+            mViewerFontType = Typeface.createFromFile(getViewerFont());
+        } catch (Exception e) {
+            mViewerFontType = Typeface.DEFAULT;
+        }
+    }
+
+    public Typeface getViewerFontType() {
+        if (mViewerFontType == null) {
+            setViewerFontType();
+        }
+
+        return mViewerFontType;
+    }
+
+    public void setMainPanelFont(String font) {
+        getSharedPreferences().edit().putString(MAIN_PANEL_FONT_NAME, font).commit();
+        mMainPanelFont = font;
+        setMainPanelFontType();
+    }
+
+    public String getMainPanelFont() {
+        if (mMainPanelFont == null) {
+            mMainPanelFont = getSharedPreferences().getString(MAIN_PANEL_FONT_NAME, "");
+        }
+
+        return mMainPanelFont;
+    }
+
+    public void setViewerFont(String font) {
+        getSharedPreferences().edit().putString(VIEWER_FONT_NAME, font).commit();
+        mViewerFont = font;
+        setViewerFontType();
+    }
+
+    public String getViewerFont() {
+        if (mViewerFont == null) {
+            mViewerFont = getSharedPreferences().getString(VIEWER_FONT_NAME, "");
+        }
+
+        return mViewerFont;
+    }
 }

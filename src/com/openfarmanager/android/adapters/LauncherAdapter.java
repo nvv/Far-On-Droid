@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Handler;
@@ -123,6 +124,10 @@ public class LauncherAdapter extends FlatFileSystemAdapter {
         int size = App.sInstance.getSettings().getMainPanelFontSize();
         name.setTextSize(TypedValue.COMPLEX_UNIT_SP, size);
         infoItem.setTextSize(TypedValue.COMPLEX_UNIT_SP, size); // to adjust item size
+
+        Typeface typeface = App.sInstance.getSettings().getMainPanelFontType();
+        name.setTypeface(typeface);
+        infoItem.setTypeface(typeface);
 
         return view;
     }
