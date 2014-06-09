@@ -1,6 +1,7 @@
 package com.openfarmanager.android.fragments;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -342,6 +343,18 @@ public class MainPanel extends BaseFileSystemPanel {
 
         setIsActivePanel(mIsActivePanel);
         setNavigationButtonsVisibility();
+
+        int color = App.sInstance.getSettings().getMainPanelColor();
+        mChangePathToLeft.setBackgroundColor(color);
+        mChangePathToRight.setBackgroundColor(color);
+        mAddToBookmarksLeft.setBackgroundColor(color);
+        mAddToBookmarksRight.setBackgroundColor(color);
+        mNetworkLeft.setBackgroundColor(color);
+        mNetworkRight.setBackgroundColor(color);
+        mHomeLeft.setBackgroundColor(color);
+        mHomeRight.setBackgroundColor(color);
+        mExitLeft.setBackgroundColor(color);
+        mExitRight.setBackgroundColor(color);
     }
 
     @Override
@@ -773,6 +786,10 @@ public class MainPanel extends BaseFileSystemPanel {
         mIsActivePanel = active;
         if (mCurrentPathView != null) {
             mCurrentPathView.setSelected(mIsActivePanel);
+
+            mCurrentPathView.setBackgroundColor(mIsActivePanel ?
+                    Color.parseColor(getString(R.color.selected_item)) : App.sInstance.getSettings().getMainPanelColor());
+
         }
         if (active && mFileSystemList != null) {
             mFileSystemList.requestFocus();

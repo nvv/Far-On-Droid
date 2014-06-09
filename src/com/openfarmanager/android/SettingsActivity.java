@@ -29,6 +29,9 @@ import com.openfarmanager.android.view.ToastNotification;
 
 import java.util.HashMap;
 
+import afzkl.development.colorpickerview.preference.ColorPickerPreference;
+import afzkl.development.colorpickerview.view.ColorPickerView;
+
 public class SettingsActivity extends PreferenceActivity {
 
     private Intent mResultData;
@@ -186,6 +189,16 @@ public class SettingsActivity extends PreferenceActivity {
                 }
             });
         }
+
+        ColorPickerPreference colorPickerPreference = (ColorPickerPreference) findPreference("main_panel_color");
+
+        colorPickerPreference.setOnColorChangedListener(new ColorPickerView.OnColorChangedListener() {
+            @Override
+            public void onColorChanged(int newColor) {
+                App.sInstance.getSettings().setMainPanelColor(newColor);
+            }
+        });
+
 
         Settings settings = App.sInstance.getSettings();
         CheckBoxPreference multiPanels = (CheckBoxPreference) findPreference("multi_panels");

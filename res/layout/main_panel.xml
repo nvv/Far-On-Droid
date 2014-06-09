@@ -34,7 +34,6 @@
         <TextView
                 android:id="@+id/charset_left"
                 android:drawableRight="@drawable/charset"
-                android:background="@color/main_blue"
                 android:paddingLeft="8dp"
                 android:paddingRight="8dp"
                 android:paddingTop="2dp"
@@ -46,7 +45,6 @@
         <TextView
                 android:id="@+id/exit_left"
                 android:drawableRight="@drawable/network_exit"
-                android:background="@color/main_blue"
                 android:paddingLeft="8dp"
                 android:paddingRight="8dp"
                 android:paddingTop="2dp"
@@ -58,7 +56,6 @@
         <TextView
                 android:id="@+id/home_left"
                 android:drawableRight="@drawable/home"
-                android:background="@color/main_blue"
                 android:paddingLeft="8dp"
                 android:paddingRight="8dp"
                 android:paddingTop="2dp"
@@ -69,7 +66,6 @@
         <TextView
                 android:id="@+id/network_left"
                 android:drawableRight="@drawable/cloud"
-                android:background="@color/main_blue"
                 android:paddingLeft="8dp"
                 android:paddingRight="8dp"
                 android:paddingTop="2dp"
@@ -80,7 +76,6 @@
         <TextView
                 android:id="@+id/add_to_bookmarks_left"
                 android:drawableLeft="@drawable/add_bookmark"
-                android:background="@color/main_blue"
                 android:paddingLeft="8dp"
                 android:paddingRight="8dp"
                 android:paddingTop="2dp"
@@ -93,7 +88,6 @@
                 android:text="&lt;"
                 android:layout_weight="0"
                 android:textStyle="bold"
-                android:background="@color/main_blue"
                 android:visibility="gone"
                 android:paddingLeft="10dp"
                 android:paddingRight="10dp"
@@ -108,7 +102,6 @@
                 android:ellipsize="middle"
                 android:layout_weight="1"
                 android:textColor="@color/white"
-                android:background="@drawable/file_system_path_selector"
                 android:padding="0dp"
                 android:gravity="center"
                 android:singleLine="true"
@@ -120,7 +113,6 @@
                 android:layout_weight="0"
                 android:visibility="gone"
                 android:textStyle="bold"
-                android:background="@color/main_blue"
                 android:paddingRight="10dp"
                 android:paddingLeft="10dp"
                 android:layout_marginTop="-5dp"
@@ -130,7 +122,6 @@
         <TextView
                 android:id="@+id/add_to_bookmarks_right"
                 android:drawableRight="@drawable/add_bookmark"
-                android:background="@color/main_blue"
                 android:paddingLeft="8dp"
                 android:paddingRight="8dp"
                 android:paddingTop="2dp"
@@ -141,7 +132,6 @@
         <TextView
                 android:id="@+id/network_right"
                 android:drawableRight="@drawable/cloud"
-                android:background="@color/main_blue"
                 android:paddingLeft="8dp"
                 android:paddingRight="8dp"
                 android:paddingTop="2dp"
@@ -152,7 +142,6 @@
         <TextView
                 android:id="@+id/home_right"
                 android:drawableRight="@drawable/home"
-                android:background="@color/main_blue"
                 android:paddingLeft="8dp"
                 android:paddingRight="8dp"
                 android:paddingTop="2dp"
@@ -164,7 +153,6 @@
                 android:id="@+id/exit_right"
                 android:visibility="gone"
                 android:drawableRight="@drawable/network_exit"
-                android:background="@color/main_blue"
                 android:paddingLeft="8dp"
                 android:paddingRight="8dp"
                 android:paddingTop="2dp"
@@ -176,7 +164,6 @@
                 android:id="@+id/charset_right"
                 android:visibility="gone"
                 android:drawableRight="@drawable/charset"
-                android:background="@color/main_blue"
                 android:paddingLeft="8dp"
                 android:paddingRight="8dp"
                 android:paddingTop="2dp"

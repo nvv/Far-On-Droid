@@ -3,6 +3,7 @@ package com.openfarmanager.android;
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -192,6 +193,8 @@ public class Main extends FragmentActivity {
                 !PreferenceManager.getDefaultSharedPreferences(this).getBoolean("main_swipe_right_left_hint", false)) {
             showSwipeRightLiftHint();
         }
+
+        (findViewById(R.id.panels_holder)).setBackgroundColor(App.sInstance.getSettings().getMainPanelColor());
     }
 
     @Override

@@ -1,10 +1,12 @@
 package com.openfarmanager.android.core;
 
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import com.openfarmanager.android.App;
+import com.openfarmanager.android.R;
 import com.openfarmanager.android.filesystem.FileSystemScanner;
 import com.openfarmanager.android.utils.SystemUtils;
 
@@ -35,9 +37,9 @@ public class Settings {
     public static final String VIEWER_FONT_SIZE = "viewer_panel_font_size";
     public static final String VIEWER_DEFAULT_CHARSET_NAME = "viewer_charset_name";
     public static final String ROOT_ENABLED = "root_enabled";
-
     public static final String MAIN_PANEL_FONT_NAME = "main_panel_font";
     public static final String VIEWER_FONT_NAME = "viewer_panel_font";
+    public static final String MAIN_PANEL_COLOR = "main_panel_color";
 
     private static File sSdCard;
     public static String sSdPath;
@@ -51,6 +53,8 @@ public class Settings {
 
     private Typeface mMainPanelFontType;
     private Typeface mViewerFontType;
+
+    private int mMainPanelColor = 0;
 
     static {
         sSdCard = Environment.getExternalStorageDirectory();
@@ -276,5 +280,18 @@ public class Settings {
         }
 
         return mViewerFont;
+    }
+
+    public int getMainPanelColor() {
+        if (mMainPanelColor == 0) {
+            mMainPanelColor = getSharedPreferences().getInt(MAIN_PANEL_COLOR, Color.parseColor(App.sInstance.getString(R.color.main_blue)));
+        }
+
+        return mMainPanelColor;
+    }
+
+    public void setMainPanelColor(int color) {
+        getSharedPreferences().edit().putInt(MAIN_PANEL_COLOR, color).commit();
+        mMainPanelColor = color;
     }
 }

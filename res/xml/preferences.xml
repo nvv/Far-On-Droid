@@ -107,6 +107,11 @@
                 android:key="viewer_font"
                 android:title="@string/viewer_font"/>
 
+        <afzkl.development.colorpickerview.preference.ColorPickerPreference
+                android:key="main_panel_color"
+                android:summary="@string/main_panel_color_summary"
+                android:title="@string/main_panel_color"/>
+
     </PreferenceCategory>
     <PreferenceCategory
             android:title="@string/settings_feedback"

@@ -1,7 +1,7 @@
 <resources>
     <color name="transparent">#00000000</color>
     <color name="selected_item">#008080</color>
-    <color name="main_blue">#000080</color>
+    <color name="main_blue">#ff000080</color>
     <color name="white">#ffffff</color>
     <color name="black">#000000</color>
     <color name="main_grey">#c0c0c0</color>

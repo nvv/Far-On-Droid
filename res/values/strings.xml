@@ -182,6 +182,8 @@
     <string name="tips">Show tips again</string>
     <string name="main_panel_font">Main panel font</string>
     <string name="viewer_font">Viewer font</string>
+    <string name="main_panel_color">Main panel color</string>
+    <string name="main_panel_color_summary">Configure color of main file system panel</string>
 
     <string name="mime_type">Mime Type</string>
     <string name="mime_type_text">Text file</string>
