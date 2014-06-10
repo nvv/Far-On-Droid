@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
@@ -164,6 +165,7 @@ public class SettingsActivity extends PreferenceActivity {
                                 @Override
                                 public void onValueSelected(int index) {
                                     App.sInstance.getSettings().setMainPanelFont(fontPathes[index]);
+                                    mResultData.putExtra(Main.RESULT_BOTTOM_PANEL_INVALIDATE, true);
                                 }
                             }
                     );
@@ -190,17 +192,44 @@ public class SettingsActivity extends PreferenceActivity {
             });
         }
 
-        ColorPickerPreference colorPickerPreference = (ColorPickerPreference) findPreference("main_panel_color");
-
-        colorPickerPreference.setOnColorChangedListener(new ColorPickerView.OnColorChangedListener() {
+        final Settings settings = App.sInstance.getSettings();
+        ColorPickerPreference mainPanelColor = (ColorPickerPreference) findPreference("main_panel_color");
+        mainPanelColor.setDefaultColor(settings.getMainPanelColor());
+        mainPanelColor.setOnColorChangedListener(new ColorPickerView.OnColorChangedListener() {
             @Override
             public void onColorChanged(int newColor) {
-                App.sInstance.getSettings().setMainPanelColor(newColor);
+                settings.setMainPanelColor(newColor);
             }
         });
 
+        ColorPickerPreference secondaryColor = (ColorPickerPreference) findPreference("secondary_color");
+        secondaryColor.setDefaultColor(settings.getSecondaryColor());
+        secondaryColor.setOnColorChangedListener(new ColorPickerView.OnColorChangedListener() {
+            @Override
+            public void onColorChanged(int newColor) {
+                settings.setSecondaryColor(newColor);
+                mResultData.putExtra(Main.RESULT_BOTTOM_PANEL_INVALIDATE, true);
+            }
+        });
 
-        Settings settings = App.sInstance.getSettings();
+        ColorPickerPreference viewerColor = (ColorPickerPreference) findPreference("viewer_color");
+        viewerColor.setDefaultColor(settings.getViewerColor());
+        viewerColor.setOnColorChangedListener(new ColorPickerView.OnColorChangedListener() {
+            @Override
+            public void onColorChanged(int newColor) {
+                settings.setViewerColor(newColor);
+            }
+        });
+
+        ColorPickerPreference textColor = (ColorPickerPreference) findPreference("text_color");
+        textColor.setDefaultColor(settings.getTextColor());
+        textColor.setOnColorChangedListener(new ColorPickerView.OnColorChangedListener() {
+            @Override
+            public void onColorChanged(int newColor) {
+                settings.setTextColor(newColor);
+            }
+        });
+
         CheckBoxPreference multiPanels = (CheckBoxPreference) findPreference("multi_panels");
         multiPanels.setChecked(settings.isMultiPanelMode());
         CheckBoxPreference flexiblePanels = (CheckBoxPreference) findPreference("flexible_panels");

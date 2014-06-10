@@ -40,6 +40,9 @@ public class Settings {
     public static final String MAIN_PANEL_FONT_NAME = "main_panel_font";
     public static final String VIEWER_FONT_NAME = "viewer_panel_font";
     public static final String MAIN_PANEL_COLOR = "main_panel_color";
+    public static final String VIEWER_COLOR = "viewer_color";
+    public static final String SECONDARY_COLOR = "secondary_color";
+    public static final String TEXT_COLOR = "text_color";
 
     private static File sSdCard;
     public static String sSdPath;
@@ -55,6 +58,9 @@ public class Settings {
     private Typeface mViewerFontType;
 
     private int mMainPanelColor = 0;
+    private int mViewerColor = 0;
+    private int mSecondaryColor = 0;
+    private int mTextColor = 0;
 
     static {
         sSdCard = Environment.getExternalStorageDirectory();
@@ -293,5 +299,44 @@ public class Settings {
     public void setMainPanelColor(int color) {
         getSharedPreferences().edit().putInt(MAIN_PANEL_COLOR, color).commit();
         mMainPanelColor = color;
+    }
+
+    public int getViewerColor() {
+        if (mViewerColor == 0) {
+            mViewerColor = getSharedPreferences().getInt(VIEWER_COLOR, Color.parseColor(App.sInstance.getString(R.color.main_blue)));
+        }
+
+        return mViewerColor;
+    }
+
+    public void setViewerColor(int color) {
+        getSharedPreferences().edit().putInt(VIEWER_COLOR, color).commit();
+        mViewerColor = color;
+    }
+
+    public int getSecondaryColor() {
+        if (mSecondaryColor == 0) {
+            mSecondaryColor = getSharedPreferences().getInt(SECONDARY_COLOR, Color.parseColor(App.sInstance.getString(R.color.selected_item)));
+        }
+
+        return mSecondaryColor;
+    }
+
+    public void setSecondaryColor(int color) {
+        getSharedPreferences().edit().putInt(SECONDARY_COLOR, color).commit();
+        mSecondaryColor = color;
+    }
+
+    public int getTextColor() {
+        if (mTextColor == 0) {
+            mTextColor = getSharedPreferences().getInt(TEXT_COLOR, Color.CYAN);
+        }
+
+        return mTextColor;
+    }
+
+    public void setTextColor(int color) {
+        getSharedPreferences().edit().putInt(TEXT_COLOR, color).commit();
+        mTextColor = color;
     }
 }

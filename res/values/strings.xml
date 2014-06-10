@@ -184,6 +184,14 @@
     <string name="viewer_font">Viewer font</string>
     <string name="main_panel_color">Main panel color</string>
     <string name="main_panel_color_summary">Configure color of main file system panel</string>
+    <string name="secondary_color">Secondary color</string>
+    <string name="secondary_color_summary">Configure secondary color : bottom panel, current path, etc</string>
+    <string name="viewer_color">Viewer color</string>
+    <string name="viewer_color_summary">Configure viewer color</string>
+    <string name="text_color">Text color</string>
+    <string name="text_color_summary">Configure text color for viewer and main panel</string>
+    <string name="style">Style</string>
+    <string name="style_summary">Configure your app looks like</string>
 
     <string name="mime_type">Mime Type</string>
     <string name="mime_type_text">Text file</string>

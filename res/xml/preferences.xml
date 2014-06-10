@@ -87,31 +87,52 @@
                 android:title="@string/force_use_en_locale"
                 android:widgetLayout="@layout/check_box_preference"/>
 
-        <Preference
-                android:key="panel_font_size"
-                android:title="@string/main_panel_font_size"/>
+        <PreferenceScreen
+                android:key="style"
+                android:title="@string/style"
+                android:summary="@string/style_summary">
 
-        <Preference
-                android:key="toolbar_font_size"
-                android:title="@string/toolbar_font_size"/>
+            <Preference
+                    android:key="panel_font_size"
+                    android:title="@string/main_panel_font_size"/>
 
-        <Preference
-                android:key="viewer_font_size"
-                android:title="@string/viewer_font_size"/>
+            <Preference
+                    android:key="toolbar_font_size"
+                    android:title="@string/toolbar_font_size"/>
 
-        <Preference
-                android:key="panel_font"
-                android:title="@string/main_panel_font"/>
+            <Preference
+                    android:key="viewer_font_size"
+                    android:title="@string/viewer_font_size"/>
 
-        <Preference
-                android:key="viewer_font"
-                android:title="@string/viewer_font"/>
+            <Preference
+                    android:key="panel_font"
+                    android:title="@string/main_panel_font"/>
 
-        <afzkl.development.colorpickerview.preference.ColorPickerPreference
-                android:key="main_panel_color"
-                android:summary="@string/main_panel_color_summary"
-                android:title="@string/main_panel_color"/>
+            <Preference
+                    android:key="viewer_font"
+                    android:title="@string/viewer_font"/>
 
+            <afzkl.development.colorpickerview.preference.ColorPickerPreference
+                    android:key="main_panel_color"
+                    android:summary="@string/main_panel_color_summary"
+                    android:title="@string/main_panel_color"/>
+
+            <afzkl.development.colorpickerview.preference.ColorPickerPreference
+                    android:key="secondary_color"
+                    android:summary="@string/secondary_color_summary"
+                    android:title="@string/secondary_color"/>
+
+            <afzkl.development.colorpickerview.preference.ColorPickerPreference
+                    android:key="viewer_color"
+                    android:summary="@string/viewer_color_summary"
+                    android:title="@string/viewer_color"/>
+
+            <afzkl.development.colorpickerview.preference.ColorPickerPreference
+                    android:key="text_color"
+                    android:summary="@string/text_color_summary"
+                    android:title="@string/text_color"/>
+
+        </PreferenceScreen>
     </PreferenceCategory>
     <PreferenceCategory
             android:title="@string/settings_feedback"

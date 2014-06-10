@@ -788,7 +788,7 @@ public class MainPanel extends BaseFileSystemPanel {
             mCurrentPathView.setSelected(mIsActivePanel);
 
             mCurrentPathView.setBackgroundColor(mIsActivePanel ?
-                    Color.parseColor(getString(R.color.selected_item)) : App.sInstance.getSettings().getMainPanelColor());
+                    App.sInstance.getSettings().getSecondaryColor() : App.sInstance.getSettings().getMainPanelColor());
 
         }
         if (active && mFileSystemList != null) {
