@@ -188,10 +188,20 @@
     <string name="secondary_color_summary">Configure secondary color : bottom panel, current path, etc</string>
     <string name="viewer_color">Viewer color</string>
     <string name="viewer_color_summary">Configure viewer color</string>
-    <string name="text_color">Text color</string>
-    <string name="text_color_summary">Configure text color for viewer and main panel</string>
     <string name="style">Style</string>
     <string name="style_summary">Configure your app looks like</string>
+    <string name="text_color">Text color</string>
+    <string name="text_color_summary">Configure text color for viewer and main panel</string>
+    <string name="selected_color">Selected file color</string>
+    <string name="selected_color_summary">Configure selected file color for main panel</string>
+    <string name="hidden_color">Hidden file color</string>
+    <string name="hidden_color_summary">Configure hidden file color for main panel</string>
+    <string name="install_color">Install (apk) file color</string>
+    <string name="install_color_summary">Configure apk file color for main panel</string>
+    <string name="archive_color">Archive file color</string>
+    <string name="archive_color_summary">Configure archive file color for main panel</string>
+    <string name="folder_color">Folder color</string>
+    <string name="folder_color_summary">Configure folder color for main panel</string>
 
     <string name="mime_type">Mime Type</string>
     <string name="mime_type_text">Text file</string>

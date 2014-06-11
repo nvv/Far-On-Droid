@@ -118,7 +118,7 @@ public class LauncherAdapter extends FlatFileSystemAdapter {
 
         TextView name = (TextView) view.findViewById(R.id.item_name);
         name.setText(info.getName());
-        name.setTextColor(Color.GREEN);
+        name.setTextColor(App.sInstance.getSettings().getInstallColor());
         TextView infoItem = (TextView) view.findViewById(R.id.item_info);
 
         int size = App.sInstance.getSettings().getMainPanelFontSize();

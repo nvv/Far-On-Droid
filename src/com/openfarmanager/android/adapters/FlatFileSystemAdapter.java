@@ -13,6 +13,7 @@ import android.widget.TextView;
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.R;
 import com.openfarmanager.android.core.FontManager;
+import com.openfarmanager.android.core.Settings;
 import com.openfarmanager.android.core.archive.ArchiveUtils;
 import com.openfarmanager.android.core.archive.MimeTypes;
 import com.openfarmanager.android.core.bookmark.BookmarkManager;
@@ -92,18 +93,19 @@ public class FlatFileSystemAdapter extends BaseAdapter {
 
         File fileItem = (File) item;
 
+        Settings settings = App.sInstance.getSettings();
         if (mSelectedFiles.contains(item)) {
-            setColor(name, info, Color.YELLOW);
+            setColor(name, info, settings.getSelectedColor());
         } else if ((!fileItem.canRead() || fileItem.isHidden()) && !item.isVirtualDirectory()) {
-            setColor(name, info, Color.GRAY);
+            setColor(name, info, settings.getHiddenColor());
         } else if (item.isDirectory()) {
-            setColor(name, info, Color.WHITE);
+            setColor(name, info, settings.getFolderColor());
         } else if (ArchiveUtils.getMimeType(fileItem).equals(MimeTypes.MIME_APPLICATION_ANDROID_PACKAGE)) {
-            setColor(name, info, Color.GREEN);
+            setColor(name, info, settings.getInstallColor());
         } else if (ArchiveUtils.isArchiveFile(fileItem)) {
-            setColor(name, info, Color.MAGENTA);
+            setColor(name, info, settings.getArchiveColor());
         } else {
-            setColor(name, info, Color.CYAN);
+            setColor(name, info, settings.getTextColor());
         }
 
         if (item.isDirectory()) {

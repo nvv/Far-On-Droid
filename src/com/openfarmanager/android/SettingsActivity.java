@@ -230,6 +230,51 @@ public class SettingsActivity extends PreferenceActivity {
             }
         });
 
+        ColorPickerPreference folderColor = (ColorPickerPreference) findPreference("folder_color");
+        folderColor.setDefaultColor(settings.getFolderColor());
+        folderColor.setOnColorChangedListener(new ColorPickerView.OnColorChangedListener() {
+            @Override
+            public void onColorChanged(int newColor) {
+                settings.setFolderColor(newColor);
+            }
+        });
+
+        ColorPickerPreference selectedColor = (ColorPickerPreference) findPreference("selected_color");
+        selectedColor.setDefaultColor(settings.getSelectedColor());
+        selectedColor.setOnColorChangedListener(new ColorPickerView.OnColorChangedListener() {
+            @Override
+            public void onColorChanged(int newColor) {
+                settings.setSelectedColor(newColor);
+            }
+        });
+
+        ColorPickerPreference hiddenColor = (ColorPickerPreference) findPreference("hidden_color");
+        hiddenColor.setDefaultColor(settings.getHiddenColor());
+        hiddenColor.setOnColorChangedListener(new ColorPickerView.OnColorChangedListener() {
+            @Override
+            public void onColorChanged(int newColor) {
+                settings.setHiddenColor(newColor);
+            }
+        });
+
+        ColorPickerPreference installColor = (ColorPickerPreference) findPreference("install_color");
+        installColor.setDefaultColor(settings.getInstallColor());
+        installColor.setOnColorChangedListener(new ColorPickerView.OnColorChangedListener() {
+            @Override
+            public void onColorChanged(int newColor) {
+                settings.setInstallColor(newColor);
+            }
+        });
+
+        ColorPickerPreference archiveColor = (ColorPickerPreference) findPreference("archive_color");
+        archiveColor.setDefaultColor(settings.getArchiveColor());
+        archiveColor.setOnColorChangedListener(new ColorPickerView.OnColorChangedListener() {
+            @Override
+            public void onColorChanged(int newColor) {
+                settings.setArchiveColor(newColor);
+            }
+        });
+
         CheckBoxPreference multiPanels = (CheckBoxPreference) findPreference("multi_panels");
         multiPanels.setChecked(settings.isMultiPanelMode());
         CheckBoxPreference flexiblePanels = (CheckBoxPreference) findPreference("flexible_panels");

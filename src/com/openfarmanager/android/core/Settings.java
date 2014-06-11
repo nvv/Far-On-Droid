@@ -43,6 +43,11 @@ public class Settings {
     public static final String VIEWER_COLOR = "viewer_color";
     public static final String SECONDARY_COLOR = "secondary_color";
     public static final String TEXT_COLOR = "text_color";
+    public static final String FOLDER_COLOR = "folder_color";
+    public static final String SELECTED_COLOR = "selected_color";
+    public static final String HIDDEN_COLOR = "hidden_color";
+    public static final String INSTALL_COLOR = "install_color";
+    public static final String ARCHIVE_COLOR = "archive_color";
 
     private static File sSdCard;
     public static String sSdPath;
@@ -61,6 +66,11 @@ public class Settings {
     private int mViewerColor = 0;
     private int mSecondaryColor = 0;
     private int mTextColor = 0;
+    private int mFolderColor = 0;
+    private int mHiddenColor = 0;
+    private int mInstallColor = 0;
+    private int mSelectedColor = 0;
+    private int mArchiveColor = 0;
 
     static {
         sSdCard = Environment.getExternalStorageDirectory();
@@ -339,4 +349,70 @@ public class Settings {
         getSharedPreferences().edit().putInt(TEXT_COLOR, color).commit();
         mTextColor = color;
     }
+
+    public int getFolderColor() {
+        if (mFolderColor == 0) {
+            mFolderColor = getSharedPreferences().getInt(FOLDER_COLOR, Color.WHITE);
+        }
+
+        return mFolderColor;
+    }
+
+    public void setFolderColor(int color) {
+        getSharedPreferences().edit().putInt(FOLDER_COLOR, color).commit();
+        mFolderColor = color;
+    }
+
+    public int getSelectedColor() {
+        if (mSelectedColor == 0) {
+            mSelectedColor = getSharedPreferences().getInt(SELECTED_COLOR, Color.YELLOW);
+        }
+
+        return mSelectedColor;
+    }
+
+    public void setSelectedColor(int color) {
+        getSharedPreferences().edit().putInt(SELECTED_COLOR, color).commit();
+        mSelectedColor = color;
+    }
+
+    public int getHiddenColor() {
+        if (mHiddenColor == 0) {
+            mHiddenColor = getSharedPreferences().getInt(HIDDEN_COLOR, Color.GRAY);
+        }
+
+        return mHiddenColor;
+    }
+
+    public void setHiddenColor(int color) {
+        getSharedPreferences().edit().putInt(HIDDEN_COLOR, color).commit();
+        mHiddenColor = color;
+    }
+
+    public int getInstallColor() {
+        if (mInstallColor == 0) {
+            mInstallColor = getSharedPreferences().getInt(INSTALL_COLOR, Color.GREEN);
+        }
+
+        return mInstallColor;
+    }
+
+    public void setInstallColor(int color) {
+        getSharedPreferences().edit().putInt(INSTALL_COLOR, color).commit();
+        mInstallColor = color;
+    }
+
+    public int getArchiveColor() {
+        if (mArchiveColor == 0) {
+            mArchiveColor = getSharedPreferences().getInt(ARCHIVE_COLOR, Color.MAGENTA);
+        }
+
+        return mArchiveColor;
+    }
+
+    public void setArchiveColor(int color) {
+        getSharedPreferences().edit().putInt(ARCHIVE_COLOR, color).commit();
+        mArchiveColor = color;
+    }
+
 }

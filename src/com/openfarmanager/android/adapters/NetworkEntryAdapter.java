@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.R;
+import com.openfarmanager.android.core.Settings;
 import com.openfarmanager.android.filesystem.FakeFile;
 import com.openfarmanager.android.filesystem.FileProxy;
 import com.openfarmanager.android.utils.Extensions;
@@ -71,23 +72,26 @@ public class NetworkEntryAdapter extends FlatFileSystemAdapter {
         name.setText(item.getName());
         TextView size = (TextView) view.findViewById(R.id.item_info);
 
-        int fontSize = App.sInstance.getSettings().getMainPanelFontSize();
+        Settings settings = App.sInstance.getSettings();
+
+        int fontSize = settings.getMainPanelFontSize();
         name.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize);
         size.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize);
 
-        Typeface typeface = App.sInstance.getSettings().getMainPanelFontType();
+        Typeface typeface = settings.getMainPanelFontType();
         name.setTypeface(typeface);
         size.setTypeface(typeface);
 
         if (mSelectedFiles.contains(item)) {
-            name.setTextColor(Color.YELLOW);
-            size.setTextColor(Color.YELLOW);
+            name.setTextColor(settings.getSelectedColor());
+            size.setTextColor(settings.getSelectedColor());
         } else if (item.isDirectory()) {
-            name.setTextColor(Color.WHITE);
-            size.setTextColor(Color.WHITE);
+            name.setTextColor(settings.getFolderColor());
+            size.setTextColor(settings.getFolderColor());
         } else {
-            name.setTextColor(Color.CYAN);
-            size.setTextColor(Color.CYAN);
+            name.setTextColor(settings.getTextColor());
+            size.setTextColor(settings.getTextColor()
+            );
         }
 
         FakeFile fakeFile = null;

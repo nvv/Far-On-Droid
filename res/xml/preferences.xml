@@ -132,6 +132,31 @@
                     android:summary="@string/text_color_summary"
                     android:title="@string/text_color"/>
 
+            <afzkl.development.colorpickerview.preference.ColorPickerPreference
+                    android:key="folder_color"
+                    android:summary="@string/folder_color_summary"
+                    android:title="@string/folder_color"/>
+
+            <afzkl.development.colorpickerview.preference.ColorPickerPreference
+                    android:key="selected_color"
+                    android:summary="@string/selected_color_summary"
+                    android:title="@string/selected_color"/>
+
+            <afzkl.development.colorpickerview.preference.ColorPickerPreference
+                    android:key="hidden_color"
+                    android:summary="@string/hidden_color_summary"
+                    android:title="@string/hidden_color"/>
+
+            <afzkl.development.colorpickerview.preference.ColorPickerPreference
+                    android:key="install_color"
+                    android:summary="@string/install_color_summary"
+                    android:title="@string/install_color"/>
+
+            <afzkl.development.colorpickerview.preference.ColorPickerPreference
+                    android:key="archive_color"
+                    android:summary="@string/archive_color_summary"
+                    android:title="@string/archive_color"/>
+
         </PreferenceScreen>
     </PreferenceCategory>
     <PreferenceCategory
