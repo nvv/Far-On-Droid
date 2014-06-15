@@ -157,6 +157,10 @@
                     android:summary="@string/archive_color_summary"
                     android:title="@string/archive_color"/>
 
+            <Preference
+                    android:key="reset_to_defaults"
+                    android:title="@string/reset_to_defaults"/>
+
         </PreferenceScreen>
     </PreferenceCategory>
     <PreferenceCategory

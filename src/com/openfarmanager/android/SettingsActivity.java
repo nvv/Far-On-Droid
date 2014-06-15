@@ -27,6 +27,7 @@ import com.openfarmanager.android.filesystem.actions.RootTask;
 import com.openfarmanager.android.utils.SystemUtils;
 import com.openfarmanager.android.view.FontSetupDialog;
 import com.openfarmanager.android.view.ToastNotification;
+import com.openfarmanager.android.view.YesNoPreference;
 
 import java.util.HashMap;
 
@@ -193,87 +194,6 @@ public class SettingsActivity extends PreferenceActivity {
         }
 
         final Settings settings = App.sInstance.getSettings();
-        ColorPickerPreference mainPanelColor = (ColorPickerPreference) findPreference("main_panel_color");
-        mainPanelColor.setDefaultColor(settings.getMainPanelColor());
-        mainPanelColor.setOnColorChangedListener(new ColorPickerView.OnColorChangedListener() {
-            @Override
-            public void onColorChanged(int newColor) {
-                settings.setMainPanelColor(newColor);
-            }
-        });
-
-        ColorPickerPreference secondaryColor = (ColorPickerPreference) findPreference("secondary_color");
-        secondaryColor.setDefaultColor(settings.getSecondaryColor());
-        secondaryColor.setOnColorChangedListener(new ColorPickerView.OnColorChangedListener() {
-            @Override
-            public void onColorChanged(int newColor) {
-                settings.setSecondaryColor(newColor);
-                mResultData.putExtra(Main.RESULT_BOTTOM_PANEL_INVALIDATE, true);
-            }
-        });
-
-        ColorPickerPreference viewerColor = (ColorPickerPreference) findPreference("viewer_color");
-        viewerColor.setDefaultColor(settings.getViewerColor());
-        viewerColor.setOnColorChangedListener(new ColorPickerView.OnColorChangedListener() {
-            @Override
-            public void onColorChanged(int newColor) {
-                settings.setViewerColor(newColor);
-            }
-        });
-
-        ColorPickerPreference textColor = (ColorPickerPreference) findPreference("text_color");
-        textColor.setDefaultColor(settings.getTextColor());
-        textColor.setOnColorChangedListener(new ColorPickerView.OnColorChangedListener() {
-            @Override
-            public void onColorChanged(int newColor) {
-                settings.setTextColor(newColor);
-            }
-        });
-
-        ColorPickerPreference folderColor = (ColorPickerPreference) findPreference("folder_color");
-        folderColor.setDefaultColor(settings.getFolderColor());
-        folderColor.setOnColorChangedListener(new ColorPickerView.OnColorChangedListener() {
-            @Override
-            public void onColorChanged(int newColor) {
-                settings.setFolderColor(newColor);
-            }
-        });
-
-        ColorPickerPreference selectedColor = (ColorPickerPreference) findPreference("selected_color");
-        selectedColor.setDefaultColor(settings.getSelectedColor());
-        selectedColor.setOnColorChangedListener(new ColorPickerView.OnColorChangedListener() {
-            @Override
-            public void onColorChanged(int newColor) {
-                settings.setSelectedColor(newColor);
-            }
-        });
-
-        ColorPickerPreference hiddenColor = (ColorPickerPreference) findPreference("hidden_color");
-        hiddenColor.setDefaultColor(settings.getHiddenColor());
-        hiddenColor.setOnColorChangedListener(new ColorPickerView.OnColorChangedListener() {
-            @Override
-            public void onColorChanged(int newColor) {
-                settings.setHiddenColor(newColor);
-            }
-        });
-
-        ColorPickerPreference installColor = (ColorPickerPreference) findPreference("install_color");
-        installColor.setDefaultColor(settings.getInstallColor());
-        installColor.setOnColorChangedListener(new ColorPickerView.OnColorChangedListener() {
-            @Override
-            public void onColorChanged(int newColor) {
-                settings.setInstallColor(newColor);
-            }
-        });
-
-        ColorPickerPreference archiveColor = (ColorPickerPreference) findPreference("archive_color");
-        archiveColor.setDefaultColor(settings.getArchiveColor());
-        archiveColor.setOnColorChangedListener(new ColorPickerView.OnColorChangedListener() {
-            @Override
-            public void onColorChanged(int newColor) {
-                settings.setArchiveColor(newColor);
-            }
-        });
 
         CheckBoxPreference multiPanels = (CheckBoxPreference) findPreference("multi_panels");
         multiPanels.setChecked(settings.isMultiPanelMode());
@@ -286,6 +206,88 @@ public class SettingsActivity extends PreferenceActivity {
         Preference homeFolder = findPreference("home_folder");
         homeFolder.setEnabled(settings.isEnableHomeFolder());
         homeFolder.setSummary(settings.getHomeFolder());
+
+        final ColorPickerPreference mainPanelColor = (ColorPickerPreference) findPreference("main_panel_color");
+        mainPanelColor.setDefaultColor(settings.getMainPanelColor());
+        mainPanelColor.setOnColorChangedListener(new ColorPickerView.OnColorChangedListener() {
+            @Override
+            public void onColorChanged(int newColor) {
+                settings.setMainPanelColor(newColor);
+            }
+        });
+
+        final ColorPickerPreference secondaryColor = (ColorPickerPreference) findPreference("secondary_color");
+        secondaryColor.setDefaultColor(settings.getSecondaryColor());
+        secondaryColor.setOnColorChangedListener(new ColorPickerView.OnColorChangedListener() {
+            @Override
+            public void onColorChanged(int newColor) {
+                settings.setSecondaryColor(newColor);
+                mResultData.putExtra(Main.RESULT_BOTTOM_PANEL_INVALIDATE, true);
+            }
+        });
+
+        final ColorPickerPreference viewerColor = (ColorPickerPreference) findPreference("viewer_color");
+        viewerColor.setDefaultColor(settings.getViewerColor());
+        viewerColor.setOnColorChangedListener(new ColorPickerView.OnColorChangedListener() {
+            @Override
+            public void onColorChanged(int newColor) {
+                settings.setViewerColor(newColor);
+            }
+        });
+
+        final ColorPickerPreference textColor = (ColorPickerPreference) findPreference("text_color");
+        textColor.setDefaultColor(settings.getTextColor());
+        textColor.setOnColorChangedListener(new ColorPickerView.OnColorChangedListener() {
+            @Override
+            public void onColorChanged(int newColor) {
+                settings.setTextColor(newColor);
+            }
+        });
+
+        final ColorPickerPreference folderColor = (ColorPickerPreference) findPreference("folder_color");
+        folderColor.setDefaultColor(settings.getFolderColor());
+        folderColor.setOnColorChangedListener(new ColorPickerView.OnColorChangedListener() {
+            @Override
+            public void onColorChanged(int newColor) {
+                settings.setFolderColor(newColor);
+            }
+        });
+
+        final ColorPickerPreference selectedColor = (ColorPickerPreference) findPreference("selected_color");
+        selectedColor.setDefaultColor(settings.getSelectedColor());
+        selectedColor.setOnColorChangedListener(new ColorPickerView.OnColorChangedListener() {
+            @Override
+            public void onColorChanged(int newColor) {
+                settings.setSelectedColor(newColor);
+            }
+        });
+
+        final ColorPickerPreference hiddenColor = (ColorPickerPreference) findPreference("hidden_color");
+        hiddenColor.setDefaultColor(settings.getHiddenColor());
+        hiddenColor.setOnColorChangedListener(new ColorPickerView.OnColorChangedListener() {
+            @Override
+            public void onColorChanged(int newColor) {
+                settings.setHiddenColor(newColor);
+            }
+        });
+
+        final ColorPickerPreference installColor = (ColorPickerPreference) findPreference("install_color");
+        installColor.setDefaultColor(settings.getInstallColor());
+        installColor.setOnColorChangedListener(new ColorPickerView.OnColorChangedListener() {
+            @Override
+            public void onColorChanged(int newColor) {
+                settings.setInstallColor(newColor);
+            }
+        });
+
+        final ColorPickerPreference archiveColor = (ColorPickerPreference) findPreference("archive_color");
+        archiveColor.setDefaultColor(settings.getArchiveColor());
+        archiveColor.setOnColorChangedListener(new ColorPickerView.OnColorChangedListener() {
+            @Override
+            public void onColorChanged(int newColor) {
+                settings.setArchiveColor(newColor);
+            }
+        });
 
         findPreference("feedback").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
@@ -311,6 +313,37 @@ public class SettingsActivity extends PreferenceActivity {
                 Uri uri = Uri.parse(getString(R.string.rate_app_url));
                 Intent intent = new Intent (Intent.ACTION_VIEW, uri);
                 startActivity(intent);
+                return true;
+            }
+        });
+
+        findPreference("reset_to_defaults").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+
+                final Dialog dialog = new YesNoPreference(SettingsActivity.this, getString(R.string.reset_to_defaults_summary),
+                        new YesNoPreference.YesNoAction() {
+
+                    @Override
+                    public void onResult(boolean result) {
+                        if (result) {
+                            Settings settings = App.sInstance.getSettings();
+                            settings.resetStyle();
+                            mResultData.putExtra(Main.RESULT_BOTTOM_PANEL_INVALIDATE, true);
+                            mainPanelColor.setPreviewColor(settings.getMainPanelColor());
+                            secondaryColor.setPreviewColor(settings.getSecondaryColor());
+                            viewerColor.setPreviewColor(settings.getViewerColor());
+                            textColor.setPreviewColor(settings.getTextColor());
+                            folderColor.setPreviewColor(settings.getFolderColor());
+                            selectedColor.setPreviewColor(settings.getSelectedColor());
+                            hiddenColor.setPreviewColor(settings.getHiddenColor());
+                            installColor.setPreviewColor(settings.getInstallColor());
+                            archiveColor.setPreviewColor(settings.getArchiveColor());
+                        }
+                    }
+                });
+                dialog.show();
+                adjustDialogSize(dialog);
                 return true;
             }
         });

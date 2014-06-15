@@ -415,4 +415,30 @@ public class Settings {
         mArchiveColor = color;
     }
 
+    public void resetStyle() {
+        getSharedPreferences().edit().remove(MAIN_PANEL_FONT_SIZE)
+                .remove(BOTTOM_PANEL_FONT_SIZE)
+                .remove(VIEWER_FONT_SIZE)
+                .remove(MAIN_PANEL_FONT_NAME)
+                .remove(VIEWER_FONT_NAME)
+                .remove(MAIN_PANEL_COLOR)
+                .remove(VIEWER_COLOR)
+                .remove(SECONDARY_COLOR)
+                .remove(TEXT_COLOR)
+                .remove(FOLDER_COLOR)
+                .remove(SELECTED_COLOR)
+                .remove(HIDDEN_COLOR)
+                .remove(INSTALL_COLOR)
+                .remove(ARCHIVE_COLOR).commit();
+
+        mMainPanelColor = 0;
+        mViewerColor = 0;
+        mSecondaryColor = 0;
+        mTextColor = 0;
+        mFolderColor = 0;
+        mHiddenColor = 0;
+        mInstallColor = 0;
+        mSelectedColor = 0;
+        mArchiveColor = 0;
+    }
 }

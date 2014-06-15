@@ -202,6 +202,8 @@
     <string name="archive_color_summary">Configure archive file color for main panel</string>
     <string name="folder_color">Folder color</string>
     <string name="folder_color_summary">Configure folder color for main panel</string>
+    <string name="reset_to_defaults">Reset to defaults</string>
+    <string name="reset_to_defaults_summary">Reset style settings to default values</string>
 
     <string name="mime_type">Mime Type</string>
     <string name="mime_type_text">Text file</string>
