@@ -27,6 +27,7 @@ import com.openfarmanager.android.filesystem.actions.FileActionTask;
 import com.openfarmanager.android.filesystem.actions.network.ExportAsTask;
 import com.openfarmanager.android.model.FileActionEnum;
 import com.openfarmanager.android.model.TaskStatusEnum;
+import com.openfarmanager.android.utils.CustomFormatter;
 import com.openfarmanager.android.utils.FileUtilsExt;
 import com.openfarmanager.android.view.ToastNotification;
 import org.apache.commons.io.FilenameUtils;
@@ -78,12 +79,15 @@ public class MainPanel extends BaseFileSystemPanel {
 
     protected ConfirmActionDialog mConfirmDialog;
 
+    protected TextView mSelectedFilesSize;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         setupHandler();
         View view = inflater.inflate(R.layout.main_panel, container, false);
         mFileSystemList = (ListView) view.findViewById(android.R.id.list);
         mProgress = (ProgressBar) view.findViewById(R.id.loading);
+        mSelectedFilesSize = (TextView) view.findViewById(R.id.selected_files_size);
 
         mFileSystemList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -355,6 +359,9 @@ public class MainPanel extends BaseFileSystemPanel {
         mHomeRight.setBackgroundColor(color);
         mExitLeft.setBackgroundColor(color);
         mExitRight.setBackgroundColor(color);
+
+        mSelectedFilesSize.setBackgroundColor(App.sInstance.getSettings().getSecondaryColor());
+        mSelectedFilesSize.setTextColor(App.sInstance.getSettings().getSelectedColor());
     }
 
     @Override
@@ -386,6 +393,14 @@ public class MainPanel extends BaseFileSystemPanel {
         }
         ((FlatFileSystemAdapter) adapterView.getAdapter()).setSelectedFiles(mSelectedFiles);
         ((BaseAdapter) adapterView.getAdapter()).notifyDataSetChanged();
+
+        setSelectedFilesSizeVisibility();
+        long size = 0;
+        for (FileProxy f : mSelectedFiles) {
+            size += f.isDirectory() ? 0 : f.getSize();
+        }
+
+        mSelectedFilesSize.setText(getString(R.string.selected_files, CustomFormatter.formatBytes(size), mSelectedFiles.size()));
     }
 
     public void openFileActionMenu() {
@@ -881,6 +896,8 @@ public class MainPanel extends BaseFileSystemPanel {
             return;
         }
 
+        setSelectedFilesSizeVisibility();
+
         File oldDir = mBaseDir;
         mBaseDir = directory.getAbsoluteFile();
         mCurrentPathView.setText(mBaseDir.getAbsolutePath());
@@ -895,6 +912,11 @@ public class MainPanel extends BaseFileSystemPanel {
         if(adapter != null && oldDir != null){
             mFileSystemList.setSelection(adapter.getItemPosition(oldDir));
         }
+    }
+
+    private void setSelectedFilesSizeVisibility() {
+        mSelectedFilesSize.setVisibility((!App.sInstance.getSettings().isShowSelectedFilesSize() || mSelectedFiles.size() == 0) ?
+                View.GONE : View.VISIBLE);
     }
 
     FlatFileSystemAdapter.OnFolderScannedListener mOnFolderScannedListener = new FlatFileSystemAdapter.OnFolderScannedListener() {

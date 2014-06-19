@@ -16,6 +16,16 @@
             android:listSelector="@drawable/file_system_item_selector"
             android:id="@android:id/list"/>
 
+    <TextView
+            android:id="@+id/selected_files_size"
+            android:layout_gravity="bottom|center_horizontal"
+            android:paddingLeft="2dp"
+            android:paddingRight="2dp"
+            android:textSize="13dp"
+            android:visibility="gone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
     <ProgressBar
             android:id="@+id/loading"
             android:visibility="gone"

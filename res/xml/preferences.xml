@@ -59,6 +59,13 @@
             android:widgetLayout="@layout/check_box_preference"
             android:defaultValue="false"/>
 
+        <CheckBoxPreference
+                android:key="show_selected_files_size"
+                android:title="@string/show_selected_files_size"
+                android:summary="@string/show_selected_files_size_summary"
+                android:widgetLayout="@layout/check_box_preference"
+                android:defaultValue="true"/>
+
     </PreferenceCategory>
     <PreferenceCategory
             android:title="@string/user_interface"

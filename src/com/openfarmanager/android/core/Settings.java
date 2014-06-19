@@ -48,6 +48,7 @@ public class Settings {
     public static final String HIDDEN_COLOR = "hidden_color";
     public static final String INSTALL_COLOR = "install_color";
     public static final String ARCHIVE_COLOR = "archive_color";
+    public static final String SHOW_SELECTED_FILES_SIZE = "show_selected_files_size";
 
     private static File sSdCard;
     public static String sSdPath;
@@ -440,5 +441,9 @@ public class Settings {
         mInstallColor = 0;
         mSelectedColor = 0;
         mArchiveColor = 0;
+    }
+
+    public boolean isShowSelectedFilesSize() {
+        return getSharedPreferences().getBoolean(SHOW_SELECTED_FILES_SIZE, false);
     }
 }
