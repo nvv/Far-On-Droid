@@ -101,6 +101,7 @@ public class NetworkPanel extends MainPanel {
             ToastNotification.makeText(App.sInstance.getApplicationContext(),
                     getSafeString(R.string.error_unknown_unexpected_error), Toast.LENGTH_SHORT).show();
             exitFromNetwork();
+            return view;
         }
 
         mCurrentNetworkAccount = App.sInstance.getNetworkApi(getNetworkType()).getCurrentNetworkAccount();
