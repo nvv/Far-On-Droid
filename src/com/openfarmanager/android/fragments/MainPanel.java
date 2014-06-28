@@ -1,5 +1,6 @@
 package com.openfarmanager.android.fragments;
 
+import android.app.Dialog;
 import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
@@ -7,9 +8,11 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.text.TextUtils;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.webkit.MimeTypeMap;
 import android.widget.*;
 import com.openfarmanager.android.App;
@@ -26,9 +29,12 @@ import com.openfarmanager.android.filesystem.FileSystemScanner;
 import com.openfarmanager.android.filesystem.actions.FileActionTask;
 import com.openfarmanager.android.filesystem.actions.network.ExportAsTask;
 import com.openfarmanager.android.model.FileActionEnum;
+import com.openfarmanager.android.model.SelectParams;
 import com.openfarmanager.android.model.TaskStatusEnum;
 import com.openfarmanager.android.utils.CustomFormatter;
 import com.openfarmanager.android.utils.FileUtilsExt;
+import com.openfarmanager.android.utils.SystemUtils;
+import com.openfarmanager.android.view.SelectDialog;
 import com.openfarmanager.android.view.ToastNotification;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
@@ -395,6 +401,10 @@ public class MainPanel extends BaseFileSystemPanel {
         ((BaseAdapter) adapterView.getAdapter()).notifyDataSetChanged();
 
         setSelectedFilesSizeVisibility();
+        calculateSelectedFilesSize();
+    }
+
+    private void calculateSelectedFilesSize() {
         long size = 0;
         for (FileProxy f : mSelectedFiles) {
             size += f.isDirectory() ? 0 : f.getSize();
@@ -564,11 +574,9 @@ public class MainPanel extends BaseFileSystemPanel {
     }
 
     public void showSelectDialog() {
-        try {
-            ConfirmActionDialog.newInstance(FileActionEnum.SELECT, mSelectFilesCommand, null,
-                    App.sInstance.getSharedPreferences("action_dialog", 0).getString("select_pattern", "*"), false).show(fragmentManager(), "confirmDialog");
-        } catch (Exception e) {
-        }
+        SelectDialog dialog = new SelectDialog(getActivity(), mSelectFilesCommand);
+        dialog.show();
+        adjustDialogSize(dialog);
     }
 
     public void showSearchDialog() {
@@ -934,35 +942,86 @@ public class MainPanel extends BaseFileSystemPanel {
         }
     }
 
-    public void select(String pattern, boolean inverseSelection) {
+    @Override
+    public void select(SelectParams selectParams) {
 
         if (mBaseDir == null) {
             // handle unexpected situation.
             return;
         }
 
-        FileFilter select = new WildcardFileFilter(pattern);
-        File[] contents = mBaseDir.listFiles(select);
-
         mSelectedFiles.clear();
-        if (contents != null) {
-            if (inverseSelection) {
-                File[] allFiles = mBaseDir.listFiles();
-                List selection = Arrays.asList(contents);
+        if (selectParams.getType() == SelectParams.SelectionType.NAME) {
+
+            String pattern = selectParams.getSelectionString();
+            boolean inverseSelection = selectParams.isInverseSelection();
+
+            App.sInstance.getSharedPreferences("action_dialog", 0).edit(). putString("select_pattern", pattern).commit();
+
+            FileFilter select = new WildcardFileFilter(pattern);
+            File[] contents = mBaseDir.listFiles(select);
+
+            if (contents != null) {
+                if (inverseSelection) {
+                    File[] allFiles = mBaseDir.listFiles();
+                    List selection = Arrays.asList(contents);
+                    for (File file : allFiles) {
+                        if (!selection.contains(file)) {
+                            mSelectedFiles.add(new FileSystemFile(file.getAbsolutePath()));
+                        }
+                    }
+                } else {
+                    for (File file : contents) {
+                        mSelectedFiles.add(new FileSystemFile(file.getAbsolutePath()));
+                    }
+                }
+            }
+        } else {
+            File[] allFiles = mBaseDir.listFiles();
+            if (selectParams.isTodayDate()) {
+
+                Calendar today = Calendar.getInstance();
+                Calendar currentDay = Calendar.getInstance();
+
                 for (File file : allFiles) {
-                    if (!selection.contains(file)) {
+                    currentDay.setTime(new Date(file.lastModified()));
+                    if (isSameDay(today, currentDay)) {
                         mSelectedFiles.add(new FileSystemFile(file.getAbsolutePath()));
                     }
                 }
             } else {
-                for (File file : contents) {
-                    mSelectedFiles.add(new FileSystemFile(file.getAbsolutePath()));
+                long startDate = selectParams.getDateFrom().getTime();
+                long endDate = selectParams.getDateTo().getTime();
+                for (File file : allFiles) {
+                    if (file.lastModified() > startDate && file.lastModified() < endDate) {
+                        mSelectedFiles.add(new FileSystemFile(file.getAbsolutePath()));
+                    }
                 }
             }
+
         }
+
         FlatFileSystemAdapter adapter = (FlatFileSystemAdapter) mFileSystemList.getAdapter();
         adapter.setSelectedFiles(mSelectedFiles);
         adapter.notifyDataSetChanged();
+        setSelectedFilesSizeVisibility();
+        calculateSelectedFilesSize();
+    }
+
+    /**
+     * <p>Checks if two calendars represent the same day ignoring time.</p>
+     * @param cal1  the first calendar, not altered, not null
+     * @param cal2  the second calendar, not altered, not null
+     * @return true if they represent the same day
+     * @throws IllegalArgumentException if either calendar is <code>null</code>
+     */
+    public static boolean isSameDay(Calendar cal1, Calendar cal2) {
+        if (cal1 == null || cal2 == null) {
+            throw new IllegalArgumentException("The dates must not be null");
+        }
+        return (cal1.get(Calendar.ERA) == cal2.get(Calendar.ERA) &&
+                cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
+                cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR));
     }
 
     public void addSelectedFiles(LinkedHashSet<File> selectedFiles) {
@@ -1051,6 +1110,29 @@ public class MainPanel extends BaseFileSystemPanel {
         }
 
         mIsDataLoading = isLoading;
+    }
+
+    private void adjustDialogSize(Dialog dialog) {
+        adjustDialogSize(dialog, 0.8f);
+    }
+
+    /**
+     * Adjust dialog size. Actuall for old android version only (due to absence of Holo themes).
+     *
+     * @param dialog dialog whose size should be adjusted.
+     */
+    private void adjustDialogSize(Dialog dialog, float scaleFactor) {
+        if (!SystemUtils.isHoneycombOrNever()) {
+            DisplayMetrics metrics = new DisplayMetrics();
+            getActivity().getWindowManager().getDefaultDisplay().getMetrics(metrics);
+
+            WindowManager.LayoutParams params = new WindowManager.LayoutParams();
+            params.copyFrom(dialog.getWindow().getAttributes());
+            params.width = (int) (metrics.widthPixels * scaleFactor);
+            params.height = (int) (metrics.heightPixels * scaleFactor);
+
+            dialog.getWindow().setAttributes(params);
+        }
     }
 
     protected boolean isDataLoading() {

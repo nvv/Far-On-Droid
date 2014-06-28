@@ -22,9 +22,11 @@ import com.openfarmanager.android.core.network.datasource.SmbDataSource;
 import com.openfarmanager.android.core.network.datasource.YandexDiskDataSource;
 import com.openfarmanager.android.filesystem.FakeFile;
 import com.openfarmanager.android.filesystem.FileProxy;
+import com.openfarmanager.android.filesystem.FileSystemFile;
 import com.openfarmanager.android.model.FileActionEnum;
 import com.openfarmanager.android.model.NetworkAccount;
 import com.openfarmanager.android.model.NetworkEnum;
+import com.openfarmanager.android.model.SelectParams;
 import com.openfarmanager.android.model.exeptions.NetworkException;
 import com.openfarmanager.android.utils.Extensions;
 import com.openfarmanager.android.view.ToastNotification;
@@ -32,6 +34,8 @@ import com.openfarmanager.android.view.ToastNotification;
 import org.apache.commons.io.FilenameUtils;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import static com.openfarmanager.android.controllers.FileSystemController.EXIT_FROM_NETWORK_STORAGE;
@@ -300,28 +304,60 @@ public class NetworkPanel extends MainPanel {
         openDirectory(mDataSource.getParentPath(TextUtils.join("/", items.subList(0, pos + 1)).substring(1)));
     }
 
-    public void select(String pattern, boolean inverseSelection) {
+    @Override
+    public void select(SelectParams selectParams) {
+
         NetworkEntryAdapter adapter = (NetworkEntryAdapter) mFileSystemList.getAdapter();
         List<FileProxy> allFiles = adapter.getFiles();
-        List<FileProxy> contents = new ArrayList<FileProxy>();
 
-        for (FileProxy file : allFiles) {
-            if (FilenameUtils.wildcardMatch(file.getName(), pattern)) {
-                contents.add(file);
+        if (selectParams.getType() == SelectParams.SelectionType.NAME) {
+
+            String pattern = selectParams.getSelectionString();
+
+            App.sInstance.getSharedPreferences("action_dialog", 0).edit(). putString("select_pattern", pattern).commit();
+
+            boolean inverseSelection = selectParams.isInverseSelection();
+            List<FileProxy> contents = new ArrayList<FileProxy>();
+
+            for (FileProxy file : allFiles) {
+                if (FilenameUtils.wildcardMatch(file.getName(), pattern)) {
+                    contents.add(file);
+                }
             }
-        }
 
-        mSelectedFiles.clear();
-        if (contents.size() > 0) {
-            if (inverseSelection) {
+            mSelectedFiles.clear();
+            if (contents.size() > 0) {
+                if (inverseSelection) {
+                    for (FileProxy file : allFiles) {
+                        if (!contents.contains(file)) {
+                            mSelectedFiles.add(file);
+                        }
+                    }
+                } else {
+                    for (FileProxy file : contents) {
+                        mSelectedFiles.add(file);
+                    }
+                }
+            }
+        } else {
+            if (selectParams.isTodayDate()) {
+
+                Calendar today = Calendar.getInstance();
+                Calendar currentDay = Calendar.getInstance();
+
                 for (FileProxy file : allFiles) {
-                    if (!contents.contains(file)) {
+                    currentDay.setTime(new Date(file.lastModifiedDate()));
+                    if (isSameDay(today, currentDay)) {
                         mSelectedFiles.add(file);
                     }
                 }
             } else {
-                for (FileProxy file : contents) {
-                    mSelectedFiles.add(file);
+                long startDate = selectParams.getDateFrom().getTime();
+                long endDate = selectParams.getDateTo().getTime();
+                for (FileProxy file : allFiles) {
+                    if (file.lastModifiedDate() > startDate && file.lastModifiedDate() < endDate) {
+                        mSelectedFiles.add(file);
+                    }
                 }
             }
         }

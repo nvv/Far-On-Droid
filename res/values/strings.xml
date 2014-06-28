@@ -317,5 +317,10 @@ More network stuff will appear in future versions.
     <string name="error_no_browser">No application can handle this request, please, install a web browser</string>
 
     <string name="hardware_keyboard">Hardware keyboard is detected. Open settings (F10) to see some hotkeys in \'Keyboard\' section</string>
+    <string name="file_name">Name</string>
+    <string name="modified_date">Modified date</string>
+    <string name="file_extension">Extension</string>
+    <string name="today">Today</string>
+    <string name="period">Period</string>
 
 </resources>

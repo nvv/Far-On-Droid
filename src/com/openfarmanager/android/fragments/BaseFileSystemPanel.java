@@ -26,6 +26,7 @@ import com.openfarmanager.android.filesystem.FileProxy;
 import com.openfarmanager.android.filesystem.actions.*;
 import com.openfarmanager.android.filesystem.actions.network.*;
 import com.openfarmanager.android.model.Bookmark;
+import com.openfarmanager.android.model.SelectParams;
 import com.openfarmanager.android.model.TaskStatusEnum;
 import com.openfarmanager.android.view.OnSwipeTouchListener;
 import com.openfarmanager.android.view.ToastNotification;
@@ -444,10 +445,7 @@ public abstract class BaseFileSystemPanel extends BasePanel {
     protected AbstractCommand mSelectFilesCommand = new AbstractCommand() {
         @Override
         public void execute(final Object... args) {
-            select((String) args[1], (Boolean) args[2]);
-            App.sInstance.getSharedPreferences("action_dialog", 0).edit().
-                    putString("select_pattern", (String) args[1]).commit();
-
+            select((SelectParams) args[0]);
         }
     };
 
@@ -639,7 +637,7 @@ public abstract class BaseFileSystemPanel extends BasePanel {
 
     protected abstract String getCurrentPath();
 
-    public abstract void select(String pattern, boolean inverseSelection);
+    public abstract void select(SelectParams selectParams);
 
     protected abstract void onNavigationItemSelected(int pos, List<String> items);
 

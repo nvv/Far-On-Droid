@@ -11,6 +11,7 @@ import com.openfarmanager.android.filesystem.FileSystemScanner;
 import com.openfarmanager.android.utils.SystemUtils;
 
 import java.io.File;
+import java.util.zip.ZipEntry;
 
 public class Settings {
 
@@ -445,5 +446,13 @@ public class Settings {
 
     public boolean isShowSelectedFilesSize() {
         return getSharedPreferences().getBoolean(SHOW_SELECTED_FILES_SIZE, false);
+    }
+
+    public void exportSettings() {
+
+    }
+
+    public void importSettings() {
+
     }
 }
