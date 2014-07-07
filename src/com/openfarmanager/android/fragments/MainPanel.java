@@ -718,9 +718,10 @@ public class MainPanel extends BaseFileSystemPanel {
 
     public void invalidate() {
         FlatFileSystemAdapter adapter = (FlatFileSystemAdapter) mFileSystemList.getAdapter();
-        adapter.setSelectedFiles(mSelectedFiles);
         adapter.setBaseDir(mBaseDir);
+        adapter.setSelectedFiles(mSelectedFiles);
         adapter.notifyDataSetChanged();
+        setSelectedFilesSizeVisibility();
     }
 
     private void openFile(File item) {
