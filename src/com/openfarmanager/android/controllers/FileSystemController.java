@@ -282,19 +282,7 @@ public class FileSystemController {
                     }
                     break;
                 case QUICKVIEW:
-                    if (!isDetailsPanelVisible()) {
-                        boolean panelShowed = showDetailsView(activePanel, inactivePanel);
-                        if (activePanel == null) {
-                            return;
-                        }
-
-                        if (panelShowed) {
-                            mDirectoryDetailsView.selectFile(activePanel.getCurrentDir());
-                            EasyTracker.getInstance(App.sInstance).send(MapBuilder.createAppView().set(Fields.SCREEN_NAME, "QuickView").build());
-                        }
-                    } else {
-                        hideDetailsView(activePanel, inactivePanel);
-                    }
+                    openQuickPanel(activePanel, inactivePanel);
                     break;
                 case EXIT:
                     mLeftVisibleFragment.getActivity().finish();
@@ -360,6 +348,22 @@ public class FileSystemController {
         }
 
     };
+
+    private void openQuickPanel(MainPanel activePanel, MainPanel inactivePanel) {
+        if (!isDetailsPanelVisible()) {
+            boolean panelShowed = showDetailsView(activePanel, inactivePanel);
+            if (activePanel == null) {
+                return;
+            }
+
+            if (panelShowed) {
+                mDirectoryDetailsView.selectFile(activePanel.getCurrentDir());
+                EasyTracker.getInstance(App.sInstance).send(MapBuilder.createAppView().set(Fields.SCREEN_NAME, "QuickView").build());
+            }
+        } else {
+            hideDetailsView(activePanel, inactivePanel);
+        }
+    }
 
     public Handler getPanelHandler() {
         return mPanelHandler;
@@ -1580,6 +1584,9 @@ public class FileSystemController {
     }
 
     public boolean onKeyDown(int keyCode, KeyEvent event) {
+        MainPanel panel = getActivePanel();
+        MainPanel inactivePanel = getInactivePanel();
+
         switch (keyCode) {
             case KeyEvent.KEYCODE_BACK:
                 return navigateBack();
@@ -1593,8 +1600,43 @@ public class FileSystemController {
             case KeyEvent.KEYCODE_DEL:
                 navigateBack();
                 return true;
+            case KeyEvent.KEYCODE_F1:
+                if (event.isAltPressed()) {
+                    showNetworksDialog();
+                }
+                return true;
             case KeyEvent.KEYCODE_F2:
-                getActivePanel().openFileActionMenu();
+                if (event.isAltPressed()) {
+                    if (panel != null) {
+                        openQuickPanel(panel, inactivePanel);
+                    }
+                } else {
+                    getActivePanel().openFileActionMenu();
+                }
+                return true;
+            case KeyEvent.KEYCODE_F3:
+                if (event.isAltPressed()) {
+                    if (panel != null) {
+                        panel.showSearchDialog();
+                        EasyTracker.getInstance(App.sInstance).send(MapBuilder.createAppView().set(Fields.SCREEN_NAME, "Search").build());
+                    }
+                } else {
+                    openAppLaucnher();
+                }
+                return true;
+            case KeyEvent.KEYCODE_F4:
+                if (event.isAltPressed()) {
+                    if (panel != null) {
+                        Activity activity = panel.getActivity();
+                        if (activity != null) {
+                            openBookmarkList(activity);
+                        }
+                    }
+                } else {
+                    if (panel != null) {
+                        panel.showSelectDialog();
+                    }
+                }
                 return true;
             case KeyEvent.KEYCODE_F5:
                 getActivePanel().copy(getInactivePanel());
@@ -1612,11 +1654,18 @@ public class FileSystemController {
                 getActivePanel().showSearchDialog();
                 return true;
             case KeyEvent.KEYCODE_F10:
-                MainPanel panel = getActivePanel();
                 if (panel != null) {
                     Activity activity = panel.getActivity();
                     if (activity != null) {
                         activity.startActivity(new Intent(App.sInstance.getApplicationContext(), Help.class));
+                    }
+                }
+                return true;
+            case KeyEvent.KEYCODE_F11:
+                if (panel != null) {
+                    Activity activity = panel.getActivity();
+                    if (activity != null) {
+                        activity.startActivity(new Intent(App.sInstance.getApplicationContext(), SettingsActivity.class));
                     }
                 }
                 return true;

@@ -14,7 +14,7 @@
     <string name="btn_save">Save</string>
     <string name="btn_select">Select</string>
     <string name="btn_replace">Replace</string>
-    <string name="btn_settings">Settings</string>
+    <string name="btn_settings">Settings (F11)</string>
     <string name="btn_encoding">Encoding</string>
     <string name="btn_back">Back</string>
     <string name="btn_next">Next</string>

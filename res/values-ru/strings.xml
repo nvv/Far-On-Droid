@@ -12,7 +12,7 @@
     <string name="btn_save">Сохранить</string>
     <string name="btn_select">Выбрать</string>
     <string name="btn_replace">Заменить</string>
-    <string name="btn_settings">Настройки</string>
+    <string name="btn_settings">Настройки (F11)</string>
     <string name="btn_encoding">Кодировка</string>
     <string name="btn_back">Назад</string>
     <string name="btn_next">Дальше</string>
