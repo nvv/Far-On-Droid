@@ -11,7 +11,7 @@
                   android:layout_height="0dp"
                   android:layout_weight="1"
                   android:paddingTop="2dp"
-                  android:background="@color/main_blue" android:baselineAligned="false">
+                  android:baselineAligned="false">
 
         <LinearLayout
                 android:id="@+id/panel_left"

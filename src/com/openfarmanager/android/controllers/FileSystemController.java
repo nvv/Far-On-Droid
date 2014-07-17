@@ -2,6 +2,7 @@ package com.openfarmanager.android.controllers;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
@@ -17,6 +18,7 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.webkit.URLUtil;
 import android.widget.*;
 import com.google.analytics.tracking.android.EasyTracker;
 import com.google.analytics.tracking.android.Fields;
@@ -33,6 +35,7 @@ import com.openfarmanager.android.core.network.googledrive.GoogleDriveApi;
 import com.openfarmanager.android.core.network.skydrive.SkyDriveAPI;
 import com.openfarmanager.android.core.network.smb.SmbAPI;
 import com.openfarmanager.android.core.network.yandexdisk.YandexDiskApi;
+import com.openfarmanager.android.filesystem.GoogleDriveFile;
 import com.openfarmanager.android.filesystem.actions.DiffDirectoriesTask;
 import com.openfarmanager.android.filesystem.actions.RootTask;
 import com.openfarmanager.android.fragments.*;
@@ -46,18 +49,24 @@ import static com.openfarmanager.android.utils.Extensions.*;
 
 import com.openfarmanager.android.model.exeptions.InAppAuthException;
 import com.openfarmanager.android.model.exeptions.InitYandexDiskException;
+import com.openfarmanager.android.utils.FileUtilsExt;
 import com.openfarmanager.android.utils.SystemUtils;
 import com.openfarmanager.android.view.BookmarksListDialog;
 import com.openfarmanager.android.view.ExpandPanelAnimation;
 import com.openfarmanager.android.view.FtpAuthDialog;
 import com.openfarmanager.android.view.NetworkScanDialog;
+import com.openfarmanager.android.view.SelectEncodingDialog;
 import com.openfarmanager.android.view.SmbAuthDialog;
 import com.openfarmanager.android.view.ToastNotification;
 import com.openfarmanager.android.view.YandexDiskNameRequestDialog;
 import com.yandex.disk.client.Credentials;
 
+import org.apache.commons.io.FileUtils;
+
 import java.io.File;
 import java.io.FileInputStream;
+import java.nio.charset.Charset;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 
@@ -113,6 +122,9 @@ public class FileSystemController {
     public static final int SMB_IP_SELECTED = 121;
     public static final int EXPAND_PANEL = 122;
     public static final int OPEN_PATH = 123;
+    public static final int EXPORT_AS = 124;
+    public static final int OPEN_WEB = 125;
+    public static final int OPEN_ENCODING_DIALOG = 126;
 
     public static final int ARG_FORCE_OPEN_FILE_IN_EDITOR = 1000;
     public static final int ARG_EXPAND_LEFT_PANEL = 1001;
@@ -270,19 +282,7 @@ public class FileSystemController {
                     }
                     break;
                 case QUICKVIEW:
-                    if (!isDetailsPanelVisible()) {
-                        boolean panelShowed = showDetailsView(activePanel, inactivePanel);
-                        if (activePanel == null) {
-                            return;
-                        }
-
-                        if (panelShowed) {
-                            mDirectoryDetailsView.selectFile(activePanel.getCurrentDir());
-                            EasyTracker.getInstance(App.sInstance).send(MapBuilder.createAppView().set(Fields.SCREEN_NAME, "QuickView").build());
-                        }
-                    } else {
-                        hideDetailsView(activePanel, inactivePanel);
-                    }
+                    openQuickPanel(activePanel, inactivePanel);
                     break;
                 case EXIT:
                     mLeftVisibleFragment.getActivity().finish();
@@ -348,6 +348,22 @@ public class FileSystemController {
         }
 
     };
+
+    private void openQuickPanel(MainPanel activePanel, MainPanel inactivePanel) {
+        if (!isDetailsPanelVisible()) {
+            boolean panelShowed = showDetailsView(activePanel, inactivePanel);
+            if (activePanel == null) {
+                return;
+            }
+
+            if (panelShowed) {
+                mDirectoryDetailsView.selectFile(activePanel.getCurrentDir());
+                EasyTracker.getInstance(App.sInstance).send(MapBuilder.createAppView().set(Fields.SCREEN_NAME, "QuickView").build());
+            }
+        } else {
+            hideDetailsView(activePanel, inactivePanel);
+        }
+    }
 
     public Handler getPanelHandler() {
         return mPanelHandler;
@@ -434,12 +450,43 @@ public class FileSystemController {
                     exitFromGenericPanel((Integer) msg.obj == MainPanel.LEFT_PANEL ? mLeftGenericPanel : mRightGenericPanel);
                     break;
                 case EXPAND_PANEL:
-                    expandPanel(msg.arg1 == ARG_EXPAND_LEFT_PANEL);
+                    try {
+                        expandPanel(msg.arg1 == ARG_EXPAND_LEFT_PANEL);
+                    } catch (Exception ignore) {
+                        // avoid very unexpected crash
+                    }
                     break;
                 case OPEN_PATH:
                     if (activePanel != null) {
                         activePanel.openDirectory(new File((String) msg.obj));
                     }
+                    break;
+                case EXPORT_AS:
+                    try {
+                        openExportAsDialog((GoogleDriveFile) msg.obj);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    break;
+                case OPEN_WEB:
+                    GoogleDriveFile file = (GoogleDriveFile) msg.obj;
+                    try {
+                        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(file.getOpenWithLink()));
+                        activePanel.getActivity().startActivity(browserIntent);
+                    } catch (ActivityNotFoundException e) {
+                        ToastNotification.makeText(activePanel.getActivity(), App.sInstance.getString(R.string.error_no_browser),  Toast.LENGTH_LONG).show();
+                        e.printStackTrace();
+                    }
+                    break;
+                case OPEN_ENCODING_DIALOG:
+                    showSelectEncodingDialog();
+                    break;
+                case EditViewController.MSG_SELECT_ENCODING:
+                    Pair<Boolean, Charset> values = (Pair<Boolean, Charset>) msg.obj;
+
+                    App.sInstance.getFtpApi().setCharset(values.second);
+                    activePanel.invalidatePanels(inactivePanel);
+                    break;
             }
         }
     };
@@ -1296,20 +1343,91 @@ public class FileSystemController {
         adjustDialogSize(dialog);
     }
 
+    public void showSelectEncodingDialog() {
+        Dialog mCharsetSelectDialog = new SelectEncodingDialog(getActivePanel().getActivity(), mPanelHandler, null, false);
+        mCharsetSelectDialog.setCancelable(true);
+        mCharsetSelectDialog.show();
+        adjustDialogSize(mCharsetSelectDialog, 0.6f);
+    }
+
+    private void openExportAsDialog(final GoogleDriveFile file) {
+        final Dialog dialog = new Dialog(getActivePanel().getActivity(), R.style.Action_Dialog_Invert);
+        View dialogView = View.inflate(App.sInstance.getApplicationContext(), R.layout.mime_type_chooser, null);
+
+        final ListView exportTypes = (ListView) dialogView.findViewById(R.id.mime_types);
+        final ExportAsAdapter adapter = new ExportAsAdapter(file.getExportLinks());
+        exportTypes.setAdapter(adapter);
+
+        dialogView.findViewById(R.id.cancel).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.dismiss();
+            }
+        });
+
+        ((TextView) dialogView.findViewById(R.id.title)).setText(App.sInstance.getString(R.string.export_as));
+        exportTypes.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                final String downloadLink = (String) view.getTag();
+
+                final MainPanel inactivePanel = getInactivePanel();
+
+                if (inactivePanel == null || inactivePanel.getActivity().isFinishing()) {
+                    return;
+                }
+
+                final String fileName = file.getName();
+
+                inactivePanel.export(getActivePanel(), downloadLink,
+                        inactivePanel.getCurrentPath() + File.separator + fileName + "." +
+                                downloadLink.substring(downloadLink.lastIndexOf('=') + 1));
+//
+//                runAsynk(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        try {
+//                            App.sInstance.getGoogleDriveApi().download(downloadLink,
+//                                    inactivePanel.getCurrentPath() + File.separator + fileName + "." +
+//                                            downloadLink.substring(downloadLink.lastIndexOf('=') + 1));
+//
+//                        } catch (Exception e) {
+//                            e.printStackTrace();
+//                        }
+//                    }
+//                });
+
+                if (dialog.isShowing()) {
+                    dialog.dismiss();
+                }
+            }
+        });
+
+        dialog.setContentView(dialogView);
+        dialog.show();
+
+        adjustDialogSize(dialog);
+    }
+
+    private void adjustDialogSize(Dialog dialog) {
+        adjustDialogSize(dialog, 0.8f);
+    }
+
     /**
      * Adjust dialog size. Actuall for old android version only (due to absence of Holo themes).
      *
      * @param dialog dialog whose size should be adjusted.
      */
-    private void adjustDialogSize(Dialog dialog) {
+    private void adjustDialogSize(Dialog dialog, float scaleFactor) {
         if (!SystemUtils.isHoneycombOrNever()) {
             DisplayMetrics metrics = new DisplayMetrics();
             getActivePanel().getActivity().getWindowManager().getDefaultDisplay().getMetrics(metrics);
 
             WindowManager.LayoutParams params = new WindowManager.LayoutParams();
             params.copyFrom(dialog.getWindow().getAttributes());
-            params.width = (int) (metrics.widthPixels * 0.8f);
-            params.height = (int) (metrics.heightPixels * 0.8);
+            params.width = (int) (metrics.widthPixels * scaleFactor);
+            params.height = (int) (metrics.heightPixels * scaleFactor);
 
             dialog.getWindow().setAttributes(params);
         }
@@ -1466,6 +1584,9 @@ public class FileSystemController {
     }
 
     public boolean onKeyDown(int keyCode, KeyEvent event) {
+        MainPanel panel = getActivePanel();
+        MainPanel inactivePanel = getInactivePanel();
+
         switch (keyCode) {
             case KeyEvent.KEYCODE_BACK:
                 return navigateBack();
@@ -1479,8 +1600,43 @@ public class FileSystemController {
             case KeyEvent.KEYCODE_DEL:
                 navigateBack();
                 return true;
+            case KeyEvent.KEYCODE_F1:
+                if (event.isAltPressed()) {
+                    showNetworksDialog();
+                }
+                return true;
             case KeyEvent.KEYCODE_F2:
-                getActivePanel().openFileActionMenu();
+                if (event.isAltPressed()) {
+                    if (panel != null) {
+                        openQuickPanel(panel, inactivePanel);
+                    }
+                } else {
+                    getActivePanel().openFileActionMenu();
+                }
+                return true;
+            case KeyEvent.KEYCODE_F3:
+                if (event.isAltPressed()) {
+                    if (panel != null) {
+                        panel.showSearchDialog();
+                        EasyTracker.getInstance(App.sInstance).send(MapBuilder.createAppView().set(Fields.SCREEN_NAME, "Search").build());
+                    }
+                } else {
+                    openAppLaucnher();
+                }
+                return true;
+            case KeyEvent.KEYCODE_F4:
+                if (event.isAltPressed()) {
+                    if (panel != null) {
+                        Activity activity = panel.getActivity();
+                        if (activity != null) {
+                            openBookmarkList(activity);
+                        }
+                    }
+                } else {
+                    if (panel != null) {
+                        panel.showSelectDialog();
+                    }
+                }
                 return true;
             case KeyEvent.KEYCODE_F5:
                 getActivePanel().copy(getInactivePanel());
@@ -1498,11 +1654,18 @@ public class FileSystemController {
                 getActivePanel().showSearchDialog();
                 return true;
             case KeyEvent.KEYCODE_F10:
-                MainPanel panel = getActivePanel();
                 if (panel != null) {
                     Activity activity = panel.getActivity();
                     if (activity != null) {
                         activity.startActivity(new Intent(App.sInstance.getApplicationContext(), Help.class));
+                    }
+                }
+                return true;
+            case KeyEvent.KEYCODE_F11:
+                if (panel != null) {
+                    Activity activity = panel.getActivity();
+                    if (activity != null) {
+                        activity.startActivity(new Intent(App.sInstance.getApplicationContext(), SettingsActivity.class));
                     }
                 }
                 return true;
@@ -1571,16 +1734,22 @@ public class FileSystemController {
             } else if (msg.what == GoogleDriveAuthWindow.MSG_SHOW_LOADING_DIALOG) {
                 showProgressDialog(R.string.google_drive_obtaining_token);
             } else if (msg.what == GoogleDriveAuthWindow.MSG_HIDE_LOADING_DIALOG) {
+                GoogleDriveApi.GoogleDriveAccount account = null;
                 if (msg.arg1 == GoogleDriveAuthWindow.MSG_ARG_SUCCESS) {
                     GoogleDriveApi api = App.sInstance.getGoogleDriveApi();
                     Pair<About, Token> data = (Pair<About, Token>) msg.obj;
-                    api.saveAccount(data.first, data.second);
+                    account = (GoogleDriveApi.GoogleDriveAccount) api.saveAccount(data.first, data.second);
                 } else {
                     ToastNotification.makeText(App.sInstance.getApplicationContext(),
                             App.sInstance.getString(R.string.google_drive_get_token_error), Toast.LENGTH_LONG).show();
                 }
 
                 dismissProgressDialog();
+
+                if (account != null) {
+                    App.sInstance.getGoogleDriveApi().setup(account);
+                    openNetworkPanel(NetworkEnum.GoogleDrive);
+                }
             }
         }
     };

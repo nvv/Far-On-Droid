@@ -7,6 +7,7 @@
         >
 
     <TextView
+            android:id="@+id/title"
             android:text="@string/action_open_as"
             android:textColor="@color/white"
             android:layout_width="wrap_content"

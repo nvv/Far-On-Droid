@@ -30,6 +30,7 @@ public class SearchableTextView extends TextView implements SearchableView {
         super(context);
         setTextColor(Color.CYAN);
         setTextSize(TypedValue.COMPLEX_UNIT_SP, App.sInstance.getSettings().getViewerFontSize());
+        setTypeface(App.sInstance.getSettings().getViewerFontType());
         setupText(text);
     }
 

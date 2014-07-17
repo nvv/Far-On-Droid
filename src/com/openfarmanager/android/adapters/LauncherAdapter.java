@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Handler;
@@ -117,20 +118,30 @@ public class LauncherAdapter extends FlatFileSystemAdapter {
 
         TextView name = (TextView) view.findViewById(R.id.item_name);
         name.setText(info.getName());
-        name.setTextColor(Color.GREEN);
+        name.setTextColor(App.sInstance.getSettings().getInstallColor());
         TextView infoItem = (TextView) view.findViewById(R.id.item_info);
 
         int size = App.sInstance.getSettings().getMainPanelFontSize();
         name.setTextSize(TypedValue.COMPLEX_UNIT_SP, size);
         infoItem.setTextSize(TypedValue.COMPLEX_UNIT_SP, size); // to adjust item size
 
+        Typeface typeface = App.sInstance.getSettings().getMainPanelFontType();
+        name.setTypeface(typeface);
+        infoItem.setTypeface(typeface);
+
         return view;
     }
 
     public void onItemClick(int i) {
-        final PackageManager manager = App.sInstance.getPackageManager();
-        Intent intent = manager.getLaunchIntentForPackage(getItem(i).getFullPath());
-        App.sInstance.startActivity(intent);
+        try {
+            final PackageManager manager = App.sInstance.getPackageManager();
+            Intent intent = manager.getLaunchIntentForPackage(getItem(i).getFullPath());
+            App.sInstance.startActivity(intent);
+        } catch (Exception e) {
+            e.printStackTrace();
+            ToastNotification.makeText(App.sInstance.getApplicationContext(),
+                    App.sInstance.getString(R.string.error_can_t_open_app), Toast.LENGTH_LONG).show();
+        }
     }
 
     public FileActionEnum[] getAvailableActions() {

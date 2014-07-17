@@ -1,7 +1,9 @@
 package com.openfarmanager.android.adapters;
 
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.AsyncTask;
+import android.os.Handler;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,6 +12,8 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.R;
+import com.openfarmanager.android.core.FontManager;
+import com.openfarmanager.android.core.Settings;
 import com.openfarmanager.android.core.archive.ArchiveUtils;
 import com.openfarmanager.android.core.archive.MimeTypes;
 import com.openfarmanager.android.core.bookmark.BookmarkManager;
@@ -24,6 +28,7 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 public class FlatFileSystemAdapter extends BaseAdapter {
@@ -33,10 +38,12 @@ public class FlatFileSystemAdapter extends BaseAdapter {
     protected List<FileProxy> mFiles = new ArrayList<FileProxy>();
     boolean mIsRoot;
     private String mFilter;
+    private OnFolderScannedListener mListener;
 
     public static SimpleDateFormat sDateFormat = new SimpleDateFormat("dd MM yyyy HH:mm");
 
-    public FlatFileSystemAdapter(File baseDir) {
+    public FlatFileSystemAdapter(File baseDir, OnFolderScannedListener listener) {
+        mListener = listener;
         setBaseDir(baseDir);
     }
 
@@ -80,20 +87,25 @@ public class FlatFileSystemAdapter extends BaseAdapter {
         name.setTextSize(TypedValue.COMPLEX_UNIT_SP, size);
         info.setTextSize(TypedValue.COMPLEX_UNIT_SP, size);
 
+        Typeface typeface = App.sInstance.getSettings().getMainPanelFontType();
+        name.setTypeface(typeface);
+        info.setTypeface(typeface);
+
         File fileItem = (File) item;
 
+        Settings settings = App.sInstance.getSettings();
         if (mSelectedFiles.contains(item)) {
-            setColor(name, info, Color.YELLOW);
+            setColor(name, info, settings.getSelectedColor());
         } else if ((!fileItem.canRead() || fileItem.isHidden()) && !item.isVirtualDirectory()) {
-            setColor(name, info, Color.GRAY);
+            setColor(name, info, settings.getHiddenColor());
         } else if (item.isDirectory()) {
-            setColor(name, info, Color.WHITE);
+            setColor(name, info, settings.getFolderColor());
         } else if (ArchiveUtils.getMimeType(fileItem).equals(MimeTypes.MIME_APPLICATION_ANDROID_PACKAGE)) {
-            setColor(name, info, Color.GREEN);
+            setColor(name, info, settings.getInstallColor());
         } else if (ArchiveUtils.isArchiveFile(fileItem)) {
-            setColor(name, info, Color.MAGENTA);
+            setColor(name, info, settings.getArchiveColor());
         } else {
-            setColor(name, info, Color.CYAN);
+            setColor(name, info, settings.getTextColor());
         }
 
         if (item.isDirectory()) {
@@ -144,6 +156,10 @@ public class FlatFileSystemAdapter extends BaseAdapter {
     }
 
     public void setBaseDir(File baseDir) {
+        setBaseDir(baseDir, -1);
+    }
+
+    public void setBaseDir(File baseDir, final Integer selection) {
         if (baseDir == null) {
             return;
         }
@@ -179,6 +195,7 @@ public class FlatFileSystemAdapter extends BaseAdapter {
                 protected void onPostExecute(List<FileProxy> aVoid) {
                     mFiles = aVoid;
                     notifyDataSetChanged();
+                    mListener.onScanFinished(selection);
                 }
             }.execute();
 
@@ -213,5 +230,9 @@ public class FlatFileSystemAdapter extends BaseAdapter {
             }
         }
         return 0;
+    }
+
+    public static interface OnFolderScannedListener {
+        void onScanFinished(Integer selection);
     }
 }

@@ -19,8 +19,10 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import static com.openfarmanager.android.googledrive.GoogleDriveConstants.ABOUT_URL;
 import static com.openfarmanager.android.googledrive.GoogleDriveConstants.AUTH_URL;

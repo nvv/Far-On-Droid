@@ -22,9 +22,11 @@ import com.openfarmanager.android.core.network.datasource.SmbDataSource;
 import com.openfarmanager.android.core.network.datasource.YandexDiskDataSource;
 import com.openfarmanager.android.filesystem.FakeFile;
 import com.openfarmanager.android.filesystem.FileProxy;
+import com.openfarmanager.android.filesystem.FileSystemFile;
 import com.openfarmanager.android.model.FileActionEnum;
 import com.openfarmanager.android.model.NetworkAccount;
 import com.openfarmanager.android.model.NetworkEnum;
+import com.openfarmanager.android.model.SelectParams;
 import com.openfarmanager.android.model.exeptions.NetworkException;
 import com.openfarmanager.android.utils.Extensions;
 import com.openfarmanager.android.view.ToastNotification;
@@ -32,6 +34,8 @@ import com.openfarmanager.android.view.ToastNotification;
 import org.apache.commons.io.FilenameUtils;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import static com.openfarmanager.android.controllers.FileSystemController.EXIT_FROM_NETWORK_STORAGE;
@@ -42,7 +46,7 @@ import static com.openfarmanager.android.controllers.FileSystemController.EXIT_F
 public class NetworkPanel extends MainPanel {
 
     private DataSource mDataSource;
-    private OpenDirectoryTask mOpenDirectoryTask = new OpenDirectoryTask();
+    private OpenDirectoryTask mOpenDirectoryTask;
     private FileProxy mCurrentPath;
 
     protected FileProxy mLastSelectedFile;
@@ -71,10 +75,14 @@ public class NetworkPanel extends MainPanel {
                     } else {
                         openDirectory(file.getParentPath());
                     }
-                }
-
-                if (file.isDirectory()) {
+                } else if (file.isDirectory()) {
                     openDirectory(file.getFullPath());
+
+                    String pathKey = file.getParentPath();
+                    if (pathKey.endsWith("/") && !pathKey.equals("/")) {
+                        pathKey = pathKey.substring(0, pathKey.length() - 1);
+                    }
+                    mDirectorySelection.put(pathKey, mFileSystemList.getFirstVisiblePosition() + 1);
                 }
 
             }
@@ -97,9 +105,19 @@ public class NetworkPanel extends MainPanel {
             ToastNotification.makeText(App.sInstance.getApplicationContext(),
                     getSafeString(R.string.error_unknown_unexpected_error), Toast.LENGTH_SHORT).show();
             exitFromNetwork();
+            return view;
         }
 
         mCurrentNetworkAccount = App.sInstance.getNetworkApi(getNetworkType()).getCurrentNetworkAccount();
+
+        if (mDataSource.getNetworkTypeEnum() == NetworkEnum.FTP) {
+            mCharsetLeft.setVisibility(mPanelLocation == LEFT_PANEL ? View.VISIBLE : View.GONE);
+            mCharsetRight.setVisibility(mPanelLocation == RIGHT_PANEL ? View.VISIBLE : View.GONE);
+        }
+
+        mExitLeft.setVisibility(mPanelLocation == LEFT_PANEL ? View.VISIBLE : View.GONE);
+        mExitRight.setVisibility(mPanelLocation == RIGHT_PANEL ? View.VISIBLE : View.GONE);
+
         return view;
     }
 
@@ -143,9 +161,16 @@ public class NetworkPanel extends MainPanel {
         setIsActivePanel(mIsActivePanel);
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        mCharsetLeft.setVisibility(View.GONE);
+        mCharsetRight.setVisibility(View.GONE);
+    }
+
     protected boolean onLongClick(AdapterView<?> adapterView, int i) {
         FileProxy file = (FileProxy) adapterView.getItemAtPosition(i);
-        if (!file.isUpNavigator()) {
+        if (!file.isUpNavigator() && !file.isVirtualDirectory()) {
             mLastSelectedFile = file;
             updateLongClickSelection(adapterView, file, true);
             if (!file.isVirtualDirectory()) {
@@ -176,7 +201,7 @@ public class NetworkPanel extends MainPanel {
     }
 
     protected FileActionEnum[] getAvailableActions() {
-        return FileActionEnum.getAvailableActionsForNetwork(mSelectedFiles, mLastSelectedFile);
+        return FileActionEnum.getAvailableActionsForNetwork(mDataSource.getNetworkTypeEnum(), mSelectedFiles);
     }
 
     public FileProxy getLastSelectedFile() {
@@ -212,11 +237,15 @@ public class NetworkPanel extends MainPanel {
     }
 
     public void openDirectory(final String path) {
+        openDirectory(path, true);
+    }
+
+    public void openDirectory(final String path, final boolean restorePosition) {
         if (!mIsInitialized) {
             addToPendingList(new Runnable() {
                 @Override
                 public void run() {
-                    openDirectory(path);
+                    openDirectory(path, restorePosition);
                 }
             });
             return;
@@ -226,12 +255,12 @@ public class NetworkPanel extends MainPanel {
             mOpenDirectoryTask.cancel(true);
         }
 
-        mOpenDirectoryTask = new OpenDirectoryTask();
+        mOpenDirectoryTask = new OpenDirectoryTask(restorePosition);
         mOpenDirectoryTask.execute(path);
     }
 
     public void invalidate() {
-        openDirectory(mDataSource.getParentPath(getCurrentPath()));
+        openDirectory(mDataSource.getParentPath(getCurrentPath()), false);
     }
 
     private void setCurrentPath(String path) {
@@ -275,28 +304,60 @@ public class NetworkPanel extends MainPanel {
         openDirectory(mDataSource.getParentPath(TextUtils.join("/", items.subList(0, pos + 1)).substring(1)));
     }
 
-    public void select(String pattern, boolean inverseSelection) {
+    @Override
+    public void select(SelectParams selectParams) {
+
         NetworkEntryAdapter adapter = (NetworkEntryAdapter) mFileSystemList.getAdapter();
         List<FileProxy> allFiles = adapter.getFiles();
-        List<FileProxy> contents = new ArrayList<FileProxy>();
 
-        for (FileProxy file : allFiles) {
-            if (FilenameUtils.wildcardMatch(file.getName(), pattern)) {
-                contents.add(file);
+        if (selectParams.getType() == SelectParams.SelectionType.NAME) {
+
+            String pattern = selectParams.getSelectionString();
+
+            App.sInstance.getSharedPreferences("action_dialog", 0).edit(). putString("select_pattern", pattern).commit();
+
+            boolean inverseSelection = selectParams.isInverseSelection();
+            List<FileProxy> contents = new ArrayList<FileProxy>();
+
+            for (FileProxy file : allFiles) {
+                if (FilenameUtils.wildcardMatch(file.getName(), pattern)) {
+                    contents.add(file);
+                }
             }
-        }
 
-        mSelectedFiles.clear();
-        if (contents.size() > 0) {
-            if (inverseSelection) {
+            mSelectedFiles.clear();
+            if (contents.size() > 0) {
+                if (inverseSelection) {
+                    for (FileProxy file : allFiles) {
+                        if (!contents.contains(file)) {
+                            mSelectedFiles.add(file);
+                        }
+                    }
+                } else {
+                    for (FileProxy file : contents) {
+                        mSelectedFiles.add(file);
+                    }
+                }
+            }
+        } else {
+            if (selectParams.isTodayDate()) {
+
+                Calendar today = Calendar.getInstance();
+                Calendar currentDay = Calendar.getInstance();
+
                 for (FileProxy file : allFiles) {
-                    if (!contents.contains(file)) {
+                    currentDay.setTime(new Date(file.lastModifiedDate()));
+                    if (isSameDay(today, currentDay)) {
                         mSelectedFiles.add(file);
                     }
                 }
             } else {
-                for (FileProxy file : contents) {
-                    mSelectedFiles.add(file);
+                long startDate = selectParams.getDateFrom().getTime();
+                long endDate = selectParams.getDateTo().getTime();
+                for (FileProxy file : allFiles) {
+                    if (file.lastModifiedDate() > startDate && file.lastModifiedDate() < endDate) {
+                        mSelectedFiles.add(file);
+                    }
                 }
             }
         }
@@ -345,7 +406,12 @@ public class NetworkPanel extends MainPanel {
     private class OpenDirectoryTask extends AsyncTask<String, Void, List<FileProxy>> {
 
         private String mPath;
+        private boolean mRestorePosition;
         private NetworkException mException;
+
+        public OpenDirectoryTask(boolean restorePosition) {
+            mRestorePosition = restorePosition;
+        }
 
         @Override
         protected void onPreExecute() {
@@ -412,11 +478,12 @@ public class NetworkPanel extends MainPanel {
                 setIsLoading(false);
 
                 mPath = mDataSource.getPath(mPath);
-                setCurrentPath(mPath);
 
                 if (mPath.endsWith("/")) {
                     mPath = mPath.substring(0, mPath.length() - 1);
                 }
+
+                setCurrentPath(mPath);
 
                 String parentPath = mPath.substring(0, mPath.lastIndexOf("/") + 1);
                 ListAdapter adapter = mFileSystemList.getAdapter();
@@ -428,8 +495,13 @@ public class NetworkPanel extends MainPanel {
                 } else {
                     mFileSystemList.setAdapter(new NetworkEntryAdapter(files, upNavigator));
                 }
-                mCurrentPath = new FakeFile(Extensions.isNullOrEmpty(mPath) ? "/" : mPath, mDataSource.getParentPath(parentPath), Extensions.isNullOrEmpty(parentPath));
-                mFileSystemList.setSelection(0);
+                mCurrentPath = new FakeFile(Extensions.isNullOrEmpty(mPath) ? "/" : mPath,
+                        mDataSource.getParentPath(parentPath), Extensions.isNullOrEmpty(parentPath));
+
+                if (mRestorePosition) {
+                    Integer selection = mDirectorySelection.get(Extensions.isNullOrEmpty(mPath) ? "/" : mPath);
+                    mFileSystemList.setSelection(selection != null ? selection : 0);
+                }
             }
         }
     }

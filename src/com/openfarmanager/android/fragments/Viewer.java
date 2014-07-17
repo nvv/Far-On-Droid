@@ -87,6 +87,8 @@ public class Viewer extends Fragment {
         mText = new ViewerTextBuffer();
         mBigText = new ViewerBigFileTextViewer();
 
+        view.findViewById(R.id.root_view).setBackgroundColor(App.sInstance.getSettings().getViewerColor());
+
         return view;
     }
 

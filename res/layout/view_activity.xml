@@ -11,8 +11,7 @@
             android:id="@+id/viewer"
             android:layout_width="fill_parent"
             android:layout_height="0dp"
-            android:layout_weight="1"
-            android:background="@color/main_blue"/>
+            android:layout_weight="1"/>
 
     <fragment
             android:name="com.openfarmanager.android.fragments.ViewerToolbar"

@@ -1,6 +1,7 @@
 package com.openfarmanager.android.fragments;
 
 import android.content.Context;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.DialogFragment;
@@ -11,6 +12,7 @@ import android.view.*;
 import android.widget.*;
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.R;
+import com.openfarmanager.android.core.Settings;
 import com.openfarmanager.android.toolbar.MenuBuilder;
 import com.openfarmanager.android.utils.SystemUtils;
 
@@ -227,8 +229,10 @@ public class MainToolbarPanel extends Fragment {
 
         private TextView getTextView(MenuItem item) {
             int threedip = (int) (3 * mDensity);
-            int size = App.sInstance.getSettings().getBottomPanelFontSize();
+            Settings settings = App.sInstance.getSettings();
+            int size = settings.getBottomPanelFontSize();
             TextView view = new TextView(getContext());
+            view.setTypeface(settings.getMainPanelFontType());
             view.setText(item.getTitle());
             view.setGravity(Gravity.CENTER);
             view.setTextSize(TypedValue.COMPLEX_UNIT_SP, size);
@@ -241,7 +245,7 @@ public class MainToolbarPanel extends Fragment {
             } else {
                 view.setOnClickListener(mClickListener);
             }
-            view.setBackgroundColor(getResources().getColor(R.color.selected_item));
+            view.setBackgroundColor(settings.getSecondaryColor());
             view.setTextColor(getResources().getColor(R.color.black));
             view.setSingleLine();
             view.setPadding(threedip, threedip, threedip, threedip);

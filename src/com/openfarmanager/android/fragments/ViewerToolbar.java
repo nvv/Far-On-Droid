@@ -56,6 +56,7 @@ public class ViewerToolbar extends Fragment {
         });
         view.setTextSize(TypedValue.COMPLEX_UNIT_SP, mFontSize);
         view.setHeight((int) ((6 + 2 * mFontSize) * mDensity));
+        view.setTypeface(App.sInstance.getSettings().getMainPanelFontType());
     }
 
     public void setTextChanged(boolean isTextChanged) {

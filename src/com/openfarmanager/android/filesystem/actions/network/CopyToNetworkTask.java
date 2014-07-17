@@ -8,9 +8,11 @@ import com.microsoft.live.OverwriteOption;
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.core.network.dropbox.DropboxAPI;
 import com.openfarmanager.android.core.network.ftp.FtpAPI;
+import com.openfarmanager.android.core.network.googledrive.GoogleDriveApi;
 import com.openfarmanager.android.core.network.skydrive.SkyDriveAPI;
 import com.openfarmanager.android.core.network.smb.SmbAPI;
 import com.openfarmanager.android.core.network.yandexdisk.YandexDiskApi;
+import com.openfarmanager.android.googledrive.api.GoogleDriveWebApi;
 import com.openfarmanager.android.model.NetworkEnum;
 import com.openfarmanager.android.model.TaskStatusEnum;
 import com.openfarmanager.android.model.exeptions.NetworkException;
@@ -65,6 +67,9 @@ public class CopyToNetworkTask extends NetworkActionTask {
                 switch (mNetworkType) {
                     case SkyDrive:
                         copyToSkyDrive(file, mDestination);
+                        break;
+                    case GoogleDrive:
+                        copyToGoogleDrive(file, mDestination);
                         break;
                     case Dropbox: default:
                         copyToDropbox(file, mDestination);
@@ -123,6 +128,37 @@ public class CopyToNetworkTask extends NetworkActionTask {
                 }
             });
             doneSize = tempSize + source.length();
+        }
+    }
+
+    private void copyToGoogleDrive(File source, String destination) throws Exception {
+        GoogleDriveApi api = App.sInstance.getGoogleDriveApi();
+        if (isCancelled()) {
+            throw new InterruptedIOException();
+        }
+
+        if (api.findInPathAliases(destination) == null) {
+            api.createDirectory(destination);
+        }
+
+        if (source.isDirectory()) {
+            String[] files = source.list();
+            for (String file : files) {
+                copyToGoogleDrive(new File(source, file), destination + "/" + source.getName());
+            }
+        } else {
+            mCurrentFile = source.getName();
+            updateProgress();
+
+            api.upload(api.findPathId(destination), source.getName(), source, new GoogleDriveWebApi.UploadListener() {
+                @Override
+                public void onProgress(int uploaded, int transferedPortion, int total) {
+                    doneSize += transferedPortion;
+                    updateProgress();
+                }
+            });
+
+//            doneSize += source.length();
         }
     }
 

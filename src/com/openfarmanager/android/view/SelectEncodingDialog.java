@@ -28,11 +28,17 @@ public class SelectEncodingDialog extends Dialog {
     private File mSelectedFile;
     private View mDialogView;
     private CheckBox mSaveAsDefault;
+    private boolean mShowSaveOption;
 
     public SelectEncodingDialog(Context context, Handler handler, File selectedFile) {
+        this(context, handler, selectedFile, true);
+    }
+
+    public SelectEncodingDialog(Context context, Handler handler, File selectedFile, boolean showSaveOption) {
         super(context, R.style.Action_Dialog);
         mHandler = handler;
         mSelectedFile = selectedFile;
+        mShowSaveOption = showSaveOption;
         setCancelable(false);
     }
 
@@ -41,6 +47,9 @@ public class SelectEncodingDialog extends Dialog {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         mDialogView = View.inflate(App.sInstance.getApplicationContext(), R.layout.dialog_select_encoding, null);
         mSaveAsDefault = (CheckBox) mDialogView.findViewById(R.id.save_as_default);
+
+        mSaveAsDefault.setVisibility(mShowSaveOption ? View.VISIBLE : View.GONE);
+
         ListView encodings = (ListView) mDialogView.findViewById(R.id.encoding_list);
         SelectEncodingAdapter adapter = new SelectEncodingAdapter(mSelectedFile, getDefaultCharset());
         encodings.setAdapter(adapter);

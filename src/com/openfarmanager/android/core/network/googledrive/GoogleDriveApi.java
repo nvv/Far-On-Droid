@@ -25,6 +25,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -45,6 +49,7 @@ public class GoogleDriveApi implements NetworkApi {
     private HashMap<String, String> mFoldersAliases = new HashMap<String, String>();
     private GoogleDriveAccount mCurrentAccount;
 
+    private final static byte[] BUFFER = new byte[256 * 1024];
 
     public GoogleDriveApi() {
         mDriveApi = new GoogleDriveWebApi();
@@ -150,6 +155,33 @@ public class GoogleDriveApi implements NetworkApi {
         mDriveApi.setupToken(account.getToken());
     }
 
+    public void upload(String parentId, String title, java.io.File file, GoogleDriveWebApi.UploadListener listener) {
+        mDriveApi.upload(parentId, title, file, listener);
+    }
+
+    public void download(FileProxy source, java.io.File destination) throws IOException {
+        BufferedInputStream inputStream = new BufferedInputStream(
+                mDriveApi.download(((GoogleDriveFile) source).getDownloadLink()));
+        int len;
+        OutputStream outputStream = new FileOutputStream(destination);
+        while ((len = inputStream.read(BUFFER)) > 0) {
+            outputStream.write(BUFFER, 0, len);
+        }
+        inputStream.close();
+        outputStream.close();
+    }
+
+    public void download(String downloadLink, String destination) throws IOException {
+        BufferedInputStream inputStream = new BufferedInputStream(mDriveApi.download(downloadLink));
+        int len;
+        OutputStream outputStream = new FileOutputStream(destination);
+        while ((len = inputStream.read(BUFFER)) > 0) {
+            outputStream.write(BUFFER, 0, len);
+        }
+        inputStream.close();
+        outputStream.close();
+    }
+
     public List<FileProxy> getDirectoryFiles(String path) {
         List<FileProxy> list = new ArrayList<FileProxy>();
 
@@ -162,6 +194,10 @@ public class GoogleDriveApi implements NetworkApi {
 
             if (files.size() > 0 && path.equals("/")) {
                 mFoldersAliases.put(files.get(0).getParentPath(), "/");
+            }
+
+            if (path.equals("/") || mFoldersAliases.get(path).equals("/")) {
+                list.add(new GoogleDriveFile(File.createSharedFolder(), path));
             }
 
             FileSystemScanner.sInstance.sort(list);

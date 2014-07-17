@@ -13,6 +13,7 @@ import com.openfarmanager.android.model.NetworkAccount;
 import com.openfarmanager.android.model.NetworkEnum;
 import com.openfarmanager.android.model.exeptions.InAppAuthException;
 import com.openfarmanager.android.model.exeptions.NetworkException;
+import com.yandex.disk.client.ListParser;
 
 import static com.openfarmanager.android.utils.Extensions.tryParse;
 
@@ -21,12 +22,17 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.SocketTimeoutException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.SortedMap;
 
 import it.sauronsoftware.ftp4j.FTPClient;
 import it.sauronsoftware.ftp4j.FTPException;
 import it.sauronsoftware.ftp4j.FTPFile;
+import it.sauronsoftware.ftp4j.FTPListParseException;
+import it.sauronsoftware.ftp4j.FTPListParser;
+import it.sauronsoftware.ftp4j.FTPTextualExtensionRecognizer;
 
 /**
  * @author Vlad Namashko
@@ -96,17 +102,23 @@ public class FtpAPI implements NetworkApi {
             throw new InAppAuthException(App.sInstance.getString(R.string.error_ftp_io));
         }
 
+        String charset = App.sInstance.getSettings().getCharset(server);
+        if (charset != null) {
+            mFtpClient.setCharset(charset);
+        }
+
+        //mFtpClient.setType(FTPClient.TYPE_BINARY);
         mFtpClient.setPassive(!activeMode);
     }
 
     public List<FileProxy> getDirectoryFiles(String path) throws NetworkException {
         List<FileProxy> files = new ArrayList<FileProxy>();
         try {
-            FTPClient ftpClient = App.sInstance.getFtpApi().client();
-            if (!path.equals(ftpClient.currentDirectory())) {
-                ftpClient.changeDirectory(path);
+            if (!path.equals(mFtpClient.currentDirectory())) {
+                mFtpClient.changeDirectory(path);
             }
-            for (FTPFile ftpFile : ftpClient.list()) {
+            FTPFile[] ftpFiles = mFtpClient.list();
+            for (FTPFile ftpFile : ftpFiles) {
                 files.add(new FtpFile(path, ftpFile));
             }
             FileSystemScanner.sInstance.sort(files);
@@ -122,6 +134,11 @@ public class FtpAPI implements NetworkApi {
         }
 
         return files;
+    }
+
+    public void setCharset(Charset charset) {
+        mFtpClient.setCharset(charset.name());
+        App.sInstance.getSettings().saveCharset(mFtpClient.getHost(), charset.name());
     }
 
     public int getAuthorizedAccountsCount() {

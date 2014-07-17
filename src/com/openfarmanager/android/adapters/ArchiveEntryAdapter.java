@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.R;
+import com.openfarmanager.android.core.Settings;
 import com.openfarmanager.android.core.archive.ArchiveScanner;
 import com.openfarmanager.android.filesystem.ArchiveFile;
 import com.openfarmanager.android.filesystem.FileProxy;
@@ -68,15 +69,16 @@ public class ArchiveEntryAdapter extends FlatFileSystemAdapter {
         name.setText(item.getName());
         TextView size = (TextView) view.findViewById(R.id.item_info);
 
+        Settings settings = App.sInstance.getSettings();
         if (mSelectedFiles.contains(item)) {
-            name.setTextColor(Color.YELLOW);
-            size.setTextColor(Color.YELLOW);
+            name.setTextColor(settings.getSecondaryColor());
+            size.setTextColor(settings.getSecondaryColor());
         } else if (item.isDirectory()) {
-            name.setTextColor(Color.WHITE);
-            size.setTextColor(Color.WHITE);
+            name.setTextColor(settings.getFolderColor());
+            size.setTextColor(settings.getFolderColor());
         } else {
-            name.setTextColor(Color.CYAN);
-            size.setTextColor(Color.CYAN);
+            name.setTextColor(settings.getTextColor());
+            size.setTextColor(settings.getTextColor());
         }
 
         if (item.isRoot()) {

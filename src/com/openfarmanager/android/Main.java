@@ -2,6 +2,8 @@ package com.openfarmanager.android;
 
 import android.app.Dialog;
 import android.content.Intent;
+import android.content.res.Configuration;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -14,6 +16,7 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.PopupWindow;
+import android.widget.Toast;
 
 import com.dropbox.client2.exception.DropboxException;
 import com.google.analytics.tracking.android.EasyTracker;
@@ -26,6 +29,7 @@ import com.openfarmanager.android.core.network.dropbox.DropboxAPI;
 import com.openfarmanager.android.model.NetworkEnum;
 import com.openfarmanager.android.utils.Extensions;
 import com.openfarmanager.android.view.TipsDialog;
+import com.openfarmanager.android.view.ToastNotification;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -85,6 +89,14 @@ public class Main extends FragmentActivity {
         if (getIntent() != null && getIntent().getData() != null) {
             onLogin();
         }
+
+        if (isHardwareKeyboardAvailable()) {
+            ToastNotification.makeText(App.sInstance.getApplicationContext(), getString(R.string.hardware_keyboard), Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private boolean isHardwareKeyboardAvailable() {
+        return (getResources().getConfiguration().keyboard != Configuration.KEYBOARD_NOKEYS);
     }
 
     private void onLogin () {
@@ -181,6 +193,8 @@ public class Main extends FragmentActivity {
                 !PreferenceManager.getDefaultSharedPreferences(this).getBoolean("main_swipe_right_left_hint", false)) {
             showSwipeRightLiftHint();
         }
+
+        (findViewById(R.id.panels_holder)).setBackgroundColor(App.sInstance.getSettings().getMainPanelColor());
     }
 
     @Override

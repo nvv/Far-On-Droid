@@ -11,6 +11,8 @@ import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
+import org.apache.http.entity.FileEntity;
+import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
@@ -18,12 +20,15 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
 import static com.openfarmanager.android.googledrive.GoogleDriveConstants.LIST_URL;
+import static com.openfarmanager.android.googledrive.GoogleDriveConstants.UPLOAD_URL;
 import static com.openfarmanager.android.googledrive.api.Fields.FOLDER_MIME_TYPE;
 import static com.openfarmanager.android.googledrive.api.Fields.ID;
 import static com.openfarmanager.android.googledrive.api.Fields.MIME_TYPE;
@@ -40,8 +45,12 @@ public class GoogleDriveWebApi extends Api {
             path = "root";
         }
 
+        boolean sharedFiles = path.equals(File.SHARED_FOLDER_ID);
+
         List<File> files = new ArrayList<File>();
-        list(files, null, String.format("'%s'+in+parents+and+trashed=false", path));
+        list(files, null, sharedFiles ?
+                "sharedWithMe" :
+                String.format("'%s'+in+parents+and+trashed=false", path));
         return files;
     }
 
@@ -49,6 +58,66 @@ public class GoogleDriveWebApi extends Api {
         List<File> files = new ArrayList<File>();
         list(files, null, String.format("title+contains+'%s'+and+trashed=false", title));
         return files;
+    }
+
+    public InputStream download(String downloadLink) throws IOException {
+        HttpGet httpGet = new HttpGet(downloadLink + '&' + getAuth());
+        DefaultHttpClient httpClient = new DefaultHttpClient();
+
+        HttpResponse response = httpClient.execute(httpGet);
+
+        StatusLine statusLine = response.getStatusLine();
+        if (isTokenExpired(statusLine)) {
+            setupToken(refreshToken(mToken));
+            download(downloadLink);
+        }
+
+        if (statusLine.getStatusCode() > 200) throw new RuntimeException();
+
+        return response.getEntity().getContent();
+    }
+
+    public void upload(String parentId, String title, java.io.File file, UploadListener listener) {
+        HttpPost httpPost = new HttpPost(UPLOAD_URL + '?' + getAuth() + "&uploadType=multipart");
+        httpPost.setHeader("Content-Type", String.format("multipart/related; boundary=\"%s\"", file.getName().replace(".", "_")));
+        httpPost.setHeader("Cache-Control", "no-cache");
+        DefaultHttpClient httpClient = new DefaultHttpClient();
+        HttpResponse response = null;
+
+        JSONObject postData = new JSONObject();
+        try {
+            setupFileNameData(title, parentId, postData);
+
+            SimpleMultipartEntity entity = new SimpleMultipartEntity(file.getName().replace(".", "_"), listener);
+            entity.addPart("meta", postData.toString());
+            entity.addPart("content", file.getName(), new FileInputStream(file));
+
+            httpPost.setEntity(entity);
+
+            response = httpClient.execute(httpPost);
+
+        } catch (ClientProtocolException e) {
+            throw new ResponseException(0);
+        } catch (IOException e) {
+            throw new ResponseException(0);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        StatusLine statusLine = response.getStatusLine();
+        if (isTokenExpired(statusLine)) {
+            setupToken(refreshToken(mToken));
+            upload(parentId, title, file, listener);
+        }
+
+        if ((statusLine.getStatusCode() == 201 || statusLine.getStatusCode() == 200)) {
+            try {
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
     }
 
     public boolean delete(String fileId) {
@@ -80,13 +149,9 @@ public class GoogleDriveWebApi extends Api {
         HttpResponse response = null;
 
         try {
-            postData.put(TITLE, title);
             postData.put(MIME_TYPE, FOLDER_MIME_TYPE);
 
-            JSONArray parents = new JSONArray();
-            JSONObject parent = new JSONObject();
-            parent.put(ID, parentId);
-            postData.put(PARENTS, parents.put(parent));
+            setupFileNameData(title, parentId, postData);
             httpPost.setEntity(new StringEntity(postData.toString()));
 
             response = httpClient.execute(httpPost);
@@ -116,6 +181,14 @@ public class GoogleDriveWebApi extends Api {
         }
 
         throw new CreateFolderException();
+    }
+
+    private void setupFileNameData(String title, String parentId, JSONObject postData) throws JSONException {
+        postData.put(TITLE, title);
+        JSONArray parents = new JSONArray();
+        JSONObject parent = new JSONObject();
+        parent.put(ID, parentId);
+        postData.put(PARENTS, parents.put(parent));
     }
 
     public boolean rename(String fileId, String newTitle) {
@@ -185,5 +258,9 @@ public class GoogleDriveWebApi extends Api {
                 list(files, pageToken, query);
             }
         }
+    }
+
+    public static interface UploadListener {
+        void onProgress(int uploaded, int transferedPortion, int total);
     }
 }

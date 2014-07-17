@@ -1,6 +1,7 @@
 package com.openfarmanager.android;
 
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.widget.Toast;
@@ -22,10 +23,11 @@ public class FileView extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.view_activity);
         FragmentManager manager = getSupportFragmentManager();
-        mController = new EditViewController((Viewer) manager.findFragmentById(R.id.viewer),
-                (ViewerToolbar) manager.findFragmentById(R.id.toolbar));
+        Viewer viewer = (Viewer) manager.findFragmentById(R.id.viewer);
+        mController = new EditViewController(viewer, (ViewerToolbar) manager.findFragmentById(R.id.toolbar));
+
         try {
-            ((Viewer) manager.findFragmentById(R.id.viewer)).openFile(new File(getIntent().getData().getPath()));
+            viewer.openFile(new File(getIntent().getData().getPath()));
         } catch (Exception e) { // possible NPE Exception
             ToastNotification.makeText(App.sInstance.getApplicationContext(),
                     App.sInstance.getString((R.string.error_open_file)), Toast.LENGTH_SHORT).show();

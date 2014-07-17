@@ -1,14 +1,18 @@
 package com.openfarmanager.android.fragments;
 
+import android.app.Dialog;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.text.TextUtils;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.webkit.MimeTypeMap;
 import android.widget.*;
 import com.openfarmanager.android.App;
@@ -22,8 +26,15 @@ import com.openfarmanager.android.core.archive.MimeTypes;
 import com.openfarmanager.android.filesystem.FileProxy;
 import com.openfarmanager.android.filesystem.FileSystemFile;
 import com.openfarmanager.android.filesystem.FileSystemScanner;
+import com.openfarmanager.android.filesystem.actions.FileActionTask;
+import com.openfarmanager.android.filesystem.actions.network.ExportAsTask;
 import com.openfarmanager.android.model.FileActionEnum;
+import com.openfarmanager.android.model.SelectParams;
+import com.openfarmanager.android.model.TaskStatusEnum;
+import com.openfarmanager.android.utils.CustomFormatter;
 import com.openfarmanager.android.utils.FileUtilsExt;
+import com.openfarmanager.android.utils.SystemUtils;
+import com.openfarmanager.android.view.SelectDialog;
 import com.openfarmanager.android.view.ToastNotification;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
@@ -62,11 +73,19 @@ public class MainPanel extends BaseFileSystemPanel {
     protected View mHomeLeft;
     protected View mHomeRight;
 
+    protected View mCharsetLeft;
+    protected View mCharsetRight;
+
+    protected View mExitLeft;
+    protected View mExitRight;
+
     protected boolean mIsActivePanel;
 
     private int mLastListPosition;
 
     protected ConfirmActionDialog mConfirmDialog;
+
+    protected TextView mSelectedFilesSize;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -74,6 +93,7 @@ public class MainPanel extends BaseFileSystemPanel {
         View view = inflater.inflate(R.layout.main_panel, container, false);
         mFileSystemList = (ListView) view.findViewById(android.R.id.list);
         mProgress = (ProgressBar) view.findViewById(R.id.loading);
+        mSelectedFilesSize = (TextView) view.findViewById(R.id.selected_files_size);
 
         mFileSystemList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -86,9 +106,13 @@ public class MainPanel extends BaseFileSystemPanel {
                 mSelectedFiles.clear();
                 File item = null;
                 FileSystemFile file = null;
+                Integer previousState = null;
                 if (!isRootDirectory()) {
                     if (i == 0) {
                         item = mBaseDir.getParentFile();
+                        if (item != null) {
+                            previousState = mDirectorySelection.get(item.getAbsolutePath());
+                        }
                     }
                 }
                 if (item == null) {
@@ -105,7 +129,10 @@ public class MainPanel extends BaseFileSystemPanel {
                 }
 
                 if (item.isDirectory()) {
-                    openDirectory(item);
+                    openDirectory(item, previousState);
+                    if (previousState == null) {
+                        mDirectorySelection.put(item.getParent(), mFileSystemList.getFirstVisiblePosition());
+                    }
                 }
                 if (item.isFile()) {
                     String mime = ArchiveUtils.getMimeType(item);
@@ -169,6 +196,12 @@ public class MainPanel extends BaseFileSystemPanel {
         mHomeLeft = view.findViewById(R.id.home_left);
         mHomeRight = view.findViewById(R.id.home_right);
 
+        mCharsetLeft = view.findViewById(R.id.charset_left);
+        mCharsetRight = view.findViewById(R.id.charset_right);
+
+        mExitLeft = view.findViewById(R.id.exit_left);
+        mExitRight = view.findViewById(R.id.exit_right);
+
         mChangePathToRight.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -212,6 +245,38 @@ public class MainPanel extends BaseFileSystemPanel {
             public void onClick(View v) {
                 gainFocus();
                 mHandler.sendMessage(mHandler.obtainMessage(FileSystemController.OPEN_NETWORK));
+            }
+        });
+
+        mCharsetLeft.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                gainFocus();
+                mHandler.sendMessage(mHandler.obtainMessage(FileSystemController.OPEN_ENCODING_DIALOG));
+            }
+        });
+
+        mCharsetRight.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                gainFocus();
+                mHandler.sendMessage(mHandler.obtainMessage(FileSystemController.OPEN_ENCODING_DIALOG));
+            }
+        });
+
+        mExitLeft.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                gainFocus();
+                mHandler.sendMessage(mHandler.obtainMessage(EXIT_FROM_NETWORK_STORAGE, mPanelLocation));
+            }
+        });
+
+        mExitRight.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                gainFocus();
+                mHandler.sendMessage(mHandler.obtainMessage(EXIT_FROM_NETWORK_STORAGE, mPanelLocation));
             }
         });
 
@@ -288,6 +353,21 @@ public class MainPanel extends BaseFileSystemPanel {
 
         setIsActivePanel(mIsActivePanel);
         setNavigationButtonsVisibility();
+
+        int color = App.sInstance.getSettings().getMainPanelColor();
+        mChangePathToLeft.setBackgroundColor(color);
+        mChangePathToRight.setBackgroundColor(color);
+        mAddToBookmarksLeft.setBackgroundColor(color);
+        mAddToBookmarksRight.setBackgroundColor(color);
+        mNetworkLeft.setBackgroundColor(color);
+        mNetworkRight.setBackgroundColor(color);
+        mHomeLeft.setBackgroundColor(color);
+        mHomeRight.setBackgroundColor(color);
+        mExitLeft.setBackgroundColor(color);
+        mExitRight.setBackgroundColor(color);
+
+        mSelectedFilesSize.setBackgroundColor(App.sInstance.getSettings().getSecondaryColor());
+        mSelectedFilesSize.setTextColor(App.sInstance.getSettings().getSelectedColor());
     }
 
     @Override
@@ -319,6 +399,18 @@ public class MainPanel extends BaseFileSystemPanel {
         }
         ((FlatFileSystemAdapter) adapterView.getAdapter()).setSelectedFiles(mSelectedFiles);
         ((BaseAdapter) adapterView.getAdapter()).notifyDataSetChanged();
+
+        setSelectedFilesSizeVisibility();
+        calculateSelectedFilesSize();
+    }
+
+    private void calculateSelectedFilesSize() {
+        long size = 0;
+        for (FileProxy f : mSelectedFiles) {
+            size += f.isDirectory() ? 0 : f.getSize();
+        }
+
+        mSelectedFilesSize.setText(getString(R.string.selected_files, CustomFormatter.formatBytes(size), mSelectedFiles.size()));
     }
 
     public void openFileActionMenu() {
@@ -410,6 +502,12 @@ public class MainPanel extends BaseFileSystemPanel {
             case CREATE_ARCHIVE:
                 createArchive(inactivePanel);
                 break;
+            case EXPORT_AS:
+                mHandler.sendMessage(mHandler.obtainMessage(FileSystemController.EXPORT_AS, mSelectedFiles.size() == 1 ? mSelectedFiles.get(0) : null));
+                break;
+            case OPEN_WEB:
+                mHandler.sendMessage(mHandler.obtainMessage(FileSystemController.OPEN_WEB, mSelectedFiles.size() == 1 ? mSelectedFiles.get(0) : null));
+                break;
         }
     }
 
@@ -476,11 +574,9 @@ public class MainPanel extends BaseFileSystemPanel {
     }
 
     public void showSelectDialog() {
-        try {
-            ConfirmActionDialog.newInstance(FileActionEnum.SELECT, mSelectFilesCommand, null,
-                    App.sInstance.getSharedPreferences("action_dialog", 0).getString("select_pattern", "*"), false).show(fragmentManager(), "confirmDialog");
-        } catch (Exception e) {
-        }
+        SelectDialog dialog = new SelectDialog(getActivity(), mSelectFilesCommand);
+        dialog.show();
+        adjustDialogSize(dialog);
     }
 
     public void showSearchDialog() {
@@ -544,6 +640,34 @@ public class MainPanel extends BaseFileSystemPanel {
         }
     }
 
+    public void export(final MainPanel inactivePanel, String downloadLink, String destination) {
+        FileActionTask task = null;
+        try {
+            task = new ExportAsTask(fragmentManager(),
+                    new FileActionTask.OnActionListener() {
+                        @Override
+                        public void onActionFinish(TaskStatusEnum status) {
+                            try {
+                                if (status != TaskStatusEnum.OK) {
+                                    try {
+                                        String error = status.getNetworkErrorException().getLocalizedError();
+                                        ErrorDialog.newInstance(error).show(fragmentManager(), "errorDialog");
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                            invalidatePanels(inactivePanel);
+                        }
+                    }, downloadLink, destination);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        task.execute();
+    }
+
     public void extractArchive(final MainPanel inactivePanel) {
         String extractFileName = mLastSelectedFile.getName();
         try {
@@ -572,12 +696,16 @@ public class MainPanel extends BaseFileSystemPanel {
         }
     }
 
-    protected void invalidatePanels(MainPanel inactivePanel) {
+    public void invalidatePanels(MainPanel inactivePanel) {
         getSelectedFiles().clear();
         invalidate();
         // inactivePanel may be null when 'quick view' is opened.
         if (inactivePanel != null) {
-            inactivePanel.invalidate();
+            try {
+                inactivePanel.invalidate();
+            } catch (Exception ignore) {
+
+            }
         }
     }
 
@@ -590,9 +718,10 @@ public class MainPanel extends BaseFileSystemPanel {
 
     public void invalidate() {
         FlatFileSystemAdapter adapter = (FlatFileSystemAdapter) mFileSystemList.getAdapter();
-        adapter.setSelectedFiles(mSelectedFiles);
         adapter.setBaseDir(mBaseDir);
+        adapter.setSelectedFiles(mSelectedFiles);
         adapter.notifyDataSetChanged();
+        setSelectedFilesSizeVisibility();
     }
 
     private void openFile(File item) {
@@ -681,6 +810,10 @@ public class MainPanel extends BaseFileSystemPanel {
         mIsActivePanel = active;
         if (mCurrentPathView != null) {
             mCurrentPathView.setSelected(mIsActivePanel);
+
+            mCurrentPathView.setBackgroundColor(mIsActivePanel ?
+                    App.sInstance.getSettings().getSecondaryColor() : App.sInstance.getSettings().getMainPanelColor());
+
         }
         if (active && mFileSystemList != null) {
             mFileSystemList.requestFocus();
@@ -751,28 +884,38 @@ public class MainPanel extends BaseFileSystemPanel {
     }
 
     public void openDirectory(final File directory) {
+        openDirectory(directory, -1);
+    }
+
+    /**
+     * Open directory with "selection", i.e. scrolling file system list to certain position.
+     *
+     * @param directory folder to be opened.
+     * @param selection position in list to be selected (scrolled).
+     */
+    private void openDirectory(final File directory, final Integer selection) {
 
         if (!mIsInitialized) {
             addToPendingList(new Runnable() {
                 @Override
                 public void run() {
-                    openDirectory(directory);
+                    openDirectory(directory, selection);
                 }
             });
             return;
         }
+
+        setSelectedFilesSizeVisibility();
 
         File oldDir = mBaseDir;
         mBaseDir = directory.getAbsoluteFile();
         mCurrentPathView.setText(mBaseDir.getAbsolutePath());
         FlatFileSystemAdapter adapter = (FlatFileSystemAdapter) mFileSystemList.getAdapter();
         if (adapter == null) {
-            mFileSystemList.setAdapter(new FlatFileSystemAdapter(mBaseDir));
+            mFileSystemList.setAdapter(new FlatFileSystemAdapter(mBaseDir, mOnFolderScannedListener));
         } else {
             adapter.resetFilter();
-            adapter.setBaseDir(mBaseDir);
-//            adapter.notifyDataSetChanged();
-            mFileSystemList.setSelection(0);
+            adapter.setBaseDir(mBaseDir, selection);
             sendEmptyMessage(DIRECTORY_CHANGED);
         }
         if(adapter != null && oldDir != null){
@@ -780,41 +923,106 @@ public class MainPanel extends BaseFileSystemPanel {
         }
     }
 
+    private void setSelectedFilesSizeVisibility() {
+        mSelectedFilesSize.setVisibility((!App.sInstance.getSettings().isShowSelectedFilesSize() || mSelectedFiles.size() == 0) ?
+                View.GONE : View.VISIBLE);
+    }
+
+    FlatFileSystemAdapter.OnFolderScannedListener mOnFolderScannedListener = new FlatFileSystemAdapter.OnFolderScannedListener() {
+        @Override
+        public void onScanFinished(Integer selection) {
+            if (selection != null) {
+                mFileSystemList.setSelection(selection);
+            }
+        }
+    };
+
     private void sendEmptyMessage(int message) {
         if (mHandler != null) {
             mHandler.sendEmptyMessage(message);
         }
     }
 
-    public void select(String pattern, boolean inverseSelection) {
+    @Override
+    public void select(SelectParams selectParams) {
 
         if (mBaseDir == null) {
             // handle unexpected situation.
             return;
         }
 
-        FileFilter select = new WildcardFileFilter(pattern);
-        File[] contents = mBaseDir.listFiles(select);
-
         mSelectedFiles.clear();
-        if (contents != null) {
-            if (inverseSelection) {
-                File[] allFiles = mBaseDir.listFiles();
-                List selection = Arrays.asList(contents);
+        if (selectParams.getType() == SelectParams.SelectionType.NAME) {
+
+            String pattern = selectParams.getSelectionString();
+            boolean inverseSelection = selectParams.isInverseSelection();
+
+            App.sInstance.getSharedPreferences("action_dialog", 0).edit(). putString("select_pattern", pattern).commit();
+
+            FileFilter select = new WildcardFileFilter(pattern);
+            File[] contents = mBaseDir.listFiles(select);
+
+            if (contents != null) {
+                if (inverseSelection) {
+                    File[] allFiles = mBaseDir.listFiles();
+                    List selection = Arrays.asList(contents);
+                    for (File file : allFiles) {
+                        if (!selection.contains(file)) {
+                            mSelectedFiles.add(new FileSystemFile(file.getAbsolutePath()));
+                        }
+                    }
+                } else {
+                    for (File file : contents) {
+                        mSelectedFiles.add(new FileSystemFile(file.getAbsolutePath()));
+                    }
+                }
+            }
+        } else {
+            File[] allFiles = mBaseDir.listFiles();
+            if (selectParams.isTodayDate()) {
+
+                Calendar today = Calendar.getInstance();
+                Calendar currentDay = Calendar.getInstance();
+
                 for (File file : allFiles) {
-                    if (!selection.contains(file)) {
+                    currentDay.setTime(new Date(file.lastModified()));
+                    if (isSameDay(today, currentDay)) {
                         mSelectedFiles.add(new FileSystemFile(file.getAbsolutePath()));
                     }
                 }
             } else {
-                for (File file : contents) {
-                    mSelectedFiles.add(new FileSystemFile(file.getAbsolutePath()));
+                long startDate = selectParams.getDateFrom().getTime();
+                long endDate = selectParams.getDateTo().getTime();
+                for (File file : allFiles) {
+                    if (file.lastModified() > startDate && file.lastModified() < endDate) {
+                        mSelectedFiles.add(new FileSystemFile(file.getAbsolutePath()));
+                    }
                 }
             }
+
         }
+
         FlatFileSystemAdapter adapter = (FlatFileSystemAdapter) mFileSystemList.getAdapter();
         adapter.setSelectedFiles(mSelectedFiles);
         adapter.notifyDataSetChanged();
+        setSelectedFilesSizeVisibility();
+        calculateSelectedFilesSize();
+    }
+
+    /**
+     * <p>Checks if two calendars represent the same day ignoring time.</p>
+     * @param cal1  the first calendar, not altered, not null
+     * @param cal2  the second calendar, not altered, not null
+     * @return true if they represent the same day
+     * @throws IllegalArgumentException if either calendar is <code>null</code>
+     */
+    public static boolean isSameDay(Calendar cal1, Calendar cal2) {
+        if (cal1 == null || cal2 == null) {
+            throw new IllegalArgumentException("The dates must not be null");
+        }
+        return (cal1.get(Calendar.ERA) == cal2.get(Calendar.ERA) &&
+                cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
+                cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR));
     }
 
     public void addSelectedFiles(LinkedHashSet<File> selectedFiles) {
@@ -903,6 +1111,29 @@ public class MainPanel extends BaseFileSystemPanel {
         }
 
         mIsDataLoading = isLoading;
+    }
+
+    private void adjustDialogSize(Dialog dialog) {
+        adjustDialogSize(dialog, 0.8f);
+    }
+
+    /**
+     * Adjust dialog size. Actuall for old android version only (due to absence of Holo themes).
+     *
+     * @param dialog dialog whose size should be adjusted.
+     */
+    private void adjustDialogSize(Dialog dialog, float scaleFactor) {
+        if (!SystemUtils.isHoneycombOrNever()) {
+            DisplayMetrics metrics = new DisplayMetrics();
+            getActivity().getWindowManager().getDefaultDisplay().getMetrics(metrics);
+
+            WindowManager.LayoutParams params = new WindowManager.LayoutParams();
+            params.copyFrom(dialog.getWindow().getAttributes());
+            params.width = (int) (metrics.widthPixels * scaleFactor);
+            params.height = (int) (metrics.heightPixels * scaleFactor);
+
+            dialog.getWindow().setAttributes(params);
+        }
     }
 
     protected boolean isDataLoading() {

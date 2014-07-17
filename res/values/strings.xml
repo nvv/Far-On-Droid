@@ -14,7 +14,7 @@
     <string name="btn_save">Save</string>
     <string name="btn_select">Select</string>
     <string name="btn_replace">Replace</string>
-    <string name="btn_settings">Settings</string>
+    <string name="btn_settings">Settings (F11)</string>
     <string name="btn_encoding">Encoding</string>
     <string name="btn_back">Back</string>
     <string name="btn_next">Next</string>
@@ -78,6 +78,7 @@
     <string name="error_socket_timeout_exception">Network request timeout. Try again?</string>
     <string name="error_inactive_panel_is_busy">Inactive panel is busy.</string>
     <string name="error_cant_open_intent">This application can\'t be opened.</string>
+    <string name="error_export_as">Error while exporting file.</string>
 
     <string name="action_info">Info</string>
     <string name="action_send">Send</string>
@@ -134,6 +135,7 @@
     <string name="create_bookmark">Create bookmark</string>
     <string name="bookmark_created">Bookmark created</string>
     <string name="progress">Progress</string>
+    <string name="selected_files" formatted="false">%s in %s files</string>
 
     <string name="regular_expression">Regular expression</string>
     <string name="select_found">Select found</string>
@@ -179,6 +181,32 @@
     <string name="select_encoding">Select encoding</string>
     <string name="save_as_default">Save as default</string>
     <string name="tips">Show tips again</string>
+    <string name="main_panel_font">Main panel font</string>
+    <string name="viewer_font">Viewer font</string>
+    <string name="main_panel_color">Main panel color</string>
+    <string name="main_panel_color_summary">Configure color of main file system panel</string>
+    <string name="secondary_color">Secondary color</string>
+    <string name="secondary_color_summary">Configure secondary color : bottom panel, current path, etc</string>
+    <string name="viewer_color">Viewer color</string>
+    <string name="viewer_color_summary">Configure viewer color</string>
+    <string name="style">Style</string>
+    <string name="style_summary">Configure your app looks like</string>
+    <string name="text_color">Text color</string>
+    <string name="text_color_summary">Configure text color for viewer and main panel</string>
+    <string name="selected_color">Selected file color</string>
+    <string name="selected_color_summary">Configure selected file color for main panel</string>
+    <string name="hidden_color">Hidden file color</string>
+    <string name="hidden_color_summary">Configure hidden file color for main panel</string>
+    <string name="install_color">Install (apk) file color</string>
+    <string name="install_color_summary">Configure apk file color for main panel</string>
+    <string name="archive_color">Archive file color</string>
+    <string name="archive_color_summary">Configure archive file color for main panel</string>
+    <string name="folder_color">Folder color</string>
+    <string name="folder_color_summary">Configure folder color for main panel</string>
+    <string name="reset_to_defaults">Reset to defaults</string>
+    <string name="reset_to_defaults_summary">Reset style settings to default values</string>
+    <string name="show_selected_files_size">Show selected files size</string>
+    <string name="show_selected_files_size_summary">Dynamically calculate selected files size and show on main pannel bottom</string>
 
     <string name="mime_type">Mime Type</string>
     <string name="mime_type_text">Text file</string>
@@ -233,6 +261,7 @@
     <string name="error_forbidden">Forbidden operation.</string>
     <string name="error_duplicated_folder">Duplicated folder name.</string>
     <string name="error_intermediate_folder_not_exist">Parent folder doesn\'t exist.</string>
+    <string name="error_can_t_open_app">Unexpected error while opening application.</string>
 
     <string name="tips_first_page">
 Far On Droid is free file manager providing intuitive and simple file management using two panel interface.\n\n
@@ -278,5 +307,20 @@ More network stuff will appear in future versions.
 
     <string name="google_drive_obtaining_token">Obtaining auth token…</string>
     <string name="google_drive_get_token_error">Error while getting auth token</string>
+
+    <string name="documents">Documents</string>
+    <string name="spreadsheets">Spreadsheets</string>
+    <string name="drawings">Drawings</string>
+    <string name="presentations">Presentations</string>
+    <string name="export_as">Export As</string>
+    <string name="open_with">Open in browser</string>
+    <string name="error_no_browser">No application can handle this request, please, install a web browser</string>
+
+    <string name="hardware_keyboard">Hardware keyboard is detected. Open settings (F10) to see some hotkeys in \'Keyboard\' section</string>
+    <string name="file_name">Name</string>
+    <string name="modified_date">Modified date</string>
+    <string name="file_extension">Extension</string>
+    <string name="today">Today</string>
+    <string name="period">Period</string>
 
 </resources>
