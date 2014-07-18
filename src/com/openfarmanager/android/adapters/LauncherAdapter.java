@@ -201,16 +201,22 @@ public class LauncherAdapter extends FlatFileSystemAdapter {
                 break;
 
             case DELETE:
-                try {
-                    Intent uninstallIntent = new Intent(Intent.ACTION_DELETE, Uri.fromParts("package", fullPath, null)).
-                            setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    App.sInstance.startActivity(uninstallIntent);
-                } catch (ActivityNotFoundException e) {
-                    e.printStackTrace();
-                    ToastNotification.makeText(App.sInstance, App.sInstance.getString(R.string.error_not_supported), Toast.LENGTH_LONG).show();
+                for (FileProxy file : mSelectedFiles) {
+                    doDelete(file.getFullPath());
                 }
                 break;
 
+        }
+    }
+
+    private void doDelete(String fullPath) {
+        try {
+            Intent uninstallIntent = new Intent(Intent.ACTION_DELETE, Uri.fromParts("package", fullPath, null)).
+                    setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            App.sInstance.startActivity(uninstallIntent);
+        } catch (ActivityNotFoundException e) {
+            e.printStackTrace();
+            ToastNotification.makeText(App.sInstance, App.sInstance.getString(R.string.error_not_supported), Toast.LENGTH_LONG).show();
         }
     }
 
