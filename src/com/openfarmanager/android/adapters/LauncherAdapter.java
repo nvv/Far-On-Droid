@@ -28,6 +28,7 @@ import com.openfarmanager.android.model.Bookmark;
 import com.openfarmanager.android.model.FileActionEnum;
 import com.openfarmanager.android.view.ToastNotification;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
@@ -36,6 +37,8 @@ import java.util.List;
 public class LauncherAdapter extends FlatFileSystemAdapter {
 
     private Handler mHandler;
+
+    private List<String> mSelectedPackages = new ArrayList<String>();
 
     public LauncherAdapter(Handler handler) {
         mHandler = handler;
@@ -93,6 +96,15 @@ public class LauncherAdapter extends FlatFileSystemAdapter {
         }.execute();
     }
 
+    public void setSelectedFiles(List<FileProxy> selectedFiles) {
+        super.setSelectedFiles(selectedFiles);
+
+        mSelectedPackages.clear();
+        for (FileProxy proxy : selectedFiles) {
+            mSelectedPackages.add(proxy.getId());
+        }
+    }
+
     @Override
     public int getCount() {
         return mFiles.size();
@@ -118,7 +130,13 @@ public class LauncherAdapter extends FlatFileSystemAdapter {
 
         TextView name = (TextView) view.findViewById(R.id.item_name);
         name.setText(info.getName());
-        name.setTextColor(App.sInstance.getSettings().getInstallColor());
+
+        if (mSelectedPackages.contains(info.getId())) {
+            name.setTextColor(App.sInstance.getSettings().getSelectedColor());
+        } else {
+            name.setTextColor(App.sInstance.getSettings().getInstallColor());
+        }
+
         TextView infoItem = (TextView) view.findViewById(R.id.item_info);
 
         int size = App.sInstance.getSettings().getMainPanelFontSize();
@@ -145,9 +163,15 @@ public class LauncherAdapter extends FlatFileSystemAdapter {
     }
 
     public FileActionEnum[] getAvailableActions() {
-        return new FileActionEnum[] {
-                FileActionEnum.OPEN, FileActionEnum.INFO, FileActionEnum.DELETE
-        };
+        if (mSelectedFiles.size() > 1) {
+            return new FileActionEnum[]{
+                    FileActionEnum.DELETE
+            };
+        } else {
+            return new FileActionEnum[]{
+                    FileActionEnum.OPEN, FileActionEnum.INFO, FileActionEnum.DELETE
+            };
+        }
     }
 
     public void executeAction(final FileActionEnum action, MainPanel inactivePanel) {
@@ -196,7 +220,7 @@ public class LauncherAdapter extends FlatFileSystemAdapter {
 
         @Override
         public String getId() {
-            return null;
+            return getFullPath();
         }
 
         @Override
