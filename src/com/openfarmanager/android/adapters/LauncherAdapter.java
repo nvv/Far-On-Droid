@@ -9,6 +9,7 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Environment;
 import android.os.Handler;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -28,6 +29,7 @@ import com.openfarmanager.android.model.Bookmark;
 import com.openfarmanager.android.model.FileActionEnum;
 import com.openfarmanager.android.view.ToastNotification;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -51,6 +53,7 @@ public class LauncherAdapter extends FlatFileSystemAdapter {
             @Override
             protected void onPreExecute() {
                 super.onPreExecute();
+                mSelectedPackages.clear();
                 mHandler.sendEmptyMessage(GenericPanel.START_LOADING);
             }
 
@@ -70,6 +73,7 @@ public class LauncherAdapter extends FlatFileSystemAdapter {
                         ComponentProxy applicationInfo = new ComponentProxy();
                         applicationInfo.mComponentName = componentName;
                         applicationInfo.mName = String.valueOf(info.loadLabel(manager));
+                        applicationInfo.mPackagePath = info.activityInfo.applicationInfo.sourceDir;
                         if (TextUtils.isEmpty(applicationInfo.mName)) {
                             applicationInfo.mName = info.activityInfo.name;
                         }
@@ -165,11 +169,11 @@ public class LauncherAdapter extends FlatFileSystemAdapter {
     public FileActionEnum[] getAvailableActions() {
         if (mSelectedFiles.size() > 1) {
             return new FileActionEnum[]{
-                    FileActionEnum.DELETE
+                    FileActionEnum.DELETE, FileActionEnum.SHARE
             };
         } else {
             return new FileActionEnum[]{
-                    FileActionEnum.OPEN, FileActionEnum.INFO, FileActionEnum.DELETE
+                    FileActionEnum.OPEN, FileActionEnum.INFO, FileActionEnum.DELETE, FileActionEnum.SHARE
             };
         }
     }
@@ -206,6 +210,24 @@ public class LauncherAdapter extends FlatFileSystemAdapter {
                 }
                 break;
 
+            case SHARE:
+                intent = new Intent(Intent.ACTION_SEND_MULTIPLE);
+                intent.setType("text/plain");
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+                ArrayList<Uri> files = new ArrayList<Uri>();
+
+                for(FileProxy file : mSelectedFiles) {
+                    File f = new File(file.getParentPath());
+                    Uri uri = Uri.fromFile(f);
+                    files.add(uri);
+                }
+
+                intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, files);
+
+                App.sInstance.startActivity(intent);
+                break;
+
         }
     }
 
@@ -223,6 +245,7 @@ public class LauncherAdapter extends FlatFileSystemAdapter {
     public class ComponentProxy implements FileProxy<ComponentProxy> {
         private ComponentName mComponentName;
         private String mName;
+        private String mPackagePath;
 
         @Override
         public String getId() {
@@ -261,7 +284,7 @@ public class LauncherAdapter extends FlatFileSystemAdapter {
 
         @Override
         public String getParentPath() {
-            return null;
+            return mPackagePath;
         }
 
         @Override

@@ -98,6 +98,7 @@
     <string name="action_select_account">Select Account</string>
     <string name="action_open">Open</string>
     <string name="action_set_as_home">Set current path as Home</string>
+    <string name="action_share">Share</string>
 
     <string name="information">Information</string>
     <string name="destination">Destination</string>

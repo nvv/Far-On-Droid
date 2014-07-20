@@ -67,7 +67,7 @@ public class GenericPanel extends MainPanel {
                 LauncherAdapter adapter = (LauncherAdapter) adapterView.getAdapter();
 
                 if (mIsMultiSelectMode) {
-                    updateLongClick(i, adapter);
+                    updateLongClick(i, adapter, false);
                 } else {
                     adapter.onItemClick(i);
                 }
@@ -79,7 +79,7 @@ public class GenericPanel extends MainPanel {
             @Override
             public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
                 LauncherAdapter adapter = (LauncherAdapter) adapterView.getAdapter();
-                updateLongClick(i, adapter);
+                updateLongClick(i, adapter, true);
                 openFileActionMenu();
                 return true;
             }
@@ -92,7 +92,7 @@ public class GenericPanel extends MainPanel {
         return view;
     }
 
-    private void updateLongClick(int i, LauncherAdapter adapter) {
+    private void updateLongClick(int i, LauncherAdapter adapter, boolean longClick) {
 
         FileProxy fileProxy = adapter.getItem(i);
 
@@ -116,8 +116,10 @@ public class GenericPanel extends MainPanel {
     @Override
     public void onResume() {
         super.onResume();
-        if (mFileSystemList.getAdapter() != null) {
-            ((LauncherAdapter) mFileSystemList.getAdapter()).refresh();
+        LauncherAdapter adapter = (LauncherAdapter) mFileSystemList.getAdapter();
+        if (adapter != null) {
+            mSelectedFiles.clear();
+            adapter.refresh();
         }
     }
 
