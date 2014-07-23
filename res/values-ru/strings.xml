@@ -284,4 +284,41 @@
 
     <string name="hardware_keyboard">Обнаружена внешняя клавиатура. Откройте Настройки (F10) чтобы ознакомится с некоторыми горячими клавишами (в секции \'Клавиатура\') </string>
 
+    <string name="action_share">Поделиться</string>
+    <string name="btn_tools">Инструменты</string>
+    <string name="selected_files" formatted="false">%s в %s файлах</string>
+    <string name="main_panel_font">Шрифт основной панели</string>
+    <string name="viewer_font">Шрифт просмотрщика файлов</string>
+    <string name="main_panel_color">Цвет основной панели</string>
+    <string name="main_panel_color_summary">Настройте цвет фона основной панели</string>
+
+    <string name="secondary_color">Цвет панелей инструментов</string>
+    <string name="secondary_color_summary">Настройте цвет доп. панелей: нижняя панель меню, текущий путь, т.п.</string>
+
+    <string name="viewer_color">Фон просмотрщика файлов</string>
+    <string name="viewer_color_summary">Настройте цвет фона просмотрщика файлов</string>
+    <string name="style">Стили</string>
+    <string name="style_summary">Настройте внешний вид приложения</string>
+    <string name="text_color">Цвет текста</string>
+    <string name="text_color_summary">Цвет текста просмотрщика файлов и основной панели</string>
+    <string name="selected_color">Цвет выбранного файла</string>
+    <string name="selected_color_summary">Настройте цвет выбранного файла на основной панели</string>
+    <string name="hidden_color">Скрытые файлы</string>
+    <string name="hidden_color_summary">Настройте цвет скрытых, системных файлов</string>
+    <string name="install_color">Цвет приложений</string>
+    <string name="install_color_summary">Настройте цвет исполняемых приложений</string>
+    <string name="archive_color">Цвет архивов</string>
+    <string name="archive_color_summary">Настройте цвет архивных файлов</string>
+    <string name="folder_color">Цвет папок</string>
+    <string name="folder_color_summary">Настройте цвет директорий</string>
+    <string name="reset_to_defaults">Сбросить настройки</string>
+    <string name="reset_to_defaults_summary">Сбросить настройки по-умолчнию</string>
+    <string name="show_selected_files_size">Показывать размер выбранных файлов</string>
+    <string name="show_selected_files_size_summary">Автоматически показывать размер выбранных файлов</string>
+    <string name="file_name">Имя</string>
+    <string name="modified_date">Дата</string>
+    <string name="file_extension">Расширение</string>
+    <string name="today">Сегодня</string>
+    <string name="period">Период</string>
+
 </resources>
