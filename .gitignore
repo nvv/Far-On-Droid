@@ -1,3 +1,5 @@
 .idea
 .svn
 out
+farondroid.iml
+gen/com/openfarmanager/android/BuildConfig.java
