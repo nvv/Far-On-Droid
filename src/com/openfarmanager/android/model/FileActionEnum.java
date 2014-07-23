@@ -17,7 +17,7 @@ import java.util.List;
 public enum FileActionEnum implements Parcelable, Serializable {
 
     INFO, SEND, COPY, EDIT, DELETE, MOVE, NEW, SELECT, RENAME, FILE_OPEN_WITH, ARCHIVE_EXTRACT,
-    CREATE_BOOKMARK, CREATE_ARCHIVE, OPEN, SET_AS_HOME, EXPORT_AS, OPEN_WEB;
+    CREATE_BOOKMARK, CREATE_ARCHIVE, OPEN, SET_AS_HOME, EXPORT_AS, OPEN_WEB, SHARE;
 
     private static FileActionEnum[] sActionsForMultipleSelectedItems = new FileActionEnum[] {COPY, SET_AS_HOME, MOVE, DELETE, CREATE_ARCHIVE};
     private static FileActionEnum[] sActionsForDirectory = new FileActionEnum[] {INFO, SET_AS_HOME, COPY, MOVE, DELETE, RENAME, CREATE_ARCHIVE};
@@ -109,6 +109,8 @@ public enum FileActionEnum implements Parcelable, Serializable {
                 return res.getString(R.string.export_as);
             case OPEN_WEB:
                 return res.getString(R.string.open_with);
+            case SHARE:
+                return res.getString(R.string.action_share);
         }
 
         return "";

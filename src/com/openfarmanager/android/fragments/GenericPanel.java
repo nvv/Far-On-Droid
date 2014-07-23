@@ -46,7 +46,9 @@ import java.util.List;
 import static com.openfarmanager.android.controllers.FileSystemController.EXIT_FROM_NETWORK_STORAGE;
 
 /**
- * Created by sergii on 11/10/2013.
+ * Created on 11/10/2013.
+ *
+ * @author Sergey O
  */
 public class GenericPanel extends MainPanel {
 
@@ -61,7 +63,14 @@ public class GenericPanel extends MainPanel {
         mFileSystemList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                ((LauncherAdapter) adapterView.getAdapter()).onItemClick(i);
+
+                LauncherAdapter adapter = (LauncherAdapter) adapterView.getAdapter();
+
+                if (mIsMultiSelectMode) {
+                    updateLongClick(i, adapter, false);
+                } else {
+                    adapter.onItemClick(i);
+                }
             }
         });
 
@@ -70,9 +79,7 @@ public class GenericPanel extends MainPanel {
             @Override
             public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
                 LauncherAdapter adapter = (LauncherAdapter) adapterView.getAdapter();
-                FileProxy file = adapter.getItem(i);
-                mSelectedFiles.clear();
-                mSelectedFiles.add(file);
+                updateLongClick(i, adapter, true);
                 openFileActionMenu();
                 return true;
             }
@@ -85,6 +92,23 @@ public class GenericPanel extends MainPanel {
         return view;
     }
 
+    private void updateLongClick(int i, LauncherAdapter adapter, boolean longClick) {
+
+        FileProxy fileProxy = adapter.getItem(i);
+
+        if (mSelectedFiles.contains(fileProxy)) {
+            mSelectedFiles.remove(fileProxy);
+        } else {
+            if (mSelectedFiles.contains(fileProxy)) {
+                return;
+            }
+            mSelectedFiles.add(0, fileProxy);
+        }
+
+        adapter.setSelectedFiles(mSelectedFiles);
+        adapter.notifyDataSetChanged();
+    }
+
     public boolean isFileSystemPanel() {
         return false;
     }
@@ -92,8 +116,10 @@ public class GenericPanel extends MainPanel {
     @Override
     public void onResume() {
         super.onResume();
-        if (mFileSystemList.getAdapter() != null) {
-            ((LauncherAdapter) mFileSystemList.getAdapter()).refresh();
+        LauncherAdapter adapter = (LauncherAdapter) mFileSystemList.getAdapter();
+        if (adapter != null) {
+            mSelectedFiles.clear();
+            adapter.refresh();
         }
     }
 

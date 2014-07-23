@@ -9,6 +9,7 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Environment;
 import android.os.Handler;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -28,6 +29,8 @@ import com.openfarmanager.android.model.Bookmark;
 import com.openfarmanager.android.model.FileActionEnum;
 import com.openfarmanager.android.view.ToastNotification;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
@@ -36,6 +39,8 @@ import java.util.List;
 public class LauncherAdapter extends FlatFileSystemAdapter {
 
     private Handler mHandler;
+
+    private List<String> mSelectedPackages = new ArrayList<String>();
 
     public LauncherAdapter(Handler handler) {
         mHandler = handler;
@@ -48,6 +53,7 @@ public class LauncherAdapter extends FlatFileSystemAdapter {
             @Override
             protected void onPreExecute() {
                 super.onPreExecute();
+                mSelectedPackages.clear();
                 mHandler.sendEmptyMessage(GenericPanel.START_LOADING);
             }
 
@@ -67,6 +73,7 @@ public class LauncherAdapter extends FlatFileSystemAdapter {
                         ComponentProxy applicationInfo = new ComponentProxy();
                         applicationInfo.mComponentName = componentName;
                         applicationInfo.mName = String.valueOf(info.loadLabel(manager));
+                        applicationInfo.mPackagePath = info.activityInfo.applicationInfo.sourceDir;
                         if (TextUtils.isEmpty(applicationInfo.mName)) {
                             applicationInfo.mName = info.activityInfo.name;
                         }
@@ -91,6 +98,15 @@ public class LauncherAdapter extends FlatFileSystemAdapter {
                 mHandler.sendEmptyMessage(GenericPanel.STOP_LOADING);
             }
         }.execute();
+    }
+
+    public void setSelectedFiles(List<FileProxy> selectedFiles) {
+        super.setSelectedFiles(selectedFiles);
+
+        mSelectedPackages.clear();
+        for (FileProxy proxy : selectedFiles) {
+            mSelectedPackages.add(proxy.getId());
+        }
     }
 
     @Override
@@ -118,7 +134,13 @@ public class LauncherAdapter extends FlatFileSystemAdapter {
 
         TextView name = (TextView) view.findViewById(R.id.item_name);
         name.setText(info.getName());
-        name.setTextColor(App.sInstance.getSettings().getInstallColor());
+
+        if (mSelectedPackages.contains(info.getId())) {
+            name.setTextColor(App.sInstance.getSettings().getSelectedColor());
+        } else {
+            name.setTextColor(App.sInstance.getSettings().getInstallColor());
+        }
+
         TextView infoItem = (TextView) view.findViewById(R.id.item_info);
 
         int size = App.sInstance.getSettings().getMainPanelFontSize();
@@ -145,9 +167,15 @@ public class LauncherAdapter extends FlatFileSystemAdapter {
     }
 
     public FileActionEnum[] getAvailableActions() {
-        return new FileActionEnum[] {
-                FileActionEnum.OPEN, FileActionEnum.INFO, FileActionEnum.DELETE
-        };
+        if (mSelectedFiles.size() > 1) {
+            return new FileActionEnum[]{
+                    FileActionEnum.DELETE, FileActionEnum.SHARE
+            };
+        } else {
+            return new FileActionEnum[]{
+                    FileActionEnum.OPEN, FileActionEnum.INFO, FileActionEnum.DELETE, FileActionEnum.SHARE
+            };
+        }
     }
 
     public void executeAction(final FileActionEnum action, MainPanel inactivePanel) {
@@ -177,26 +205,51 @@ public class LauncherAdapter extends FlatFileSystemAdapter {
                 break;
 
             case DELETE:
-                try {
-                    Intent uninstallIntent = new Intent(Intent.ACTION_DELETE, Uri.fromParts("package", fullPath, null)).
-                            setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    App.sInstance.startActivity(uninstallIntent);
-                } catch (ActivityNotFoundException e) {
-                    e.printStackTrace();
-                    ToastNotification.makeText(App.sInstance, App.sInstance.getString(R.string.error_not_supported), Toast.LENGTH_LONG).show();
+                for (FileProxy file : mSelectedFiles) {
+                    doDelete(file.getFullPath());
                 }
                 break;
 
+            case SHARE:
+                intent = new Intent(Intent.ACTION_SEND_MULTIPLE);
+                intent.setType("text/plain");
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+                ArrayList<Uri> files = new ArrayList<Uri>();
+
+                for(FileProxy file : mSelectedFiles) {
+                    File f = new File(file.getParentPath());
+                    Uri uri = Uri.fromFile(f);
+                    files.add(uri);
+                }
+
+                intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, files);
+
+                App.sInstance.startActivity(intent);
+                break;
+
+        }
+    }
+
+    private void doDelete(String fullPath) {
+        try {
+            Intent uninstallIntent = new Intent(Intent.ACTION_DELETE, Uri.fromParts("package", fullPath, null)).
+                    setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            App.sInstance.startActivity(uninstallIntent);
+        } catch (ActivityNotFoundException e) {
+            e.printStackTrace();
+            ToastNotification.makeText(App.sInstance, App.sInstance.getString(R.string.error_not_supported), Toast.LENGTH_LONG).show();
         }
     }
 
     public class ComponentProxy implements FileProxy<ComponentProxy> {
         private ComponentName mComponentName;
         private String mName;
+        private String mPackagePath;
 
         @Override
         public String getId() {
-            return null;
+            return getFullPath();
         }
 
         @Override
@@ -231,7 +284,7 @@ public class LauncherAdapter extends FlatFileSystemAdapter {
 
         @Override
         public String getParentPath() {
-            return null;
+            return mPackagePath;
         }
 
         @Override
