@@ -1,26 +1,28 @@
 package com.openfarmanager.android.core.network.datasource;
 
-import com.microsoft.live.LiveOperation;
+import android.os.Handler;
+import android.util.Pair;
+
 import com.openfarmanager.android.App;
-import com.openfarmanager.android.core.network.skydrive.JsonKeys;
 import com.openfarmanager.android.filesystem.FileProxy;
-import com.openfarmanager.android.filesystem.FileSystemScanner;
 import com.openfarmanager.android.filesystem.SkyDriveFile;
 import com.openfarmanager.android.model.NetworkEnum;
-import com.openfarmanager.android.model.exeptions.NetworkException;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
-import static com.openfarmanager.android.utils.Extensions.*;
-
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+
+import static com.openfarmanager.android.fragments.NetworkPanel.MSG_OPEN;
+import static com.openfarmanager.android.utils.Extensions.isNullOrEmpty;
 
 /**
  * @author Vlad Namashko
  */
 public class SkyDriveDataSource implements DataSource {
+
+    public Handler mHandler;
+
+    public SkyDriveDataSource(Handler handler) {
+        mHandler = handler;
+    }
 
     @Override
     public String getNetworkType() {
@@ -61,5 +63,10 @@ public class SkyDriveDataSource implements DataSource {
     @Override
     public boolean isSearchSupported() {
         return true;
+    }
+
+    @Override
+    public void open(FileProxy file) {
+        mHandler.sendMessage(mHandler.obtainMessage(MSG_OPEN, new Pair<FileProxy, String>(file, ((SkyDriveFile) file).getSource())));
     }
 }

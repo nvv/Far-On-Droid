@@ -1,6 +1,7 @@
 package com.openfarmanager.android.filesystem;
 
 import com.openfarmanager.android.App;
+import com.openfarmanager.android.core.archive.MimeTypes;
 import com.openfarmanager.android.googledrive.model.File;
 import com.openfarmanager.android.model.Bookmark;
 
@@ -95,6 +96,21 @@ public class GoogleDriveFile implements FileProxy {
     @Override
     public Bookmark getBookmark() {
         return null;
+    }
+
+    @Override
+    public String getMimeType() {
+        String type = mFile.getMimeType();
+
+        if (type.startsWith("image")) {
+            return MimeTypes.MIME_IMAGE;
+        } else if (type.startsWith("video")) {
+            return MimeTypes.MIME_VIDEO;
+        } else if (type.startsWith("audio")) {
+            return MimeTypes.MIME_AUDIO;
+        }
+
+        return type;
     }
 
     public String getDownloadLink() {

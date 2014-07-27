@@ -69,6 +69,7 @@ public class MimeTypes {
     public static final String MIME_APPLICATION_XML = "application/xml";
     public static final String MIME_APPLICATION_ANDROID_PACKAGE = "application/xml-dtd";
     public static final String MIME_APPLICATION_XML_DTD = "application/vnd.android.package-archive";
+    public static final String MIME_IMAGE = "image/*";
     public static final String MIME_IMAGE_BMP = "image/bmp";
     public static final String MIME_IMAGE_CGM = "image/cgm";
     public static final String MIME_IMAGE_GIF = "image/gif";
@@ -86,6 +87,7 @@ public class MimeTypes {
     public static final String MIME_IMAGE_X_PORTABLE_GRAYMAP = "image/x-portable-graymap";
     public static final String MIME_IMAGE_X_PORTABLE_PIXMAP = "image/x-portable-pixmap";
     public static final String MIME_IMAGE_X_RGB = "image/x-rgb";
+    public static final String MIME_AUDIO = "audio/*";
     public static final String MIME_AUDIO_BASIC = "audio/basic";
     public static final String MIME_AUDIO_MIDI = "audio/midi";
     public static final String MIME_AUDIO_MPEG = "audio/mpeg";
@@ -110,6 +112,7 @@ public class MimeTypes {
     public static final String MIME_TEXT_VND_WAP_WMLSCRIPT = "text/vnd.wap.wmlscript";
     public static final String MIME_TEXT_X_SETEXT = "text/x-setext";
     public static final String MIME_TEXT_X_COMPONENT = "text/x-component";
+    public static final String MIME_VIDEO = "video/*";
     public static final String MIME_VIDEO_QUICKTIME = "video/quicktime";
     public static final String MIME_VIDEO_MPEG = "video/mpeg";
     public static final String MIME_VIDEO_VND_MPEGURL = "video/vnd.mpegurl";

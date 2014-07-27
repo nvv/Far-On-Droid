@@ -1,5 +1,8 @@
 package com.openfarmanager.android.core.network.datasource;
 
+import android.os.Handler;
+import android.util.Pair;
+
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.filesystem.FileProxy;
 import com.openfarmanager.android.model.NetworkEnum;
@@ -7,10 +10,18 @@ import com.openfarmanager.android.utils.Extensions;
 
 import java.util.List;
 
+import static com.openfarmanager.android.fragments.NetworkPanel.MSG_OPEN;
+
 /**
  * author: Vlad Namashko
  */
 public class GoogleDriveDataSource implements DataSource {
+
+    public Handler mHandler;
+
+    public GoogleDriveDataSource(Handler handler) {
+        mHandler = handler;
+    }
 
     @Override
     public String getNetworkType() {
@@ -51,5 +62,11 @@ public class GoogleDriveDataSource implements DataSource {
     @Override
     public boolean isSearchSupported() {
         return true;
+    }
+
+    @Override
+    public void open(FileProxy file) {
+        mHandler.sendMessage(mHandler.obtainMessage(MSG_OPEN, new Pair<FileProxy, String>(file,
+                App.sInstance.getGoogleDriveApi().getDownloadLink(file))));
     }
 }

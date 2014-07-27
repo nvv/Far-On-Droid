@@ -1,11 +1,12 @@
 package com.openfarmanager.android.filesystem;
 
 import com.openfarmanager.android.App;
+import com.openfarmanager.android.core.archive.MimeTypes;
 import com.openfarmanager.android.core.network.skydrive.JsonKeys;
 import com.openfarmanager.android.model.Bookmark;
+
 import org.json.JSONObject;
 
-import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -114,6 +115,25 @@ public class SkyDriveFile implements FileProxy {
     @Override
     public Bookmark getBookmark() {
         return null;
+    }
+
+    @Override
+    public String getMimeType() {
+        String type = tryGet(JsonKeys.TYPE, "");
+
+        if (type.equals("photo")) {
+            return MimeTypes.MIME_IMAGE;
+        } else if (type.equals("video")) {
+            return MimeTypes.MIME_VIDEO;
+        } else if (type.equals("audio")) {
+            return MimeTypes.MIME_AUDIO;
+        }
+
+        return type;
+    }
+
+    public String getSource() {
+        return tryGet(JsonKeys.SOURCE, "");
     }
 
     private String tryGet(String name, String defaultValue) {

@@ -108,4 +108,9 @@ public class DropboxFile implements FileProxy<DropboxAPI.Entry> {
     public Bookmark getBookmark() {
         return null;
     }
+
+    @Override
+    public String getMimeType() {
+        return mEntry.mimeType;
+    }
 }

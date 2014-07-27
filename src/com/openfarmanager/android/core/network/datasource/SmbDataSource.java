@@ -1,5 +1,7 @@
 package com.openfarmanager.android.core.network.datasource;
 
+import android.os.Handler;
+
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.filesystem.FileProxy;
 import com.openfarmanager.android.model.NetworkEnum;
@@ -11,6 +13,12 @@ import java.util.List;
  * @author Vlad Namashko
  */
 public class SmbDataSource implements DataSource {
+
+    public Handler mHandler;
+
+    public SmbDataSource(Handler handler) {
+        mHandler = handler;
+    }
 
     @Override
     public String getNetworkType() {
@@ -50,5 +58,10 @@ public class SmbDataSource implements DataSource {
     @Override
     public boolean isSearchSupported() {
         return false;
+    }
+
+    @Override
+    public void open(FileProxy file) {
+
     }
 }

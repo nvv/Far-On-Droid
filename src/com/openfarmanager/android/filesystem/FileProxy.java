@@ -38,4 +38,6 @@ public interface FileProxy<T> {
 
     public Bookmark getBookmark();
 
+    public String getMimeType();
+
 }

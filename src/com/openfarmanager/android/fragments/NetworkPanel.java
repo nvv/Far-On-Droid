@@ -1,13 +1,22 @@
 package com.openfarmanager.android.fragments;
 
+import android.app.Activity;
+import android.app.Dialog;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.text.TextUtils;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ListAdapter;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.openfarmanager.android.App;
@@ -22,7 +31,6 @@ import com.openfarmanager.android.core.network.datasource.SmbDataSource;
 import com.openfarmanager.android.core.network.datasource.YandexDiskDataSource;
 import com.openfarmanager.android.filesystem.FakeFile;
 import com.openfarmanager.android.filesystem.FileProxy;
-import com.openfarmanager.android.filesystem.FileSystemFile;
 import com.openfarmanager.android.model.FileActionEnum;
 import com.openfarmanager.android.model.NetworkAccount;
 import com.openfarmanager.android.model.NetworkEnum;
@@ -45,12 +53,18 @@ import static com.openfarmanager.android.controllers.FileSystemController.EXIT_F
  */
 public class NetworkPanel extends MainPanel {
 
+    public static final int MSG_SHOW_PROGRESS = 0;
+    public static final int MSG_HIDE_PROGRESS = 1;
+    public static final int MSG_OPEN = 2;
+
     private DataSource mDataSource;
     private OpenDirectoryTask mOpenDirectoryTask;
     private FileProxy mCurrentPath;
 
     protected FileProxy mLastSelectedFile;
     private NetworkAccount mCurrentNetworkAccount;
+
+    private Dialog mProgressDialog;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -61,7 +75,7 @@ public class NetworkPanel extends MainPanel {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
 
-                FileProxy file = (FileProxy) adapterView.getItemAtPosition(i);
+                final FileProxy file = (FileProxy) adapterView.getItemAtPosition(i);
                 if (mIsMultiSelectMode) {
                     updateLongClickSelection(adapterView, file, false);
                     return;
@@ -83,6 +97,8 @@ public class NetworkPanel extends MainPanel {
                         pathKey = pathKey.substring(0, pathKey.length() - 1);
                     }
                     mDirectorySelection.put(pathKey, mFileSystemList.getFirstVisiblePosition() + 1);
+                } else {
+                    mDataSource.open(file);
                 }
 
             }
@@ -128,22 +144,22 @@ public class NetworkPanel extends MainPanel {
     public void setNetworkType(NetworkEnum networkType) {
         switch (networkType) {
             case Dropbox:
-                mDataSource = new DropboxDataSource();
+                mDataSource = new DropboxDataSource(mHandler);
                 break;
             case SkyDrive:
-                mDataSource = new SkyDriveDataSource();
+                mDataSource = new SkyDriveDataSource(mHandler);
                 break;
             case FTP:
-                mDataSource = new FtpDataSource();
+                mDataSource = new FtpDataSource(mHandler);
                 break;
             case SMB:
-                mDataSource = new SmbDataSource();
+                mDataSource = new SmbDataSource(mHandler);
                 break;
             case YandexDisk:
-                mDataSource = new YandexDiskDataSource();
+                mDataSource = new YandexDiskDataSource(mHandler);
                 break;
             case GoogleDrive:
-                mDataSource = new GoogleDriveDataSource();
+                mDataSource = new GoogleDriveDataSource(mHandler);
                 break;
         }
     }
@@ -504,6 +520,68 @@ public class NetworkPanel extends MainPanel {
                 }
             }
         }
+    }
+
+    private Handler mHandler = new Handler() {
+
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+
+            Activity activity = getActivity();
+
+            if (activity == null || activity.isFinishing()) {
+                return;
+            }
+
+            switch (msg.what) {
+                case MSG_SHOW_PROGRESS:
+                    showProgressDialog();
+                    break;
+
+                case MSG_HIDE_PROGRESS:
+                    hideProgressDialog();
+                    break;
+
+                case MSG_OPEN:
+                    hideProgressDialog();
+                    Pair<FileProxy, String> data = (Pair<FileProxy, String>) msg.obj;
+
+                    Intent i = new Intent(Intent.ACTION_VIEW);
+                    i.setDataAndType(Uri.parse(data.second), data.first.getMimeType());
+                    startActivity(i);
+
+                    break;
+            }
+        }
+    };
+
+    private void hideProgressDialog() {
+        if (mProgressDialog != null) {
+            mProgressDialog.hide();
+            mProgressDialog = null;
+        }
+    }
+
+    private void showProgressDialog() {
+        if (mProgressDialog != null && mProgressDialog.isShowing()) {
+            mProgressDialog.hide();
+        }
+
+        Activity activity = getActivity();
+
+        if (activity == null) {
+            return;
+        }
+
+        mProgressDialog = new Dialog(activity, android.R.style.Theme_Translucent);
+        mProgressDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        mProgressDialog.setCancelable(false);
+        mProgressDialog.setContentView(R.layout.dialog_progress);
+
+        ((TextView) mProgressDialog.findViewById(R.id.progress_bar_text)).setText(R.string.loading);
+
+        mProgressDialog.show();
     }
 
 }

@@ -1,5 +1,7 @@
 package com.openfarmanager.android.core.network.datasource;
 
+import android.os.Handler;
+
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.filesystem.FileProxy;
 import com.openfarmanager.android.filesystem.FileSystemScanner;
@@ -19,6 +21,12 @@ import it.sauronsoftware.ftp4j.FTPFile;
  * @author Vlad Namashko
  */
 public class FtpDataSource implements DataSource {
+
+    public Handler mHandler;
+
+    public FtpDataSource(Handler handler) {
+        mHandler = handler;
+    }
 
     @Override
     public String getNetworkType() {
@@ -57,5 +65,10 @@ public class FtpDataSource implements DataSource {
     @Override
     public boolean isSearchSupported() {
         return false;
+    }
+
+    @Override
+    public void open(FileProxy file) {
+
     }
 }

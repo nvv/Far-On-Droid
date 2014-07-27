@@ -1,5 +1,7 @@
 package com.openfarmanager.android.core.network.datasource;
 
+import android.os.Handler;
+
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.filesystem.FileProxy;
 import com.openfarmanager.android.model.NetworkEnum;
@@ -10,6 +12,12 @@ import java.util.List;
  * @author Vlad Namashko
  */
 public class YandexDiskDataSource implements DataSource {
+
+    public Handler mHandler;
+
+    public YandexDiskDataSource(Handler handler) {
+        mHandler = handler;
+    }
 
     @Override
     public String getNetworkType() {
@@ -49,5 +57,10 @@ public class YandexDiskDataSource implements DataSource {
     @Override
     public boolean isSearchSupported() {
         return false;
+    }
+
+    @Override
+    public void open(FileProxy file) {
+
     }
 }

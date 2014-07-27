@@ -80,4 +80,9 @@ public class ArchiveFile extends ArchiveScanner.File implements FileProxy<Archiv
     public Bookmark getBookmark() {
         return null;
     }
+
+    @Override
+    public String getMimeType() {
+        return null;
+    }
 }

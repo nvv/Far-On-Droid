@@ -324,4 +324,6 @@ More network stuff will appear in future versions.
     <string name="today">Today</string>
     <string name="period">Period</string>
 
+    <string name="loading">Loading…</string>
+
 </resources>

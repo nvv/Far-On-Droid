@@ -25,4 +25,6 @@ public interface DataSource {
     void exitFromNetwork();
 
     boolean isSearchSupported();
+
+    void open(FileProxy file);
 }

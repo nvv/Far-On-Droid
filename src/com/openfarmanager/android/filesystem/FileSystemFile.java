@@ -97,6 +97,11 @@ public class FileSystemFile extends File implements FileProxy<File> {
     }
 
     @Override
+    public String getMimeType() {
+        return null;
+    }
+
+    @Override
     public boolean isBookmark() {
         return mIsBookmark;
     }

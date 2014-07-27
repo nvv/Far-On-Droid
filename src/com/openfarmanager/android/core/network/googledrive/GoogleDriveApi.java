@@ -7,21 +7,16 @@ import com.openfarmanager.android.R;
 import com.openfarmanager.android.core.DataStorageHelper;
 import com.openfarmanager.android.core.dbadapters.NetworkAccountDbAdapter;
 import com.openfarmanager.android.core.network.NetworkApi;
-import com.openfarmanager.android.core.network.skydrive.JsonKeys;
-import com.openfarmanager.android.filesystem.DropboxFile;
 import com.openfarmanager.android.filesystem.FileProxy;
 import com.openfarmanager.android.filesystem.FileSystemScanner;
 import com.openfarmanager.android.filesystem.GoogleDriveFile;
-import com.openfarmanager.android.googledrive.api.Api;
 import com.openfarmanager.android.googledrive.api.GoogleDriveWebApi;
 import com.openfarmanager.android.googledrive.model.About;
 import com.openfarmanager.android.googledrive.model.File;
 import com.openfarmanager.android.googledrive.model.Token;
 import com.openfarmanager.android.model.NetworkAccount;
 import com.openfarmanager.android.model.NetworkEnum;
-import com.yandex.disk.client.Credentials;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -180,6 +175,10 @@ public class GoogleDriveApi implements NetworkApi {
         }
         inputStream.close();
         outputStream.close();
+    }
+
+    public String getDownloadLink(FileProxy file) {
+        return mDriveApi.getDownloadLink(((GoogleDriveFile) file).getDownloadLink());
     }
 
     public List<FileProxy> getDirectoryFiles(String path) {

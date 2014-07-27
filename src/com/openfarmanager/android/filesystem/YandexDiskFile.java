@@ -88,4 +88,9 @@ public class YandexDiskFile implements FileProxy {
     public Bookmark getBookmark() {
         return null;
     }
+
+    @Override
+    public String getMimeType() {
+        return null;
+    }
 }
