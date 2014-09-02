@@ -11,7 +11,7 @@ import com.openfarmanager.android.utils.Extensions;
 
 import java.util.List;
 
-import static com.openfarmanager.android.fragments.NetworkPanel.MSG_OPEN;
+import static com.openfarmanager.android.fragments.NetworkPanel.MSG_NETWORK_OPEN;
 
 /**
  * @author Vlad Namashko
@@ -70,7 +70,7 @@ public class YandexDiskDataSource implements DataSource {
         YandexDiskFile diskFile = (YandexDiskFile) file;
 
         if (!Extensions.isNullOrEmpty(diskFile.getPublicUrl())) {
-            mHandler.sendMessage(mHandler.obtainMessage(MSG_OPEN, new Pair<FileProxy, String>(file, diskFile.getPublicUrl())));
+            mHandler.sendMessage(mHandler.obtainMessage(MSG_NETWORK_OPEN, new Pair<FileProxy, String>(file, diskFile.getPublicUrl())));
         }
     }
 }

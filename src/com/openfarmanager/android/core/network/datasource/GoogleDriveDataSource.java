@@ -10,7 +10,7 @@ import com.openfarmanager.android.utils.Extensions;
 
 import java.util.List;
 
-import static com.openfarmanager.android.fragments.NetworkPanel.MSG_OPEN;
+import static com.openfarmanager.android.fragments.NetworkPanel.MSG_NETWORK_OPEN;
 
 /**
  * author: Vlad Namashko
@@ -66,7 +66,7 @@ public class GoogleDriveDataSource implements DataSource {
 
     @Override
     public void open(FileProxy file) {
-        mHandler.sendMessage(mHandler.obtainMessage(MSG_OPEN, new Pair<FileProxy, String>(file,
+        mHandler.sendMessage(mHandler.obtainMessage(MSG_NETWORK_OPEN, new Pair<FileProxy, String>(file,
                 App.sInstance.getGoogleDriveApi().getDownloadLink(file))));
     }
 }

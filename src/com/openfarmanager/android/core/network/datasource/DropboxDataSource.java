@@ -15,9 +15,9 @@ import com.openfarmanager.android.utils.Extensions;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.openfarmanager.android.fragments.NetworkPanel.MSG_HIDE_PROGRESS;
-import static com.openfarmanager.android.fragments.NetworkPanel.MSG_OPEN;
-import static com.openfarmanager.android.fragments.NetworkPanel.MSG_SHOW_PROGRESS;
+import static com.openfarmanager.android.fragments.NetworkPanel.MSG_NETWORK_HIDE_PROGRESS;
+import static com.openfarmanager.android.fragments.NetworkPanel.MSG_NETWORK_OPEN;
+import static com.openfarmanager.android.fragments.NetworkPanel.MSG_NETWORK_SHOW_PROGRESS;
 
 /**
  * @author Vlad Namashko
@@ -80,16 +80,16 @@ public class DropboxDataSource implements DataSource {
 
     @Override
     public void open(final FileProxy file) {
-        mHandler.sendEmptyMessage(MSG_SHOW_PROGRESS);
+        mHandler.sendEmptyMessage(MSG_NETWORK_SHOW_PROGRESS);
 
         Extensions.runAsynk(new Runnable() {
             @Override
             public void run() {
                 try {
-                    mHandler.sendMessage(mHandler.obtainMessage(MSG_OPEN,
+                    mHandler.sendMessage(mHandler.obtainMessage(MSG_NETWORK_OPEN,
                             new Pair<FileProxy, String>(file, App.sInstance.getDropboxApi().media(file.getFullPath(), false).url)));
                 } catch (Exception e) {
-                    mHandler.sendEmptyMessage(MSG_HIDE_PROGRESS);
+                    mHandler.sendEmptyMessage(MSG_NETWORK_HIDE_PROGRESS);
                 }
             }
         });

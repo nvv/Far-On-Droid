@@ -10,7 +10,7 @@ import com.openfarmanager.android.model.NetworkEnum;
 
 import java.util.List;
 
-import static com.openfarmanager.android.fragments.NetworkPanel.MSG_OPEN;
+import static com.openfarmanager.android.fragments.NetworkPanel.MSG_NETWORK_OPEN;
 import static com.openfarmanager.android.utils.Extensions.isNullOrEmpty;
 
 /**
@@ -67,6 +67,6 @@ public class SkyDriveDataSource implements DataSource {
 
     @Override
     public void open(FileProxy file) {
-        mHandler.sendMessage(mHandler.obtainMessage(MSG_OPEN, new Pair<FileProxy, String>(file, ((SkyDriveFile) file).getSource())));
+        mHandler.sendMessage(mHandler.obtainMessage(MSG_NETWORK_OPEN, new Pair<FileProxy, String>(file, ((SkyDriveFile) file).getSource())));
     }
 }

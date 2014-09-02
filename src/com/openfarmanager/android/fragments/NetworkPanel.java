@@ -53,9 +53,9 @@ import static com.openfarmanager.android.controllers.FileSystemController.EXIT_F
  */
 public class NetworkPanel extends MainPanel {
 
-    public static final int MSG_SHOW_PROGRESS = 0;
-    public static final int MSG_HIDE_PROGRESS = 1;
-    public static final int MSG_OPEN = 2;
+    public static final int MSG_NETWORK_SHOW_PROGRESS = 100000;
+    public static final int MSG_NETWORK_HIDE_PROGRESS = 100001;
+    public static final int MSG_NETWORK_OPEN = 100002;
 
     private DataSource mDataSource;
     private OpenDirectoryTask mOpenDirectoryTask;
@@ -535,26 +535,33 @@ public class NetworkPanel extends MainPanel {
             }
 
             switch (msg.what) {
-                case MSG_SHOW_PROGRESS:
+                case MSG_NETWORK_SHOW_PROGRESS:
                     showProgressDialog();
                     break;
 
-                case MSG_HIDE_PROGRESS:
+                case MSG_NETWORK_HIDE_PROGRESS:
                     hideProgressDialog();
                     break;
 
-                case MSG_OPEN:
-                    hideProgressDialog();
-                    Pair<FileProxy, String> data = (Pair<FileProxy, String>) msg.obj;
+                case MSG_NETWORK_OPEN:
+                    open(msg);
+                    break;
 
-                    Intent i = new Intent(Intent.ACTION_VIEW);
-                    i.setDataAndType(Uri.parse(data.second), data.first.getMimeType());
-                    startActivity(i);
-
+                default:
+                    NetworkPanel.super.mHandler.sendMessage(Message.obtain(msg));
                     break;
             }
         }
     };
+
+    private void open(Message msg) {
+        hideProgressDialog();
+        Pair<FileProxy, String> data = (Pair<FileProxy, String>) msg.obj;
+
+        Intent i = new Intent(Intent.ACTION_VIEW);
+        i.setDataAndType(Uri.parse(data.second), data.first.getMimeType());
+        startActivity(i);
+    }
 
     private void hideProgressDialog() {
         if (mProgressDialog != null) {
