@@ -93,4 +93,8 @@ public class YandexDiskFile implements FileProxy {
     public String getMimeType() {
         return null;
     }
+
+    public String getPublicUrl() {
+        return mItem.getPublicUrl();
+    }
 }
