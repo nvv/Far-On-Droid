@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             android:layout_width="fill_parent"
+             android:background="@color/main_grey"
+             android:padding="5dp"
+             android:layout_height="fill_parent">
+
+    <LinearLayout
+            android:paddingTop="40dp"
+            android:paddingLeft="30dp"
+            android:paddingRight="30dp"
+            android:background="@drawable/confirm_dialog_frame"
+            android:orientation="vertical"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content">
+
+        <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content">
+
+            <TextView
+                    android:id="@+id/select_name"
+                    android:text="@string/file_name"
+                    android:background="@color/selected_item"
+                    android:padding="2dp"
+                    android:layout_marginRight="10dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+            <TextView
+                    android:id="@+id/select_date"
+                    android:text="@string/modified_date"
+                    android:padding="2dp"
+                    android:background="@color/main_grey"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+
+        </LinearLayout>
+
+        <ViewFlipper
+                android:id="@+id/pages"
+                android:layout_marginTop="10dp"
+                android:paddingTop="10dp"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent">
+
+            <LinearLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                <EditText
+                        android:id="@+id/selection_string"
+                        android:background="@color/selected_item"
+                        android:inputType="text"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"/>
+
+                <CheckBox
+                        android:id="@+id/invert_selection"
+                        android:text="@string/invert_selection"
+                        android:button="@drawable/check_box_selector"
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent"/>
+            </LinearLayout>
+
+            <TableLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent">
+
+                <TableRow>
+
+                    <TextView
+                            android:id="@+id/date_today"
+                            android:text="@string/today"
+                            android:background="@color/selected_item"
+                            android:padding="2dp"
+                            android:layout_marginBottom="10dp"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"/>
+                </TableRow>
+
+                <TableRow>
+
+                    <TextView
+                            android:id="@+id/date_period"
+                            android:text="@string/period"
+                            android:padding="2dp"
+                            android:background="@color/main_grey"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"/>
+
+                    <TextView
+                            android:id="@+id/date_from"
+                            android:padding="2dp"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"/>
+
+                    <TextView
+                            android:text="-"
+                            android:padding="2dp"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"/>
+
+                    <TextView
+                            android:id="@+id/date_to"
+                            android:padding="2dp"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"/>
+
+                </TableRow>
+
+            </TableLayout>
+        </ViewFlipper>
+
+        <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="fill_parent"
+                android:layout_marginTop="30dp"
+                android:layout_height="wrap_content">
+
+            <Button
+                    android:id="@+id/ok"
+                    android:text="@string/btn_ok"
+                    style="@style/dialog_button"
+                    android:layout_weight="0.5"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"/>
+
+            <Button
+                    android:id="@+id/cancel"
+                    android:text="@string/btn_cancel"
+                    style="@style/dialog_button"
+                    android:layout_weight="0.5"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"/>
+
+        </LinearLayout>
+    </LinearLayout>
+
+    <TextView
+            android:id="@+id/current_action"
+            android:text="@string/btn_select"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:textSize="16dp"
+            android:textColor="@color/white"
+            android:ellipsize="middle"
+            android:background="@color/main_grey"
+            android:layout_gravity="center_horizontal"/>
+
+</FrameLayout>

@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="fill_parent"
+              android:layout_height="fill_parent">
+    <ListView
+            android:background="@drawable/file_system_frame"
+            android:layout_gravity="top"
+            android:layout_marginTop="10dp"
+            android:paddingTop="18dp"
+            android:layout_height="fill_parent"
+            android:layout_width="fill_parent"
+            android:overScrollMode="never"
+            android:fadingEdge="none"
+            android:cacheColorHint="@color/transparent"
+            android:listSelector="@drawable/file_system_item_selector"
+            android:id="@android:id/list"/>
+
+    <TextView
+            android:id="@+id/selected_files_size"
+            android:layout_gravity="bottom|center_horizontal"
+            android:paddingLeft="2dp"
+            android:paddingRight="2dp"
+            android:textSize="13dp"
+            android:visibility="gone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+    <ProgressBar
+            android:id="@+id/loading"
+            android:visibility="gone"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_gravity="center"/>
+
+    <LinearLayout
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_marginRight="5dp"
+            android:layout_marginLeft="5dp"
+            android:layout_gravity="center_horizontal"
+            android:gravity="center">
+
+        <TextView
+                android:id="@+id/charset_left"
+                android:drawableRight="@drawable/charset"
+                android:paddingLeft="8dp"
+                android:paddingRight="8dp"
+                android:paddingTop="2dp"
+                android:paddingBottom="5dp"
+                android:visibility="gone"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"/>
+
+        <TextView
+                android:id="@+id/exit_left"
+                android:drawableRight="@drawable/network_exit"
+                android:paddingLeft="8dp"
+                android:paddingRight="8dp"
+                android:paddingTop="2dp"
+                android:paddingBottom="5dp"
+                android:visibility="gone"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"/>
+
+        <TextView
+                android:id="@+id/home_left"
+                android:drawableRight="@drawable/home"
+                android:paddingLeft="8dp"
+                android:paddingRight="8dp"
+                android:paddingTop="2dp"
+                android:paddingBottom="5dp"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"/>
+
+        <TextView
+                android:id="@+id/network_left"
+                android:drawableRight="@drawable/cloud"
+                android:paddingLeft="8dp"
+                android:paddingRight="8dp"
+                android:paddingTop="2dp"
+                android:paddingBottom="5dp"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"/>
+
+        <TextView
+                android:id="@+id/add_to_bookmarks_left"
+                android:drawableLeft="@drawable/add_bookmark"
+                android:paddingLeft="8dp"
+                android:paddingRight="8dp"
+                android:paddingTop="2dp"
+                android:paddingBottom="5dp"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"/>
+
+        <TextView
+                android:id="@+id/change_folder_to_right"
+                android:text="&lt;"
+                android:layout_weight="0"
+                android:textStyle="bold"
+                android:visibility="gone"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:layout_marginTop="-5dp"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"/>
+
+        <TextView
+                android:id="@+id/current_path"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:ellipsize="middle"
+                android:layout_weight="1"
+                android:textColor="@color/white"
+                android:padding="0dp"
+                android:gravity="center"
+                android:singleLine="true"
+                android:layout_gravity="center_horizontal"/>
+
+        <TextView
+                android:id="@+id/change_folder_to_left"
+                android:text="&gt;"
+                android:layout_weight="0"
+                android:visibility="gone"
+                android:textStyle="bold"
+                android:paddingRight="10dp"
+                android:paddingLeft="10dp"
+                android:layout_marginTop="-5dp"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"/>
+
+        <TextView
+                android:id="@+id/add_to_bookmarks_right"
+                android:drawableRight="@drawable/add_bookmark"
+                android:paddingLeft="8dp"
+                android:paddingRight="8dp"
+                android:paddingTop="2dp"
+                android:paddingBottom="5dp"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"/>
+
+        <TextView
+                android:id="@+id/network_right"
+                android:drawableRight="@drawable/cloud"
+                android:paddingLeft="8dp"
+                android:paddingRight="8dp"
+                android:paddingTop="2dp"
+                android:paddingBottom="5dp"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"/>
+
+        <TextView
+                android:id="@+id/home_right"
+                android:drawableRight="@drawable/home"
+                android:paddingLeft="8dp"
+                android:paddingRight="8dp"
+                android:paddingTop="2dp"
+                android:paddingBottom="5dp"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"/>
+
+        <TextView
+                android:id="@+id/exit_right"
+                android:visibility="gone"
+                android:drawableRight="@drawable/network_exit"
+                android:paddingLeft="8dp"
+                android:paddingRight="8dp"
+                android:paddingTop="2dp"
+                android:paddingBottom="5dp"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"/>
+
+        <TextView
+                android:id="@+id/charset_right"
+                android:visibility="gone"
+                android:drawableRight="@drawable/charset"
+                android:paddingLeft="8dp"
+                android:paddingRight="8dp"
+                android:paddingTop="2dp"
+                android:paddingBottom="5dp"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"/>
+
+    </LinearLayout>
+
+</FrameLayout>

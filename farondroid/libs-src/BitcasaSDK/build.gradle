@@ -1,0 +1,22 @@
+apply plugin: 'com.android.library'
+
+android {
+
+    compileSdkVersion rootProject.ext.compileSdkVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
+
+    sourceSets {
+        main {
+            manifest.srcFile 'AndroidManifest.xml'
+            java.srcDirs = ['src']
+            res.srcDirs = ['res']
+        }
+    }
+
+    dependencies{
+        compile fileTree(dir: '../../libs', include: 'android-support-v4.jar')
+        compile fileTree(dir: '../../libs', include: 'apache-mime4j-0.4.jar')
+        compile fileTree(dir: '../../libs', include: 'gson-2.2.2.jar')
+        compile fileTree(dir: '../../libs', include: 'httpmime-4.0-beta1.jar')
+    }
+}
