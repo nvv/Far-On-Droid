@@ -51,6 +51,7 @@ import com.openfarmanager.android.model.exeptions.InAppAuthException;
 import com.openfarmanager.android.model.exeptions.InitYandexDiskException;
 import com.openfarmanager.android.utils.FileUtilsExt;
 import com.openfarmanager.android.utils.SystemUtils;
+import com.openfarmanager.android.view.BitcasaLoginDialog;
 import com.openfarmanager.android.view.BookmarksListDialog;
 import com.openfarmanager.android.view.ExpandPanelAnimation;
 import com.openfarmanager.android.view.FtpAuthDialog;
@@ -1468,6 +1469,8 @@ public class FileSystemController {
         final Dialog dialog = new FtpAuthDialog(getActivePanel().getActivity(), mInAppAuthHandler);
         dialog.show();
         adjustDialogSize(dialog);
+//        BitcasaLoginDialog dialog = new BitcasaLoginDialog(getActivePanel().getActivity(), mInAppAuthHandler);
+//        dialog.showAtLocation(mMainView, Gravity.CENTER, 0, 0);
     }
 
     private void startSmbAuthentication() {
