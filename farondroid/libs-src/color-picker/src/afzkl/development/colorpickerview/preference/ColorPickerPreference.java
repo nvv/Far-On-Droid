@@ -28,8 +28,9 @@ public class ColorPickerPreference extends DialogPreference implements ColorPick
 	private boolean						showPreviewSelectedColorInList = true;
 	private int							colorPickerSliderColor = -1;
 	private int							colorPickerBorderColor = -1;
-	
-	
+    private ColorPickerView.OnColorChangedListener mOnColorChangedListener;
+    ColorPanelView mPreview;
+
 	public ColorPickerPreference(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		init(attrs);
@@ -120,16 +121,20 @@ public class ColorPickerPreference extends DialogPreference implements ColorPick
 	@Override
 	protected void onBindView(View view) {
 		super.onBindView(view);
-		
-		ColorPanelView preview = (ColorPanelView) view.findViewById(R.id.preference_preview_color_panel);
-		
-		if(preview != null) {
-			preview.setColor(mColor);
-		}
-		
-	}
-	
-	@Override
+
+        mPreview = (ColorPanelView) view.findViewById(R.id.preference_preview_color_panel);
+
+        setPreviewColor(mColor);
+
+    }
+
+    public void setPreviewColor(int color) {
+        if(mPreview != null) {
+            mPreview.setColor(color);
+        }
+    }
+
+    @Override
 	protected void onBindDialogView(View layout) {
 		super.onBindDialogView(layout);
 		
@@ -187,10 +192,18 @@ public class ColorPickerPreference extends DialogPreference implements ColorPick
 			persistInt(mColor);
 			
 			notifyChanged();
-			
+
+            if (mOnColorChangedListener != null) {
+                mOnColorChangedListener.onColorChanged(mColor);
+            }
 		}
 	}
-	
+
+    public void setDefaultColor(int color) {
+        mColor = color;
+        persistInt(color);
+    }
+
 	@Override
 	protected void onSetInitialValue(boolean restorePersistedValue, Object defaultValue) {		
 		if(restorePersistedValue) {
@@ -214,7 +227,9 @@ public class ColorPickerPreference extends DialogPreference implements ColorPick
 		mNewColorView.setColor(newColor);
 	}
 
-	
+	public void setOnColorChangedListener(ColorPickerView.OnColorChangedListener listener) {
+        mOnColorChangedListener = listener;
+    }
 
 	private static class SavedState extends BaseSavedState {
 	    // Member that holds the setting's value

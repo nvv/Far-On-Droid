@@ -11,8 +11,6 @@ import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
-import org.apache.http.entity.FileEntity;
-import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
@@ -58,6 +56,10 @@ public class GoogleDriveWebApi extends Api {
         List<File> files = new ArrayList<File>();
         list(files, null, String.format("title+contains+'%s'+and+trashed=false", title));
         return files;
+    }
+
+    public String getDownloadLink(String link) {
+        return link + '&' + getAuth();
     }
 
     public InputStream download(String downloadLink) throws IOException {
