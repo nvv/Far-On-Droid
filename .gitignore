@@ -1,3 +1,7 @@
 .idea
 .svn
 out
+build
+gen
+*.iml
+.gradle
