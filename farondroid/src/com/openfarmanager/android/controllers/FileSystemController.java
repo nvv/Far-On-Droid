@@ -1547,7 +1547,8 @@ public class FileSystemController {
 
     private void startGoogleDriveAuthentication() {
         GoogleDriveAuthWindow popupWindow = new GoogleDriveAuthWindow(getActivePanel().getActivity(), mInAppAuthHandler);
-        popupWindow.showAtLocation(mMainView, Gravity.CENTER, 0, 0);
+//        popupWindow.showAtLocation(mMainView, Gravity.CENTER, 0, 0);
+        popupWindow.show();
     }
 
     private void startSkyDriveAuthentication() {
