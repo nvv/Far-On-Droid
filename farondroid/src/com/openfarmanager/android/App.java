@@ -9,6 +9,7 @@ import com.openfarmanager.android.core.Settings;
 import com.openfarmanager.android.core.appmanager.AppManager;
 import com.openfarmanager.android.core.bookmark.BookmarkManager;
 import com.openfarmanager.android.core.network.NetworkApi;
+import com.openfarmanager.android.core.network.bitcasa.BitcasaApi;
 import com.openfarmanager.android.core.network.dropbox.DropboxAPI;
 import com.openfarmanager.android.core.network.ftp.FtpAPI;
 import com.openfarmanager.android.core.network.googledrive.GoogleDriveApi;
@@ -36,6 +37,7 @@ public class App extends Application {
     protected SmbAPI mSmbAPI;
     protected YandexDiskApi mYandexDiskApi;
     protected GoogleDriveApi mGoogleDriveApi;
+    protected BitcasaApi mBitcasaApi;
 
     @Override
     public void onCreate() {
@@ -58,6 +60,7 @@ public class App extends Application {
         mSmbAPI = new SmbAPI();
         mYandexDiskApi = new YandexDiskApi();
         mGoogleDriveApi = new GoogleDriveApi();
+        mBitcasaApi = new BitcasaApi();
 
         setLocale();
     }
@@ -122,6 +125,10 @@ public class App extends Application {
         return mGoogleDriveApi;
     }
 
+    public BitcasaApi getBitcasaApi() {
+        return mBitcasaApi;
+    }
+
     public NetworkApi getNetworkApi(NetworkEnum networkType) {
         switch (networkType) {
             case FTP:
@@ -136,6 +143,8 @@ public class App extends Application {
                 return mYandexDiskApi;
             case GoogleDrive:
                 return mGoogleDriveApi;
+            case Bitcasa:
+                return mBitcasaApi;
         }
     }
 }

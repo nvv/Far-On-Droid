@@ -6,9 +6,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
 
     defaultConfig {
-        minSdkVersion 11
-        versionCode 431
-        versionName "4.5"
+        minSdkVersion 8
+        versionCode 127
+        versionName "0.8"
     }
 
     sourceSets {

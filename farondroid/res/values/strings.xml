@@ -325,5 +325,6 @@ More network stuff will appear in future versions.
     <string name="period">Period</string>
 
     <string name="loading">Loading…</string>
+    <string name="restoring_bitcasa_session">Restoring Bitcasa session…</string>
 
 </resources>

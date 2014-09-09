@@ -321,4 +321,7 @@
     <string name="today">Сегодня</string>
     <string name="period">Период</string>
 
+    <string name="loading">Загрузка…</string>
+    <string name="restoring_bitcasa_session">Восстановление сессии Bitcasa…</string>
+
 </resources>
