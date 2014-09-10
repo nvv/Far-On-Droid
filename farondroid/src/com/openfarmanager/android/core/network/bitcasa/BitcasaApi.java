@@ -241,7 +241,7 @@ public class BitcasaApi implements NetworkApi {
     @Override
     public void delete(FileProxy file) throws Exception {
         FileMetaData folder = new FileMetaData();
-        folder.path = findPathId(findPathId(file.getId()));
+        folder.path = file.getId();
         if (file.isDirectory()) {
             folder.type = BitcasaRESTConstants.FileType.BITCASA_TYPE_FOLDER;
         }
