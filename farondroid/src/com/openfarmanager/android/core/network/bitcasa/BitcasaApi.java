@@ -274,8 +274,13 @@ public class BitcasaApi implements NetworkApi {
     }
 
     @Override
-    public boolean rename(String fullPath, String s) throws Exception {
-        return false;
+    public boolean rename(String fullPath, String name) throws Exception {
+        FileMetaData from = new FileMetaData();
+        from.path = findPathId(findPathId(fullPath));
+
+        mBitcasaClient.rename(from, name.substring(name.lastIndexOf("/") + 1, name.length()),
+                BitcasaRESTConstants.CollisionResolutions.OVERWRITE);
+        return true;
     }
 
     public static class BitcasaAccount extends NetworkAccount {
