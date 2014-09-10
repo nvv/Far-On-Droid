@@ -423,7 +423,12 @@ public class BitcasaClient {
     		throw new BitcasaFileException("Invalid local destination.");
     	
     	File local = new File(localDestination);
-    	if (!local.exists()) {
+
+        if (local.exists()) {
+            local.delete();
+        }
+
+        if (!local.exists()) {
 			if (!local.getParentFile().mkdirs() && !local.getParentFile().exists())
 				throw new BitcasaException(9007, "Appliation not authorized to perform this action");
 		}
