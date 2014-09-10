@@ -244,6 +244,21 @@ public class BitcasaApi implements NetworkApi {
 
     @Override
     public boolean createDirectory(String path) throws Exception {
+        String currentDir = path.substring(0, path.lastIndexOf("/"));
+        String name = path.substring(path.lastIndexOf("/") + 1, path.length());
+        try {
+            FileMetaData folder = new FileMetaData();
+            folder.path = findPathId(currentDir);
+
+            FileMetaData createdFolder = mBitcasaClient.addFolder(name, folder);
+
+            if (createdFolder != null) {
+                mFoldersAliases.put(createdFolder.path, path);
+                return true;
+            }
+        } catch (Exception ignore) {
+        }
+
         return false;
     }
 

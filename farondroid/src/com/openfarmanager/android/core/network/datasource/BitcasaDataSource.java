@@ -57,7 +57,7 @@ public class BitcasaDataSource implements DataSource {
 
     @Override
     public void exitFromNetwork() {
-
+        App.sInstance.getBitcasaApi().getFoldersAliases().clear();
     }
 
     @Override
