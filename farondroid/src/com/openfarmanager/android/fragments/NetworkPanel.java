@@ -2,6 +2,7 @@ package com.openfarmanager.android.fragments;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -569,7 +570,15 @@ public class NetworkPanel extends MainPanel {
 
         Intent i = new Intent(Intent.ACTION_VIEW);
         i.setDataAndType(Uri.parse(data.second), data.first.getMimeType());
-        startActivity(i);
+        try {
+            startActivity(i);
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (e instanceof ActivityNotFoundException) {
+                ToastNotification.makeText(App.sInstance.getApplicationContext(),
+                        getSafeString(R.string.error_activity_not_found), Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
     private void hideProgressDialog() {

@@ -323,5 +323,6 @@
 
     <string name="loading">Загрузка…</string>
     <string name="restoring_bitcasa_session">Восстановление сессии Bitcasa…</string>
+    <string name="error_activity_not_found">Не найдено приложение для обработки выбранного файла.</string>
 
 </resources>

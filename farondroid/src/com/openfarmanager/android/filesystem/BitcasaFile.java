@@ -106,4 +106,9 @@ public class BitcasaFile implements FileProxy {
     public String getMimeType() {
         return mMetaData.mime;
     }
+
+    public FileMetaData getMetaData() {
+        return mMetaData;
+    }
+
 }

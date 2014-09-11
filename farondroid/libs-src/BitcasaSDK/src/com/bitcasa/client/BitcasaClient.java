@@ -689,7 +689,22 @@ public class BitcasaClient {
 			return null; 
             
     }
-    
+
+    public String getDownloadLink(FileMetaData file) throws Exception {
+        StringBuilder method = new StringBuilder();
+        if (file.id != null && file.id.length() > 0)
+            method.append(BitcasaRESTConstants.FORESLASH).append(file.id);
+
+        method.append(BitcasaRESTConstants.FORESLASH).append(URLEncoder.encode(file.name, BitcasaRESTConstants.UTF_8_ENCODING));
+
+        StringBuilder params = new StringBuilder();
+        params.append(BitcasaRESTConstants.PARAM_ACCESS_TOKEN).append("=")
+                .append(mAuthentication.getAccess_token());
+
+        params.append("&").append(BitcasaRESTConstants.PARAM_PATH).append("=").append(file.path);
+        return mBitcasaRESTUtility.getRequestUrl(BitcasaRESTConstants.METHOD_FILES, method.toString(), params);
+    }
+
     /**
      * Delete a file or a folder from Bitcasa Infinite Drive
      * @param file

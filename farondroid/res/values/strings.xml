@@ -326,5 +326,6 @@ More network stuff will appear in future versions.
 
     <string name="loading">Loading…</string>
     <string name="restoring_bitcasa_session">Restoring Bitcasa session…</string>
+    <string name="error_activity_not_found">No Activity found to handle selected file.</string>
 
 </resources>
