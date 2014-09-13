@@ -53,6 +53,7 @@ import static com.openfarmanager.android.utils.Extensions.*;
 import com.openfarmanager.android.model.exeptions.InAppAuthException;
 import com.openfarmanager.android.model.exeptions.InitYandexDiskException;
 import com.openfarmanager.android.utils.FileUtilsExt;
+import com.openfarmanager.android.utils.NetworkUtil;
 import com.openfarmanager.android.utils.SystemUtils;
 import com.openfarmanager.android.view.BitcasaLoginDialog;
 import com.openfarmanager.android.view.BookmarksListDialog;
@@ -445,7 +446,11 @@ public class FileSystemController {
                     EasyTracker.getInstance(App.sInstance).send(MapBuilder.createAppView().set(Fields.SCREEN_NAME, "CreateBookmark").build());
                     break;
                 case OPEN_NETWORK:
-                    showNetworksDialog();
+                    if (NetworkUtil.isNetworkAvailable()) {
+                        showNetworksDialog();
+                    } else {
+                        ToastNotification.makeText(activePanel.getActivity(), App.sInstance.getString(R.string.error_no_network),  Toast.LENGTH_LONG).show();
+                    }
                     break;
                 case EXIT_FROM_NETWORK_STORAGE:
                     exitFromNetworkStorage((Integer) msg.obj == MainPanel.LEFT_PANEL ? mLeftNetworkPanel : mRightNetworkPanel);

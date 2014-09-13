@@ -1,5 +1,11 @@
 package com.openfarmanager.android.utils;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+
+import com.openfarmanager.android.App;
+
 import java.text.ParseException;
 import java.util.StringTokenizer;
 import java.util.regex.Pattern;
@@ -458,5 +464,23 @@ public class NetworkUtil {
             r[i] = new Integer(~a[i]).byteValue();
         }
         return r;
+    }
+
+    public static boolean isNetworkAvailable() {
+        return NetworkInfo.State.CONNECTED == getState();
+    }
+
+    public static NetworkInfo.State getState() {
+        ConnectivityManager mgr = (ConnectivityManager) App.sInstance.getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (mgr != null) {
+            try {
+                NetworkInfo info = mgr.getActiveNetworkInfo();
+                if (info != null) {
+                    return info.getState();
+                }
+            } catch (SecurityException ignored) {
+            }
+        }
+        return null;
     }
 }
