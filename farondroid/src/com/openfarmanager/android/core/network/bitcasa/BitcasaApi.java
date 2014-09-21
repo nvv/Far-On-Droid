@@ -16,6 +16,7 @@ import com.openfarmanager.android.core.dbadapters.NetworkAccountDbAdapter;
 import com.openfarmanager.android.core.network.NetworkApi;
 import com.openfarmanager.android.filesystem.BitcasaFile;
 import com.openfarmanager.android.filesystem.FileProxy;
+import com.openfarmanager.android.filesystem.FileSystemScanner;
 import com.openfarmanager.android.googledrive.model.About;
 import com.openfarmanager.android.googledrive.model.Token;
 import com.openfarmanager.android.model.NetworkAccount;
@@ -122,6 +123,8 @@ public class BitcasaApi implements NetworkApi {
             for (FileMetaData metaData : allFiles) {
                 files.add(new BitcasaFile(metaData, path));
             }
+
+            FileSystemScanner.sInstance.sort(files);
 
             if (files.size() > 0 && path != null && path.equals("/")) {
                 mFoldersAliases.put(files.get(0).getParentPath(), path);
