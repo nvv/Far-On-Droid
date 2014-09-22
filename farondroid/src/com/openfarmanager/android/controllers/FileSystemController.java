@@ -876,6 +876,7 @@ public class FileSystemController {
 
                 return false;
             } else {
+                panel.unselectAll();
                 panel.navigateParent();
                 return true;
             }

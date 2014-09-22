@@ -309,6 +309,10 @@ public class MainPanel extends BaseFileSystemPanel {
         }
     }
 
+    public void unselectAll() {
+        mSelectedFiles.clear();
+    }
+
     protected void onNavigationItemSelected(int pos, List<String> items) {
         File f = new File(TextUtils.join("/", items.subList(0, pos + 1)));
         if (f.exists() && f.canRead()) {
@@ -905,6 +909,7 @@ public class MainPanel extends BaseFileSystemPanel {
             return;
         }
 
+        System.out.println(":::::::::::::::---------");
         setSelectedFilesSizeVisibility();
 
         File oldDir = mBaseDir;
