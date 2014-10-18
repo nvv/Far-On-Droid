@@ -1,6 +1,7 @@
 package com.openfarmanager.android.fragments;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
@@ -126,14 +127,16 @@ public class MainToolbarPanel extends Fragment {
         View.OnTouchListener mAltListener = new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
+                Settings settings = App.sInstance.getSettings();
                 if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
-                    if (!SystemUtils.isHoneycombOrNever()) {
+                    if (!SystemUtils.isHoneycombOrNever() || settings.isHoldAltOnTouch()) {
                         view.setSelected(!view.isSelected());
-                        view.setBackgroundResource(view.isSelected() ? R.color.grey_button : R.color.selected_item);
+                        view.setBackgroundColor(view.isSelected() ?
+                            Color.parseColor(getString(R.color.grey_button)) : settings.getSecondaryColor());
                     }
                     sendMessage(ALT_DOWN);
                 } else if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
-                    if (SystemUtils.isHoneycombOrNever()) {
+                    if (SystemUtils.isHoneycombOrNever() && !settings.isHoldAltOnTouch()) {
                         sendMessage(ALT_UP);
                     }
                 }

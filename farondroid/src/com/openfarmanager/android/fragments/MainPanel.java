@@ -909,7 +909,6 @@ public class MainPanel extends BaseFileSystemPanel {
             return;
         }
 
-        System.out.println(":::::::::::::::---------");
         setSelectedFilesSizeVisibility();
 
         File oldDir = mBaseDir;

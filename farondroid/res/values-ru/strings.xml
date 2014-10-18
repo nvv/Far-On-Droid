@@ -326,4 +326,7 @@
     <string name="error_activity_not_found">Не найдено приложение для обработки выбранного файла.</string>
     <string name="error_no_network">Проблема с подключением к Интернету.</string>
 
+    <string name="hold_alt_by_click">Автоматическое удерживание \'Alt\' нажатием</string>
+    <string name="hold_alt_by_click_summary">Разрешить режим \'мультивыбора\' файлов кликом (а не удерживанием) по \'Alt\'</string>
+
 </resources>

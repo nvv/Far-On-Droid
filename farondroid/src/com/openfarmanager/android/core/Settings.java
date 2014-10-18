@@ -50,6 +50,7 @@ public class Settings {
     public static final String INSTALL_COLOR = "install_color";
     public static final String ARCHIVE_COLOR = "archive_color";
     public static final String SHOW_SELECTED_FILES_SIZE = "show_selected_files_size";
+    public static final String HOLD_ALT_BY_CLICK = "hold_alt_by_click";
 
     private static File sSdCard;
     public static String sSdPath;
@@ -454,5 +455,9 @@ public class Settings {
 
     public void importSettings() {
 
+    }
+
+    public boolean isHoldAltOnTouch() {
+        return getSharedPreferences().getBoolean(HOLD_ALT_BY_CLICK, false);
     }
 }

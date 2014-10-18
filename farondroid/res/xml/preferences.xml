@@ -94,6 +94,12 @@
                 android:title="@string/force_use_en_locale"
                 android:widgetLayout="@layout/check_box_preference"/>
 
+        <CheckBoxPreference
+            android:key="hold_alt_by_click"
+            android:title="@string/hold_alt_by_click"
+            android:summary="@string/hold_alt_by_click_summary"
+            android:widgetLayout="@layout/check_box_preference"/>
+
         <PreferenceScreen
                 android:key="style"
                 android:title="@string/style"

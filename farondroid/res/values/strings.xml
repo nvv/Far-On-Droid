@@ -329,4 +329,7 @@ More network stuff will appear in future versions.
     <string name="error_activity_not_found">No Activity found to handle selected file.</string>
     <string name="error_no_network">There seems to be a problem with the Internet connection.</string>
 
+    <string name="hold_alt_by_click">Auto hold \'Alt\' by click</string>
+    <string name="hold_alt_by_click_summary">Enable \'multi select\' file mode by click (not hold) on \'Alt\'</string>
+
 </resources>

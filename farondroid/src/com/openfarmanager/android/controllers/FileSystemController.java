@@ -257,7 +257,7 @@ public class FileSystemController {
 
             switch (msg.what) {
                 case ALT_DOWN:
-                    if (SystemUtils.isHoneycombOrNever()) {
+                    if (SystemUtils.isHoneycombOrNever() && !App.sInstance.getSettings().isHoldAltOnTouch()) {
                         if (getLeftVisiblePanel() != null) {
                             getLeftVisiblePanel().setIsMultiSelectMode(true);
                         }
