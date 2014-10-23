@@ -182,6 +182,13 @@ public class MainPanel extends BaseFileSystemPanel {
             }
         });
 
+        layout.findViewById(R.id.quick_action_delete).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mHandler.sendMessage(mHandler.obtainMessage(FILE_ACTION, FileActionEnum.DELETE));
+            }
+        });
+
         mFileSystemList.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
 
         mCurrentPathView = (TextView) view.findViewById(R.id.current_path);
