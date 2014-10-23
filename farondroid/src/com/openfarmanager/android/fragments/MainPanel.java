@@ -1,14 +1,16 @@
 package com.openfarmanager.android.fragments;
 
+import android.app.Activity;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -86,6 +88,8 @@ public class MainPanel extends BaseFileSystemPanel {
     protected ConfirmActionDialog mConfirmDialog;
 
     protected TextView mSelectedFilesSize;
+
+    protected PopupWindow mQuickActionPopup;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -165,15 +169,19 @@ public class MainPanel extends BaseFileSystemPanel {
         });
 
 
-        /*
-        mFileSystemList.setOnTouchListener(new View.OnTouchListener() {
+        View layout = ((LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE)).
+                inflate(R.layout.quick_action_popup, null);
+        mQuickActionPopup = new PopupWindow(layout, WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.WRAP_CONTENT);
+        mQuickActionPopup.setContentView(layout);
+
+        layout.findViewById(R.id.quick_action_copy).setOnClickListener(new View.OnClickListener() {
             @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                gainFocus();
-                return false;
+            public void onClick(View v) {
+                mHandler.sendMessage(mHandler.obtainMessage(FILE_ACTION, FileActionEnum.COPY));
             }
         });
-        */
+
         mFileSystemList.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
 
         mCurrentPathView = (TextView) view.findViewById(R.id.current_path);
@@ -406,6 +414,7 @@ public class MainPanel extends BaseFileSystemPanel {
 
         setSelectedFilesSizeVisibility();
         calculateSelectedFilesSize();
+        showQuickActionPanel();
     }
 
     private void calculateSelectedFilesSize() {
@@ -415,6 +424,31 @@ public class MainPanel extends BaseFileSystemPanel {
         }
 
         mSelectedFilesSize.setText(getString(R.string.selected_files, CustomFormatter.formatBytes(size), mSelectedFiles.size()));
+    }
+
+    private void showQuickActionPanel() {
+
+        if (mQuickActionPopup == null) {
+            return;
+        }
+
+        boolean showPanel = isFileSystemPanel() &&
+                App.sInstance.getSettings().isShowQuickActionPanel() && mSelectedFiles.size() > 0;
+
+        try {
+
+            if (showPanel) {
+                if (!mQuickActionPopup.isShowing()) {
+                    mQuickActionPopup.showAtLocation(mFileSystemList,
+                            (mPanelLocation == LEFT_PANEL ? Gravity.LEFT : Gravity.RIGHT) | Gravity.TOP, 50, 50);
+                }
+            } else {
+                mQuickActionPopup.dismiss();
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void openFileActionMenu() {
@@ -726,6 +760,7 @@ public class MainPanel extends BaseFileSystemPanel {
         adapter.setSelectedFiles(mSelectedFiles);
         adapter.notifyDataSetChanged();
         setSelectedFilesSizeVisibility();
+        showQuickActionPanel();
     }
 
     private void openFile(File item) {
@@ -910,6 +945,7 @@ public class MainPanel extends BaseFileSystemPanel {
         }
 
         setSelectedFilesSizeVisibility();
+        showQuickActionPanel();
 
         File oldDir = mBaseDir;
         mBaseDir = directory.getAbsoluteFile();
@@ -1011,6 +1047,7 @@ public class MainPanel extends BaseFileSystemPanel {
         adapter.notifyDataSetChanged();
         setSelectedFilesSizeVisibility();
         calculateSelectedFilesSize();
+        showQuickActionPanel();
     }
 
     /**

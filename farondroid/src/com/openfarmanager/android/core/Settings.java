@@ -449,6 +449,10 @@ public class Settings {
         return getSharedPreferences().getBoolean(SHOW_SELECTED_FILES_SIZE, false);
     }
 
+    public boolean isShowQuickActionPanel() {
+        return true;
+    }
+
     public void exportSettings() {
 
     }
