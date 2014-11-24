@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -171,8 +172,13 @@ public class MainPanel extends BaseFileSystemPanel {
 
         View layout = ((LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE)).
                 inflate(R.layout.quick_action_popup, null);
+
+        layout.setBackgroundColor(App.sInstance.getSettings().getSecondaryColor());
+        layout.getBackground().setAlpha(170);
+
         mQuickActionPopup = new PopupWindow(layout, WindowManager.LayoutParams.WRAP_CONTENT,
                 WindowManager.LayoutParams.WRAP_CONTENT);
+        mQuickActionPopup.setAnimationStyle(R.style.QuickActionPopupAnimation);
         mQuickActionPopup.setContentView(layout);
 
         layout.findViewById(R.id.quick_action_copy).setOnClickListener(new View.OnClickListener() {
@@ -446,8 +452,11 @@ public class MainPanel extends BaseFileSystemPanel {
 
             if (showPanel) {
                 if (!mQuickActionPopup.isShowing()) {
-                    mQuickActionPopup.showAtLocation(mFileSystemList,
-                            (mPanelLocation == LEFT_PANEL ? Gravity.LEFT : Gravity.RIGHT) | Gravity.TOP, 50, 50);
+
+                    int offset = (int) (50 * getResources().getDisplayMetrics().density);
+
+                    mQuickActionPopup.showAtLocation(mFileSystemList, (mPanelLocation == LEFT_PANEL ?
+                            Gravity.LEFT : Gravity.RIGHT) | Gravity.TOP, offset, offset);
                 }
             } else {
                 mQuickActionPopup.dismiss();
