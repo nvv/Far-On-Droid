@@ -51,6 +51,7 @@ public class Settings {
     public static final String ARCHIVE_COLOR = "archive_color";
     public static final String SHOW_SELECTED_FILES_SIZE = "show_selected_files_size";
     public static final String HOLD_ALT_BY_CLICK = "hold_alt_by_click";
+    public static final String SHOW_QUICK_ACTION_PANEL = "show_quick_action_panel";
 
     private static File sSdCard;
     public static String sSdPath;
@@ -450,7 +451,7 @@ public class Settings {
     }
 
     public boolean isShowQuickActionPanel() {
-        return true;
+        return getSharedPreferences().getBoolean(SHOW_QUICK_ACTION_PANEL, true);
     }
 
     public void exportSettings() {

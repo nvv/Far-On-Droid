@@ -331,5 +331,7 @@ More network stuff will appear in future versions.
 
     <string name="hold_alt_by_click">Auto hold \'Alt\' by click</string>
     <string name="hold_alt_by_click_summary">Enable \'multi select\' file mode by click (not hold) on \'Alt\'</string>
+    <string name="show_quick_action_panel">Show quick action panel</string>
+    <string name="show_quick_action_panel_summary">Show panel to quick access for main operations on selected files</string>
 
 </resources>

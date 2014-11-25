@@ -100,6 +100,12 @@
             android:summary="@string/hold_alt_by_click_summary"
             android:widgetLayout="@layout/check_box_preference"/>
 
+        <CheckBoxPreference
+            android:key="show_quick_action_panel"
+            android:title="@string/show_quick_action_panel"
+            android:summary="@string/show_quick_action_panel_summary"
+            android:widgetLayout="@layout/check_box_preference"/>
+
         <PreferenceScreen
                 android:key="style"
                 android:title="@string/style"
