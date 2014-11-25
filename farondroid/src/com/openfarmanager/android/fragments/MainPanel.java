@@ -195,6 +195,14 @@ public class MainPanel extends BaseFileSystemPanel {
             }
         });
 
+        layout.findViewById(R.id.quick_action_deselect).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                unselectAll();
+                invalidate();
+            }
+        });
+
         mFileSystemList.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
 
         mCurrentPathView = (TextView) view.findViewById(R.id.current_path);
