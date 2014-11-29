@@ -30,7 +30,6 @@ import com.openfarmanager.android.fragments.MainToolbarPanel;
 import com.openfarmanager.android.model.NetworkEnum;
 import com.openfarmanager.android.tips.MainTips;
 import com.openfarmanager.android.utils.Extensions;
-import com.openfarmanager.android.view.TipsDialog;
 import com.openfarmanager.android.view.ToastNotification;
 
 import java.util.regex.Matcher;
@@ -123,7 +122,7 @@ public class Main extends FragmentActivity {
     private void showTips() {
         Settings settings = App.sInstance.getSettings();
         if (settings.isShowTips()) {
-            startActivity(new Intent(App.sInstance.getApplicationContext(), TipsActivity.class));
+
             settings.getSharedPreferences().edit().putBoolean(Settings.SHOW_TIPS, false).commit();
         }
     }
