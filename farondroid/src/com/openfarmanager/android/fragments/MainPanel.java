@@ -438,7 +438,7 @@ public class MainPanel extends BaseFileSystemPanel {
         showQuickActionPanel();
     }
 
-    private void calculateSelectedFilesSize() {
+    protected void calculateSelectedFilesSize() {
         long size = 0;
         for (FileProxy f : mSelectedFiles) {
             size += f.isDirectory() ? 0 : f.getSize();
@@ -447,14 +447,14 @@ public class MainPanel extends BaseFileSystemPanel {
         mSelectedFilesSize.setText(getString(R.string.selected_files, CustomFormatter.formatBytes(size), mSelectedFiles.size()));
     }
 
-    private void showQuickActionPanel() {
+    protected void showQuickActionPanel() {
 
         if (mQuickActionPopup == null) {
             return;
         }
 
-        boolean showPanel = isFileSystemPanel() &&
-                App.sInstance.getSettings().isShowQuickActionPanel() && mSelectedFiles.size() > 0;
+        boolean showPanel = (isFileSystemPanel() || this instanceof NetworkPanel) &&
+                App.sInstance.getSettings().isShowQuickActionPanel() && getSelectedFilesCount() > 0;
 
         try {
 
@@ -987,7 +987,7 @@ public class MainPanel extends BaseFileSystemPanel {
         }
     }
 
-    private void setSelectedFilesSizeVisibility() {
+    protected void setSelectedFilesSizeVisibility() {
         mSelectedFilesSize.setVisibility((!App.sInstance.getSettings().isShowSelectedFilesSize() || mSelectedFiles.size() == 0) ?
                 View.GONE : View.VISIBLE);
     }
@@ -1008,11 +1008,11 @@ public class MainPanel extends BaseFileSystemPanel {
     }
 
     @Override
-    public void select(SelectParams selectParams) {
+    public int select(SelectParams selectParams) {
 
         if (mBaseDir == null) {
             // handle unexpected situation.
-            return;
+            return 0;
         }
 
         mSelectedFiles.clear();
@@ -1072,6 +1072,8 @@ public class MainPanel extends BaseFileSystemPanel {
         setSelectedFilesSizeVisibility();
         calculateSelectedFilesSize();
         showQuickActionPanel();
+
+        return mSelectedFiles.size();
     }
 
     /**

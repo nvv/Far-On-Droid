@@ -562,6 +562,10 @@ public class FileSystemController {
         dstPanel.gainFocus();
     }
 
+    public void setInitActivePanel() {
+        setActivePanel(mLeftPanel);
+    }
+
     protected void setActivePanel(MainPanel activePanel) {
 
         // remove focus from all panels

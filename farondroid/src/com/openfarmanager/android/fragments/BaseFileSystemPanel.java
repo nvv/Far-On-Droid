@@ -637,7 +637,7 @@ public abstract class BaseFileSystemPanel extends BasePanel {
 
     protected abstract String getCurrentPath();
 
-    public abstract void select(SelectParams selectParams);
+    public abstract int select(SelectParams selectParams);
 
     protected abstract void onNavigationItemSelected(int pos, List<String> items);
 

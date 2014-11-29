@@ -219,6 +219,10 @@ public class NetworkPanel extends MainPanel {
 
         adapter.setSelectedFiles(mSelectedFiles);
         adapter.notifyDataSetChanged();
+
+        setSelectedFilesSizeVisibility();
+        calculateSelectedFilesSize();
+        showQuickActionPanel();
     }
 
     protected FileActionEnum[] getAvailableActions() {
@@ -282,6 +286,8 @@ public class NetworkPanel extends MainPanel {
 
     public void invalidate() {
         openDirectory(mDataSource.getParentPath(getCurrentPath()), false);
+        setSelectedFilesSizeVisibility();
+        showQuickActionPanel();
     }
 
     private void setCurrentPath(String path) {
@@ -326,7 +332,7 @@ public class NetworkPanel extends MainPanel {
     }
 
     @Override
-    public void select(SelectParams selectParams) {
+    public int select(SelectParams selectParams) {
 
         NetworkEntryAdapter adapter = (NetworkEntryAdapter) mFileSystemList.getAdapter();
         List<FileProxy> allFiles = adapter.getFiles();
@@ -385,6 +391,12 @@ public class NetworkPanel extends MainPanel {
 
         adapter.setSelectedFiles(mSelectedFiles);
         adapter.notifyDataSetChanged();
+
+        setSelectedFilesSizeVisibility();
+        calculateSelectedFilesSize();
+        showQuickActionPanel();
+
+        return mSelectedFiles.size();
     }
 
     private void handleError(NetworkException e) {
