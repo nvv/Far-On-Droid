@@ -5,6 +5,11 @@ android {
     compileSdkVersion rootProject.ext.compileSdkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
 
+    lintOptions {
+        checkReleaseBuilds false
+        abortOnError false
+    }
+
     defaultConfig {
         minSdkVersion 8
         versionCode 127
@@ -25,6 +30,7 @@ android {
         compile project(':farondroid:libs-src:googledrive')
         compile project(':farondroid:libs-src:skydrive:src')
         compile project(':farondroid:libs-src:yandexdisk:sdk')
+        compile project(':farondroid:libs-src:showcase-library:src:main')
 
         compile fileTree(dir: 'libs', include: '*.jar')
     }

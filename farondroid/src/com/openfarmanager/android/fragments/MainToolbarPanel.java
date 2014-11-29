@@ -2,7 +2,6 @@ package com.openfarmanager.android.fragments;
 
 import android.content.Context;
 import android.graphics.Color;
-import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.DialogFragment;
@@ -25,6 +24,11 @@ public class MainToolbarPanel extends Fragment {
     private Handler mHandler;
     private float mDensity;
     private int mMinWidth;
+
+    private View mAltView;
+    private View mApplicationsView;
+    private View mQuickView;
+    private View mMoreView;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -52,6 +56,22 @@ public class MainToolbarPanel extends Fragment {
         if (mToolbar != null) {
             mToolbar.setHandler(handler);
         }
+    }
+
+    public View getAltView() {
+        return mAltView;
+    }
+
+    public View getApplicationsView() {
+        return mApplicationsView;
+    }
+
+    public View getQuickView() {
+        return mQuickView;
+    }
+
+    public View getMoreView() {
+        return mMoreView;
     }
 
     private class MainToolbar extends LinearLayout {
@@ -184,7 +204,24 @@ public class MainToolbarPanel extends Fragment {
 
             for (int i = 0; i < mMenu.size(); i++) {
                 MenuItem item = mMenu.getItem(i);
-                mViews.put(i * 100, getTextView(item));
+                TextView view = getTextView(item);
+                mViews.put(i * 100, view);
+
+                switch (item.getItemId()) {
+                    case R.id.action_alt:
+                        mAltView = view;
+                        break;
+                    case R.id.action_applauncher:
+                        mApplicationsView = view;
+                        break;
+                    case R.id.action_quckview:
+                        mQuickView = view;
+                        break;
+                    case R.id.menu_more:
+                        mMoreView = view;
+                        break;
+                }
+
             }
 
             int expanded = 0;
@@ -283,7 +320,7 @@ public class MainToolbarPanel extends Fragment {
     /**
      * Used to show select dialog for non-expanded groups
      */
-    private static class SubMenuDialog extends BaseDialog {
+    public static class SubMenuDialog extends BaseDialog {
 
         private MenuItem menu;
         private OnActionSelectedListener listener;

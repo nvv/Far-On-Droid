@@ -500,7 +500,7 @@ public class FileSystemController {
         }
     };
 
-    private void expandPanel(boolean expandLeftPanel) {
+    public void expandPanel(boolean expandLeftPanel) {
         ExpandPanelAnimation animation = null;
 
         switch (mPanelsState) {

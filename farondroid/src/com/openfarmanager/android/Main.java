@@ -26,7 +26,9 @@ import com.openfarmanager.android.controllers.FileSystemController;
 import com.openfarmanager.android.controllers.FileSystemControllerSmartphone;
 import com.openfarmanager.android.core.Settings;
 import com.openfarmanager.android.core.network.dropbox.DropboxAPI;
+import com.openfarmanager.android.fragments.MainToolbarPanel;
 import com.openfarmanager.android.model.NetworkEnum;
+import com.openfarmanager.android.tips.MainTips;
 import com.openfarmanager.android.utils.Extensions;
 import com.openfarmanager.android.view.TipsDialog;
 import com.openfarmanager.android.view.ToastNotification;
@@ -93,6 +95,8 @@ public class Main extends FragmentActivity {
         if (isHardwareKeyboardAvailable()) {
             ToastNotification.makeText(App.sInstance.getApplicationContext(), getString(R.string.hardware_keyboard), Toast.LENGTH_LONG).show();
         }
+
+        new MainTips(this, mFileSystemController, (MainToolbarPanel) getSupportFragmentManager().findFragmentById(R.id.toolbar));
     }
 
     private boolean isHardwareKeyboardAvailable() {
