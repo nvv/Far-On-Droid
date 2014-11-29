@@ -1,6 +1,8 @@
 package com.openfarmanager.android.tips;
 
 import android.app.Activity;
+import android.graphics.Point;
+import android.support.v4.view.ViewPager;
 import android.view.View;
 import android.view.ViewTreeObserver;
 
@@ -9,6 +11,7 @@ import com.github.amlcurran.showcaseview.targets.ViewTarget;
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.R;
 import com.openfarmanager.android.controllers.FileSystemController;
+import com.openfarmanager.android.fragments.MainPanel;
 import com.openfarmanager.android.fragments.MainToolbarPanel;
 import com.openfarmanager.android.model.SelectParams;
 
@@ -23,6 +26,8 @@ public class MainTips {
     private FileSystemController mFileSystemController;
     private MainToolbarPanel mMainToolbarPanel;
 
+    private View mRootAnchor;
+    private Point mCurrentPathViewPoint;
 
     private Activity mActivity;
 
@@ -31,72 +36,109 @@ public class MainTips {
         mFileSystemController = controller;
         mMainToolbarPanel = panel;
 
+        mFileSystemController.setInitActivePanel();
         init();
     }
 
     private void init() {
-        final View anchor = mActivity.findViewById(App.sInstance.getSettings().isMultiPanelMode() ? R.id.panel_left : R.id.panels_holder);
-        anchor.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+        mRootAnchor = mActivity.findViewById(App.sInstance.getSettings().isMultiPanelMode() ? R.id.panel_left : R.id.panels_holder);
+        mRootAnchor.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
-                anchor.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+                mRootAnchor.getViewTreeObserver().removeGlobalOnLayoutListener(this);
                 mShowCaseView = new ShowcaseView.Builder(mActivity)
-                        .setTarget(new ViewTarget(anchor))
+                        .setTarget(new ViewTarget(mRootAnchor))
                         .setOnClickListener(mClickListener)
                         .build();
+
+                mCurrentPathViewPoint = new ViewTarget(mActivity.findViewById(R.id.current_path)).getPoint();
+
+                mShowCaseView.setStyle(R.style.CustomShowcaseTheme);
+
+                mShowCaseView.setContentTitle(mActivity.getString(R.string.main_panel));
+                mShowCaseView.setContentText(mActivity.getString(R.string.main_panel_common));
             }
         });
     }
 
-    private boolean nextStep() {
+    private void nextStep() {
 
-        boolean tipsFound = true;
+        MainPanel panel = mFileSystemController.getActivePanel();
+        float density = mActivity.getResources().getDisplayMetrics().density;
 
         if (mCurrentStep == 0) {
-            mFileSystemController.getActivePanel().select(new SelectParams(SelectParams.SelectionType.NAME, "*", false, false, null, null));
+            int selectedFiles = panel.select(new SelectParams(SelectParams.SelectionType.NAME, "*", false, false, null, null));
+            if (selectedFiles == 0) {
+                // skip "selected files"
+                mCurrentStep = 2;
+                nextStep();
+                return;
+            }
 
-            int offset = (int) (50 * mActivity.getResources().getDisplayMetrics().density);
-            mShowCaseView.setShowcaseX(offset + (int) (32 * mActivity.getResources().getDisplayMetrics().density * 2));
-            mShowCaseView.setShowcaseY(offset + (int) (32 * mActivity.getResources().getDisplayMetrics().density));
-
+            int offset = (int) (50 * density);
+            mShowCaseView.setContentText(mActivity.getString(R.string.main_panel_quick_panel));
+            mShowCaseView.setShowcase(new Point(offset + (int) (32 * density * 2), offset + (int) (32 * density)), true);
         } else if (mCurrentStep == 1) {
-            mFileSystemController.getActivePanel().unselectAll();
-            mFileSystemController.getActivePanel().invalidate();
-            mShowCaseView.setShowcase(new ViewTarget(R.id.network_left, mActivity), true);
+            mShowCaseView.setContentText(mActivity.getString(R.string.main_panel_size));
+            mShowCaseView.setShowcase(new ViewTarget(R.id.selected_files_size, mActivity), true);
         } else if (mCurrentStep == 2) {
 
-            mFileSystemController.expandPanel(true);
+            panel.unselectAll();
+            panel.invalidate();
 
-            mShowCaseView.setContentText("current path, long tab also handled");
-            mShowCaseView.setContentTitle("current path");
-            mShowCaseView.setShowcase(new ViewTarget(R.id.current_path, mActivity), true);
-        }
+            // tips for different mode
+            if (App.sInstance.getSettings().isMultiPanelMode()) {
+                mFileSystemController.expandPanel(true);
+                mShowCaseView.setContentText(mActivity.getString(R.string.main_panel_expand));
+            } else {
+                ViewPager pager = (ViewPager) mActivity.findViewById(R.id.view_pager);
+                if (pager != null) {
+                    pager.scrollTo(300, 0);
+                    mShowCaseView.setContentText(mActivity.getString(R.string.main_panel_swipe));
+                }
+            }
 
-        /*
-        else if (mCurrentStep == 2) {
-            mShowCaseView.setContentText("current path, long tab also handled");
-            mShowCaseView.setContentTitle("current path");
-            mShowCaseView.setShowcase(new ViewTarget(R.id.current_path, mActivity), true);
+            mShowCaseView.setShowcase(new ViewTarget(mRootAnchor), true);
         } else if (mCurrentStep == 3) {
-            mShowCaseView.setShowcase(new ViewTarget(R.id.change_folder_to_left, mActivity), true);
+
+            // back operation
+            if (App.sInstance.getSettings().isMultiPanelMode()) {
+                mFileSystemController.expandPanel(false);
+            } else {
+                ViewPager pager = (ViewPager) mActivity.findViewById(R.id.view_pager);
+                if (pager != null) {
+                    pager.scrollTo(0, 0);
+                }
+            }
+
+            mShowCaseView.setContentTitle(mActivity.getString(R.string.current_path));
+            mShowCaseView.setContentText(mActivity.getString(R.string.current_path_summary));
+            mShowCaseView.setShowcase(mCurrentPathViewPoint, true);
         } else if (mCurrentStep == 4) {
-            mShowCaseView.setContentText("Main toolbar");
-            mShowCaseView.setShowcase(new ViewTarget(R.id.toolbar, mActivity), true);
+            mShowCaseView.setContentTitle(mActivity.getString(R.string.tools));
+            mShowCaseView.setContentText(mActivity.getString(R.string.tools_summary));
+            mShowCaseView.setShowcase(new ViewTarget(R.id.network_left, mActivity), true);
         } else if (mCurrentStep == 5) {
+            mShowCaseView.setContentText(mActivity.getString(R.string.tools_change_directory));
+            mShowCaseView.setShowcase(new ViewTarget(R.id.change_folder_to_left, mActivity), true);
+        } else if (mCurrentStep == 6) {
+            mShowCaseView.setContentTitle(mActivity.getString(R.string.bottom_panel));
+            mShowCaseView.setContentText(mActivity.getString(R.string.bottom_panel_alt));
             mShowCaseView.setShowcase(new ViewTarget(mMainToolbarPanel.getAltView()), true);
-        } else if (mCurrentStep == 6 && mMainToolbarPanel.getApplicationsView() != null) {
+        } else if (mCurrentStep == 7 && mMainToolbarPanel.getApplicationsView() != null) {
+            mShowCaseView.setContentText(mActivity.getString(R.string.bottom_panel_applications));
             mShowCaseView.setShowcase(new ViewTarget(mMainToolbarPanel.getApplicationsView()), true);
-        } else if (mCurrentStep == 7 && mMainToolbarPanel.getQuickView() != null) {
+        } else if (mCurrentStep == 8 && mMainToolbarPanel.getQuickView() != null) {
+            mShowCaseView.setContentText(mActivity.getString(R.string.bottom_panel_quick_view));
             mShowCaseView.setShowcase(new ViewTarget(mMainToolbarPanel.getQuickView()), true);
-        } else if (mCurrentStep == 8) {
-            mShowCaseView.setShowcase(new ViewTarget(mMainToolbarPanel.getMoreView()), true);
         } else if (mCurrentStep == 9) {
+            mShowCaseView.setContentText(mActivity.getString(R.string.bottom_panel_more));
+            mShowCaseView.setShowcase(new ViewTarget(mMainToolbarPanel.getMoreView()), true);
+        } else {
             mShowCaseView.hide();
         }
-        */
-        mCurrentStep++;
 
-        return tipsFound;
+        mCurrentStep++;
     }
 
     private View.OnClickListener mClickListener = new View.OnClickListener() {

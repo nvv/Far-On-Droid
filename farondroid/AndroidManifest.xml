@@ -44,7 +44,6 @@
         <activity android:name="com.openfarmanager.android.Help" android:configChanges="orientation|keyboardHidden"/>
         <activity android:name="com.crittercism.NotificationActivity"/>
         <activity android:name="com.openfarmanager.android.SettingsActivity" android:theme="@style/PreferencesTheme"/>
-        <activity android:name="com.openfarmanager.android.TipsActivity" android:theme="@style/PreferencesTheme"/>
         <activity android:name="com.dropbox.client2.android.AuthActivity" android:launchMode="singleTask"
                   android:configChanges="orientation|keyboard">
             <intent-filter>

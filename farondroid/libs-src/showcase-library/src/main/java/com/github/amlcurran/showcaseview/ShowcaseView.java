@@ -156,6 +156,10 @@ public class ShowcaseView extends RelativeLayout
     }
 
     public void setShowcase(final Target target, final boolean animate) {
+        setShowcase(target.getPoint(), animate);
+    }
+
+    public void setShowcase(final Point targetPoint, final boolean animate) {
         postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -163,7 +167,7 @@ public class ShowcaseView extends RelativeLayout
                 if (!shotStateStore.hasShot()) {
 
                     updateBitmap();
-                    Point targetPoint = target.getPoint();
+
                     if (targetPoint != null) {
                         hasNoTarget = false;
                         if (animate) {

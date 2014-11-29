@@ -264,29 +264,6 @@
     <string name="error_intermediate_folder_not_exist">Parent folder doesn\'t exist.</string>
     <string name="error_can_t_open_app">Unexpected error while opening application.</string>
 
-    <string name="tips_first_page">
-Far On Droid is free file manager providing intuitive and simple file management using two panel interface.\n\n
-Manage and view all your files: music, documents, pictures, videos or any other files regardless of their location: local file system, archive or network (such as FTP server or Dropbox).\n\n
-Add your favorite and most commonly used directories to <b>bookmarks</b> list (by clicking on start icon at the top of each panel) for quick and easy access.\n\n
-Search files by name or text appearance within file using built in search mechanism.\n\n
-Application is dedicated to everyone who feels nostalgic by old school file managers like <b>FAR Manager</b> or <b>Midnight Commander</b>.
-    </string>
-    <string name="tips_settings_page">
-Flexible and easy configurable system for all your needs.\n\n
-Go through <b>Settings</b> options to configure your application: single or multi panel mode, flexible or static panels,
-variable font size (for panel items and viewer lines) and toolbar items size, different files sorting and information about files.\n\n
-Activate <b>root access</b> (on \'rooted\' device) to get full control of your device.
-    </string>
-    <string name="tips_archive_page">
-Entrust the work with your archives to <b>Far On Droid</b> and it doesn\'t let you down.\n\n
-Easily extract/view existed archives or create new with <b>Far On Droid</b>.\n\n
-Support for ZIP, encrypted ZIP, TAR, JAR, CPIO, GZIP and BZIP2.\n\n
-    </string>
-    <string name="tips_cloud_page">
-Connect your device with \'clouds\'!\n\n
-With <b>Far On Droid</b> you can access your resources from different kind of network storage, like Dropbox or SkyDrive.\n\n
-More network stuff will appear in future versions.
-    </string>
     <string name="action_exit">Exit</string>
     <string name="ip_address">Network Subnet IP Address</string>
     <string name="ip_mask">Network Subnet Mask</string>
@@ -333,5 +310,48 @@ More network stuff will appear in future versions.
     <string name="hold_alt_by_click_summary">Enable \'multi select\' file mode by click (not hold) on \'Alt\'</string>
     <string name="show_quick_action_panel">Show quick action panel</string>
     <string name="show_quick_action_panel_summary">Show panel to quick access for main operations on selected files</string>
+
+    <string name="main_panel">Main Panel</string>
+    <string name="main_panel_common">Manage your file system with simple gestures: touch, long hold, scroll.</string>
+    <string name="main_panel_quick_panel">Quick access for most common operations.</string>
+    <string name="main_panel_size">Calculated size of selected files (excluding folders).</string>
+    <string name="main_panel_expand">Expand panel by \'Swipe\' gesture to see more (must be enabled in \'Settings\').</string>
+    <string name="main_panel_swipe">Swipe to see another panel.</string>
+
+    <string name="current_path">Current Path</string>
+    <string name="current_path_summary">Currently selected directory. Use long hold gesture to show quick navigation dialog.</string>
+    <string name="tools">Tools Icons</string>
+    <string name="tools_summary">Click icons to : \nOpen \'External Storage\' dialog \nAdd current directory to \'Favorites\' list.</string>
+    <string name="tools_change_directory">Click icon to : open currently selected directory on opposite panel.</string>
+
+    <string name="bottom_panel">Bottom Panel</string>
+    <string name="bottom_panel_alt">Click/Hold \'Alt\' option to enable \'multi select\' mode, i.e. click on file selects it, not open.</string>
+    <string name="bottom_panel_applications">Click on option to open (in active panel) list of installed applications. Use long click to open context menu with available operations.</string>
+    <string name="bottom_panel_quick_view">Open \'Quick View\' to get information for selected directory.</string>
+    <string name="bottom_panel_more">Click on item to access another available commands.</string>
+
+    <string name="tips_first_page">
+Far On Droid is free file manager providing intuitive and simple file management using two panel interface.\n\n
+Manage and view all your files: music, documents, pictures, videos or any other files regardless of their location: local file system, archive or network (such as FTP server or Dropbox).\n\n
+Add your favorite and most commonly used directories to <b>bookmarks</b> list (by clicking on start icon at the top of each panel) for quick and easy access.\n\n
+Search files by name or text appearance within file using built in search mechanism.\n\n
+Application is dedicated to everyone who feels nostalgic by old school file managers like <b>FAR Manager</b> or <b>Midnight Commander</b>.
+    </string>
+    <string name="tips_settings_page">
+Flexible and easy configurable system for all your needs.\n\n
+Go through <b>Settings</b> options to configure your application: single or multi panel mode, flexible or static panels,
+variable font size (for panel items and viewer lines) and toolbar items size, different files sorting and information about files.\n\n
+Activate <b>root access</b> (on \'rooted\' device) to get full control of your device.
+    </string>
+    <string name="tips_archive_page">
+Entrust the work with your archives to <b>Far On Droid</b> and it doesn\'t let you down.\n\n
+Easily extract/view existed archives or create new with <b>Far On Droid</b>.\n\n
+Support for ZIP, encrypted ZIP, TAR, JAR, CPIO, GZIP and BZIP2.\n\n
+    </string>
+    <string name="tips_cloud_page">
+Connect your device with \'clouds\'!\n\n
+With <b>Far On Droid</b> you can access your resources from different kind of network storage, like Dropbox or SkyDrive.\n\n
+More network stuff will appear in future versions.
+    </string>
 
 </resources>
