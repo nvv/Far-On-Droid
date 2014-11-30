@@ -10,7 +10,7 @@ import com.openfarmanager.android.R;
 public enum  NetworkEnum {
     Dropbox, SkyDrive, FTP, SMB, YandexDisk, GoogleDrive, Bitcasa;
 
-    public static NetworkEnum[] sOrderedItems = {FTP, SMB, Dropbox, GoogleDrive, SkyDrive, YandexDisk, Bitcasa};
+    public static NetworkEnum[] sOrderedItems = {FTP, SMB, Dropbox, GoogleDrive, SkyDrive, YandexDisk};
 
     public static String getNetworkLabel(NetworkEnum networkEnum) {
         switch (networkEnum) {

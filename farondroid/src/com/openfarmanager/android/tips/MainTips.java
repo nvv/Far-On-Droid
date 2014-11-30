@@ -125,15 +125,29 @@ public class MainTips {
             mShowCaseView.setContentTitle(mActivity.getString(R.string.bottom_panel));
             mShowCaseView.setContentText(mActivity.getString(R.string.bottom_panel_alt));
             mShowCaseView.setShowcase(new ViewTarget(mMainToolbarPanel.getAltView()), true);
-        } else if (mCurrentStep == 7 && mMainToolbarPanel.getApplicationsView() != null) {
+        } else if (mCurrentStep == 7) {
+            if (mMainToolbarPanel.getApplicationsView() == null) {
+                mCurrentStep++;
+                nextStep();
+                return;
+            }
+
             mShowCaseView.setContentText(mActivity.getString(R.string.bottom_panel_applications));
             mShowCaseView.setShowcase(new ViewTarget(mMainToolbarPanel.getApplicationsView()), true);
-        } else if (mCurrentStep == 8 && mMainToolbarPanel.getQuickView() != null) {
+        } else if (mCurrentStep == 8) {
+            if (mMainToolbarPanel.getQuickView() == null) {
+                mCurrentStep++;
+                nextStep();
+                return;
+            }
+
             mShowCaseView.setContentText(mActivity.getString(R.string.bottom_panel_quick_view));
             mShowCaseView.setShowcase(new ViewTarget(mMainToolbarPanel.getQuickView()), true);
         } else if (mCurrentStep == 9) {
             mShowCaseView.setContentText(mActivity.getString(R.string.bottom_panel_more));
             mShowCaseView.setShowcase(new ViewTarget(mMainToolbarPanel.getMoreView()), true);
+
+            mShowCaseView.setButtonText(mActivity.getString(R.string.btn_finish));
         } else {
             mShowCaseView.hide();
         }

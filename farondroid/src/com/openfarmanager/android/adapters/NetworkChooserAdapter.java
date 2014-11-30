@@ -14,7 +14,7 @@ public class NetworkChooserAdapter extends BaseAdapter {
 
     @Override
     public int getCount() {
-        return NetworkEnum.values().length;
+        return NetworkEnum.sOrderedItems.length;
     }
 
     @Override
