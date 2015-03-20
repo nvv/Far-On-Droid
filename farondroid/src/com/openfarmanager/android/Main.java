@@ -95,7 +95,6 @@ public class Main extends FragmentActivity {
             ToastNotification.makeText(App.sInstance.getApplicationContext(), getString(R.string.hardware_keyboard), Toast.LENGTH_LONG).show();
         }
 
-        new MainTips(this, mFileSystemController, (MainToolbarPanel) getSupportFragmentManager().findFragmentById(R.id.toolbar));
     }
 
     private boolean isHardwareKeyboardAvailable() {
@@ -122,7 +121,7 @@ public class Main extends FragmentActivity {
     private void showTips() {
         Settings settings = App.sInstance.getSettings();
         if (settings.isShowTips()) {
-
+            new MainTips(this, mFileSystemController, (MainToolbarPanel) getSupportFragmentManager().findFragmentById(R.id.toolbar));
             settings.getSharedPreferences().edit().putBoolean(Settings.SHOW_TIPS, false).commit();
         }
     }

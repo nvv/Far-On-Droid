@@ -30,7 +30,7 @@ public class Settings {
     public static final String MULTI_PANELS_CHANGED = "multi_panels_changed";
     public static final String FLEXIBLE_PANELS = "flexible_panels";
     public static final String FORCE_EN_LANG = "force_en_lang";
-    public static final String SHOW_TIPS = "show_tips_full_screen";
+    public static final String SHOW_TIPS = "show_tips_full_screen_new";
     public static final String ENABLE_HOME_FOLDER = "enable_home_folder";
     public static final String HOME_FOLDER = "home_folder";
     public static final String MAIN_PANEL_FONT_SIZE = "main_panel_font_size";
