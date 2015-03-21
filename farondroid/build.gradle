@@ -25,7 +25,6 @@ android {
     }
 
     dependencies{
-        compile project(':farondroid:libs-src:BitcasaSDK')
         compile project(':farondroid:libs-src:color-picker')
         compile project(':farondroid:libs-src:googledrive')
         compile project(':farondroid:libs-src:skydrive:src')

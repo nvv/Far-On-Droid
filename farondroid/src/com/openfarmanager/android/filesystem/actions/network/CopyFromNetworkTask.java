@@ -2,12 +2,9 @@ package com.openfarmanager.android.filesystem.actions.network;
 
 import android.support.v4.app.FragmentManager;
 
-import com.bitcasa.client.datamodel.FileMetaData;
-import com.bitcasa.client.exception.BitcasaException;
 import com.dropbox.client2.exception.DropboxException;
 import com.microsoft.live.LiveOperationException;
 import com.openfarmanager.android.App;
-import com.openfarmanager.android.core.network.bitcasa.BitcasaApi;
 import com.openfarmanager.android.core.network.dropbox.DropboxAPI;
 import com.openfarmanager.android.core.network.ftp.FtpAPI;
 import com.openfarmanager.android.core.network.googledrive.GoogleDriveApi;
@@ -90,9 +87,6 @@ public class CopyFromNetworkTask extends NetworkActionTask {
                     case YandexDisk:
                         copyFromYandexDisk(file, mDestination);
                         break;
-                    case Bitcasa:
-                        copyFromBitcasa(file, mDestination);
-                        break;
                 }
             } catch (NullPointerException e) {
                 return ERROR_FILE_NOT_EXISTS;
@@ -105,8 +99,6 @@ public class CopyFromNetworkTask extends NetworkActionTask {
             } catch (DropboxException e) {
                 return createNetworkError(NetworkException.handleNetworkException(e));
             } catch (LiveOperationException e) {
-                return ERROR_COPY;
-            } catch (BitcasaException e) {
                 return ERROR_COPY;
             } catch (Exception e) {
                 return ERROR_COPY;
@@ -339,53 +331,6 @@ public class CopyFromNetworkTask extends NetworkActionTask {
                 @Override
                 public boolean hasCancelled() {
                     return false;
-                }
-            });
-        }
-    }
-
-    private void copyFromBitcasa(FileProxy source, String destination) throws IOException, BitcasaException, InterruptedException {
-        BitcasaApi api = App.sInstance.getBitcasaApi();
-
-        if (isCancelled()) {
-            throw new InterruptedIOException();
-        }
-
-        String fullSourceFilePath = destination + "/" + source.getName();
-        if (source.isDirectory()) {
-            try {
-                createDirectory(destination);
-                List<FileProxy> files = api.getDirectoryFiles(source.getFullPath());
-
-                if (files.size() == 0) {
-                    createDirectory(fullSourceFilePath);
-                } else {
-                    for (FileProxy file : files) {
-                        copyFromBitcasa(file, fullSourceFilePath);
-                    }
-                }
-            } catch (Exception e) {
-                throw NetworkException.handleNetworkException(e);
-            }
-        } else {
-            createDirectory(destination);
-
-            setCurrentFile(source);
-
-            FileMetaData file = new FileMetaData();
-            file.path = source.getId();
-            file.name = source.getName();
-            file.size = source.getSize();
-
-            api.getClient().downloadFile(file, 0, false, destination + "/" + source.getName(), new com.bitcasa.client.ProgressListener() {
-                @Override
-                public void onProgressUpdate(String file, int percentage, ProgressAction action) {
-
-                }
-
-                @Override
-                public void canceled(String file, ProgressAction action) {
-
                 }
             });
         }

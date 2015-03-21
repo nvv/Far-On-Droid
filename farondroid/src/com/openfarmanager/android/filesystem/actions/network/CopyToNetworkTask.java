@@ -2,13 +2,10 @@ package com.openfarmanager.android.filesystem.actions.network;
 
 import android.support.v4.app.FragmentManager;
 
-import com.bitcasa.client.HTTP.BitcasaRESTConstants;
-import com.bitcasa.client.datamodel.FileMetaData;
 import com.dropbox.client2.ProgressListener;
 import com.dropbox.client2.exception.DropboxException;
 import com.microsoft.live.OverwriteOption;
 import com.openfarmanager.android.App;
-import com.openfarmanager.android.core.network.bitcasa.BitcasaApi;
 import com.openfarmanager.android.core.network.dropbox.DropboxAPI;
 import com.openfarmanager.android.core.network.ftp.FtpAPI;
 import com.openfarmanager.android.core.network.googledrive.GoogleDriveApi;
@@ -85,9 +82,6 @@ public class CopyToNetworkTask extends NetworkActionTask {
                         break;
                     case YandexDisk:
                         copyToYandexDisk(file, mDestination);
-                        break;
-                    case Bitcasa:
-                        copyToBitcasa(file, mDestination);
                         break;
                 }
             } catch (NullPointerException e) {
@@ -298,47 +292,6 @@ public class CopyToNetworkTask extends NetworkActionTask {
                     return false;
                 }
             });
-            doneSize = tempSize + source.length();
-        }
-    }
-
-    private void copyToBitcasa(final File source, String destination) throws Exception {
-        BitcasaApi api = App.sInstance.getBitcasaApi();
-        if (isCancelled()) {
-            throw new InterruptedIOException();
-        }
-
-        if (source.isDirectory()) {
-            api.createDirectory(destination + "/" + source.getName());
-
-            String[] files = source.list();
-            for (String file : files) {
-                copyToBitcasa(new File(source, file), destination + "/" + source.getName());
-            }
-        } else {
-            mCurrentFile = source.getName();
-            long tempSize = doneSize;
-
-            FileMetaData folder = new FileMetaData();
-            folder.path = api.findPathId(destination);
-
-            api.getClient().uploadFile(folder, source.getAbsolutePath(), BitcasaRESTConstants.CollisionResolutions.OVERWRITE,
-                    false, new com.bitcasa.client.ProgressListener() {
-                        long mPrevProgress = 0;
-
-                        @Override
-                        public void onProgressUpdate(String file, int percentage, ProgressAction action) {
-                            long loaded = source.length() / 100 * percentage;
-                            doneSize += (loaded - mPrevProgress);
-                            mPrevProgress = loaded;
-                            CopyToNetworkTask.this.updateProgress();
-                        }
-
-                        @Override
-                        public void canceled(String file, ProgressAction action) {
-
-                        }
-                    });
             doneSize = tempSize + source.length();
         }
     }

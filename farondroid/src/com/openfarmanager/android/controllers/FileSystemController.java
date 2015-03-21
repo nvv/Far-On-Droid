@@ -21,7 +21,6 @@ import android.view.WindowManager;
 import android.webkit.URLUtil;
 import android.widget.*;
 
-import com.bitcasa.client.datamodel.AccountInfo;
 import com.google.analytics.tracking.android.EasyTracker;
 import com.google.analytics.tracking.android.Fields;
 import com.google.analytics.tracking.android.MapBuilder;
@@ -31,7 +30,6 @@ import com.openfarmanager.android.adapters.*;
 import com.openfarmanager.android.core.Settings;
 import com.openfarmanager.android.core.dbadapters.NetworkAccountDbAdapter;
 import com.openfarmanager.android.core.network.NetworkApi;
-import com.openfarmanager.android.core.network.bitcasa.BitcasaApi;
 import com.openfarmanager.android.core.network.dropbox.DropboxAPI;
 import com.openfarmanager.android.core.network.ftp.FtpAPI;
 import com.openfarmanager.android.core.network.googledrive.GoogleDriveApi;
@@ -55,7 +53,6 @@ import com.openfarmanager.android.model.exeptions.InitYandexDiskException;
 import com.openfarmanager.android.utils.FileUtilsExt;
 import com.openfarmanager.android.utils.NetworkUtil;
 import com.openfarmanager.android.utils.SystemUtils;
-import com.openfarmanager.android.view.BitcasaLoginDialog;
 import com.openfarmanager.android.view.BookmarksListDialog;
 import com.openfarmanager.android.view.ExpandPanelAnimation;
 import com.openfarmanager.android.view.FtpAuthDialog;
@@ -1160,10 +1157,6 @@ public class FileSystemController {
                         openGoogleDrive();
                         EasyTracker.getInstance(App.sInstance).send(MapBuilder.createAppView().set(Fields.SCREEN_NAME, "Network/GoogleDrive").build());
                         break;
-                    case Bitcasa:
-                        openBitcasa();
-                        EasyTracker.getInstance(App.sInstance).send(MapBuilder.createAppView().set(Fields.SCREEN_NAME, "Network/Bitcasa").build());
-                        break;
                 }
 
                 if (dialog.isShowing()) {
@@ -1338,17 +1331,6 @@ public class FileSystemController {
                             openNetworkPanel(NetworkEnum.GoogleDrive);
                         }
                         break;
-                    case Bitcasa:
-                        BitcasaApi.BitcasaAccount bitcasaAccount = (BitcasaApi.BitcasaAccount) view.getTag();
-                        if (bitcasaAccount.getAuthorizationCode() == null) { // new
-                            startBitcasaAuthentication();
-                        } else {
-                            showProgressDialog(R.string.restoring_bitcasa_session);
-                            App.sInstance.getBitcasaApi().restoreToken(bitcasaAccount, mInAppAuthHandler);
-                        }
-                        break;
-
-
                 }
 
                 if (dialog.isShowing()) {
@@ -1536,15 +1518,6 @@ public class FileSystemController {
         }
     }
 
-    private void openBitcasa() {
-        BitcasaApi api = App.sInstance.getBitcasaApi();
-        if (api.getAuthorizedAccountsCount() == 0) {
-            startBitcasaAuthentication();
-        } else {
-            showSelectAccountDialog(NetworkEnum.Bitcasa);
-        }
-    }
-
     public void openAppLaucnher() {
         MainPanel activePanel = getActivePanel();
 
@@ -1575,11 +1548,6 @@ public class FileSystemController {
 
     private void startGoogleDriveAuthentication() {
         GoogleDriveAuthWindow popupWindow = new GoogleDriveAuthWindow(getActivePanel().getActivity(), mInAppAuthHandler);
-        popupWindow.show();
-    }
-
-    private void startBitcasaAuthentication() {
-        BitcasaLoginDialog popupWindow = new BitcasaLoginDialog(getActivePanel().getActivity(), mInAppAuthHandler);
         popupWindow.show();
     }
 
@@ -1767,9 +1735,6 @@ public class FileSystemController {
                 startSmbAuthentication();
             } else if (msg.what == SMB_IP_SELECTED) {
                 startSmbAuthentication((String) msg.obj);
-            } else if (msg.what == GoogleDriveAuthWindow.MSG_SHOW_LOADING_DIALOG ||
-                    msg.what == BitcasaLoginDialog.MSG_SHOW_LOADING_DIALOG) {
-                showProgressDialog(R.string.google_drive_obtaining_token);
             } else if (msg.what == GoogleDriveAuthWindow.MSG_HIDE_LOADING_DIALOG) {
                 GoogleDriveApi.GoogleDriveAccount account = null;
                 if (msg.arg1 == GoogleDriveAuthWindow.MSG_ARG_SUCCESS) {
@@ -1787,26 +1752,6 @@ public class FileSystemController {
                     App.sInstance.getGoogleDriveApi().setup(account);
                     openNetworkPanel(NetworkEnum.GoogleDrive);
                 }
-            } else if (msg.what == BitcasaLoginDialog.MSG_HIDE_LOADING_DIALOG) {
-                BitcasaApi.BitcasaAccount account = null;
-                if (msg.arg1 == BitcasaLoginDialog.MSG_ARG_SUCCESS) {
-                    BitcasaApi api = App.sInstance.getBitcasaApi();
-                    Pair<AccountInfo, String> data = (Pair<AccountInfo, String>) msg.obj;
-                    account = (BitcasaApi.BitcasaAccount) api.saveAccount(data.first, data.second);
-                } else {
-                    ToastNotification.makeText(App.sInstance.getApplicationContext(),
-                            App.sInstance.getString(R.string.google_drive_get_token_error), Toast.LENGTH_LONG).show();
-                }
-                dismissProgressDialog();
-
-                if (account != null) {
-                    App.sInstance.getBitcasaApi().setCurrentAccount(account);
-                    openNetworkPanel(NetworkEnum.Bitcasa);
-                }
-            } else if (msg.what == BitcasaLoginDialog.MSG_RESTORE_SUCCESS) {
-                dismissProgressDialog();
-                App.sInstance.getBitcasaApi().setCurrentAccount((BitcasaApi.BitcasaAccount) msg.obj);
-                openNetworkPanel(NetworkEnum.Bitcasa);
             }
         }
     };

@@ -1,1 +1,1 @@
-include ':farondroid:libs-src:BitcasaSDK', ':farondroid:libs-src:color-picker', ':farondroid:libs-src:googledrive', ':farondroid:libs-src:skydrive:src', ':farondroid:libs-src:yandexdisk:sdk', ':farondroid:libs-src:showcase-library:src:main', ':farondroid'
+include ':farondroid:libs-src:color-picker', ':farondroid:libs-src:googledrive', ':farondroid:libs-src:skydrive:src', ':farondroid:libs-src:yandexdisk:sdk', ':farondroid:libs-src:showcase-library:src:main', ':farondroid'

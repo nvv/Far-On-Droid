@@ -23,7 +23,6 @@ import android.widget.Toast;
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.R;
 import com.openfarmanager.android.adapters.NetworkEntryAdapter;
-import com.openfarmanager.android.core.network.datasource.BitcasaDataSource;
 import com.openfarmanager.android.core.network.datasource.DataSource;
 import com.openfarmanager.android.core.network.datasource.DropboxDataSource;
 import com.openfarmanager.android.core.network.datasource.FtpDataSource;
@@ -162,9 +161,6 @@ public class NetworkPanel extends MainPanel {
                 break;
             case GoogleDrive:
                 mDataSource = new GoogleDriveDataSource(mHandler);
-                break;
-            case Bitcasa:
-                mDataSource = new BitcasaDataSource(mHandler);
                 break;
         }
     }

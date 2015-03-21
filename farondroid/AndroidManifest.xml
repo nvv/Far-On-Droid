@@ -22,10 +22,10 @@
             android:xlargeScreens="true"/>
 
     <application android:label="@string/app_name"
-                 android:name="com.openfarmanager.android.App"
+                 android:name=".App"
                  android:theme="@style/AppTheme"
                  android:icon="@drawable/icon_main">
-        <activity android:name="com.openfarmanager.android.Main"
+        <activity android:name=".Main"
                   android:icon="@drawable/icon_main"
                   android:configChanges="orientation|keyboardHidden"
                   android:label="@string/app_name">
@@ -40,10 +40,10 @@
                 <data android:scheme="faryandexdisk" />
             </intent-filter>
         </activity>
-        <activity android:name="com.openfarmanager.android.FileView" android:configChanges="orientation|keyboardHidden" android:windowSoftInputMode="adjustPan"/>
-        <activity android:name="com.openfarmanager.android.Help" android:configChanges="orientation|keyboardHidden"/>
+        <activity android:name=".FileView" android:configChanges="orientation|keyboardHidden" android:windowSoftInputMode="adjustPan"/>
+        <activity android:name=".Help" android:configChanges="orientation|keyboardHidden"/>
         <activity android:name="com.crittercism.NotificationActivity"/>
-        <activity android:name="com.openfarmanager.android.SettingsActivity" android:theme="@style/PreferencesTheme"/>
+        <activity android:name=".SettingsActivity" android:theme="@style/PreferencesTheme"/>
         <activity android:name="com.dropbox.client2.android.AuthActivity" android:launchMode="singleTask"
                   android:configChanges="orientation|keyboard">
             <intent-filter>

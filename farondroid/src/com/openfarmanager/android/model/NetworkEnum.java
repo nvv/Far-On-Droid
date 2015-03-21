@@ -8,7 +8,7 @@ import com.openfarmanager.android.R;
  * @author Vlad Namashko
  */
 public enum  NetworkEnum {
-    Dropbox, SkyDrive, FTP, SMB, YandexDisk, GoogleDrive, Bitcasa;
+    Dropbox, SkyDrive, FTP, SMB, YandexDisk, GoogleDrive;
 
     public static NetworkEnum[] sOrderedItems = {FTP, SMB, Dropbox, GoogleDrive, SkyDrive, YandexDisk};
 
@@ -20,7 +20,6 @@ public enum  NetworkEnum {
             case SkyDrive: return "SkyDrive";
             case GoogleDrive: return "Google Drive";
             case YandexDisk: return "Yandex Disk";
-            case Bitcasa: return "Bitcasa";
             default: return "Dropbox";
         }
     }
