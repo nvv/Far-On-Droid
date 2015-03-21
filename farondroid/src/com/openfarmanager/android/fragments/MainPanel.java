@@ -1,10 +1,9 @@
 package com.openfarmanager.android.fragments;
 
-import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Configuration;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -91,6 +90,8 @@ public class MainPanel extends BaseFileSystemPanel {
     protected TextView mSelectedFilesSize;
 
     protected PopupWindow mQuickActionPopup;
+
+    protected PopupWindow mAltTipsPopup;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -180,6 +181,13 @@ public class MainPanel extends BaseFileSystemPanel {
                 WindowManager.LayoutParams.WRAP_CONTENT);
         mQuickActionPopup.setAnimationStyle(R.style.QuickActionPopupAnimation);
         mQuickActionPopup.setContentView(layout);
+
+        mAltTipsPopup = new PopupWindow(layout, WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.WRAP_CONTENT);
+
+        ImageView imageView = new ImageView(App.sInstance);
+        imageView.setImageBitmap(BitmapFactory.decodeResource(App.sInstance.getResources(), R.drawable.shift_tips_icon));
+        mAltTipsPopup.setContentView(imageView);
 
         layout.findViewById(R.id.quick_action_copy).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -801,8 +809,22 @@ public class MainPanel extends BaseFileSystemPanel {
         mIsMultiSelectMode = value;
     }
 
-    public void switchMultiSelectMode() {
-        mIsMultiSelectMode = !mIsMultiSelectMode;
+    public void showAltTip(boolean value) {
+        if (value) {
+            if (!mAltTipsPopup.isShowing()) {
+
+                int offset = (int) (50 * getResources().getDisplayMetrics().density);
+
+                mAltTipsPopup.showAtLocation(mFileSystemList, (mPanelLocation == LEFT_PANEL ?
+                        Gravity.LEFT : Gravity.RIGHT) | Gravity.TOP, offset, 2 * offset);
+            }
+        } else {
+            mAltTipsPopup.dismiss();
+        }
+    }
+
+    public boolean switchMultiSelectMode() {
+        return (mIsMultiSelectMode = !mIsMultiSelectMode);
     }
 
     public void setupHandler() {
