@@ -330,6 +330,8 @@
     <string name="bottom_panel_quick_view">Open \'Quick View\' to get information for selected directory.</string>
     <string name="bottom_panel_more">Click on item to access another available commands.</string>
 
+    <string name="error_non_existsed_directory">Attempt to open non existed directory. Open home directory.</string>
+
     <string name="tips_first_page">
 Far On Droid is free file manager providing intuitive and simple file management using two panel interface.\n\n
 Manage and view all your files: music, documents, pictures, videos or any other files regardless of their location: local file system, archive or network (such as FTP server or Dropbox).\n\n

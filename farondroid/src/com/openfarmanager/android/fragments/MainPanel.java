@@ -139,8 +139,7 @@ public class MainPanel extends BaseFileSystemPanel {
                     if (previousState == null) {
                         mDirectorySelection.put(item.getParent(), mFileSystemList.getFirstVisiblePosition());
                     }
-                }
-                if (item.isFile()) {
+                } else if (item.isFile()) {
                     String mime = ArchiveUtils.getMimeType(item);
                     if (ArchiveUtils.isArchiveSupported(mime)) {
                         mHandler.sendMessage(mHandler.obtainMessage(OPEN_ARCHIVE, item));
@@ -157,7 +156,12 @@ public class MainPanel extends BaseFileSystemPanel {
                     } else {
                         openFile(item);
                     }
+                } else if (!item.exists()) {
+                    ToastNotification.makeText(App.sInstance.getApplicationContext(),
+                            getSafeString(R.string.error_non_existsed_directory), Toast.LENGTH_SHORT).show();
+                    openHomeFolder();
                 }
+
             }
         });
 

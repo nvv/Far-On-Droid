@@ -329,4 +329,6 @@
     <string name="hold_alt_by_click">Автоматическое удерживание \'Alt\' нажатием</string>
     <string name="hold_alt_by_click_summary">Разрешить режим \'мультивыбора\' файлов кликом (а не удерживанием) по \'Alt\'</string>
 
+    <string name="error_non_existsed_directory">Попытка открыть несуществующую директорию. Открываем домашнюю директорию.</string>
+
 </resources>
