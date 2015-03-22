@@ -7,21 +7,16 @@ import android.os.Handler;
 import android.os.Message;
 import android.view.View;
 import android.view.Window;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.EditText;
-import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.R;
 import com.openfarmanager.android.controllers.FileSystemController;
 import com.openfarmanager.android.model.exeptions.InAppAuthException;
-import com.openfarmanager.android.utils.Extensions;
 
 import static com.openfarmanager.android.utils.Extensions.isNullOrEmpty;
 import static com.openfarmanager.android.utils.Extensions.runAsynk;
-import static com.openfarmanager.android.utils.Extensions.tryParse;
 
 /**
  * author: Vlad Namashko

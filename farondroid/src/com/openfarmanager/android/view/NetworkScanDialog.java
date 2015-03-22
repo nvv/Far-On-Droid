@@ -268,7 +268,12 @@ public class NetworkScanDialog extends Dialog {
 
                                 if (isReachable) {
                                     synchronized (mReachableHosts) {
-                                        mReachableHosts.add(ip);
+                                        String ipLabel = ip;
+                                        if (!ipLabel.equals(address.getHostName())) {
+                                            ipLabel += "(" + address.getHostName() + ")";
+                                        }
+
+                                        mReachableHosts.add(ipLabel);
                                         mHandler.post(new Runnable() {
                                             @Override
                                             public void run() {
@@ -276,7 +281,7 @@ public class NetworkScanDialog extends Dialog {
                                                     mAvailableHosts.setVisibility(View.VISIBLE);
                                                 }
 
-                                                mAvailableHosts.setAdapter(new ArrayAdapter<String>(App.sInstance.getApplicationContext(),
+                                                mAvailableHosts.setAdapter(new ArrayAdapter<>(App.sInstance.getApplicationContext(),
                                                         android.R.layout.simple_list_item_1, mReachableHosts.toArray(new String[mReachableHosts.size()])));
                                             }
                                         });
