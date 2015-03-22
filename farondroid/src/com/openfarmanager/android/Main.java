@@ -76,9 +76,6 @@ public class Main extends FragmentActivity {
             mFileSystemController = new FileSystemController(getSupportFragmentManager(), findViewById(R.id.root_view));
         } else {
             mFileSystemController = new FileSystemControllerSmartphone(getSupportFragmentManager(), findViewById(R.id.root_view));
-            if (!PreferenceManager.getDefaultSharedPreferences(this).getBoolean("main_swipe_hint", false)) {
-                showSwipeHint();
-            }        
         }
         App.sInstance.setFileSystemController(mFileSystemController);
 
@@ -126,40 +123,6 @@ public class Main extends FragmentActivity {
         }
     }
 
-    private void showSwipeHint() {
-        showHint(R.layout.main_swipe_hint, "main_swipe_hint");
-    }
-
-    private void showSwipeRightLiftHint() {
-        showHint(R.layout.main_swipe_left_right_hint, "main_swipe_right_left_hint");
-    }
-
-    private void showHint(int hintResourceId, final String hintSettingsName) {
-        View view = getLayoutInflater().inflate(hintResourceId, null);
-        final PopupWindow popupWindow = new PopupWindow(view,
-                ViewGroup.LayoutParams.FILL_PARENT,
-                ViewGroup.LayoutParams.FILL_PARENT, true);
-
-        view.findViewById(R.id.ok).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                PreferenceManager.getDefaultSharedPreferences(Main.this).edit().putBoolean(hintSettingsName, true).commit();
-                popupWindow.dismiss();
-            }
-        });
-
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                try{
-                    popupWindow.showAtLocation(findViewById(R.id.root_view), Gravity.CENTER, 0, 0);
-                } catch (Exception ignored){
-
-                }
-            }
-        }, 500);
-    }
-
     @Override
     protected void onResume() {
         super.onResume();
@@ -191,10 +154,6 @@ public class Main extends FragmentActivity {
         }
 
         Settings settings = App.sInstance.getSettings();
-        if (settings.isMultiPanelMode() && settings.isFlexiblePanelsMode() &&
-                !PreferenceManager.getDefaultSharedPreferences(this).getBoolean("main_swipe_right_left_hint", false)) {
-            showSwipeRightLiftHint();
-        }
 
         (findViewById(R.id.panels_holder)).setBackgroundColor(App.sInstance.getSettings().getMainPanelColor());
     }

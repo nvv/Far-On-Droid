@@ -25,11 +25,20 @@ import com.openfarmanager.android.App;
 import com.openfarmanager.android.R;
 import com.openfarmanager.android.controllers.FileSystemController;
 import com.openfarmanager.android.utils.Extensions;
+import com.openfarmanager.android.utils.HardwareUtils;
+import com.openfarmanager.android.utils.NetworkCalculator;
 import com.openfarmanager.android.utils.NetworkUtil;
+import com.openfarmanager.android.utils.NetworkUtils;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.InterfaceAddress;
+import java.net.NetworkInterface;
+import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -42,6 +51,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * author: Vlad Namashko
  */
 public class NetworkScanDialog extends Dialog {
+
+    private final static int[] DPORTS = {22, 135, 139, 445, 80};
 
     private Handler mHandler;
     private View mDialogView;
@@ -143,7 +154,18 @@ public class NetworkScanDialog extends Dialog {
 
         try {
             String stringIp = mMyIpAddress = NetworkUtil.ipIntToStringRevert(dhcpInfo.ipAddress);
-            String stringMask = NetworkUtil.ipIntToStringRevert(dhcpInfo.netmask);
+
+            int maskCidr = 24;
+
+            List<InterfaceAddress> interfaceAddresses = NetworkInterface.getByInetAddress(
+                    InetAddress.getByAddress(NetworkCalculator.ipIntToBytesReverted(dhcpInfo.ipAddress))).getInterfaceAddresses();
+            for (InterfaceAddress address : interfaceAddresses) {
+                if (address.getAddress().getHostAddress().equals(stringIp)) {
+                    maskCidr = address.getNetworkPrefixLength();
+                }
+            }
+
+            String stringMask = NetworkCalculator.ipBytesToString(NetworkCalculator.cidrToQuad(maskCidr));
 
             mIpAddress.setText(stringIp);
             mMask.setText(stringMask);
@@ -200,7 +222,7 @@ public class NetworkScanDialog extends Dialog {
                 return null;
             }
 
-            mThreadPoolExecutor = Executors.newFixedThreadPool(4);
+            mThreadPoolExecutor = Executors.newFixedThreadPool(20);
             for (final String ip : ips) {
                 if (ip.equals(mMyIpAddress)) {
                     continue;
@@ -211,7 +233,40 @@ public class NetworkScanDialog extends Dialog {
                         public void run() {
                             try {
                                 InetAddress address = InetAddress.getByName(ip);
-                                if (address.isReachable(1500)) {
+
+                                boolean isReachable = false;
+
+                                try {
+                                    if (mIsScanning && address.isReachable(250) || NetworkUtils.ping(ip)) {
+                                        isReachable = true;
+                                    } else if (mIsScanning) {
+                                        Socket s = new Socket();
+                                        for (int port : DPORTS) {
+                                            try {
+                                                s.bind(null);
+                                                s.connect(new InetSocketAddress(ip, port), 250);
+                                                isReachable = true;
+                                                break;
+                                            } catch (Exception ignored) {
+                                            } finally {
+                                                try {
+                                                    s.close();
+                                                } catch (Exception ignored) {
+                                                }
+                                            }
+                                        }
+
+                                        // last resort
+                                        if (mIsScanning && !isReachable) {
+                                            String mac = HardwareUtils.getHardwareAddress(ip);
+                                            if (!HardwareUtils.NOMAC.equals(mac)) {
+                                                isReachable = true;
+                                            }
+                                        }
+                                    }
+                                } catch (Exception ignore) {}
+
+                                if (isReachable) {
                                     synchronized (mReachableHosts) {
                                         mReachableHosts.add(ip);
                                         mHandler.post(new Runnable() {

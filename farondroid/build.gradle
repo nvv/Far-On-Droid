@@ -24,12 +24,18 @@ android {
         }
     }
 
+    repositories {
+        mavenCentral()
+    }
+
     dependencies{
         compile project(':farondroid:libs-src:color-picker')
         compile project(':farondroid:libs-src:googledrive')
         compile project(':farondroid:libs-src:skydrive:src')
         compile project(':farondroid:libs-src:yandexdisk:sdk')
         compile project(':farondroid:libs-src:showcase-library:src:main')
+
+        compile 'io.reactivex:rxandroid:0.24.0'
 
         compile fileTree(dir: 'libs', include: '*.jar')
     }
