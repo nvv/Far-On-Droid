@@ -34,8 +34,6 @@ public class ExpandPanelAnimation extends Animation {
     @Override
     protected void applyTransformation(float interpolatedTime, Transformation transformation) {
 
-        System.out.println(":::::::::  " + interpolatedTime);
-
         mLayoutParams1.weight = mWeight1 + interpolatedTime * (mTargetWeight1 - mWeight1);
         mLayoutParams2.weight = mWeight2 + interpolatedTime * (mTargetWeight2 - mWeight2);
 
