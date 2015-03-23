@@ -126,6 +126,10 @@ public class MainTips {
             mShowCaseView.setContentText(mActivity.getString(R.string.bottom_panel_alt));
             mShowCaseView.setShowcase(new ViewTarget(mMainToolbarPanel.getAltView()), true);
         } else if (mCurrentStep == 7) {
+            mShowCaseView.setContentTitle(mActivity.getString(R.string.bottom_panel));
+            mShowCaseView.setContentText(mActivity.getString(R.string.bottom_panel_select));
+            mShowCaseView.setShowcase(new ViewTarget(mMainToolbarPanel.getSelectView()), true);
+        } else if (mCurrentStep == 8) {
             if (mMainToolbarPanel.getApplicationsView() == null) {
                 mCurrentStep++;
                 nextStep();
@@ -134,7 +138,7 @@ public class MainTips {
 
             mShowCaseView.setContentText(mActivity.getString(R.string.bottom_panel_applications));
             mShowCaseView.setShowcase(new ViewTarget(mMainToolbarPanel.getApplicationsView()), true);
-        } else if (mCurrentStep == 8) {
+        } else if (mCurrentStep == 9) {
             if (mMainToolbarPanel.getQuickView() == null) {
                 mCurrentStep++;
                 nextStep();
@@ -143,7 +147,7 @@ public class MainTips {
 
             mShowCaseView.setContentText(mActivity.getString(R.string.bottom_panel_quick_view));
             mShowCaseView.setShowcase(new ViewTarget(mMainToolbarPanel.getQuickView()), true);
-        } else if (mCurrentStep == 9) {
+        } else if (mCurrentStep == 10) {
             mShowCaseView.setContentText(mActivity.getString(R.string.bottom_panel_more));
             mShowCaseView.setShowcase(new ViewTarget(mMainToolbarPanel.getMoreView()), true);
 

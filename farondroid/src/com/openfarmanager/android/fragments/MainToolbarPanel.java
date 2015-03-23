@@ -29,6 +29,7 @@ public class MainToolbarPanel extends Fragment {
     private View mApplicationsView;
     private View mQuickView;
     private View mMoreView;
+    private View mSelectView;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -72,6 +73,10 @@ public class MainToolbarPanel extends Fragment {
 
     public View getMoreView() {
         return mMoreView;
+    }
+
+    public View getSelectView() {
+        return mSelectView;
     }
 
     private class MainToolbar extends LinearLayout {
@@ -219,6 +224,9 @@ public class MainToolbarPanel extends Fragment {
                         break;
                     case R.id.menu_more:
                         mMoreView = view;
+                        break;
+                    case R.id.action_select:
+                        mSelectView = view;
                         break;
                 }
 

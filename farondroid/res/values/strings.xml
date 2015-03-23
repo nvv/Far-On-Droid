@@ -326,6 +326,7 @@
 
     <string name="bottom_panel">Bottom Panel</string>
     <string name="bottom_panel_alt">Click/Hold \'Alt\' option to enable \'multi select\' mode, i.e. click on file selects it, not open.</string>
+    <string name="bottom_panel_select">Click \'Select\' option to apply flexible \'select\' filter on files from currently opened directory.</string>
     <string name="bottom_panel_applications">Click on option to open (in active panel) list of installed applications. Use long click to open context menu with available operations.</string>
     <string name="bottom_panel_quick_view">Open \'Quick View\' to get information for selected directory.</string>
     <string name="bottom_panel_more">Click on item to access another available commands.</string>
