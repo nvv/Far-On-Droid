@@ -91,7 +91,7 @@ public class MainPanel extends BaseFileSystemPanel {
 
     protected PopupWindow mQuickActionPopup;
 
-    protected PopupWindow mAltTipsPopup;
+    //protected PopupWindow mAltTipsPopup;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -186,13 +186,14 @@ public class MainPanel extends BaseFileSystemPanel {
         mQuickActionPopup.setAnimationStyle(R.style.QuickActionPopupAnimation);
         mQuickActionPopup.setContentView(layout);
 
+        /*
         mAltTipsPopup = new PopupWindow(layout, WindowManager.LayoutParams.WRAP_CONTENT,
                 WindowManager.LayoutParams.WRAP_CONTENT);
 
         ImageView imageView = new ImageView(App.sInstance);
         imageView.setImageBitmap(BitmapFactory.decodeResource(App.sInstance.getResources(), R.drawable.shift_tips_icon));
         mAltTipsPopup.setContentView(imageView);
-
+        */
         layout.findViewById(R.id.quick_action_copy).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -812,7 +813,7 @@ public class MainPanel extends BaseFileSystemPanel {
     public void setIsMultiSelectMode(boolean value) {
         mIsMultiSelectMode = value;
     }
-
+/*
     public void showAltTip(boolean value) {
         if (value) {
             if (!mAltTipsPopup.isShowing()) {
@@ -826,7 +827,7 @@ public class MainPanel extends BaseFileSystemPanel {
             mAltTipsPopup.dismiss();
         }
     }
-
+*/
     public boolean switchMultiSelectMode() {
         return (mIsMultiSelectMode = !mIsMultiSelectMode);
     }

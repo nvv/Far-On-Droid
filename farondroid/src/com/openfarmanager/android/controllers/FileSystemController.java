@@ -259,7 +259,7 @@ public class FileSystemController {
                             getLeftVisiblePanel().setIsMultiSelectMode(true);
                         }
                         if (getRightVisiblePanel() != null) {
-                            getRightVisiblePanel().showAltTip(true);
+                            //getRightVisiblePanel().showAltTip(true);
                             getRightVisiblePanel().setIsMultiSelectMode(true);
                         }
                     } else {
@@ -267,7 +267,8 @@ public class FileSystemController {
                             getLeftVisiblePanel().switchMultiSelectMode();
                         }
                         if (getRightVisiblePanel() != null) {
-                            getRightVisiblePanel().showAltTip(getRightVisiblePanel().switchMultiSelectMode());
+                            getRightVisiblePanel().switchMultiSelectMode();
+                            //getRightVisiblePanel().showAltTip(getRightVisiblePanel().switchMultiSelectMode());
                         }
                     }
                     break;
@@ -276,7 +277,7 @@ public class FileSystemController {
                         getLeftVisiblePanel().setIsMultiSelectMode(false);
                     }
                     if (getRightVisiblePanel() != null) {
-                        getRightVisiblePanel().showAltTip(false);
+                        //getRightVisiblePanel().showAltTip(false);
                         getRightVisiblePanel().setIsMultiSelectMode(false);
                     }
                     break;

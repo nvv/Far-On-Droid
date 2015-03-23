@@ -157,12 +157,16 @@ public class MainToolbarPanel extends Fragment {
                     if (!SystemUtils.isHoneycombOrNever() || settings.isHoldAltOnTouch()) {
                         view.setSelected(!view.isSelected());
                         view.setBackgroundColor(view.isSelected() ?
-                            Color.parseColor(getString(R.color.grey_button)) : settings.getSecondaryColor());
+                                Color.parseColor(getString(R.color.grey_button)) : settings.getSecondaryColor());
+                    } else {
+                        view.setBackgroundColor(Color.parseColor(getString(R.color.grey_button)));
                     }
                     sendMessage(ALT_DOWN);
+
                 } else if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
                     if (SystemUtils.isHoneycombOrNever() && !settings.isHoldAltOnTouch()) {
                         sendMessage(ALT_UP);
+                        view.setBackgroundColor(settings.getSecondaryColor());
                     }
                 }
                 return true;
