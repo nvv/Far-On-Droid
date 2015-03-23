@@ -340,10 +340,10 @@
     <string name="current_path_summary">Текущая директория. Удерживайте элемент с текущей директорией чтобы открыть диалог быстрой навигации.</string>
     <string name="main_panel">Основная Панель</string>
     <string name="main_panel_common">Управляйте вашей файловой системой с помощью простых жестов: прикосновение, удерживание, прокрутка. </string>
-    <string name="main_panel_expand">Расширьте панель (выполнив жест \'Перелистывание\') чтобы увидеть больше (должно быть включено в \'Настройках\'). </string>
+    <string name="main_panel_expand">Расширьте панель (проведите пальцем по экрану) чтобы увидеть больше (должно быть включено в \'Настройках\'). </string>
     <string name="main_panel_quick_panel">Быстрый доступ к наиболее общим операциям.</string>
     <string name="main_panel_size">Посчитанный размер выделенных файлов (исключая директории).</string>
-    <string name="main_panel_swipe">Пролистните чтобы увидеть другую панель.</string>
+    <string name="main_panel_swipe">Проведите пальцем по экрану чтобы увидеть другую панель.</string>
     <string name="show_quick_action_panel">Показать панель быстрого доступа</string>
     <string name="show_quick_action_panel_summary">Показать панель быстрого доступа к основным операциям с файлами</string>
     <string name="tools">Иконки инструментов</string>
