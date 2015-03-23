@@ -103,6 +103,7 @@
         <CheckBoxPreference
             android:key="show_quick_action_panel"
             android:title="@string/show_quick_action_panel"
+            android:defaultValue="true"
             android:summary="@string/show_quick_action_panel_summary"
             android:widgetLayout="@layout/check_box_preference"/>
 

@@ -447,7 +447,7 @@ public class Settings {
     }
 
     public boolean isShowSelectedFilesSize() {
-        return getSharedPreferences().getBoolean(SHOW_SELECTED_FILES_SIZE, false);
+        return getSharedPreferences().getBoolean(SHOW_SELECTED_FILES_SIZE, true);
     }
 
     public boolean isShowQuickActionPanel() {
