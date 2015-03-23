@@ -330,5 +330,24 @@
     <string name="hold_alt_by_click_summary">Разрешить режим \'мультивыбора\' файлов кликом (а не удерживанием) по \'Alt\'</string>
 
     <string name="error_non_existsed_directory">Попытка открыть несуществующую директорию. Открываем домашнюю директорию.</string>
+    <string name="bottom_panel">Нижняя панель</string>
+    <string name="bottom_panel_alt">Удерживайте \'Alt\' чтобы включить режим выделения файлов</string>
+    <string name="bottom_panel_applications">Кликните по данной опции чтобы открыть (в активной панели) список установленных приложений. Удерживайте выбранный элемент чтобы открыть контекстное меню с доступными операциями.</string>
+    <string name="bottom_panel_more">Кликните по данному элементу чтобы открыть список остальных комманд.</string>
+    <string name="bottom_panel_quick_view">Откройте \'Быстрый Просмотр\' чтобы получить информацию о выбранной директории.</string>
+    <string name="bottom_panel_select">Кликните по опции \'Выбрать\' чтобы применить гибкий фильтр выделения для текущей директории.</string>
+    <string name="current_path">Текущая директория</string>
+    <string name="current_path_summary">Текущая директория. Удерживайте элемент с текущей директорией чтобы открыть диалог быстрой навигации.</string>
+    <string name="main_panel">Основная Панель</string>
+    <string name="main_panel_common">Управляйте вашей файловой системой с помощью простых жестов: прикосновение, удерживание, прокрутка. </string>
+    <string name="main_panel_expand">Расширьте панель (выполнив жест \'Перелистывание\') чтобы увидеть больше (должно быть включено в \'Настройках\'). </string>
+    <string name="main_panel_quick_panel">Быстрый доступ к наиболее общим операциям.</string>
+    <string name="main_panel_size">Посчитанный размер выделенных файлов (исключая директории).</string>
+    <string name="main_panel_swipe">Пролистните чтобы увидеть другую панель.</string>
+    <string name="show_quick_action_panel">Показать панель быстрого доступа</string>
+    <string name="show_quick_action_panel_summary">Показать панель быстрого доступа к основным операциям с файлами</string>
+    <string name="tools">Иконки инструментов</string>
+    <string name="tools_change_directory">Кликните по иконке чтобы открыть текущую директорию на противоположной панели.</string>
+    <string name="tools_summary">Кликните по иконкам чтобы : \nОткрыть \'Внешнее хранилище\' \nДобавить текущую директорию в \'Избранное\'.</string>
 
 </resources>
