@@ -3,7 +3,9 @@ package com.openfarmanager.android.adapters;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.content.pm.IPackageStatsObserver;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageStats;
 import android.content.pm.ResolveInfo;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -11,8 +13,10 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.RemoteException;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,14 +31,17 @@ import com.openfarmanager.android.fragments.GenericPanel;
 import com.openfarmanager.android.fragments.MainPanel;
 import com.openfarmanager.android.model.Bookmark;
 import com.openfarmanager.android.model.FileActionEnum;
+import com.openfarmanager.android.utils.FileUtilsExt;
 import com.openfarmanager.android.view.ToastNotification;
 
 import java.io.File;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.Semaphore;
 
 public class LauncherAdapter extends FlatFileSystemAdapter {
 
@@ -84,7 +91,7 @@ public class LauncherAdapter extends FlatFileSystemAdapter {
                 Collections.sort(result, new Comparator<FileProxy>() {
                     @Override
                     public int compare(FileProxy applicationInfo, FileProxy applicationInfo2) {
-                        return applicationInfo.getName().compareTo(applicationInfo2.getName());
+                        return applicationInfo.getName().compareToIgnoreCase(applicationInfo2.getName());
                     }
                 });
 
@@ -96,6 +103,49 @@ public class LauncherAdapter extends FlatFileSystemAdapter {
                 mFiles = result;
                 notifyDataSetChanged();
                 mHandler.sendEmptyMessage(GenericPanel.STOP_LOADING);
+                populateApplicationSize();
+            }
+        }.execute();
+    }
+
+    private void populateApplicationSize() {
+        new AsyncTask<Void, Void, Void>() {
+
+            @Override
+            protected Void doInBackground(Void... params) {
+                try {
+                    final PackageManager manager = App.sInstance.getPackageManager();
+                    Method getPackageSizeInfo = manager.getClass().getMethod("getPackageSizeInfo",
+                            String.class,
+                            IPackageStatsObserver.class);
+
+                    final Semaphore codeSizeSemaphore = new Semaphore(1, true);
+
+                    for (FileProxy param : mFiles) {
+
+                        try {
+                            codeSizeSemaphore.acquire();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace(System.err);
+                        }
+
+                        final FileProxy final_param = param;
+                        getPackageSizeInfo.invoke(manager, ((ComponentProxy) param).mComponentName.getPackageName(),
+                                new IPackageStatsObserver.Stub() {
+                                    public void onGetStatsCompleted(PackageStats pStats, boolean succeedded)
+                                            throws RemoteException {
+                                        ((ComponentProxy) final_param).mSize = pStats.codeSize + pStats.dataSize;
+                                        notifyDataSetChanged();
+                                        codeSizeSemaphore.release();
+                                    }
+                                });
+                    }
+
+
+                } catch (Exception e) {
+                    e.printStackTrace(System.err);
+                }
+                return null;
             }
         }.execute();
     }
@@ -133,7 +183,14 @@ public class LauncherAdapter extends FlatFileSystemAdapter {
         FileProxy info = getItem(i);
 
         TextView name = (TextView) view.findViewById(R.id.item_name);
+        TextView infoItem = (TextView) view.findViewById(R.id.item_info);
+
         name.setText(info.getName());
+        if (info.getSize() > 0) {
+            infoItem.setText(FileUtilsExt.byteCountToDisplaySize(info.getSize()));
+        } else {
+            infoItem.setText(null);
+        }
 
         if (mSelectedPackages.contains(info.getId())) {
             name.setTextColor(App.sInstance.getSettings().getSelectedColor());
@@ -141,7 +198,6 @@ public class LauncherAdapter extends FlatFileSystemAdapter {
             name.setTextColor(App.sInstance.getSettings().getInstallColor());
         }
 
-        TextView infoItem = (TextView) view.findViewById(R.id.item_info);
 
         int size = App.sInstance.getSettings().getMainPanelFontSize();
         name.setTextSize(TypedValue.COMPLEX_UNIT_SP, size);
@@ -217,7 +273,7 @@ public class LauncherAdapter extends FlatFileSystemAdapter {
 
                 ArrayList<Uri> files = new ArrayList<Uri>();
 
-                for(FileProxy file : mSelectedFiles) {
+                for (FileProxy file : mSelectedFiles) {
                     File f = new File(file.getParentPath());
                     Uri uri = Uri.fromFile(f);
                     files.add(uri);
@@ -246,6 +302,7 @@ public class LauncherAdapter extends FlatFileSystemAdapter {
         private ComponentName mComponentName;
         private String mName;
         private String mPackagePath;
+        private long mSize;
 
         @Override
         public String getId() {
@@ -264,7 +321,7 @@ public class LauncherAdapter extends FlatFileSystemAdapter {
 
         @Override
         public long getSize() {
-            return 0;
+            return mSize;
         }
 
         @Override
