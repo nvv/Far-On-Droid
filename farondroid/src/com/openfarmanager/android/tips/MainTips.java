@@ -147,6 +147,12 @@ public class MainTips {
 
             mShowCaseView.setContentText(mActivity.getString(R.string.bottom_panel_quick_view));
             mShowCaseView.setShowcase(new ViewTarget(mMainToolbarPanel.getQuickView()), true);
+
+            if (mMainToolbarPanel.getMoreView().getWidth() == 0) { // hided
+                mShowCaseView.setButtonText(mActivity.getString(R.string.btn_finish));
+                mCurrentStep++;
+            }
+
         } else if (mCurrentStep == 10) {
             mShowCaseView.setContentText(mActivity.getString(R.string.bottom_panel_more));
             mShowCaseView.setShowcase(new ViewTarget(mMainToolbarPanel.getMoreView()), true);
