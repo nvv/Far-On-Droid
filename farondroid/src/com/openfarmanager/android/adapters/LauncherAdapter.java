@@ -135,8 +135,8 @@ public class LauncherAdapter extends FlatFileSystemAdapter {
                                     public void onGetStatsCompleted(PackageStats pStats, boolean succeedded)
                                             throws RemoteException {
                                         ((ComponentProxy) final_param).mSize = pStats.codeSize + pStats.dataSize;
-                                        notifyDataSetChanged();
                                         codeSizeSemaphore.release();
+                                        publishProgress();
                                     }
                                 });
                     }
@@ -146,6 +146,11 @@ public class LauncherAdapter extends FlatFileSystemAdapter {
                     e.printStackTrace(System.err);
                 }
                 return null;
+            }
+
+            @Override
+            protected void onProgressUpdate(Void... values) {
+                notifyDataSetChanged();
             }
         }.execute();
     }
