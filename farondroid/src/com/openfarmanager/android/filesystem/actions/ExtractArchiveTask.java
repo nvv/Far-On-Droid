@@ -1,6 +1,8 @@
 package com.openfarmanager.android.filesystem.actions;
 
 import android.support.v4.app.FragmentManager;
+
+import com.github.junrar.Archive;
 import com.openfarmanager.android.core.archive.ArchiveScanner;
 import com.openfarmanager.android.core.archive.ArchiveUtils;
 import com.openfarmanager.android.model.TaskStatusEnum;
@@ -69,7 +71,15 @@ public class ExtractArchiveTask extends FileActionTask {
                         // Extract the file to the specified destination
                         ArchiveScanner.sInstance.root().processFile(fileHeader.getFileName(), fileHeader.getUncompressedSize());
                     }
-
+                } else if (ArchiveUtils.isRarArchive(mArchiveFile)) { // one more special case :(
+                    Archive rarArchive = new Archive(mArchiveFile);
+                    List<com.github.junrar.rarfile.FileHeader> fileHeaders = rarArchive.getFileHeaders();
+                    for (final com.github.junrar.rarfile.FileHeader header : fileHeaders) {
+                        if (header.isDirectory()) {
+                            continue;
+                        }
+                        ArchiveScanner.sInstance.root().processFile(header.getFileNameString(), header.getFullUnpackSize());
+                    }
                 } else {
                     ArchiveInputStream inputStream = ArchiveUtils.createInputStream(
                             mIsCompressed ?

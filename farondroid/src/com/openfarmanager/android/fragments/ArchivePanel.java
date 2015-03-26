@@ -11,6 +11,8 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
+
+import com.github.junrar.Archive;
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.R;
 import com.openfarmanager.android.adapters.ArchiveEntryAdapter;
@@ -132,7 +134,7 @@ public class ArchivePanel extends MainPanel {
 
         try {
             mLastSelectedFile = item;
-            openArchive(new CompressorStreamFactory().createCompressorInputStream(
+            openArchive(item, new CompressorStreamFactory().createCompressorInputStream(
                     new BufferedInputStream(new FileInputStream(item))));
             setCurrentPath(null);
             mIsArchiveCompressed = true;
@@ -158,7 +160,7 @@ public class ArchivePanel extends MainPanel {
 
         try {
             mLastSelectedFile = item;
-            openArchive(new FileInputStream(item));
+            openArchive(item, new FileInputStream(item));
         } catch (IOException e) {
             openArchiveFailed();
         } catch (Exception e) {
@@ -166,9 +168,9 @@ public class ArchivePanel extends MainPanel {
         }
     }
 
-    private void openArchive(final InputStream stream) {
+    private void openArchive(final File archiveFile, final InputStream stream) {
         setIsLoading(true);
-        mOpenArchiveTask.init(stream, mEncryptedArchivePassword);
+        mOpenArchiveTask.init(archiveFile, stream, mEncryptedArchivePassword);
         runAsynk(mOpenArchiveTask);
     }
 
@@ -277,10 +279,12 @@ public class ArchivePanel extends MainPanel {
 
     private class OpenArchiveTask implements Runnable {
 
+        private File mArchiveFile;
         private InputStream mStream;
         private String mPassword;
 
-        public void init(InputStream stream, String password) {
+        public void init(File archiveFile, InputStream stream, String password) {
+            mArchiveFile = archiveFile;
             mStream = stream;
             mPassword = password;
         }
@@ -289,9 +293,15 @@ public class ArchivePanel extends MainPanel {
         public void run() {
             mEncryptedArchive = false;
             ArchiveInputStream inputStream = null;
+            Archive rarArchive = null;
             try {
                 ArchiveScanner.sInstance.clearArchive();
-                inputStream = ArchiveUtils.createInputStream(mStream);
+
+                if (ArchiveUtils.isRarArchive(mArchiveFile)) {
+                    rarArchive = new Archive(mArchiveFile);
+                } else {
+                    inputStream = ArchiveUtils.createInputStream(mStream);
+                }
 
                 // special case for zip archives
                 ZipFile zipFile = null;
@@ -320,6 +330,25 @@ public class ArchivePanel extends MainPanel {
                         zipArchiveEntry.setSize(header.getUncompressedSize());
                         entries.add(zipArchiveEntry);
                     }
+                } else if (rarArchive != null) { // special case; completely different api
+
+                    if (rarArchive.isEncrypted()) {
+                        if (isNullOrEmpty(mPassword)) {
+                            throw new NoPasswordException();
+                        }
+                    }
+
+                    List<com.github.junrar.rarfile.FileHeader> fileHeaders = rarArchive.getFileHeaders();
+                    for (final com.github.junrar.rarfile.FileHeader header : fileHeaders) {
+                        if (header.isDirectory()) {
+                            continue;
+                        }
+
+                        ZipArchiveEntry entry = new ZipArchiveEntry(header.getFileNameString());
+                        entry.setSize(header.getFullUnpackSize());
+                        entries.add(entry);
+                    }
+
                 } else {
                     // read all entries from archive first.
                     // it's essential since for 'DEFLATED' zip items some data is available only after entry actually been read.

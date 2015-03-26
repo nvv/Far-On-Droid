@@ -2,6 +2,9 @@ package com.openfarmanager.android.core.archive;
 
 import android.net.Uri;
 import android.webkit.MimeTypeMap;
+
+import com.github.junrar.Archive;
+import com.github.junrar.exception.RarException;
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.R;
 import com.openfarmanager.android.model.exeptions.CreateArchiveException;
@@ -28,7 +31,7 @@ public class ArchiveUtils {
     private static final String TAG = "ArchiveUtils";
 
     public enum ArchiveType {
-        zip, tar, ar, jar, cpio;
+        zip, tar, ar, jar, cpio, rar;
 
         public static ArchiveType getType(String mime) {
 
@@ -42,6 +45,8 @@ public class ArchiveUtils {
                 return jar;
             } else if (MIME_APPLICATION_X_CPIO.equals(mime)) {
                 return cpio;
+            } else if (MIME_APPLICATION_X_RAR_COMPRESSED.equals(mime)) {
+                return rar;
             }
 
             return null;
@@ -98,6 +103,10 @@ public class ArchiveUtils {
 
     public static boolean isArchiveSupported(File file) {
         return ArchiveType.getType(getMimeType(file)) != null;
+    }
+
+    public static boolean isRarArchive(File file) {
+        return ArchiveType.getType(getMimeType(file)) == ArchiveType.rar;
     }
 
     public static ArchiveInputStream createInputStream(InputStream stream) {
@@ -181,6 +190,64 @@ public class ArchiveUtils {
 
             } catch (Exception e) {
                 throw new ArchiveException("error extracting encrypted zip");
+            }
+
+            return;
+        }
+
+        if (ArchiveUtils.isRarArchive(inputFile)) {
+            Archive arch;
+            try {
+                arch = new Archive(inputFile);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return;
+            }
+
+            if (listener != null) {
+                listener.beforeExtractStarted(arch.getFileHeaders().size());
+            }
+
+            // Get the list of file headers from the rar file
+            List<com.github.junrar.rarfile.FileHeader> fileHeaderList = arch.getFileHeaders();
+
+            // Loop through the file headers
+            for (com.github.junrar.rarfile.FileHeader fileHeader : fileHeaderList) {
+
+                if (fileHeader.isEncrypted()) {
+                }
+
+                // try to find current archive entry in list of files to extraction
+                ArchiveScanner.File file = extractFileTree.findFile(fileHeader.getFileNameString());
+                // if current entry shouldn't be extracted - goto next
+                if (file == null || file.isDirectory()) {
+                    continue;
+                }
+
+                try {
+                    String outputPath = outputDir.getAbsolutePath();
+                    if (!outputPath.endsWith(File.separator)) {
+                        outputPath += "/";
+                    }
+                    outputPath += fileHeader.getFileNameString().trim().replace("\\", "/");
+                    String outputDirectory = outputPath.substring(0, outputPath.lastIndexOf("/"));
+
+                    File outDir = new File(outputDirectory);
+                    if (!outDir.exists()) {
+                        outDir.mkdirs();
+                    }
+
+                    OutputStream stream = new FileOutputStream(new File(outputPath));
+                    arch.extractFile(fileHeader, stream);
+                    stream.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+
+                if (listener != null) {
+                    listener.onFileExtracted(null);
+                }
             }
 
             return;
