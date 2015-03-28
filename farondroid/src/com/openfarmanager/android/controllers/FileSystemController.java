@@ -587,7 +587,6 @@ public class FileSystemController {
         }
 
         boolean isLeftPanel = panel.getPanelLocation() == LEFT_PANEL;
-
         if (isLeftPanel) {
             mHiddenPanel = mRightVisibleFragment;
             mRightVisibleFragment = mDirectoryDetailsView;
