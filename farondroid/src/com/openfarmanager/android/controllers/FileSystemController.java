@@ -63,8 +63,6 @@ import com.openfarmanager.android.view.ToastNotification;
 import com.openfarmanager.android.view.YandexDiskNameRequestDialog;
 import com.yandex.disk.client.Credentials;
 
-import org.apache.commons.io.FileUtils;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.nio.charset.Charset;

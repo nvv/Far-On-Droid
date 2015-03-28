@@ -1,49 +1,18 @@
 package com.openfarmanager.android.fragments;
 
-import android.content.ComponentName;
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v4.app.Fragment;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ListAdapter;
-import android.widget.ListView;
-import android.widget.ProgressBar;
 
-import com.google.analytics.tracking.android.EasyTracker;
-import com.google.analytics.tracking.android.Fields;
-import com.google.analytics.tracking.android.MapBuilder;
-import com.openfarmanager.android.App;
 import com.openfarmanager.android.R;
 import com.openfarmanager.android.adapters.LauncherAdapter;
-import com.openfarmanager.android.adapters.NetworkEntryAdapter;
 import com.openfarmanager.android.controllers.FileSystemController;
-import com.openfarmanager.android.core.network.datasource.DataSource;
-import com.openfarmanager.android.filesystem.FakeFile;
 import com.openfarmanager.android.filesystem.FileProxy;
 import com.openfarmanager.android.model.FileActionEnum;
-import com.openfarmanager.android.model.NetworkAccount;
-import com.openfarmanager.android.model.NetworkEnum;
-import com.openfarmanager.android.model.exeptions.NetworkException;
-import com.openfarmanager.android.utils.Extensions;
-import org.apache.commons.io.FilenameUtils;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.List;
-
-import static com.openfarmanager.android.controllers.FileSystemController.EXIT_FROM_NETWORK_STORAGE;
 
 /**
  * Created on 11/10/2013.
