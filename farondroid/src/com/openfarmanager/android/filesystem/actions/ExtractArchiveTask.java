@@ -10,12 +10,15 @@ import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.model.FileHeader;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
+import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
+import org.apache.commons.compress.archivers.sevenz.SevenZFile;
 import org.apache.commons.compress.archivers.zip.UnsupportedZipFeatureException;
 import org.apache.commons.compress.compressors.CompressorStreamFactory;
 
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,6 +43,10 @@ public class ExtractArchiveTask extends FileActionTask {
         mExtractTree = extractTree;
         mIsCompressed = compressed;
         mEncryptedArchivePassword = encryptedArchivePassword;
+
+        if (ArchiveUtils.is7zArchive(mArchiveFile)) {
+            mNoProgress = true;
+        }
     }
 
     public ExtractArchiveTask(FragmentManager fragmentManager, OnActionListener listener,
@@ -80,6 +87,19 @@ public class ExtractArchiveTask extends FileActionTask {
                         }
                         ArchiveScanner.sInstance.root().processFile(header.getFileNameString(), header.getFullUnpackSize());
                     }
+                } else if (ArchiveUtils.is7zArchive(mArchiveFile)) { // and one more special case :( :( :(
+                    SevenZFile sevenZFile = new SevenZFile(mArchiveFile, mEncryptedArchivePassword == null ? null : mEncryptedArchivePassword.getBytes());
+                    SevenZArchiveEntry entry = sevenZFile.getNextEntry();
+                    while (entry != null) {
+                        if (!entry.isDirectory()) {
+                            ArchiveScanner.sInstance.root().processFile(entry.getName(), entry.getSize());
+                        }
+
+                        byte[] content = new byte[(int) entry.getSize()];
+                        sevenZFile.read(content, 0, content.length);
+                        entry = sevenZFile.getNextEntry();
+                    }
+                    sevenZFile.close();
                 } else {
                     ArchiveInputStream inputStream = ArchiveUtils.createInputStream(
                             mIsCompressed ?
@@ -94,7 +114,14 @@ public class ExtractArchiveTask extends FileActionTask {
                 }
             } catch (UnsupportedZipFeatureException e) {
                 return TaskStatusEnum.ERROR_EXTRACTING_ARCHIVE_FILES_ENCRYPTION_PASSWORD_REQUIRED;
-            } catch (Exception e) {
+            } catch (IOException e) {
+                if (e.getMessage().equals("Cannot read encrypted files without a password")) {
+                    return TaskStatusEnum.ERROR_EXTRACTING_ARCHIVE_FILES_ENCRYPTION_PASSWORD_REQUIRED;
+                } else {
+                    return TaskStatusEnum.ERROR_CREATING_ARCHIVE_FILES_TREE;
+                }
+            }
+            catch (Exception e) {
                 return TaskStatusEnum.ERROR_CREATING_ARCHIVE_FILES_TREE;
             }
             mExtractTree = ArchiveScanner.sInstance.root();

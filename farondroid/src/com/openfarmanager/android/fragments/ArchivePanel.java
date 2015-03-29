@@ -29,6 +29,8 @@ import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.model.FileHeader;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
+import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
+import org.apache.commons.compress.archivers.sevenz.SevenZFile;
 import org.apache.commons.compress.archivers.zip.UnsupportedZipFeatureException;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
@@ -293,25 +295,29 @@ public class ArchivePanel extends MainPanel {
         public void run() {
             mEncryptedArchive = false;
             ArchiveInputStream inputStream = null;
+
+            // special cases
             Archive rarArchive = null;
+            ZipFile zipFile = null;
+            SevenZFile sevenZFile = null;
+
             try {
                 ArchiveScanner.sInstance.clearArchive();
 
                 if (ArchiveUtils.isRarArchive(mArchiveFile)) {
                     rarArchive = new Archive(mArchiveFile);
+                } else if (ArchiveUtils.is7zArchive(mArchiveFile)) {
+                    sevenZFile = new SevenZFile(mArchiveFile, mPassword == null ? null : mPassword.getBytes());
                 } else {
                     inputStream = ArchiveUtils.createInputStream(mStream);
                 }
-
-                // special case for zip archives
-                ZipFile zipFile = null;
 
                 if (inputStream instanceof ZipArchiveInputStream) {
                     zipFile = new ZipFile(mLastSelectedFile);
                     mEncryptedArchive = zipFile.isEncrypted();
                 }
 
-                LinkedList<ArchiveEntry> entries = new LinkedList<ArchiveEntry>();
+                LinkedList<ArchiveEntry> entries = new LinkedList<>();
 
                 if (mEncryptedArchive) {
 
@@ -330,7 +336,7 @@ public class ArchivePanel extends MainPanel {
                         zipArchiveEntry.setSize(header.getUncompressedSize());
                         entries.add(zipArchiveEntry);
                     }
-                } else if (rarArchive != null) { // special case; completely different api
+                } else if (rarArchive != null) { // special case: completely different api
 
                     if (rarArchive.isEncrypted()) {
                         if (isNullOrEmpty(mPassword)) {
@@ -349,6 +355,20 @@ public class ArchivePanel extends MainPanel {
                         entries.add(entry);
                     }
 
+                } else if (sevenZFile != null) { // special case: completely different api
+
+                    SevenZArchiveEntry entry = sevenZFile.getNextEntry();
+                    while (entry != null) {
+                        if (!entry.isDirectory()) {
+                            entries.add(entry);
+                        }
+
+                        byte[] content = new byte[(int) entry.getSize()];
+                        sevenZFile.read(content, 0, content.length);
+                        entry = sevenZFile.getNextEntry();
+                    }
+                    sevenZFile.close();
+
                 } else {
                     // read all entries from archive first.
                     // it's essential since for 'DEFLATED' zip items some data is available only after entry actually been read.
@@ -364,12 +384,16 @@ public class ArchivePanel extends MainPanel {
                 }
                 entries.clear();
 
-            } catch (NoPasswordException e) {
+            } catch (NoPasswordException | UnsupportedZipFeatureException e) {
                 postIfAttached(mRequestPassword);
                 return;
-            } catch (UnsupportedZipFeatureException e) {
-                postIfAttached(mRequestPassword);
-                return;
+            } catch (IOException e) {
+                if (e.getMessage().equals("Cannot read encrypted files without a password")) {
+                    postIfAttached(mRequestPassword);
+                } else {
+                    e.printStackTrace();
+                    openArchiveFailed();
+                }
             } catch (Exception e) {
                 e.printStackTrace();
                 openArchiveFailed();

@@ -4,13 +4,14 @@ import android.net.Uri;
 import android.webkit.MimeTypeMap;
 
 import com.github.junrar.Archive;
-import com.github.junrar.exception.RarException;
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.R;
 import com.openfarmanager.android.model.exeptions.CreateArchiveException;
 import com.openfarmanager.android.utils.FileUtilsExt;
 import net.lingala.zip4j.model.FileHeader;
 import org.apache.commons.compress.archivers.*;
+import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
+import org.apache.commons.compress.archivers.sevenz.SevenZFile;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.compressors.CompressorException;
 import org.apache.commons.compress.compressors.CompressorOutputStream;
@@ -31,7 +32,7 @@ public class ArchiveUtils {
     private static final String TAG = "ArchiveUtils";
 
     public enum ArchiveType {
-        zip, tar, ar, jar, cpio, rar;
+        zip, tar, ar, jar, cpio, rar, x7z;
 
         public static ArchiveType getType(String mime) {
 
@@ -47,6 +48,8 @@ public class ArchiveUtils {
                 return cpio;
             } else if (MIME_APPLICATION_X_RAR_COMPRESSED.equals(mime)) {
                 return rar;
+            } else if (MIME_APPLICATION_7Z.equals(mime)) {
+                return x7z;
             }
 
             return null;
@@ -109,6 +112,14 @@ public class ArchiveUtils {
         return ArchiveType.getType(getMimeType(file)) == ArchiveType.rar;
     }
 
+    public static boolean is7zArchive(File file) {
+        return ArchiveType.getType(getMimeType(file)) == ArchiveType.x7z;
+    }
+
+    public static boolean isZipArchive(File file) {
+        return ArchiveType.getType(getMimeType(file)) == ArchiveType.zip;
+    }
+
     public static ArchiveInputStream createInputStream(InputStream stream) {
         try {
             return new ArchiveStreamFactory()
@@ -153,7 +164,7 @@ public class ArchiveUtils {
             throw new FileNotFoundException(App.sInstance.getResources().getString(R.string.error_output_directory_doesnt_exists));
         }
 
-        if (encryptedZipPassword != null) {
+        if (encryptedZipPassword != null && isZipArchive(inputFile)) {
 
             try {
                 net.lingala.zip4j.core.ZipFile zipFile = new net.lingala.zip4j.core.ZipFile(inputFile);
@@ -195,7 +206,7 @@ public class ArchiveUtils {
             return;
         }
 
-        if (ArchiveUtils.isRarArchive(inputFile)) {
+        if (isRarArchive(inputFile)) {
             Archive arch;
             try {
                 arch = new Archive(inputFile);
@@ -208,34 +219,22 @@ public class ArchiveUtils {
                 listener.beforeExtractStarted(arch.getFileHeaders().size());
             }
 
-            // Get the list of file headers from the rar file
             List<com.github.junrar.rarfile.FileHeader> fileHeaderList = arch.getFileHeaders();
 
-            // Loop through the file headers
             for (com.github.junrar.rarfile.FileHeader fileHeader : fileHeaderList) {
 
                 if (fileHeader.isEncrypted()) {
                 }
 
                 // try to find current archive entry in list of files to extraction
-                ArchiveScanner.File file = extractFileTree.findFile(fileHeader.getFileNameString());
+                ArchiveScanner.File file = extractFileTree.findFile(fileHeader.getFileNameString().replace("\\", "/"));
                 // if current entry shouldn't be extracted - goto next
                 if (file == null || file.isDirectory()) {
                     continue;
                 }
 
                 try {
-                    String outputPath = outputDir.getAbsolutePath();
-                    if (!outputPath.endsWith(File.separator)) {
-                        outputPath += "/";
-                    }
-                    outputPath += fileHeader.getFileNameString().trim().replace("\\", "/");
-                    String outputDirectory = outputPath.substring(0, outputPath.lastIndexOf("/"));
-
-                    File outDir = new File(outputDirectory);
-                    if (!outDir.exists()) {
-                        outDir.mkdirs();
-                    }
+                    String outputPath = adjustExtractDirectory(outputDir, fileHeader.getFileNameString().replace("\\", "/"));
 
                     OutputStream stream = new FileOutputStream(new File(outputPath));
                     arch.extractFile(fileHeader, stream);
@@ -249,6 +248,34 @@ public class ArchiveUtils {
                     listener.onFileExtracted(null);
                 }
             }
+
+            return;
+        }
+
+        if (is7zArchive(inputFile)) {
+            SevenZFile sevenZFile = new SevenZFile(inputFile, encryptedZipPassword == null ? null : encryptedZipPassword.getBytes());
+
+            if (listener != null) {
+                listener.beforeExtractStarted(-1);
+            }
+
+            SevenZArchiveEntry entry = sevenZFile.getNextEntry();
+            while (entry != null) {
+
+                byte[] content = new byte[(int) entry.getSize()];
+                sevenZFile.read(content, 0, content.length);
+
+                ArchiveScanner.File file = extractFileTree.findFile(entry.getName());
+                if (file != null && !file.isDirectory()) {
+                    String outputPath = adjustExtractDirectory(outputDir, entry.getName());
+                    OutputStream stream = new FileOutputStream(new File(outputPath));
+                    IOUtils.write(content, stream);
+                    stream.close();
+                }
+
+                entry = sevenZFile.getNextEntry();
+            }
+            sevenZFile.close();
 
             return;
         }
@@ -299,6 +326,21 @@ public class ArchiveUtils {
 
         archiveInputStream.close();
 
+    }
+
+    private static String adjustExtractDirectory(File outputDir, String fileName) {
+        String outputPath = outputDir.getAbsolutePath();
+        if (!outputPath.endsWith(File.separator)) {
+            outputPath += "/";
+        }
+        outputPath += fileName.trim().replace("\\", "/");
+        String outputDirectory = outputPath.substring(0, outputPath.lastIndexOf("/"));
+
+        File outDir = new File(outputDirectory);
+        if (!outDir.exists()) {
+            outDir.mkdirs();
+        }
+        return outputPath;
     }
 
     /**
