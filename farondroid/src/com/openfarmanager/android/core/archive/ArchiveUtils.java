@@ -227,14 +227,14 @@ public class ArchiveUtils {
                 }
 
                 // try to find current archive entry in list of files to extraction
-                ArchiveScanner.File file = extractFileTree.findFile(fileHeader.getFileNameString().replace("\\", "/"));
+                ArchiveScanner.File file = extractFileTree.findFile(fileHeader.getFileNameString());
                 // if current entry shouldn't be extracted - goto next
                 if (file == null || file.isDirectory()) {
                     continue;
                 }
 
                 try {
-                    String outputPath = adjustExtractDirectory(outputDir, fileHeader.getFileNameString().replace("\\", "/"));
+                    String outputPath = adjustExtractDirectory(file, extractFileTree, outputDir);
 
                     OutputStream stream = new FileOutputStream(new File(outputPath));
                     arch.extractFile(fileHeader, stream);
@@ -267,7 +267,7 @@ public class ArchiveUtils {
 
                 ArchiveScanner.File file = extractFileTree.findFile(entry.getName());
                 if (file != null && !file.isDirectory()) {
-                    String outputPath = adjustExtractDirectory(outputDir, entry.getName());
+                    String outputPath = adjustExtractDirectory(file, extractFileTree, outputDir);
                     OutputStream stream = new FileOutputStream(new File(outputPath));
                     IOUtils.write(content, stream);
                     stream.close();
@@ -328,7 +328,27 @@ public class ArchiveUtils {
 
     }
 
-    private static String adjustExtractDirectory(File outputDir, String fileName) {
+    private static String adjustExtractDirectory(ArchiveScanner.File file, ArchiveScanner.File extractFileTree, File outputDir) {
+
+        String internalPath = File.separator + file.getFullDirectoryPath();
+        if (!extractFileTree.isRoot()) {
+            if (!extractFileTree.isDirectory()) { // single file.
+                internalPath = "";
+            } else { // find sub path within current working directory.
+                internalPath = File.separator + extractFileTree.getSubDirectoryPath(file);
+            }
+        }
+
+        String directoryPath = outputDir + internalPath;
+        final File outputFile = new File(directoryPath, file.getName());
+        File directory = new File(directoryPath);
+        if (!directory.exists()) {
+            directory.mkdirs();
+        }
+
+        return outputFile.getPath();
+
+        /*
         String outputPath = outputDir.getAbsolutePath();
         if (!outputPath.endsWith(File.separator)) {
             outputPath += "/";
@@ -341,6 +361,7 @@ public class ArchiveUtils {
             outDir.mkdirs();
         }
         return outputPath;
+        */
     }
 
     /**

@@ -99,11 +99,13 @@ public class ArchiveScanner {
             mChildren.add(child);
         }
 
-        public void processFile(String fullPath, long fileSize) {
+        public void processFile(String path, long fileSize) {
 
-            if (isNullOrEmpty(fullPath)) {
+            if (isNullOrEmpty(path)) {
                 return;
             }
+
+            String fullPath = path.replace("\\", "/");
 
             if (fullPath.contains(java.io.File.separator)) {
                 String[] names = fullPath.split(java.io.File.separator);
@@ -149,10 +151,11 @@ public class ArchiveScanner {
         /**
          * Find file recursively.
          *
-         * @param fileName name of file to find
+         * @param name name of file to find
          * @return file with name <code>fileName</code> or <code>null</code>, if file with specified name can't be found.
          */
-        public File findFile(String fileName) {
+        public File findFile(String name) {
+            String fileName = name.replace("\\", "/");
             if (getName().equals(fileName)) {
                 return this;
             }
@@ -247,7 +250,7 @@ public class ArchiveScanner {
             String fullSubPath = getFullDirectoryPath();
             String fullPath = file.getFullDirectoryPath();
 
-            return fullPath.substring(fullSubPath.length() - 1);
+            return fullPath.substring(fullSubPath.trim().length() > 0 ? fullSubPath.length() - 1 : 0);
         }
 
         public String getFullDirectoryPath() {
