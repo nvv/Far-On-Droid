@@ -43,10 +43,6 @@ public class ExtractArchiveTask extends FileActionTask {
         mExtractTree = extractTree;
         mIsCompressed = compressed;
         mEncryptedArchivePassword = encryptedArchivePassword;
-
-        if (ArchiveUtils.is7zArchive(mArchiveFile)) {
-            mNoProgress = true;
-        }
     }
 
     public ExtractArchiveTask(FragmentManager fragmentManager, OnActionListener listener,
