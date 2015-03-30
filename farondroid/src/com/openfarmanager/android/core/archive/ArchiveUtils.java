@@ -256,7 +256,7 @@ public class ArchiveUtils {
             SevenZFile sevenZFile = new SevenZFile(inputFile, encryptedZipPassword == null ? null : encryptedZipPassword.getBytes());
 
             if (listener != null) {
-                listener.beforeExtractStarted(-1);
+                listener.beforeExtractStarted(extractFileTree.countFiles());
             }
 
             SevenZArchiveEntry entry = sevenZFile.getNextEntry();
@@ -274,6 +274,10 @@ public class ArchiveUtils {
                 }
 
                 entry = sevenZFile.getNextEntry();
+
+                if (listener != null) {
+                    listener.onFileExtracted(file);
+                }
             }
             sevenZFile.close();
 

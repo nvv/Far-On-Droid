@@ -8,6 +8,7 @@ public class MimeTypes {
     public static final String MIME_APPLICATION_JSON = "application/json";
     public static final String MIME_APPLICATION_ZIP = "application/zip";
     public static final String MIME_APPLICATION_7Z = "application/x-7z-compressed";
+    public static final String MIME_APPLICATION_ARJ = "application/arj";
     public static final String MIME_APPLICATION_X_GZIP = "application/x-gzip";
     public static final String MIME_APPLICATION_TGZ = "application/tgz";
     public static final String MIME_APPLICATION_MSWORD = "application/msword";
@@ -307,6 +308,7 @@ public class MimeTypes {
                 putType("jar", MIME_APPLICATION_JAVA_ARCHIVE);
                 putType("apk", MIME_APPLICATION_ANDROID_PACKAGE);
                 putType("7z", MIME_APPLICATION_7Z);
+                putType("arj", MIME_APPLICATION_ARJ);
             }
         };
     }
