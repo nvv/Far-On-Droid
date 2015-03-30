@@ -58,18 +58,18 @@ public class ArchiveUtils {
     }
 
     public enum CompressionEnum {
-        gzip, bzip2;
+        gzip, bzip2, xz, pack200;
 
         public static CompressionEnum getCompression(String mime) {
 
             if (mime.equals(MimeTypes.MIME_APPLICATION_X_GZIP) || mime.equals(MimeTypes.MIME_APPLICATION_TGZ)) {
                 return gzip;
             } else if (mime.equals(MimeTypes.MIME_APPLICATION_X_XZ)) {
-                //return xz;
+                return xz;
             } else if (mime.equals(MimeTypes.MIME_APPLICATION_X_BZIP2)) {
                 return bzip2;
             } else if (mime.equals(MimeTypes.MIME_APPLICATION_X_PACK200)) {
-                //return pack200;
+                return pack200;
             }
 
             return null;
@@ -78,9 +78,9 @@ public class ArchiveUtils {
         public static String toString(CompressionEnum type) {
             switch (type) {
                 case gzip: return CompressorStreamFactory.GZIP;
-                //case xz: return CompressorStreamFactory.XZ;
+                case xz: return CompressorStreamFactory.XZ;
                 case bzip2: return CompressorStreamFactory.BZIP2;
-                //case pack200: return CompressorStreamFactory.PACK200;
+                case pack200: return CompressorStreamFactory.PACK200;
                 default: return "";
             }
         }

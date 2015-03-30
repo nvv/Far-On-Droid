@@ -88,6 +88,11 @@
                          android:layout_marginRight="20dp"
                          android:text="bzip2"/>
 
+            <RadioButton android:id="@+id/archive_compression_xz" android:button="@drawable/radio_selector"
+                         android:layout_width="wrap_content" android:layout_height="wrap_content"
+                         android:layout_marginRight="20dp"
+                         android:text="xz"/>
+
         </RadioGroup>
 
         <LinearLayout

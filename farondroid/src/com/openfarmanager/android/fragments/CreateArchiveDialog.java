@@ -179,6 +179,7 @@ public class CreateArchiveDialog extends BaseDialog {
         switch (compressionId) {
             case R.id.archive_compression_gzip: default: return ArchiveUtils.CompressionEnum.gzip;
             case R.id.archive_compression_bzip2: return ArchiveUtils.CompressionEnum.bzip2;
+            case R.id.archive_compression_xz: return ArchiveUtils.CompressionEnum.xz;
         }
     }
 
