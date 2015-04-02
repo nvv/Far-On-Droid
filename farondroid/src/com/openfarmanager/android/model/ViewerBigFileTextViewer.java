@@ -32,6 +32,11 @@ public class ViewerBigFileTextViewer implements TextBuffer {
     }
 
     @Override
+    public ArrayList<String> getTextLines() {
+        return mLines;
+    }
+
+    @Override
     public int size() {
         return mSize;
     }

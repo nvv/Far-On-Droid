@@ -33,6 +33,11 @@ public class LinesAdapter extends BaseAdapter {
         mAdapterMode = MODE_VIEW;
     }
 
+    public void stopSearch() {
+        mDoSearch = false;
+        notifyDataSetChanged();
+    }
+
     public void search(String pattern, boolean caseSensitive, boolean wholeWords, boolean regularExpression) {
         initSearchParams(pattern, caseSensitive, wholeWords, regularExpression);
         mDoSearch = true;
@@ -96,6 +101,10 @@ public class LinesAdapter extends BaseAdapter {
     public void swapData(ArrayList<String> strings) {
         mText.swapData(strings);
         notifyDataSetChanged();
+    }
+
+    public ArrayList<String> getText() {
+        return mText.getTextLines();
     }
 
     private View newInstance(final String initText, final int lineNumber) {

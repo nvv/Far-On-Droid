@@ -9,6 +9,8 @@ import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.Pair;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +19,7 @@ import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 import com.google.analytics.tracking.android.EasyTracker;
 import com.google.analytics.tracking.android.Fields;
@@ -24,11 +27,12 @@ import com.google.analytics.tracking.android.MapBuilder;
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.R;
 import com.openfarmanager.android.adapters.LinesAdapter;
-import com.openfarmanager.android.core.Settings;
 import com.openfarmanager.android.filesystem.actions.RootTask;
 import com.openfarmanager.android.model.ViewerBigFileTextViewer;
 import com.openfarmanager.android.model.ViewerTextBuffer;
-import com.openfarmanager.android.utils.SystemUtils;
+import com.openfarmanager.android.utils.FileUtilsExt;
+import com.openfarmanager.android.utils.ReversedIterator;
+import com.openfarmanager.android.view.QuickPopupDialog;
 import com.openfarmanager.android.view.SelectEncodingDialog;
 import com.openfarmanager.android.view.ToastNotification;
 import org.apache.commons.io.IOCase;
@@ -40,10 +44,20 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.FutureTask;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import rx.Observable;
+import rx.Subscriber;
+import rx.Subscription;
+import rx.schedulers.Schedulers;
 
 import static com.openfarmanager.android.controllers.EditViewController.MSG_BIG_FILE;
 import static com.openfarmanager.android.controllers.EditViewController.MSG_TEXT_CHANGED;
+import static com.openfarmanager.android.utils.Extensions.getThreadPool;
 import static com.openfarmanager.android.utils.Extensions.runAsynk;
 
 /**
@@ -75,6 +89,8 @@ public class Viewer extends Fragment {
     private Charset mSelectedCharset = Charset.forName("UTF-8");
     private Dialog mCharsetSelectDialog;
 
+    protected QuickPopupDialog mSearchResultsPopup;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
@@ -89,6 +105,8 @@ public class Viewer extends Fragment {
 
         view.findViewById(R.id.root_view).setBackgroundColor(App.sInstance.getSettings().getViewerColor());
 
+        mSearchResultsPopup = new QuickPopupDialog(view, R.layout.search_results_popup);
+        mSearchResultsPopup.setPosition(Gravity.RIGHT | Gravity.TOP, (int) (50 * getResources().getDisplayMetrics().density));
         return view;
     }
 
@@ -107,6 +125,8 @@ public class Viewer extends Fragment {
             mLoadFileTask.cancel(true);
             mLoadFileTask = null;
         }
+
+        mSearchResultsPopup.dismiss();
         super.onDestroy();
     }
 
@@ -138,13 +158,7 @@ public class Viewer extends Fragment {
             position = totalLinesNumber;
         }
 
-        final int endPosition = position;
-
-        mList.post(new Runnable() {
-            public void run() {
-                mList.setSelection(endPosition);
-            }
-        });
+        mList.setSelection(position);
     }
 
     public void openFile(final File file) {
@@ -202,6 +216,131 @@ public class Viewer extends Fragment {
 
     public void search(String pattern, boolean caseSensitive, boolean wholeWords, boolean regularExpression) {
         mAdapter.search(pattern, caseSensitive, wholeWords, regularExpression);
+
+        doSearch(pattern, caseSensitive, wholeWords, regularExpression);
+    }
+
+    public void doSearch(final String pattern, final boolean caseSensitive,
+                       final boolean wholeWords, final boolean regularExpression) {
+
+        if (!mSearchResultsPopup.isShowing()) {
+            mSearchResultsPopup.show();
+        }
+
+        final List<Integer> searchLines = Collections.synchronizedList(new ArrayList<Integer>());
+
+        View view = mSearchResultsPopup.getContentView();
+        final View progress = view.findViewById(R.id.search_progress);
+        final TextView matches = (TextView) view.findViewById(R.id.search_found);
+        final View next = view.findViewById(R.id.search_next);
+        final View prev = view.findViewById(R.id.search_prev);
+        final View close = view.findViewById(R.id.search_close);
+
+        progress.setVisibility(View.VISIBLE);
+
+        prev.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int position = mList.getFirstVisiblePosition() + 2;
+                for (Integer pos : new ReversedIterator<>(searchLines)) {
+                    if (pos < position) {
+                        gotoLine(pos - 1, EditViewGotoDialog.GOTO_LINE_POSITION);
+                        return;
+                    }
+                }
+            }
+        });
+
+        next.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int position = mList.getFirstVisiblePosition() + 2;
+                for (Integer pos : searchLines) {
+                    if (pos > position) {
+                        gotoLine(pos - 1, EditViewGotoDialog.GOTO_LINE_POSITION);
+                        return;
+                    }
+                }
+            }
+        });
+
+        close.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //subscription.unsubscribe();
+                mAdapter.stopSearch();
+                mSearchResultsPopup.dismiss();
+            }
+        });
+
+        matches.setText("0");
+        Subscription subscription = Observable.create(new Observable.OnSubscribe<Pair<Integer, Integer>>() {
+            @Override
+            public void call(Subscriber<? super Pair<Integer, Integer>> subscriber) {
+                ArrayList<String> lines = mAdapter.getText();
+                for (int i = 0; i < lines.size(); i++) {
+                    String line = lines.get(i);
+                    int count = doSearchInText(line, pattern, caseSensitive, wholeWords, regularExpression);
+
+                    if (count > 0) {
+                        subscriber.onNext(new Pair<>(i, count));
+                    }
+                }
+
+                subscriber.onCompleted();
+            }
+        }).subscribeOn(Schedulers.from(getThreadPool())).subscribe(new Subscriber<Pair<Integer, Integer>>() {
+
+            private int mTotalOccurrence;
+
+            @Override
+            public void onCompleted() {
+                updateUi(new Runnable() {
+                    @Override
+                    public void run() {
+                        progress.setVisibility(View.GONE);
+                    }
+                });
+            }
+
+            @Override
+            public void onError(Throwable e) {
+
+            }
+
+            @Override
+            public void onNext(Pair<Integer, Integer> searchResult) {
+                System.out.println("::::  " + searchResult.first + " " + searchResult.second);
+                mTotalOccurrence += searchResult.second;
+                searchLines.add(searchResult.first);
+
+                updateUi(mUpdateOccurrences);
+            }
+
+            private void updateUi(Runnable runnable) {
+                getActivity().runOnUiThread(runnable);
+            }
+
+            private Runnable mUpdateOccurrences = new Runnable() {
+                @Override
+                public void run() {
+                    matches.setText(String.valueOf(mTotalOccurrence));
+                }
+            };
+        });
+
+    }
+
+    private int doSearchInText(String string, String pattern, boolean caseSensitive, boolean wholeWords, boolean regularExpression) {
+        Pattern patternMatch = FileUtilsExt.createWordSearchPattern(pattern, wholeWords, caseSensitive ? IOCase.SENSITIVE : IOCase.INSENSITIVE);
+        Matcher matcher = patternMatch.matcher(string);
+        int count = 0;
+
+        while (matcher.find()) {
+            count++;
+        }
+
+        return count;
     }
 
     public void save() {

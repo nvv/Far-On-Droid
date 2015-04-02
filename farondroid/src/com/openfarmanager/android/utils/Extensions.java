@@ -5,10 +5,11 @@ import com.openfarmanager.android.App;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 
 public class Extensions {
 
-    private static ExecutorService sService = Executors.newFixedThreadPool(1);
+    private static ExecutorService sService = Executors.newFixedThreadPool(3);
 
     public static void runAsynk(Callable callable) {
         //noinspection unchecked
@@ -18,6 +19,10 @@ public class Extensions {
     public static void runAsynk(Runnable runnable) {
         //noinspection unchecked
         sService.submit(runnable);
+    }
+
+    public static ExecutorService getThreadPool() {
+        return sService;
     }
 
     public static int tryParse(String string, int defaultValue) {

@@ -16,6 +16,13 @@ public interface TextBuffer {
     String getLine(int lineNumber);
 
     /**
+     * Get all text lines (including changes).
+     *
+     * @return all text.
+     */
+    ArrayList<String> getTextLines();
+
+    /**
      * Total buffer size (count of all lines).
      *
      * @return total count of all lines.

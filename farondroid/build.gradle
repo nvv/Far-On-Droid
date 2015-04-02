@@ -43,6 +43,7 @@ android {
         compile 'commons-logging:commons-logging-api:1.1'
         compile 'commons-io:commons-io:2.4'
         compile 'org.apache.commons:commons-compress:1.9'
+        compile 'de.greenrobot:eventbus:2.4.0'
 
         compile fileTree(dir: 'libs', include: '*.jar')
     }

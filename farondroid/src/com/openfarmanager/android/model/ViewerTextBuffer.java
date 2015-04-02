@@ -41,6 +41,11 @@ public class ViewerTextBuffer implements TextBuffer {
     }
 
     @Override
+    public ArrayList<String> getTextLines() {
+        return mNumberOfLines;
+    }
+
+    @Override
     public void setLine(int lineNumber, String text) {
         try {
             mNumberOfLines.set(lineNumber, text);
