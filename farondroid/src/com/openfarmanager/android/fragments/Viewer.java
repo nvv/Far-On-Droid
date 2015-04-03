@@ -94,7 +94,7 @@ public class Viewer extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-        EasyTracker.getInstance(App.sInstance).send(MapBuilder.createAppView().set(Fields.SCREEN_NAME,"Viewer").build());
+        EasyTracker.getInstance(App.sInstance).send(MapBuilder.createAppView().set(Fields.SCREEN_NAME, "Viewer").build());
 
         View view = inflater.inflate(R.layout.viewer, container);
         mList = (ListView) view.findViewById(android.R.id.list);
@@ -308,10 +308,6 @@ public class Viewer extends Fragment {
                 updateUi(mUpdateOccurrences);
             }
 
-            private void updateUi(Runnable runnable) {
-                getActivity().runOnUiThread(runnable);
-            }
-
             private Runnable mUpdateOccurrences = new Runnable() {
                 @Override
                 public void run() {
@@ -364,23 +360,38 @@ public class Viewer extends Fragment {
 
     public void replace(final String pattern, final String replaceTo, final boolean caseSensitive,
                         final boolean wholeWords, final boolean regularExpression) {
-        runAsynk(new Runnable() {
+
+        Observable.create(new Observable.OnSubscribe<Boolean>() {
             @Override
-            public void run() {
-
-                @SuppressWarnings("unchecked")
-                FutureTask<Boolean> futureTask = new FutureTask<Boolean>(
-                        mText.replaceTask(pattern, replaceTo, caseSensitive ? IOCase.SENSITIVE : IOCase.INSENSITIVE,
-                                wholeWords, regularExpression));
-                futureTask.run();
-
-                try {
-                    if (futureTask.get()) {
-                        updateAdapter();
-                        mHandler.sendMessage(Message.obtain(mHandler, MSG_TEXT_CHANGED, mText.isTextChanged()));
-                    }
-                } catch (Exception ignore) {}
+            public void call(Subscriber<? super Boolean> subscriber) {
+                mText.replace(pattern, replaceTo, caseSensitive ? IOCase.SENSITIVE : IOCase.INSENSITIVE,
+                        wholeWords, regularExpression);
+                subscriber.onCompleted();
             }
+        }).subscribeOn(Schedulers.from(getThreadPool())).subscribe(new Subscriber<Boolean>() {
+            @Override
+            public void onCompleted() {
+                updateUi(onReplaceCompleted);
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                e.printStackTrace();
+            }
+
+            @Override
+            public void onNext(Boolean aBoolean) {
+
+            }
+
+            private Runnable onReplaceCompleted = new Runnable() {
+                @Override
+                public void run() {
+                    updateAdapter();
+                    mSearchResultsPopup.dismiss();
+                    mHandler.sendMessage(Message.obtain(mHandler, MSG_TEXT_CHANGED, mText.isTextChanged()));
+                }
+            };
         });
     }
 
@@ -573,6 +584,10 @@ public class Viewer extends Fragment {
         params.height = (int) (metrics.heightPixels * 0.55);
 
         dialog.getWindow().setAttributes(params);
+    }
+
+    private void updateUi(Runnable runnable) {
+        getActivity().runOnUiThread(runnable);
     }
 
     private Observable<Boolean> mSaveObservable = Observable.create(new Observable.OnSubscribe<Boolean>() {

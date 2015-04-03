@@ -90,12 +90,6 @@ public class ViewerTextBuffer implements TextBuffer {
         Collections.copy(mNumberOfLines, mOriginalLines);
     }
 
-    public Callable replaceTask(String pattern, String replaceTo,
-                             IOCase caseSensitive, boolean wholeWords, boolean regularExpression) {
-
-        return new ReplaceCallable(pattern, replaceTo, caseSensitive, wholeWords, regularExpression);
-    }
-
     public void replace(String pattern, String replaceTo,
                                IOCase caseSensitive, boolean wholeWords, boolean regularExpression) {
         Pattern patternMatch = FileUtilsExt.createWordSearchPattern(pattern, wholeWords, caseSensitive);
@@ -176,27 +170,4 @@ public class ViewerTextBuffer implements TextBuffer {
                 append(text.substring(firstOccurrence + pattern.length())).toString();
     }
 
-    private class ReplaceCallable implements Callable {
-
-        private String mSearchPattern;
-        private String mReplaceTo;
-        private IOCase mCaseSensitive;
-        private boolean mWholeWords;
-        private boolean mRegularExpression;
-
-        public ReplaceCallable(String pattern, String replaceTo,
-                               IOCase caseSensitive, boolean wholeWords, boolean regularExpression) {
-            mSearchPattern = pattern;
-            mReplaceTo = replaceTo;
-            mCaseSensitive = caseSensitive;
-            mWholeWords = wholeWords;
-            mRegularExpression = regularExpression;
-        }
-
-        @Override
-        public Boolean call() {
-            replace(mSearchPattern, mReplaceTo, mCaseSensitive, mWholeWords, mRegularExpression);
-            return true;
-        }
-    }
 }
