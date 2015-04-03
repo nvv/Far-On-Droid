@@ -264,17 +264,8 @@ public class Viewer extends Fragment {
             }
         });
 
-        close.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //subscription.unsubscribe();
-                mAdapter.stopSearch();
-                mSearchResultsPopup.dismiss();
-            }
-        });
-
         matches.setText("0");
-        Subscription subscription = Observable.create(new Observable.OnSubscribe<Pair<Integer, Integer>>() {
+        final Subscription subscription = Observable.create(new Observable.OnSubscribe<Pair<Integer, Integer>>() {
             @Override
             public void call(Subscriber<? super Pair<Integer, Integer>> subscriber) {
                 ArrayList<String> lines = mAdapter.getText();
@@ -329,6 +320,14 @@ public class Viewer extends Fragment {
             };
         });
 
+        close.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                subscription.unsubscribe();
+                mAdapter.stopSearch();
+                mSearchResultsPopup.dismiss();
+            }
+        });
     }
 
     private int doSearchInText(String string, String pattern, boolean caseSensitive, boolean wholeWords, boolean regularExpression) {
@@ -345,18 +344,19 @@ public class Viewer extends Fragment {
 
     public void save() {
         mAdapter.saveCurrentEditLine(getActivity().getCurrentFocus());
-        runAsynk(new Runnable() {
+        mSaveObservable.subscribe(new Subscriber<Boolean>() {
             @Override
-            public void run() {
-                @SuppressWarnings("unchecked")
-                FutureTask<Boolean> futureTask = new FutureTask<Boolean>(mText.saveTask(mFile));
-                futureTask.run();
+            public void onCompleted() {
+                mHandler.sendMessage(Message.obtain(mHandler, MSG_TEXT_CHANGED, mText.isTextChanged()));
+            }
 
-                try {
-                    if (futureTask.get()) {
-                        mHandler.sendMessage(Message.obtain(mHandler, MSG_TEXT_CHANGED, mText.isTextChanged()));
-                    }
-                } catch (Exception ignore) {}
+            @Override
+            public void onError(Throwable e) {
+                e.printStackTrace();
+            }
+
+            @Override
+            public void onNext(Boolean aBoolean) {
 
             }
         });
@@ -574,5 +574,17 @@ public class Viewer extends Fragment {
 
         dialog.getWindow().setAttributes(params);
     }
+
+    private Observable<Boolean> mSaveObservable = Observable.create(new Observable.OnSubscribe<Boolean>() {
+        @Override
+        public void call(Subscriber<? super Boolean> subscriber) {
+            try {
+                mText.save(mFile);
+            } catch (Exception e) {
+                subscriber.onError(e);
+            }
+            subscriber.onCompleted();
+        }
+    }).subscribeOn(Schedulers.from(getThreadPool()));
 
 }

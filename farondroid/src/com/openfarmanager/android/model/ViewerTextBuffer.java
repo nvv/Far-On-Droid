@@ -8,7 +8,6 @@ import org.apache.commons.io.IOCase;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
@@ -120,10 +119,6 @@ public class ViewerTextBuffer implements TextBuffer {
         }
     }
 
-    public Callable saveTask(File file) {
-        return new SaveCallable(file);
-    }
-
     public void saveToFile(File file) throws IOException {
         if (!isTextChanged()) {
             return;
@@ -165,6 +160,15 @@ public class ViewerTextBuffer implements TextBuffer {
         }
     }
 
+    public void save(File file) throws IOException {
+        if(file.canWrite()) {
+            saveToFile(file);
+        } else {
+            saveToFileRoot(file);
+        }
+        syncStringLists();
+    }
+
     private String replaceText(String text, String pattern, String replaceTo, int firstOccurrence) {
         mTempBuilder.delete(0, mTempBuilder.length());
         return mTempBuilder.append(text.substring(0, firstOccurrence)).
@@ -192,26 +196,6 @@ public class ViewerTextBuffer implements TextBuffer {
         @Override
         public Boolean call() {
             replace(mSearchPattern, mReplaceTo, mCaseSensitive, mWholeWords, mRegularExpression);
-            return true;
-        }
-    }
-
-    private class SaveCallable implements Callable {
-
-        private File mCurrentFile;
-
-        private SaveCallable(File currentFile) {
-            mCurrentFile = currentFile;
-        }
-
-        @Override
-        public Boolean call() throws IOException {
-            if(mCurrentFile.canWrite()) {
-                saveToFile(mCurrentFile);
-            } else {
-                saveToFileRoot(mCurrentFile);
-            }
-            syncStringLists();
             return true;
         }
     }
