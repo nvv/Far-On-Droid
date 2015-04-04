@@ -45,6 +45,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.FutureTask;
 import java.util.regex.Matcher;
@@ -265,22 +266,25 @@ public class Viewer extends Fragment {
         });
 
         matches.setText("0");
-        final Subscription subscription = Observable.create(new Observable.OnSubscribe<Pair<Integer, Integer>>() {
+        final Subscription subscription = Observable.create(new Observable.OnSubscribe<SearchResult>() {
             @Override
-            public void call(Subscriber<? super Pair<Integer, Integer>> subscriber) {
+            public void call(Subscriber<? super SearchResult> subscriber) {
                 ArrayList<String> lines = mAdapter.getText();
+                SearchResult searchResult = new SearchResult();
                 for (int i = 0; i < lines.size(); i++) {
+                    searchResult.reset();
                     String line = lines.get(i);
-                    int count = doSearchInText(line, pattern, caseSensitive, wholeWords, regularExpression);
+                    doSearchInText(line, pattern, caseSensitive, wholeWords, regularExpression, searchResult);
 
-                    if (count > 0) {
-                        subscriber.onNext(new Pair<>(i, count));
+                    if (searchResult.count > 0) {
+                        searchResult.lineNumber = i;
+                        subscriber.onNext(searchResult);
                     }
                 }
 
                 subscriber.onCompleted();
             }
-        }).subscribeOn(Schedulers.from(getThreadPool())).subscribe(new Subscriber<Pair<Integer, Integer>>() {
+        }).subscribeOn(Schedulers.from(getThreadPool())).subscribe(new Subscriber<SearchResult>() {
 
             private int mTotalOccurrence;
 
@@ -300,10 +304,11 @@ public class Viewer extends Fragment {
             }
 
             @Override
-            public void onNext(Pair<Integer, Integer> searchResult) {
-                System.out.println("::::  " + searchResult.first + " " + searchResult.second);
-                mTotalOccurrence += searchResult.second;
-                searchLines.add(searchResult.first);
+            public void onNext(SearchResult searchResult) {
+                //System.out.println("::::  " + searchResult.first + " " + searchResult.second);
+
+                mTotalOccurrence += searchResult.count;
+                searchLines.add(searchResult.lineNumber);
 
                 updateUi(mUpdateOccurrences);
             }
@@ -326,16 +331,25 @@ public class Viewer extends Fragment {
         });
     }
 
-    private int doSearchInText(String string, String pattern, boolean caseSensitive, boolean wholeWords, boolean regularExpression) {
+    private void doSearchInText(String string, String pattern, boolean caseSensitive, boolean wholeWords, boolean regularExpression, SearchResult result) {
         Pattern patternMatch = FileUtilsExt.createWordSearchPattern(pattern, wholeWords, caseSensitive ? IOCase.SENSITIVE : IOCase.INSENSITIVE);
         Matcher matcher = patternMatch.matcher(string);
-        int count = 0;
 
         while (matcher.find()) {
-            count++;
+            result.positions.add(matcher.start());
+            result.count++;
         }
+    }
 
-        return count;
+    private class SearchResult {
+        int lineNumber;
+        int count;
+        LinkedList<Integer> positions = new LinkedList<>();
+
+        public void reset() {
+            count = 0;
+            positions.clear();
+        }
     }
 
     public void save() {
