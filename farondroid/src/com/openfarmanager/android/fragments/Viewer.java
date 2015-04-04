@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.Fragment;
+import android.text.Layout;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Pair;
@@ -47,6 +48,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.FutureTask;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -133,7 +135,7 @@ public class Viewer extends Fragment {
 
     public void changeMode() {
         mAdapter.setMode(mAdapter.getMode() == LinesAdapter.MODE_VIEW ? LinesAdapter.MODE_EDIT : LinesAdapter.MODE_VIEW);
-        EasyTracker.getInstance(App.sInstance).send(MapBuilder.createAppView().set(Fields.SCREEN_NAME,"Viewer").set("MODE",mAdapter.getMode()==LinesAdapter.MODE_VIEW?"view":"edit").build());
+        EasyTracker.getInstance(App.sInstance).send(MapBuilder.createAppView().set(Fields.SCREEN_NAME, "Viewer").set("MODE", mAdapter.getMode() == LinesAdapter.MODE_VIEW ? "view" : "edit").build());
         updateAdapter();
     }
 
@@ -221,14 +223,17 @@ public class Viewer extends Fragment {
         doSearch(pattern, caseSensitive, wholeWords, regularExpression);
     }
 
+    private int mCalculatedRowHeight = -1;
+
     public void doSearch(final String pattern, final boolean caseSensitive,
-                       final boolean wholeWords, final boolean regularExpression) {
+                         final boolean wholeWords, final boolean regularExpression) {
 
         if (!mSearchResultsPopup.isShowing()) {
             mSearchResultsPopup.show();
         }
 
         final List<Integer> searchLines = Collections.synchronizedList(new ArrayList<Integer>());
+        final Map<Integer, int[]> wordsOnLine = Collections.synchronizedMap(new HashMap<Integer, int[]>());
 
         View view = mSearchResultsPopup.getContentView();
         final View progress = view.findViewById(R.id.search_progress);
@@ -242,11 +247,35 @@ public class Viewer extends Fragment {
         prev.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                int position = mList.getFirstVisiblePosition() + 2;
+                int position = mList.getFirstVisiblePosition();
                 for (Integer pos : new ReversedIterator<>(searchLines)) {
+                    TextView textView = (TextView) getChildView(pos);
+
                     if (pos < position) {
                         gotoLine(pos - 1, EditViewGotoDialog.GOTO_LINE_POSITION);
                         return;
+                    } else if (textView != null && textView.getLineCount() > 1 && wordsOnLine.get(pos).length > 1) {
+                        Layout layout = textView.getLayout();
+                        if (mCalculatedRowHeight == -1) {
+                            mCalculatedRowHeight = layout.getHeight() / textView.getLineCount();
+                        }
+                        int firstVisibleRow = Math.abs(Math.round(textView.getY() / mCalculatedRowHeight));
+                        int firstSearchIndex = layout.getLineEnd(firstVisibleRow - 1);
+
+                        int prevPosition = wordsOnLine.get(pos)[0];
+                        for (int wordPosition : wordsOnLine.get(pos)) {
+                            if (wordPosition > firstSearchIndex) {
+                                for (int j = firstVisibleRow; j >= 0; j--) {
+                                    if (prevPosition >= layout.getLineStart(j) && prevPosition <= layout.getLineEnd(j)) {
+                                        int scrollBy = mCalculatedRowHeight * (j - firstVisibleRow);
+                                        mList.smoothScrollBy(scrollBy - 5, 0);
+                                        return;
+                                    }
+                                }
+                            } else {
+                                prevPosition = wordPosition;
+                            }
+                        }
                     }
                 }
             }
@@ -257,9 +286,30 @@ public class Viewer extends Fragment {
             public void onClick(View v) {
                 int position = mList.getFirstVisiblePosition() + 2;
                 for (Integer pos : searchLines) {
+                    TextView textView = (TextView) getChildView(pos);
+
                     if (pos > position) {
                         gotoLine(pos - 1, EditViewGotoDialog.GOTO_LINE_POSITION);
                         return;
+                    } else if (textView != null && textView.getLineCount() > 1 && wordsOnLine.get(pos).length > 1) {
+                        Layout layout = textView.getLayout();
+                        if (mCalculatedRowHeight == -1) {
+                            mCalculatedRowHeight = layout.getHeight() / textView.getLineCount();
+                        }
+                        int firstVisibleRow = Math.abs(Math.round(textView.getY() / mCalculatedRowHeight));
+                        int firstSearchIndex = layout.getLineEnd(firstVisibleRow);
+
+                        for (int wordPosition : wordsOnLine.get(pos)) {
+                            if (wordPosition > firstSearchIndex) {
+                                for (int j = firstVisibleRow + 1; j < layout.getLineCount(); j++) {
+                                    if (wordPosition >= layout.getLineStart(j) && wordPosition <= layout.getLineEnd(j)) {
+                                        int scrollBy = mCalculatedRowHeight * (j - firstVisibleRow);
+                                        mList.smoothScrollBy(scrollBy - 5, 0);
+                                        return;
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -310,6 +360,14 @@ public class Viewer extends Fragment {
                 mTotalOccurrence += searchResult.count;
                 searchLines.add(searchResult.lineNumber);
 
+                int[] wordPositions = new int[searchResult.positions.size()];
+                int i = 0;
+                for (Integer position : searchResult.positions) {
+                    wordPositions[i++] = position;
+                }
+
+                wordsOnLine.put(searchResult.lineNumber, wordPositions);
+
                 updateUi(mUpdateOccurrences);
             }
 
@@ -329,6 +387,12 @@ public class Viewer extends Fragment {
                 mSearchResultsPopup.dismiss();
             }
         });
+    }
+
+    private View getChildView(int pos) {
+        int firstPosition = mList.getFirstVisiblePosition() - mList.getHeaderViewsCount();
+        int wantedChild = pos - firstPosition;
+        return mList.getChildAt(wantedChild);
     }
 
     private void doSearchInText(String string, String pattern, boolean caseSensitive, boolean wholeWords, boolean regularExpression, SearchResult result) {
