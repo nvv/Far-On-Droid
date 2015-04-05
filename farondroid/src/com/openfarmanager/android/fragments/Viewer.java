@@ -34,6 +34,7 @@ import com.openfarmanager.android.model.ViewerTextBuffer;
 import com.openfarmanager.android.utils.FileUtilsExt;
 import com.openfarmanager.android.utils.ReversedIterator;
 import com.openfarmanager.android.view.QuickPopupDialog;
+import com.openfarmanager.android.view.SearchableTextView;
 import com.openfarmanager.android.view.SelectEncodingDialog;
 import com.openfarmanager.android.view.ToastNotification;
 import org.apache.commons.io.IOCase;
@@ -46,6 +47,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -93,6 +95,8 @@ public class Viewer extends Fragment {
     private Dialog mCharsetSelectDialog;
 
     protected QuickPopupDialog mSearchResultsPopup;
+
+    private int mCalculatedRowHeight = -1;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -223,8 +227,6 @@ public class Viewer extends Fragment {
         doSearch(pattern, caseSensitive, wholeWords, regularExpression);
     }
 
-    private int mCalculatedRowHeight = -1;
-
     public void doSearch(final String pattern, final boolean caseSensitive,
                          final boolean wholeWords, final boolean regularExpression) {
 
@@ -256,19 +258,16 @@ public class Viewer extends Fragment {
                         return;
                     } else if (textView != null && textView.getLineCount() > 1 && wordsOnLine.get(pos).length > 1) {
                         Layout layout = textView.getLayout();
-                        if (mCalculatedRowHeight == -1) {
-                            mCalculatedRowHeight = layout.getHeight() / textView.getLineCount();
-                        }
-                        int firstVisibleRow = Math.abs(Math.round(textView.getY() / mCalculatedRowHeight));
+                        calculateRowHeight(textView, layout);
+                        int firstVisibleRow = calculateFirstVisibleRow(textView);
                         int firstSearchIndex = layout.getLineEnd(firstVisibleRow - 1);
 
                         int prevPosition = wordsOnLine.get(pos)[0];
                         for (int wordPosition : wordsOnLine.get(pos)) {
                             if (wordPosition > firstSearchIndex) {
                                 for (int j = firstVisibleRow; j >= 0; j--) {
-                                    if (prevPosition >= layout.getLineStart(j) && prevPosition <= layout.getLineEnd(j)) {
-                                        int scrollBy = mCalculatedRowHeight * (j - firstVisibleRow);
-                                        mList.smoothScrollBy(scrollBy - 5, 0);
+                                    if (isSearchWordOnLine(layout, prevPosition, j)) {
+                                        scrollToLine(textView, firstVisibleRow, j);
                                         return;
                                     }
                                 }
@@ -293,18 +292,15 @@ public class Viewer extends Fragment {
                         return;
                     } else if (textView != null && textView.getLineCount() > 1 && wordsOnLine.get(pos).length > 1) {
                         Layout layout = textView.getLayout();
-                        if (mCalculatedRowHeight == -1) {
-                            mCalculatedRowHeight = layout.getHeight() / textView.getLineCount();
-                        }
-                        int firstVisibleRow = Math.abs(Math.round(textView.getY() / mCalculatedRowHeight));
+                        calculateRowHeight(textView, layout);
+                        int firstVisibleRow = calculateFirstVisibleRow(textView);
                         int firstSearchIndex = layout.getLineEnd(firstVisibleRow);
 
                         for (int wordPosition : wordsOnLine.get(pos)) {
                             if (wordPosition > firstSearchIndex) {
                                 for (int j = firstVisibleRow + 1; j < layout.getLineCount(); j++) {
-                                    if (wordPosition >= layout.getLineStart(j) && wordPosition <= layout.getLineEnd(j)) {
-                                        int scrollBy = mCalculatedRowHeight * (j - firstVisibleRow);
-                                        mList.smoothScrollBy(scrollBy - 5, 0);
+                                    if (isSearchWordOnLine(layout, wordPosition, j)) {
+                                        scrollToLine(textView, firstVisibleRow, j);
                                         return;
                                     }
                                 }
@@ -387,6 +383,25 @@ public class Viewer extends Fragment {
                 mSearchResultsPopup.dismiss();
             }
         });
+    }
+
+    private int calculateFirstVisibleRow(TextView textView) {
+        return Math.abs(Math.round(textView.getY() / mCalculatedRowHeight));
+    }
+
+    private boolean isSearchWordOnLine(Layout layout, int prevPosition, int j) {
+        return prevPosition >= layout.getLineStart(j) && prevPosition <= layout.getLineEnd(j);
+    }
+
+    private void scrollToLine(TextView textView, int firstVisibleRow, int j) {
+        int scrollBy = mCalculatedRowHeight * (j - firstVisibleRow);
+        mList.smoothScrollBy(scrollBy + (int) (textView.getY() + firstVisibleRow * mCalculatedRowHeight), 0);
+    }
+
+    private void calculateRowHeight(TextView textView, Layout layout) {
+        if (mCalculatedRowHeight == -1) {
+            mCalculatedRowHeight = layout.getHeight() / textView.getLineCount();
+        }
     }
 
     private View getChildView(int pos) {

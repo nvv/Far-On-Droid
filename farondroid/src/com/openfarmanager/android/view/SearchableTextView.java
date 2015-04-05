@@ -22,7 +22,7 @@ import java.util.regex.Pattern;
 public class SearchableTextView extends TextView implements SearchableView {
 
     public static final int SELECTION_MODE_BACKGROUND = 0;
-    
+
     private int selectionMode = SELECTION_MODE_BACKGROUND;
     private String mText;
 
