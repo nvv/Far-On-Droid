@@ -389,12 +389,12 @@ public class Viewer extends Fragment {
         return Math.abs(Math.round(textView.getY() / mCalculatedRowHeight));
     }
 
-    private boolean isSearchWordOnLine(Layout layout, int prevPosition, int j) {
-        return prevPosition >= layout.getLineStart(j) && prevPosition <= layout.getLineEnd(j);
+    private boolean isSearchWordOnLine(Layout layout, int wordPosition, int j) {
+        return wordPosition >= layout.getLineStart(j) && wordPosition <= layout.getLineEnd(j);
     }
 
-    private void scrollToLine(TextView textView, int firstVisibleRow, int j) {
-        int scrollBy = mCalculatedRowHeight * (j - firstVisibleRow);
+    private void scrollToLine(TextView textView, int firstVisibleRow, int requiredRow) {
+        int scrollBy = mCalculatedRowHeight * (requiredRow - firstVisibleRow);
         mList.smoothScrollBy(scrollBy + (int) (textView.getY() + firstVisibleRow * mCalculatedRowHeight), 0);
     }
 
