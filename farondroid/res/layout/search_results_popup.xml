@@ -8,13 +8,13 @@
 
     <ImageView
         android:id="@+id/search_prev"
-        android:src="@drawable/btn_prev"
+        android:src="@drawable/bg_btn_prev"
         android:layout_width="36dp"
         android:layout_height="36dp"/>
 
     <ImageView
         android:id="@+id/search_next"
-        android:src="@drawable/btn_next"
+        android:src="@drawable/bg_btn_next"
         android:layout_width="36dp"
         android:layout_height="36dp"/>
 
