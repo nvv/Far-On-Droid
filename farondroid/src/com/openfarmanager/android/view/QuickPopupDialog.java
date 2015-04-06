@@ -42,13 +42,9 @@ public class QuickPopupDialog extends PopupWindow {
 
     public void show() {
         try {
-
             if (!isShowing()) {
                 showAtLocation(mParentView, mGravity, mOffset, mOffset);
-            } else {
-                dismiss();
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }

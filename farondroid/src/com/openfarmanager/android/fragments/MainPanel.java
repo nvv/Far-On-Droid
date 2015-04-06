@@ -37,6 +37,7 @@ import com.openfarmanager.android.model.TaskStatusEnum;
 import com.openfarmanager.android.utils.CustomFormatter;
 import com.openfarmanager.android.utils.FileUtilsExt;
 import com.openfarmanager.android.utils.SystemUtils;
+import com.openfarmanager.android.view.QuickPopupDialog;
 import com.openfarmanager.android.view.SelectDialog;
 import com.openfarmanager.android.view.ToastNotification;
 import org.apache.commons.io.FilenameUtils;
@@ -90,7 +91,7 @@ public class MainPanel extends BaseFileSystemPanel {
 
     protected TextView mSelectedFilesSize;
 
-    protected PopupWindow mQuickActionPopup;
+    protected QuickPopupDialog mQuickActionPopup;
 
     //protected PopupWindow mAltTipsPopup;
 
@@ -175,26 +176,10 @@ public class MainPanel extends BaseFileSystemPanel {
             }
         });
 
-
-        View layout = ((LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE)).
-                inflate(R.layout.quick_action_popup, null);
-
-        layout.setBackgroundColor(App.sInstance.getSettings().getSecondaryColor());
-        layout.getBackground().setAlpha(170);
-
-        mQuickActionPopup = new PopupWindow(layout, WindowManager.LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.WRAP_CONTENT);
-        mQuickActionPopup.setAnimationStyle(R.style.QuickActionPopupAnimation);
-        mQuickActionPopup.setContentView(layout);
-
-        /*
-        mAltTipsPopup = new PopupWindow(layout, WindowManager.LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.WRAP_CONTENT);
-
-        ImageView imageView = new ImageView(App.sInstance);
-        imageView.setImageBitmap(BitmapFactory.decodeResource(App.sInstance.getResources(), R.drawable.shift_tips_icon));
-        mAltTipsPopup.setContentView(imageView);
-        */
+        mQuickActionPopup = new QuickPopupDialog(view, R.layout.quick_action_popup);
+        mQuickActionPopup.setPosition((mPanelLocation == LEFT_PANEL ? Gravity.LEFT : Gravity.RIGHT) | Gravity.TOP,
+                (int) (50 * getResources().getDisplayMetrics().density));
+        View layout = mQuickActionPopup.getContentView();;
         layout.findViewById(R.id.quick_action_copy).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -426,6 +411,14 @@ public class MainPanel extends BaseFileSystemPanel {
         mLastListPosition = mFileSystemList.getFirstVisiblePosition();
     }
 
+    @Override
+    public void onDetach () {
+        super.onDetach();
+        if (mQuickActionPopup != null) {
+            mQuickActionPopup.dismiss();
+        }
+    }
+
     protected void updateLongClickSelection(AdapterView<?> adapterView, File file, boolean longClick) {
         FileSystemFile systemFile = (FileSystemFile) file;
 
@@ -475,13 +468,7 @@ public class MainPanel extends BaseFileSystemPanel {
         try {
 
             if (showPanel) {
-                if (!mQuickActionPopup.isShowing()) {
-
-                    int offset = (int) (50 * getResources().getDisplayMetrics().density);
-
-                    mQuickActionPopup.showAtLocation(mFileSystemList, (mPanelLocation == LEFT_PANEL ?
-                            Gravity.LEFT : Gravity.RIGHT) | Gravity.TOP, offset, offset);
-                }
+                mQuickActionPopup.show();
             } else {
                 mQuickActionPopup.dismiss();
             }

@@ -445,6 +445,8 @@ public class NetworkPanel extends MainPanel {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
+            showQuickActionPanel();
+            setSelectedFilesSizeVisibility();
             setIsLoading(true);
         }
 
