@@ -69,6 +69,11 @@ public class GoogleDriveFile implements FileProxy {
     }
 
     @Override
+    public String getFullPathRaw() {
+        return mFullPath;
+    }
+
+    @Override
     public String getParentPath() {
         return mFile.getParentPath();
     }

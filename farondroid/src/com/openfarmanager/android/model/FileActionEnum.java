@@ -17,17 +17,30 @@ import java.util.List;
 public enum FileActionEnum implements Parcelable, Serializable {
 
     INFO, SEND, COPY, EDIT, DELETE, MOVE, NEW, SELECT, RENAME, FILE_OPEN_WITH, ARCHIVE_EXTRACT,
-    CREATE_BOOKMARK, CREATE_ARCHIVE, OPEN, SET_AS_HOME, EXPORT_AS, OPEN_WEB, SHARE;
+    CREATE_BOOKMARK, CREATE_ARCHIVE, OPEN, SET_AS_HOME, EXPORT_AS, OPEN_WEB, SHARE, COPY_PATH;
 
     private static FileActionEnum[] sActionsForMultipleSelectedItems = new FileActionEnum[] {COPY, SET_AS_HOME, MOVE, DELETE, CREATE_ARCHIVE};
-    private static FileActionEnum[] sActionsForDirectory = new FileActionEnum[] {INFO, SET_AS_HOME, COPY, MOVE, DELETE, RENAME, CREATE_ARCHIVE};
-    private static FileActionEnum[] sActionsForFile = new FileActionEnum[] {INFO, SET_AS_HOME, SEND, COPY, MOVE, DELETE, EDIT, RENAME, FILE_OPEN_WITH, CREATE_ARCHIVE};
+    private static FileActionEnum[] sActionsForDirectory = new FileActionEnum[] {INFO, SET_AS_HOME, COPY, MOVE, DELETE, RENAME, COPY_PATH, CREATE_ARCHIVE};
+    private static FileActionEnum[] sActionsForFile = new FileActionEnum[] {INFO, SET_AS_HOME, SEND, COPY, MOVE, DELETE, EDIT, RENAME, COPY_PATH, FILE_OPEN_WITH, CREATE_ARCHIVE};
     private static FileActionEnum[] sActionsForNetwork = new FileActionEnum[] {COPY, MOVE, DELETE, RENAME};
     private static FileActionEnum[] sActionsForNetworkWithExport = new FileActionEnum[] {COPY, MOVE, EXPORT_AS, DELETE, RENAME};
     private static FileActionEnum[] sActionsForNetworkWithOpenWith = new FileActionEnum[] {COPY, MOVE, OPEN_WEB, DELETE, RENAME};
     private static FileActionEnum[] sActionsForNetworkWithExportAndOpenWith = new FileActionEnum[] {COPY, MOVE, EXPORT_AS, OPEN_WEB, DELETE, RENAME};
 
     public static FileActionEnum[] getAvailableActionsForNetwork(NetworkEnum networkType, List<FileProxy> selectedFiles) {
+        FileActionEnum[] actionEnums = selectActionsForNetwork(networkType, selectedFiles);
+
+        if (selectedFiles.size() == 1) {
+            FileActionEnum[] actions = new FileActionEnum[actionEnums.length + 1];
+            System.arraycopy(actionEnums, 0, actions, 0, actionEnums.length);
+            actions[actionEnums.length] = COPY_PATH;
+            return actions;
+        }
+
+        return actionEnums;
+    }
+
+    private static FileActionEnum[] selectActionsForNetwork(NetworkEnum networkType, List<FileProxy> selectedFiles) {
         if (networkType == NetworkEnum.GoogleDrive && selectedFiles != null && selectedFiles.size() == 1) {
             GoogleDriveFile file = (GoogleDriveFile) selectedFiles.get(0);
 
@@ -111,6 +124,8 @@ public enum FileActionEnum implements Parcelable, Serializable {
                 return res.getString(R.string.open_with);
             case SHARE:
                 return res.getString(R.string.action_share);
+            case COPY_PATH:
+                return res.getString(R.string.action_copy_path);
         }
 
         return "";

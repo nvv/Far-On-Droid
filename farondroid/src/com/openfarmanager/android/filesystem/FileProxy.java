@@ -26,6 +26,8 @@ public interface FileProxy<T> {
 
     public String getFullPath();
 
+    public String getFullPathRaw();
+
     public String getParentPath();
 
     public boolean isUpNavigator();

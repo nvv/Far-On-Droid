@@ -80,6 +80,11 @@ public class DropboxFile implements FileProxy<DropboxAPI.Entry> {
     }
 
     @Override
+    public String getFullPathRaw() {
+        return mEntry.path;
+    }
+
+    @Override
     public String getParentPath() {
         return mParentPath;
     }

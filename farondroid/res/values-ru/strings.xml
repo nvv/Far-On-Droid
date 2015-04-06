@@ -96,7 +96,9 @@
     <string name="action_select_account">Выберите аккаунт</string>
     <string name="action_open">Открыть</string>
     <string name="action_set_as_home">Сделать домашней директорией</string>
+    <string name="action_copy_path">Копировать путь</string>
 
+    <string name="path_copied">Путь к файлу/каталогу скопирован в буфер обмена</string>
     <string name="information">Информация</string>
     <string name="destination">Назначение</string>
     <string name="archive_name">Имя архива</string>

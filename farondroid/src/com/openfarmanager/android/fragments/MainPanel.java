@@ -1,6 +1,7 @@
 package com.openfarmanager.android.fragments;
 
 import android.app.Dialog;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
@@ -584,6 +585,13 @@ public class MainPanel extends BaseFileSystemPanel {
                 break;
             case OPEN_WEB:
                 mHandler.sendMessage(mHandler.obtainMessage(FileSystemController.OPEN_WEB, mSelectedFiles.size() == 1 ? mSelectedFiles.get(0) : null));
+                break;
+            case COPY_PATH:
+                if (mSelectedFiles.size() == 1) {
+                    android.text.ClipboardManager clipboard = (android.text.ClipboardManager) App.sInstance.getSystemService(Context.CLIPBOARD_SERVICE);
+                    clipboard.setText(mSelectedFiles.get(0).getFullPathRaw());
+                    ToastNotification.makeText(App.sInstance.getApplicationContext(), getString(R.string.path_copied), Toast.LENGTH_SHORT).show();
+                }
                 break;
         }
     }

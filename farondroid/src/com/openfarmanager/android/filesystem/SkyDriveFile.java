@@ -88,6 +88,11 @@ public class SkyDriveFile implements FileProxy {
     }
 
     @Override
+    public String getFullPathRaw() {
+        return mFullPath;
+    }
+
+    @Override
     public String getParentPath() {
         return tryGet(JsonKeys.PARENT_ID, "");
     }

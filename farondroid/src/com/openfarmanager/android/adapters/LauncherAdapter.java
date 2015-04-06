@@ -345,6 +345,11 @@ public class LauncherAdapter extends FlatFileSystemAdapter {
         }
 
         @Override
+        public String getFullPathRaw() {
+            return mComponentName.getPackageName();
+        }
+
+        @Override
         public String getParentPath() {
             return mPackagePath;
         }

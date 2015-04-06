@@ -99,7 +99,9 @@
     <string name="action_open">Open</string>
     <string name="action_set_as_home">Set current path as Home</string>
     <string name="action_share">Share</string>
+    <string name="action_copy_path">Copy path</string>
 
+    <string name="path_copied">Path to file/directory copied to clipboard</string>
     <string name="information">Information</string>
     <string name="destination">Destination</string>
     <string name="archive_name">Archive name</string>

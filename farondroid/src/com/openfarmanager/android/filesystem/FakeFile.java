@@ -55,6 +55,11 @@ public class FakeFile implements FileProxy {
     }
 
     @Override
+    public String getFullPathRaw() {
+        return null;
+    }
+
+    @Override
     public String getParentPath() {
         return mParentPath;
     }

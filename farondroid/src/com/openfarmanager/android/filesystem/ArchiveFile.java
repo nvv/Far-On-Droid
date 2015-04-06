@@ -52,6 +52,11 @@ public class ArchiveFile extends ArchiveScanner.File implements FileProxy<Archiv
     }
 
     @Override
+    public String getFullPathRaw() {
+        return super.getFullPath();
+    }
+
+    @Override
     public String getParentPath() {
         return getParent().getFullPath();
     }

@@ -72,6 +72,11 @@ public class FileSystemFile extends File implements FileProxy<File> {
     }
 
     @Override
+    public String getFullPathRaw() {
+        return getAbsolutePath();
+    }
+
+    @Override
     public String getParentPath() {
         return getParent();
     }
