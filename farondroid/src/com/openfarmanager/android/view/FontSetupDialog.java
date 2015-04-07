@@ -21,7 +21,7 @@ public class FontSetupDialog extends Dialog {
     protected final static int MAX_VALUE = 26 - MIN_VALUE;
 
     protected int mNewFontSize;
-    private View mDialogView;
+    protected View mDialogView;
     private SaveAction mSaveAction;
 
     public FontSetupDialog(Context context, SaveAction runnable) {
@@ -37,11 +37,11 @@ public class FontSetupDialog extends Dialog {
         int fontSize = mSaveAction.getDefaultValue();
 
         final TextView fontSizeSample = (TextView) mDialogView.findViewById(R.id.font_size_sample);
-        fontSizeSample.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize);
+        setInitFontSize(fontSize, fontSizeSample);
 
-        mNewFontSize = fontSize - MIN_VALUE;
+        mNewFontSize = fontSize - getMinValue();
         SeekBar seekbar = (SeekBar) mDialogView.findViewById(R.id.slider_preference_seekbar);
-        seekbar.setMax(MAX_VALUE);
+        seekbar.setMax(getMaxValue());
         seekbar.setProgress(mNewFontSize);
         seekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 
@@ -56,8 +56,7 @@ public class FontSetupDialog extends Dialog {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if (fromUser) {
-                    mNewFontSize = MIN_VALUE + progress;
-                    fontSizeSample.setTextSize(TypedValue.COMPLEX_UNIT_SP, mNewFontSize);
+                    onValueChanged(progress, fontSizeSample);
                 }
             }
         });
@@ -70,6 +69,23 @@ public class FontSetupDialog extends Dialog {
         });
 
         setContentView(mDialogView);
+    }
+
+    protected void setInitFontSize(int fontSize, TextView fontSizeSample) {
+        fontSizeSample.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize);
+    }
+
+    protected void onValueChanged(int progress, TextView fontSizeSample) {
+        mNewFontSize = getMinValue() + progress;
+        fontSizeSample.setTextSize(TypedValue.COMPLEX_UNIT_SP, mNewFontSize);
+    }
+
+    protected int getMinValue() {
+        return MIN_VALUE;
+    }
+
+    protected int getMaxValue() {
+        return MAX_VALUE;
     }
 
     @Override

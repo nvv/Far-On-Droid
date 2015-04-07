@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.R;
@@ -32,6 +33,12 @@ import java.util.HashMap;
 import java.util.List;
 
 public class FlatFileSystemAdapter extends BaseAdapter {
+
+    private static float sScaledDensity;
+
+    static {
+        sScaledDensity = App.sInstance.getResources().getDisplayMetrics().scaledDensity;
+    }
 
     protected File mBaseDir;
     protected List<FileProxy> mSelectedFiles = new ArrayList<FileProxy>();
@@ -87,13 +94,19 @@ public class FlatFileSystemAdapter extends BaseAdapter {
         name.setTextSize(TypedValue.COMPLEX_UNIT_SP, size);
         info.setTextSize(TypedValue.COMPLEX_UNIT_SP, size);
 
-        Typeface typeface = App.sInstance.getSettings().getMainPanelFontType();
+        Settings settings = App.sInstance.getSettings();
+
+        Typeface typeface = settings.getMainPanelFontType();
         name.setTypeface(typeface);
         info.setTypeface(typeface);
 
+        int margin = (int) sScaledDensity * settings.getMainPanelCellMargin();
+        LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) name.getLayoutParams();
+        params.setMargins(0, margin, 0, margin);
+        name.setLayoutParams(params);
+
         File fileItem = (File) item;
 
-        Settings settings = App.sInstance.getSettings();
         if (mSelectedFiles.contains(item)) {
             setColor(name, info, settings.getSelectedColor());
         } else if ((!fileItem.canRead() || fileItem.isHidden()) && !item.isVirtualDirectory()) {

@@ -179,6 +179,7 @@
     <string name="enable_home_folder_summary">Enable to use Home folder option</string>
     <string name="home_folder_updated">Home directory updated.</string>
     <string name="main_panel_font_size">Main panel font size</string>
+    <string name="main_panel_margin">Main panel cells margin</string>
     <string name="toolbar_font_size">Toolbar item font size</string>
     <string name="viewer_font_size">Viewer font size</string>
     <string name="select_encoding">Select encoding</string>
@@ -219,6 +220,7 @@
 
     <string name="exit_from_archive">Exit from archive</string>
     <string name="font_size">Font size</string>
+    <string name="margin_size">Margin size</string>
 
     <string name="feedback_to">VNamashko@gmail.com</string>
     <string name="feedback_subject">[Far On Droid %s] Feedback</string>

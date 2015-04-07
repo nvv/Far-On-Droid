@@ -26,6 +26,7 @@ import com.openfarmanager.android.filesystem.FileSystemScanner;
 import com.openfarmanager.android.filesystem.actions.RootTask;
 import com.openfarmanager.android.utils.SystemUtils;
 import com.openfarmanager.android.view.FontSetupDialog;
+import com.openfarmanager.android.view.MarginSetupDialog;
 import com.openfarmanager.android.view.ToastNotification;
 import com.openfarmanager.android.view.YesNoPreference;
 
@@ -93,6 +94,27 @@ public class SettingsActivity extends PreferenceActivity {
                     @Override
                     public int getDefaultValue() {
                         return App.sInstance.getSettings().getMainPanelFontSize();
+                    }
+                });
+                dialog.show();
+                adjustDialogSize(dialog);
+                return true;
+            }
+        });
+
+        findPreference("panel_margin").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+
+                final Dialog dialog = new MarginSetupDialog(SettingsActivity.this, new FontSetupDialog.SaveAction() {
+                    @Override
+                    public void execute(int newValue) {
+                        App.sInstance.getSettings().setMainPanelCellMargin(newValue);
+                    }
+
+                    @Override
+                    public int getDefaultValue() {
+                        return App.sInstance.getSettings().getMainPanelCellMargin();
                     }
                 });
                 dialog.show();

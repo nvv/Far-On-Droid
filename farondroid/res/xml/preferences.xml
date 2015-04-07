@@ -117,6 +117,10 @@
                     android:title="@string/main_panel_font_size"/>
 
             <Preference
+                    android:key="panel_margin"
+                    android:title="@string/main_panel_margin"/>
+
+            <Preference
                     android:key="toolbar_font_size"
                     android:title="@string/toolbar_font_size"/>
 

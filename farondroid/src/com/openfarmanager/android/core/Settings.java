@@ -34,6 +34,7 @@ public class Settings {
     public static final String ENABLE_HOME_FOLDER = "enable_home_folder";
     public static final String HOME_FOLDER = "home_folder";
     public static final String MAIN_PANEL_FONT_SIZE = "main_panel_font_size";
+    public static final String MAIN_PANEL_CELL_MARGIN = "main_panel_cell_margin";
     public static final String BOTTOM_PANEL_FONT_SIZE = "bottom_panel_font_size";
     public static final String VIEWER_FONT_SIZE = "viewer_panel_font_size";
     public static final String VIEWER_DEFAULT_CHARSET_NAME = "viewer_charset_name";
@@ -59,6 +60,7 @@ public class Settings {
     private int mMainPanelFontSize = 0;
     private int mBottomPanelFontSize = 0;
     private int mViewerFontSize = 0;
+    private int mPanelCellMargin = 0;
 
     private String mMainPanelFont;
     private String mViewerFont;
@@ -198,6 +200,20 @@ public class Settings {
     public void setMainPanelFontSize(int size) {
         getSharedPreferences().edit().putInt(MAIN_PANEL_FONT_SIZE, size).commit();
         mMainPanelFontSize = size;
+    }
+
+
+    public int getMainPanelCellMargin() {
+        if (mPanelCellMargin == 0) {
+            mPanelCellMargin = getSharedPreferences().getInt(MAIN_PANEL_CELL_MARGIN, 2);
+        }
+
+        return mPanelCellMargin;
+    }
+
+    public void setMainPanelCellMargin(int size) {
+        getSharedPreferences().edit().putInt(MAIN_PANEL_CELL_MARGIN, size).commit();
+        mPanelCellMargin = size;
     }
 
     public int getBottomPanelFontSize() {
@@ -421,6 +437,7 @@ public class Settings {
 
     public void resetStyle() {
         getSharedPreferences().edit().remove(MAIN_PANEL_FONT_SIZE)
+                .remove(MAIN_PANEL_CELL_MARGIN)
                 .remove(BOTTOM_PANEL_FONT_SIZE)
                 .remove(VIEWER_FONT_SIZE)
                 .remove(MAIN_PANEL_FONT_NAME)
@@ -444,6 +461,14 @@ public class Settings {
         mInstallColor = 0;
         mSelectedColor = 0;
         mArchiveColor = 0;
+
+        mMainPanelFontSize = 0;
+        mBottomPanelFontSize = 0;
+        mViewerFontSize = 0;
+        mPanelCellMargin = 0;
+
+        mMainPanelFontType = Typeface.DEFAULT;
+        mViewerFontType = Typeface.createFromFile(getViewerFont());
     }
 
     public boolean isShowSelectedFilesSize() {

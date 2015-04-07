@@ -173,6 +173,7 @@
     <string name="enable_home_folder_summary">Разрешить использовать опцию \'Домашняя директория\'</string>
     <string name="home_folder_updated">\'Домашняя директория\' обновлена.</string>
     <string name="main_panel_font_size">Размер шрифта на основной панели</string>
+    <string name="main_panel_margin">Дополнительный отступ на ячейках основной панели</string>
     <string name="toolbar_font_size">Размер шрифта на нижней панели</string>
     <string name="viewer_font_size">Размер шрифта в просмотрщике файлов</string>
     <string name="select_encoding">Выберите кодировку</string>
@@ -187,6 +188,7 @@
 
     <string name="exit_from_archive">Выйти из архива</string>
     <string name="font_size">Размер шрифта</string>
+    <string name="margin_size">Размер отступа</string>
 
     <string name="no_email_client">Пожалуйста, установите и настройте почтовый клиент для этой операции.</string>
     <string name="restoring_skydrive_session">Восстановление сессии SkyDrive…</string>
