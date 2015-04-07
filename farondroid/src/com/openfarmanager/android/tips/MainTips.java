@@ -2,6 +2,7 @@ package com.openfarmanager.android.tips;
 
 import android.app.Activity;
 import android.graphics.Point;
+import android.os.Build;
 import android.support.v4.view.ViewPager;
 import android.view.View;
 import android.view.ViewTreeObserver;
@@ -32,6 +33,11 @@ public class MainTips {
     private Activity mActivity;
 
     public MainTips(Activity activity, FileSystemController controller, MainToolbarPanel panel) {
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
+            return;
+        }
+
         mActivity = activity;
         mFileSystemController = controller;
         mMainToolbarPanel = panel;
