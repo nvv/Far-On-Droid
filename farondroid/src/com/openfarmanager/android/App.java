@@ -3,7 +3,6 @@ package com.openfarmanager.android;
 import android.app.Application;
 import android.content.res.Configuration;
 import android.preference.PreferenceManager;
-import com.crittercism.app.Crittercism;
 import com.openfarmanager.android.controllers.FileSystemController;
 import com.openfarmanager.android.core.Settings;
 import com.openfarmanager.android.core.appmanager.AppManager;
@@ -41,10 +40,6 @@ public class App extends Application {
     public void onCreate() {
         super.onCreate();
         SystemUtils.init(this);
-
-        if (!BuildConfig.DEBUG) {
-            Crittercism.init(getApplicationContext(), "50f12e6c1abc692bd4000004");
-        }
 
         sInstance = this;
         mAppManager = new AppManager();

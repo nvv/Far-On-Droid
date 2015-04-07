@@ -21,9 +21,6 @@ import android.view.WindowManager;
 import android.webkit.URLUtil;
 import android.widget.*;
 
-import com.google.analytics.tracking.android.EasyTracker;
-import com.google.analytics.tracking.android.Fields;
-import com.google.analytics.tracking.android.MapBuilder;
 import com.openfarmanager.android.*;
 import com.openfarmanager.android.R;
 import com.openfarmanager.android.adapters.*;
@@ -304,7 +301,6 @@ public class FileSystemController {
                         return;
                     }
                     activePanel.showSearchDialog();
-                    EasyTracker.getInstance(App.sInstance).send(MapBuilder.createAppView().set(Fields.SCREEN_NAME, "Search").build());
                     break;
                 case MENU:
                     if (activePanel == null) {
@@ -314,7 +310,6 @@ public class FileSystemController {
                     break;
                 case DIFF:
                     diffDirectories();
-                    EasyTracker.getInstance(App.sInstance).send(MapBuilder.createAppView().set(Fields.SCREEN_NAME, "Diff").build());
                     break;
                 case HELP:
                     if (activity != null) {
@@ -361,7 +356,6 @@ public class FileSystemController {
 
             if (panelShowed) {
                 mDirectoryDetailsView.selectFile(activePanel.getCurrentDir());
-                EasyTracker.getInstance(App.sInstance).send(MapBuilder.createAppView().set(Fields.SCREEN_NAME, "QuickView").build());
             }
         } else {
             hideDetailsView(activePanel, inactivePanel);
@@ -413,7 +407,6 @@ public class FileSystemController {
                     if (activePanel != null) {
                         openArchive(activePanel, (File) msg.obj);
                     }
-                    EasyTracker.getInstance(App.sInstance).send(MapBuilder.createAppView().set(Fields.SCREEN_NAME, "Archive").build());
                     break;
                 case OPEN_COMPRESSED_ARCHIVE:
                     if (activePanel != null) {
@@ -441,7 +434,6 @@ public class FileSystemController {
                     if (activePanel != null) {
                         activePanel.createBookmark(inactivePanel);
                     }
-                    EasyTracker.getInstance(App.sInstance).send(MapBuilder.createAppView().set(Fields.SCREEN_NAME, "CreateBookmark").build());
                     break;
                 case OPEN_NETWORK:
                     if (NetworkUtil.isNetworkAvailable()) {
@@ -1135,27 +1127,21 @@ public class FileSystemController {
                 switch (network) {
                     case FTP:
                         openFTP();
-                        EasyTracker.getInstance(App.sInstance).send(MapBuilder.createAppView().set(Fields.SCREEN_NAME, "Network/FTP").build());
                         break;
                     case SMB:
                         openSmb();
-                        EasyTracker.getInstance(App.sInstance).send(MapBuilder.createAppView().set(Fields.SCREEN_NAME, "Network/SMB").build());
                         break;
                     case Dropbox:
                         openDropbox();
-                        EasyTracker.getInstance(App.sInstance).send(MapBuilder.createAppView().set(Fields.SCREEN_NAME, "Network/Dropbox").build());
                         break;
                     case SkyDrive:
                         openSkyDrive();
-                        EasyTracker.getInstance(App.sInstance).send(MapBuilder.createAppView().set(Fields.SCREEN_NAME, "Network/SkyDrive").build());
                         break;
                     case YandexDisk:
                         openYandexDisk();
-                        EasyTracker.getInstance(App.sInstance).send(MapBuilder.createAppView().set(Fields.SCREEN_NAME, "Network/YandexDisk").build());
                         break;
                     case GoogleDrive:
                         openGoogleDrive();
-                        EasyTracker.getInstance(App.sInstance).send(MapBuilder.createAppView().set(Fields.SCREEN_NAME, "Network/GoogleDrive").build());
                         break;
                 }
 
@@ -1622,7 +1608,6 @@ public class FileSystemController {
                 if (event.isAltPressed()) {
                     if (panel != null) {
                         panel.showSearchDialog();
-                        EasyTracker.getInstance(App.sInstance).send(MapBuilder.createAppView().set(Fields.SCREEN_NAME, "Search").build());
                     }
                 } else {
                     openAppLaucnher();

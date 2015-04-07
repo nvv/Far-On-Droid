@@ -22,9 +22,6 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.google.analytics.tracking.android.EasyTracker;
-import com.google.analytics.tracking.android.Fields;
-import com.google.analytics.tracking.android.MapBuilder;
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.R;
 import com.openfarmanager.android.adapters.LinesAdapter;
@@ -101,8 +98,6 @@ public class Viewer extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-        EasyTracker.getInstance(App.sInstance).send(MapBuilder.createAppView().set(Fields.SCREEN_NAME, "Viewer").build());
-
         View view = inflater.inflate(R.layout.viewer, container);
         mList = (ListView) view.findViewById(android.R.id.list);
         mProgress = (ProgressBar) view.findViewById(android.R.id.progress);
@@ -139,7 +134,6 @@ public class Viewer extends Fragment {
 
     public void changeMode() {
         mAdapter.setMode(mAdapter.getMode() == LinesAdapter.MODE_VIEW ? LinesAdapter.MODE_EDIT : LinesAdapter.MODE_VIEW);
-        EasyTracker.getInstance(App.sInstance).send(MapBuilder.createAppView().set(Fields.SCREEN_NAME, "Viewer").set("MODE", mAdapter.getMode() == LinesAdapter.MODE_VIEW ? "view" : "edit").build());
         updateAdapter();
     }
 

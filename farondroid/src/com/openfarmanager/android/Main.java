@@ -13,15 +13,14 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.PopupWindow;
 import android.widget.Toast;
 
 import com.dropbox.client2.exception.DropboxException;
-import com.google.analytics.tracking.android.EasyTracker;
-import com.google.analytics.tracking.android.Fields;
-import com.google.analytics.tracking.android.MapBuilder;
 import com.openfarmanager.android.controllers.FileSystemController;
 import com.openfarmanager.android.controllers.FileSystemControllerSmartphone;
 import com.openfarmanager.android.core.Settings;
@@ -82,7 +81,6 @@ public class Main extends FragmentActivity {
         mFileSystemController.restorePanelState();
 
         showTips();
-        EasyTracker.getInstance(this).send(MapBuilder.createAppView().set(Fields.SCREEN_NAME,"Main").set("MultiPanel",App.sInstance.getSettings().isMultiPanelMode()?"true":"false").build());
 
         if (getIntent() != null && getIntent().getData() != null) {
             onLogin();

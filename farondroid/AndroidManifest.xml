@@ -43,7 +43,6 @@
         </activity>
         <activity android:name=".FileView" android:configChanges="orientation|keyboardHidden" android:windowSoftInputMode="adjustPan"/>
         <activity android:name=".Help" android:configChanges="orientation|keyboardHidden"/>
-        <activity android:name="com.crittercism.NotificationActivity"/>
         <activity android:name=".SettingsActivity" android:theme="@style/PreferencesTheme"/>
         <activity android:name="com.dropbox.client2.android.AuthActivity" android:launchMode="singleTask"
                   android:configChanges="orientation|keyboard">
