@@ -18,4 +18,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.github.amlcurran.showcaseview">
 
+    <uses-sdk android:minSdkVersion="8" android:targetSdkVersion="11"/>
+
 </manifest>
