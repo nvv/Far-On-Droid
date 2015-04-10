@@ -350,7 +350,9 @@ public class SettingsActivity extends PreferenceActivity {
                     public void onResult(boolean result) {
                         if (result) {
                             Settings settings = App.sInstance.getSettings();
-                            settings.resetStyle();
+                            try {
+                                settings.resetStyle();
+                            } catch (Exception ignore) {}
                             mResultData.putExtra(Main.RESULT_BOTTOM_PANEL_INVALIDATE, true);
                             mainPanelColor.setPreviewColor(settings.getMainPanelColor());
                             secondaryColor.setPreviewColor(settings.getSecondaryColor());
