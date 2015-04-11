@@ -179,7 +179,7 @@ public class MainPanel extends BaseFileSystemPanel {
         mQuickActionPopup = new QuickPopupDialog(view, R.layout.quick_action_popup);
         mQuickActionPopup.setPosition((mPanelLocation == LEFT_PANEL ? Gravity.LEFT : Gravity.RIGHT) | Gravity.TOP,
                 (int) (50 * getResources().getDisplayMetrics().density));
-        View layout = mQuickActionPopup.getContentView();;
+        View layout = mQuickActionPopup.getContentView();
         layout.findViewById(R.id.quick_action_copy).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

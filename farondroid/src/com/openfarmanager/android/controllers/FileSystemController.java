@@ -54,6 +54,7 @@ import com.openfarmanager.android.view.BookmarksListDialog;
 import com.openfarmanager.android.view.ExpandPanelAnimation;
 import com.openfarmanager.android.view.FtpAuthDialog;
 import com.openfarmanager.android.view.NetworkScanDialog;
+import com.openfarmanager.android.view.QuickPopupDialog;
 import com.openfarmanager.android.view.SelectEncodingDialog;
 import com.openfarmanager.android.view.SmbAuthDialog;
 import com.openfarmanager.android.view.ToastNotification;
@@ -200,6 +201,14 @@ public class FileSystemController {
         mMainToolbar.invalidate();
     }
 
+    public void hideMainToolbar() {
+        mMainToolbar.getFragmentManager().beginTransaction().hide(mMainToolbar).commit();
+    }
+
+    public void showMainToolbar() {
+        mMainToolbar.getFragmentManager().beginTransaction().show(mMainToolbar).commit();
+    }
+
     protected void initPanels() {
 
         mMainToolbar.setHandler(mToolbarHandler);
@@ -225,6 +234,10 @@ public class FileSystemController {
         mRightArchivePanel.setPanelLocation(RIGHT_PANEL);
         mRightNetworkPanel.setPanelLocation(RIGHT_PANEL);
         mRightGenericPanel.setPanelLocation(RIGHT_PANEL);
+    }
+
+    public Handler getToolbarHandler() {
+        return mToolbarHandler;
     }
 
     private Handler mToolbarHandler = new Handler() {

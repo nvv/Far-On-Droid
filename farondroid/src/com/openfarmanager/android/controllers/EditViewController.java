@@ -98,6 +98,18 @@ public class EditViewController {
         }
     };
 
+    public Handler getToolbarHandler() {
+        return mToolbarHandler;
+    }
+
+    public void hideToolbar() {
+        mViewerToolbar.getFragmentManager().beginTransaction().hide(mViewerToolbar).commit();
+    }
+
+    public void showToolbar() {
+        mViewerToolbar.getFragmentManager().beginTransaction().show(mViewerToolbar).commit();
+    }
+
     private void doReplace() {
         EditViewReplaceDialog.newInstance(listener).show(mViewer.getFragmentManager(), "edit_view_replace");
     }

@@ -174,10 +174,14 @@ public class Viewer extends Fragment {
         }
     }
 
+    public boolean isFileTooBig() {
+        return mFile.length() > MAX_FILE_SIZE;
+    }
+
     private void openSelectedFile() {
         mProgress.setVisibility(View.VISIBLE);
 
-        if (mFile.length() > MAX_FILE_SIZE) {
+        if (isFileTooBig()) {
             mBigFile = true;
             mHandler.sendMessage(Message.obtain(mHandler, MSG_BIG_FILE));
             Log.d(TAG, "file to large to be opened in edit mode");

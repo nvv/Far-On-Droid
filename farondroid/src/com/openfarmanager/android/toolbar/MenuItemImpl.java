@@ -80,7 +80,7 @@ public final class MenuItemImpl implements MenuItem {
      * @param categoryOrder The ordering for this item.
      * @param title The text to display for the item.
      */
-    MenuItemImpl(MenuBuilder menu, int group, int id, int categoryOrder, int ordering,
+    public MenuItemImpl(MenuBuilder menu, int group, int id, int categoryOrder, int ordering,
                  CharSequence title, int showAsAction) {
 
         mMenu = menu;

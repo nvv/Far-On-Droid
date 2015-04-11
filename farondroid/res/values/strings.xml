@@ -360,5 +360,7 @@ Connect your device with \'clouds\'!\n\n
 With <b>Far On Droid</b> you can access your resources from different kind of network storage, like Dropbox or SkyDrive.\n\n
 More network stuff will appear in future versions.
     </string>
+    <string name="hide_bottom_toolbar">Hide bottom toolbar</string>
+    <string name="hide_bottom_toolbar_summary">Will be replaced by semi-transparent icon</string>
 
 </resources>

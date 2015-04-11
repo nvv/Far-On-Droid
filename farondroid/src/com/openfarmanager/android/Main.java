@@ -1,5 +1,6 @@
 package com.openfarmanager.android;
 
+import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -15,8 +16,10 @@ import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.PopupWindow;
 import android.widget.Toast;
 
@@ -28,13 +31,17 @@ import com.openfarmanager.android.core.network.dropbox.DropboxAPI;
 import com.openfarmanager.android.fragments.MainToolbarPanel;
 import com.openfarmanager.android.model.NetworkEnum;
 import com.openfarmanager.android.tips.MainTips;
+import com.openfarmanager.android.toolbar.MenuBuilder;
+import com.openfarmanager.android.toolbar.MenuItemImpl;
 import com.openfarmanager.android.utils.Extensions;
+import com.openfarmanager.android.view.QuickPopupDialog;
 import com.openfarmanager.android.view.ToastNotification;
 
+import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Main extends FragmentActivity {
+public class Main extends BaseActivity {
 
     private static String TAG = "MainFragmentActivity";
 
@@ -65,6 +72,8 @@ public class Main extends FragmentActivity {
         if (data != null && data.getBooleanExtra(RESULT_SHOW_HINT, false)) {
             showTips();
         }
+
+        setupToolbarVisibility();
     }
 
     @Override
@@ -90,6 +99,7 @@ public class Main extends FragmentActivity {
             ToastNotification.makeText(App.sInstance.getApplicationContext(), getString(R.string.hardware_keyboard), Toast.LENGTH_LONG).show();
         }
 
+        setupToolbarVisibility();
     }
 
     private boolean isHardwareKeyboardAvailable() {
@@ -171,5 +181,33 @@ public class Main extends FragmentActivity {
         if(mFileSystemController.onKeyDown(keyCode, event))
             return true;
         return super.onKeyDown(keyCode, event);
+    }
+
+    @Override
+    protected void hideToolbar() {
+        mFileSystemController.hideMainToolbar();
+    }
+
+    @Override
+    protected void showToolbar() {
+        mFileSystemController.showMainToolbar();
+    }
+
+    @Override
+    protected Handler getHandler() {
+        return mFileSystemController.getToolbarHandler();
+    }
+
+    @Override
+    protected ArrayList<MenuItemImpl> getItems() {
+        Menu menu = new MenuBuilder(this);
+        int res = getResources().getIdentifier("main", "menu", getPackageName());
+        new MenuInflater(this).inflate(res, menu);
+        return ((MenuBuilder) menu).getAllActionItems();
+    }
+
+    @Override
+    protected void onToolbarItemSelected(MenuItem item) {
+        getHandler().sendEmptyMessage(MainToolbarPanel.sActions.get(item.getItemId()));
     }
 }

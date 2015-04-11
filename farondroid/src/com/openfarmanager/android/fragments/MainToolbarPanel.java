@@ -11,10 +11,16 @@ import android.util.TypedValue;
 import android.view.*;
 import android.widget.*;
 import com.openfarmanager.android.App;
+import com.openfarmanager.android.Main;
 import com.openfarmanager.android.R;
 import com.openfarmanager.android.core.Settings;
 import com.openfarmanager.android.toolbar.MenuBuilder;
+import com.openfarmanager.android.toolbar.MenuItemImpl;
 import com.openfarmanager.android.utils.SystemUtils;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.openfarmanager.android.controllers.FileSystemController.*;
 
@@ -30,6 +36,23 @@ public class MainToolbarPanel extends Fragment {
     private View mQuickView;
     private View mMoreView;
     private View mSelectView;
+
+    public static final Map<Integer, Integer> sActions = new HashMap<>();
+
+    static {
+        sActions.put(R.id.action_select, SELECT);
+        sActions.put(R.id.action_new, NEW);
+        sActions.put(R.id.menu_action, MENU);
+        sActions.put(R.id.action_quckview, QUICKVIEW);
+        sActions.put(R.id.action_exit, EXIT);
+        sActions.put(R.id.action_diff, DIFF);
+        sActions.put(R.id.action_find, SEARCH);
+        sActions.put(R.id.action_help, HELP);
+        sActions.put(R.id.action_settings, SETTINGS);
+        sActions.put(R.id.action_network, NETWORK);
+        sActions.put(R.id.action_applauncher, APPLAUNCHER);
+        sActions.put(R.id.action_bookmarks, BOOKMARKS);
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -98,55 +121,7 @@ public class MainToolbarPanel extends Fragment {
         };
 
         private void sendMessage(MenuItem item) {
-            switch (item.getItemId()) {
-                case R.id.action_select:
-                    sendMessage(SELECT);
-                    return;
-                case R.id.action_new:
-                    sendMessage(NEW);
-                    return;
-                case R.id.menu_action:
-                    sendMessage(MENU);
-                    return;
-                case R.id.action_quckview:
-                    sendMessage(QUICKVIEW);
-                    return;
-                case R.id.action_exit:
-                    sendMessage(EXIT);
-                    return;
-                case R.id.action_diff:
-                    sendMessage(DIFF);
-                    return;
-                case R.id.action_find:
-                    sendMessage(SEARCH);
-                    return;
-                case R.id.action_help:
-                    sendMessage(HELP);
-                    return;
-                case R.id.action_settings:
-                    sendMessage(SETTINGS);
-                    return;
-                /*
-                case R.id.action_dropbox:
-                    sendMessage(NETWORK_DROPBOX);
-                    return;
-                case R.id.action_skydrive:
-                    sendMessage(NETWORK_SKYDRIVE);
-                    return;
-                case R.id.action_yandex:
-                    sendMessage(NETWORK_YANDEX);
-                    return;
-                */
-                case R.id.action_network:
-                    sendMessage(NETWORK);
-                    return;
-                case R.id.action_applauncher:
-                    sendMessage(APPLAUNCHER);
-                    return;
-                case R.id.action_bookmarks:
-                    sendMessage(BOOKMARKS);
-                    return;
-            }
+            sendMessage(sActions.get(item.getItemId()));
         }
 
         View.OnTouchListener mAltListener = new View.OnTouchListener() {
@@ -321,12 +296,6 @@ public class MainToolbarPanel extends Fragment {
                 mHandler.sendEmptyMessage(what);
             }
         }
-
-        private void sendMessage(final int what, final Object obj) {
-            if (mHandler != null) {
-                mHandler.sendMessage(mHandler.obtainMessage(what, obj));
-            }
-        }
     }
 
     /**
@@ -335,7 +304,20 @@ public class MainToolbarPanel extends Fragment {
     public static class SubMenuDialog extends BaseDialog {
 
         private MenuItem menu;
+        private ArrayList<MenuItemImpl> menuItems;
         private OnActionSelectedListener listener;
+
+        public static SubMenuDialog newInstance(ArrayList<MenuItemImpl> items, OnActionSelectedListener listener) {
+            SubMenuDialog dialog = new SubMenuDialog();
+            dialog.menuItems = new ArrayList<>();
+            for (MenuItemImpl item : items) {
+                if (item.getItemId() != R.id.action_alt) {
+                    dialog.menuItems.add(item);
+                }
+            }
+            dialog.listener = listener;
+            return dialog;
+        }
 
         public static SubMenuDialog newInstance(MenuItem menu, OnActionSelectedListener listener) {
             SubMenuDialog dialog = new SubMenuDialog();
@@ -357,10 +339,19 @@ public class MainToolbarPanel extends Fragment {
 
             final ListView actionsList = (ListView) view.findViewById(R.id.action_list);
 
-            String[] items = new String[menu.getSubMenu().size()];
-            for (int i = 0; i < menu.getSubMenu().size(); i++) {
-                MenuItem sub = menu.getSubMenu().getItem(i);
-                items[i] = (String) sub.getTitle();
+            String[] items;
+            if (menu != null) {
+                items = new String[menu.getSubMenu().size()];
+                for (int i = 0; i < menu.getSubMenu().size(); i++) {
+                    MenuItem sub = menu.getSubMenu().getItem(i);
+                    items[i] = (String) sub.getTitle();
+                }
+            } else {
+                items = new String[menuItems.size()];
+                int i = 0;
+                for (MenuItemImpl menuItem : menuItems) {
+                    items[i++] = (String) menuItem.getTitle();
+                }
             }
 
             ArrayAdapter<String> adapter = new ArrayAdapter<String>(
@@ -380,7 +371,7 @@ public class MainToolbarPanel extends Fragment {
                 @Override
                 public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                     dismiss();
-                    listener.onActionSelected(menu.getSubMenu().getItem(i));
+                    listener.onActionSelected(menu != null ? menu.getSubMenu().getItem(i) : menuItems.get(i));
 
                 }
             });

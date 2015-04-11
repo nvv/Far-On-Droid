@@ -101,6 +101,12 @@
             android:widgetLayout="@layout/check_box_preference"/>
 
         <CheckBoxPreference
+            android:key="hide_main_toolbar"
+            android:title="@string/hide_bottom_toolbar"
+            android:summary="@string/hide_bottom_toolbar_summary"
+            android:widgetLayout="@layout/check_box_preference"/>
+
+        <CheckBoxPreference
             android:key="show_quick_action_panel"
             android:title="@string/show_quick_action_panel"
             android:defaultValue="true"

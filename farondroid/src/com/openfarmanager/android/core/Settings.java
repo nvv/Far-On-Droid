@@ -53,6 +53,7 @@ public class Settings {
     public static final String SHOW_SELECTED_FILES_SIZE = "show_selected_files_size";
     public static final String HOLD_ALT_BY_CLICK = "hold_alt_by_click";
     public static final String SHOW_QUICK_ACTION_PANEL = "show_quick_action_panel";
+    public static final String HIDE_MAIN_TOOLBAR = "hide_main_toolbar";
 
     private static File sSdCard;
     public static String sSdPath;
@@ -125,6 +126,10 @@ public class Settings {
 
     public boolean isSDCardRoot() {
         return getSharedPreferences().getBoolean(SDCARD_ROOT, false);
+    }
+
+    public boolean isHideMainToolbar() {
+        return getSharedPreferences().getBoolean(HIDE_MAIN_TOOLBAR, false);
     }
 
     public boolean isHideSystemFiles() {

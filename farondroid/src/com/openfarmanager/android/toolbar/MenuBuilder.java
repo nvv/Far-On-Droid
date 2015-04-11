@@ -92,6 +92,11 @@ public class MenuBuilder implements Menu {
     private ArrayList<MenuItemImpl> mNonActionItems;
 
     /**
+     * Contains all menu items.
+     */
+    private ArrayList<MenuItemImpl> mAllActionItems;
+
+    /**
      * Whether or not the items (or any one item's action state) has changed since it was
      * last fetched.
      */
@@ -166,6 +171,8 @@ public class MenuBuilder implements Menu {
         mActionItems = new ArrayList<MenuItemImpl>();
         mNonActionItems = new ArrayList<MenuItemImpl>();
         mIsActionItemsStale = true;
+
+        mAllActionItems = new ArrayList<>();
 
         setShortcutsVisibleInner(true);
     }
@@ -848,6 +855,23 @@ public class MenuBuilder implements Menu {
     ArrayList<MenuItemImpl> getNonActionItems() {
         flagActionItems();
         return mNonActionItems;
+    }
+
+    public ArrayList<MenuItemImpl> getAllActionItems() {
+        ArrayList<MenuItemImpl> visibleItems = getVisibleItems();
+        mAllActionItems.clear();
+        for (MenuItemImpl item : visibleItems) {
+            if (item.hasSubMenu()) {
+                SubMenu subMenu = item.getSubMenu();
+                for (int i = 0; i < subMenu.size(); i++) {
+                    mAllActionItems.add((MenuItemImpl) subMenu.getItem(i));
+                }
+            } else {
+                mAllActionItems.add(item);
+            }
+        }
+
+        return mAllActionItems;
     }
 
     public void clearHeader() {
