@@ -7,11 +7,12 @@ import android.util.Log;
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.core.dbadapters.BookmarkDBAdapter;
 import com.openfarmanager.android.core.dbadapters.NetworkAccountDbAdapter;
+import com.openfarmanager.android.core.dbadapters.VendorDbAdapter;
 
 public class DataStorageHelper {
 
     private static final String DB_NAME = "far_on_droid_database";
-    private static final int DB_VERSION = 2;
+    private static final int DB_VERSION = 3;
 
     public static DatabaseHelper sHelper;
 
@@ -45,6 +46,7 @@ public class DataStorageHelper {
         public void onCreate(SQLiteDatabase db) throws SQLiteException {
             db.execSQL(BookmarkDBAdapter.CREATE_TABLE);
             db.execSQL(NetworkAccountDbAdapter.CREATE_TABLE);
+            VendorDbAdapter.createTable(db);
             Log.d("DataStorageHelper", "Create database, version " + DB_VERSION);
         }
 
@@ -53,6 +55,10 @@ public class DataStorageHelper {
             switch (oldVersion) {
                 case 1:
                     db.execSQL(NetworkAccountDbAdapter.CREATE_TABLE);
+                    Log.d("DataStorageHelper", "Update database from version " + oldVersion + " to " + newVersion);
+                    break;
+                case 2:
+                    VendorDbAdapter.createTable(db);
                     Log.d("DataStorageHelper", "Update database from version " + oldVersion + " to " + newVersion);
                     break;
             }
