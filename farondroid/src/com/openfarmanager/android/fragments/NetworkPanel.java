@@ -437,6 +437,7 @@ public class NetworkPanel extends MainPanel {
         private String mPath;
         private boolean mRestorePosition;
         private NetworkException mException;
+        private boolean mRecalculateSize;
 
         public OpenDirectoryTask(boolean restorePosition) {
             mRestorePosition = restorePosition;
@@ -456,17 +457,12 @@ public class NetworkPanel extends MainPanel {
             try {
                 List<FileProxy> files = mDataSource.openDirectory(mPath);
                 if (mPreSelectedFiles.size() > 0) {
-                    ArrayList<String> preSelectedFiles = new ArrayList<String>();
-                    for (FileProxy proxy : mPreSelectedFiles) {
-                        preSelectedFiles.add(proxy.getFullPath());
-                    }
-                    mPreSelectedFiles.clear();
-                    for (FileProxy fileProxy : files) {
-                        if (preSelectedFiles.contains(fileProxy.getFullPath())) {
-                            mSelectedFiles.add(fileProxy);
-                        }
-                    }
+                    mRecalculateSize = true;
                 }
+
+                // due to files object are changed we need to refresh them.
+                syncSelectedFiles(mSelectedFiles, files);
+                syncSelectedFiles(mPreSelectedFiles, files);
 
                 return files;
             } catch (NetworkException e) {
@@ -474,6 +470,21 @@ public class NetworkPanel extends MainPanel {
             }
 
             return null;
+        }
+
+        private void syncSelectedFiles(List<FileProxy> files, List<FileProxy> allFiles) {
+            if (files.size() > 0) {
+                ArrayList<String> preSelectedFiles = new ArrayList<>();
+                for (FileProxy proxy : files) {
+                    preSelectedFiles.add(proxy.getFullPath());
+                }
+                files.clear();
+                for (FileProxy fileProxy : allFiles) {
+                    if (preSelectedFiles.contains(fileProxy.getFullPath())) {
+                        mSelectedFiles.add(fileProxy);
+                    }
+                }
+            }
         }
 
         @Override
@@ -538,6 +549,12 @@ public class NetworkPanel extends MainPanel {
                     Integer selection = mDirectorySelection.get(Extensions.isNullOrEmpty(mPath) ? "/" : mPath);
                     mFileSystemList.setSelection(selection != null ? selection : 0);
                 }
+
+                if (mRecalculateSize) {
+                    calculateSelectedFilesSize();
+                }
+                showQuickActionPanel();
+                setSelectedFilesSizeVisibility();
             }
         }
     }

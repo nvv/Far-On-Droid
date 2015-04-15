@@ -415,6 +415,7 @@ public class MainPanel extends BaseFileSystemPanel {
     public void onDetach () {
         super.onDetach();
         if (mQuickActionPopup != null) {
+            getSelectedFiles().clear();
             mQuickActionPopup.dismiss();
         }
     }
