@@ -850,9 +850,11 @@ public class MainPanel extends BaseFileSystemPanel {
     }
 
     public List<File> getSelectedFiles() {
-        if (mSelectedFiles.size() == 0 && mFileSystemList != null && mFileSystemList.getSelectedItem() != null) {
-            mSelectedFiles.add((FileSystemFile) mFileSystemList.getSelectedItem());
-        }
+        try {
+            if (mSelectedFiles.size() == 0 && mFileSystemList != null && mFileSystemList.getSelectedItem() instanceof FileSystemFile) {
+                mSelectedFiles.add((FileSystemFile) mFileSystemList.getSelectedItem());
+            }
+        } catch (Exception ignore) {}
 
         //noinspection unchecked
         return (List) mSelectedFiles;
