@@ -31,6 +31,7 @@ public class Settings {
     public static final String FLEXIBLE_PANELS = "flexible_panels";
     public static final String FORCE_EN_LANG = "force_en_lang";
     public static final String SHOW_TIPS = "show_tips_full_screen_new";
+    public static final String SHOW_TOOLBAR_TIPS = "show_toolbar_tips_full_screen_new";
     public static final String ENABLE_HOME_FOLDER = "enable_home_folder";
     public static final String HOME_FOLDER = "home_folder";
     public static final String MAIN_PANEL_FONT_SIZE = "main_panel_font_size";
@@ -249,6 +250,10 @@ public class Settings {
 
     public boolean isShowTips() {
         return getSharedPreferences().getBoolean(SHOW_TIPS, true);
+    }
+
+    public boolean isShowToolbarTips() {
+        return getSharedPreferences().getBoolean(SHOW_TOOLBAR_TIPS, true);
     }
 
     public void setDefaultCharset(String key) {

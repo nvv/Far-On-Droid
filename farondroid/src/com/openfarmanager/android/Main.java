@@ -1,26 +1,16 @@
 package com.openfarmanager.android;
 
-import android.annotation.SuppressLint;
-import android.app.Dialog;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.preference.PreferenceManager;
-import android.support.v4.app.FragmentActivity;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
-import android.widget.PopupWindow;
 import android.widget.Toast;
 
 import com.dropbox.client2.exception.DropboxException;
@@ -34,7 +24,6 @@ import com.openfarmanager.android.tips.MainTips;
 import com.openfarmanager.android.toolbar.MenuBuilder;
 import com.openfarmanager.android.toolbar.MenuItemImpl;
 import com.openfarmanager.android.utils.Extensions;
-import com.openfarmanager.android.view.QuickPopupDialog;
 import com.openfarmanager.android.view.ToastNotification;
 
 import java.util.ArrayList;

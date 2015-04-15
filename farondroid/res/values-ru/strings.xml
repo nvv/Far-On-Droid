@@ -355,5 +355,7 @@
     <string name="tools_summary">Кликните по иконкам чтобы : \nОткрыть \'Внешнее хранилище\' \nДобавить текущую директорию в \'Избранное\'.</string>
     <string name="hide_bottom_toolbar">Спрятать нижнюю панель</string>
     <string name="hide_bottom_toolbar_summary">Будет заменена полупрозрачной иконкой</string>
+    <string name="full_screen_icon">Полноэкранный режим.</string>
+    <string name="full_screen_icon_summary">Кликните по этой кнопке чтобы открыть список комманд.</string>
 
 </resources>

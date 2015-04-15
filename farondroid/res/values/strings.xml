@@ -321,6 +321,8 @@
     <string name="main_panel_size">Calculated size of selected files (excluding folders).</string>
     <string name="main_panel_expand">Expand panel by \'Swipe\' gesture to see more (must be enabled in \'Settings\').</string>
     <string name="main_panel_swipe">Swipe to see another panel.</string>
+    <string name="full_screen_icon">Full screen mode.</string>
+    <string name="full_screen_icon_summary">Use this button to open actions list.</string>
 
     <string name="current_path">Current Path</string>
     <string name="current_path_summary">Currently selected directory. Use long hold gesture to show quick navigation dialog.</string>
