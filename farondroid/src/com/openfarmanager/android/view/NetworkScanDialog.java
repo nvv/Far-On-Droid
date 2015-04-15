@@ -3,18 +3,14 @@ package com.openfarmanager.android.view;
 import android.app.Dialog;
 import android.content.Context;
 import android.net.DhcpInfo;
-import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
-import android.text.format.Formatter;
 import android.view.View;
 import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridView;
@@ -24,7 +20,7 @@ import android.widget.TextView;
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.R;
 import com.openfarmanager.android.controllers.FileSystemController;
-import com.openfarmanager.android.utils.Extensions;
+import com.openfarmanager.android.core.dbadapters.VendorDbAdapter;
 import com.openfarmanager.android.utils.HardwareUtils;
 import com.openfarmanager.android.utils.NetworkCalculator;
 import com.openfarmanager.android.utils.NetworkUtil;
@@ -36,14 +32,10 @@ import java.net.InetSocketAddress;
 import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -144,7 +136,7 @@ public class NetworkScanDialog extends Dialog {
                 stopScanning(0);
                 dismiss();
 
-                String selectedIp = ((TextView) view).getText().toString();
+                String selectedIp = ((TextView) view).getText().toString().split("\n")[0];
                 mHandler.sendMessage(mHandler.obtainMessage(FileSystemController.SMB_IP_SELECTED, selectedIp));
             }
         });
@@ -270,8 +262,11 @@ public class NetworkScanDialog extends Dialog {
                                     synchronized (mReachableHosts) {
                                         String ipLabel = ip;
                                         if (!ipLabel.equals(address.getHostName())) {
-                                            ipLabel += "(" + address.getHostName() + ")";
+                                            ipLabel += "\n" + address.getHostName();
                                         }
+
+                                        String mac = HardwareUtils.getHardwareAddress(ip);
+                                        ipLabel += "\n" + VendorDbAdapter.getVendor(Integer.parseInt(mac.substring(0, 8).replace(":", ""), 16));
 
                                         mReachableHosts.add(ipLabel);
                                         mHandler.post(new Runnable() {
