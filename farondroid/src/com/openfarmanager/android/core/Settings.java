@@ -55,6 +55,7 @@ public class Settings {
     public static final String HOLD_ALT_BY_CLICK = "hold_alt_by_click";
     public static final String SHOW_QUICK_ACTION_PANEL = "show_quick_action_panel";
     public static final String HIDE_MAIN_TOOLBAR = "hide_main_toolbar";
+    public static final String REPLACE_DELIMETERS = "replace_delimeters";
 
     private static File sSdCard;
     public static String sSdPath;
@@ -404,6 +405,10 @@ public class Settings {
     public void setSelectedColor(int color) {
         getSharedPreferences().edit().putInt(SELECTED_COLOR, color).commit();
         mSelectedColor = color;
+    }
+
+    public boolean isReplaceDelimeters() {
+        return getSharedPreferences().getBoolean(REPLACE_DELIMETERS, false);
     }
 
     public int getHiddenColor() {

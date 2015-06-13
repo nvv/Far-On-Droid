@@ -194,6 +194,9 @@
     <string name="viewer_color">Viewer color</string>
     <string name="viewer_color_summary">Configure viewer color</string>
     <string name="style">Style</string>
+    <string name="settings_viewer">Viewer</string>
+    <string name="show_delimiter">Show delimiter symbols</string>
+    <string name="show_delimiter_summary">Delimiter symbols will ne be replaced with spaces</string>
     <string name="style_summary">Configure your app looks like</string>
     <string name="text_color">Text color</string>
     <string name="text_color_summary">Configure text color for viewer and main panel</string>

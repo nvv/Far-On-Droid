@@ -68,6 +68,15 @@
 
     </PreferenceCategory>
     <PreferenceCategory
+        android:title="@string/settings_viewer"
+        android:key="pref_vewer">
+        <CheckBoxPreference
+            android:key="replace_delimeters"
+            android:title="@string/show_delimiter"
+            android:summary="@string/show_delimiter_summary"
+            android:widgetLayout="@layout/check_box_preference"/>
+    </PreferenceCategory>
+    <PreferenceCategory
             android:title="@string/user_interface"
             android:key="pref_user_interface">
 

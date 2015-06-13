@@ -617,11 +617,12 @@ public class Viewer extends Fragment {
                 }else{
                     is = new BufferedReader(RootTask.readFile(mFile));
                 }
-                String line;
-                while (!mStopLoading && (line = is.readLine()) != null) {
-                    mLines.add(line);
-                }
 
+                if (App.sInstance.getSettings().isReplaceDelimeters()) {
+                    loadLinesReplaceSpecialCh(is);
+                } else {
+                    loadLines(is);
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (OutOfMemoryError e) {
@@ -634,6 +635,23 @@ public class Viewer extends Fragment {
                         e.printStackTrace();
                     }
                 }
+            }
+        }
+
+        private void loadLines(BufferedReader is) throws IOException {
+            String line;
+            while (!mStopLoading && (line = is.readLine()) != null) {
+                mLines.add(line);
+            }
+        }
+
+        private void loadLinesReplaceSpecialCh(BufferedReader is) throws IOException {
+            String line;
+            while (!mStopLoading && (line = is.readLine()) != null) {
+                for (int i = 1; i <= 31; i++) {
+                    line = line.replace(Character.toString((char) i), "0x" + Integer.toString(i, 16));
+                }
+                mLines.add(line);
             }
         }
 
