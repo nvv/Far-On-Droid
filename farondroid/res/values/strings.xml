@@ -259,6 +259,11 @@
     <string name="error_smb_wrong_credentials">Logon failure: unknown user name or bad password.</string>
     <string name="error_access_denied">Access is denied.</string>
 
+    <string name="connecting_to_mediafire">Connecting to the MediaFire…</string>
+    <string name="mediafire">MediaFire</string>
+    <string name="mediafire_auth_error">Error connection to MediaFire. Please, check your credentials.</string>
+    <string name="mediafire_connection_error">Error while connecting to the server. Please, check your credentials or try later.</string>
+
     <string name="save_account_as">Save account as</string>
     <string name="save_account_info">Saving account info…</string>
     <string name="error_yandex_account_empty">Username can\'t be empty</string>

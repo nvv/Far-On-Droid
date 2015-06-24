@@ -36,6 +36,7 @@ android {
         compile project(':farondroid:libs-src:skydrive:src')
         compile project(':farondroid:libs-src:yandexdisk:sdk')
         compile project(':farondroid:libs-src:showcase-library:src:main')
+        compile project(':farondroid:libs-src:mediafire')
 
         compile 'io.reactivex:rxandroid:0.24.0'
 

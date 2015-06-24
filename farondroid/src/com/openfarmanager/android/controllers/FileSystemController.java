@@ -21,6 +21,7 @@ import android.view.WindowManager;
 import android.webkit.URLUtil;
 import android.widget.*;
 
+import com.mediafire.sdk.MediaFire;
 import com.openfarmanager.android.*;
 import com.openfarmanager.android.R;
 import com.openfarmanager.android.adapters.*;
@@ -30,6 +31,7 @@ import com.openfarmanager.android.core.network.NetworkApi;
 import com.openfarmanager.android.core.network.dropbox.DropboxAPI;
 import com.openfarmanager.android.core.network.ftp.FtpAPI;
 import com.openfarmanager.android.core.network.googledrive.GoogleDriveApi;
+import com.openfarmanager.android.core.network.mediafire.MediaFireApi;
 import com.openfarmanager.android.core.network.skydrive.SkyDriveAPI;
 import com.openfarmanager.android.core.network.smb.SmbAPI;
 import com.openfarmanager.android.core.network.yandexdisk.YandexDiskApi;
@@ -53,6 +55,7 @@ import com.openfarmanager.android.utils.SystemUtils;
 import com.openfarmanager.android.view.BookmarksListDialog;
 import com.openfarmanager.android.view.ExpandPanelAnimation;
 import com.openfarmanager.android.view.FtpAuthDialog;
+import com.openfarmanager.android.view.MediaFireAuthDialog;
 import com.openfarmanager.android.view.NetworkScanDialog;
 import com.openfarmanager.android.view.QuickPopupDialog;
 import com.openfarmanager.android.view.SelectEncodingDialog;
@@ -123,6 +126,7 @@ public class FileSystemController {
     public static final int EXPORT_AS = 124;
     public static final int OPEN_WEB = 125;
     public static final int OPEN_ENCODING_DIALOG = 126;
+    public static final int MEDIA_FIRE_CONNECTED = 127;
 
     public static final int ARG_FORCE_OPEN_FILE_IN_EDITOR = 1000;
     public static final int ARG_EXPAND_LEFT_PANEL = 1001;
@@ -1156,6 +1160,9 @@ public class FileSystemController {
                     case GoogleDrive:
                         openGoogleDrive();
                         break;
+                    case MediaFire:
+                        openMediaFire();
+                        break;
                 }
 
                 if (dialog.isShowing()) {
@@ -1330,6 +1337,22 @@ public class FileSystemController {
                             openNetworkPanel(NetworkEnum.GoogleDrive);
                         }
                         break;
+                    case MediaFire:
+                        final MediaFireApi.MediaFireAccount account= (MediaFireApi.MediaFireAccount) view.getTag();
+                        if (account.getPassword() == null) { // new
+                            startMediaFireAuthentication();
+                        } else {
+                            try {
+                                App.sInstance.getMediaFireApi().startSession(account);
+                                openNetworkPanel(NetworkEnum.MediaFire);
+                            } catch (Exception e) {
+                                ToastNotification.makeText(App.sInstance.getApplicationContext(),
+                                        App.sInstance.getString(R.string.mediafire_connection_error), Toast.LENGTH_LONG).show();
+
+                            }
+                        }
+
+                        break;
                 }
 
                 if (dialog.isShowing()) {
@@ -1384,20 +1407,6 @@ public class FileSystemController {
                 inactivePanel.export(getActivePanel(), downloadLink,
                         inactivePanel.getCurrentPath() + File.separator + fileName + "." +
                                 downloadLink.substring(downloadLink.lastIndexOf('=') + 1));
-//
-//                runAsynk(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        try {
-//                            App.sInstance.getGoogleDriveApi().download(downloadLink,
-//                                    inactivePanel.getCurrentPath() + File.separator + fileName + "." +
-//                                            downloadLink.substring(downloadLink.lastIndexOf('=') + 1));
-//
-//                        } catch (Exception e) {
-//                            e.printStackTrace();
-//                        }
-//                    }
-//                });
 
                 if (dialog.isShowing()) {
                     dialog.dismiss();
@@ -1437,17 +1446,24 @@ public class FileSystemController {
     public void openSmb() {
         SmbAPI api = App.sInstance.getSmbAPI();
         if (api.getAuthorizedAccountsCount() == 0) {
-            // no authorized accounts
             startSmbAuthentication();
         } else {
             showSelectAccountDialog(NetworkEnum.SMB);
         }
     }
 
+    public void openMediaFire() {
+        MediaFireApi api = App.sInstance.getMediaFireApi();
+        if (api.getAuthorizedAccountsCount() == 0) {
+            startMediaFireAuthentication();
+        } else {
+            showSelectAccountDialog(NetworkEnum.MediaFire);
+        }
+    }
+
     public void openFTP() {
         FtpAPI api = App.sInstance.getFtpApi();
         if (api.getAuthorizedAccountsCount() == 0) {
-            // no authorized accounts
             startFtpAuthentication();
         } else {
             showSelectAccountDialog(NetworkEnum.FTP);
@@ -1457,7 +1473,6 @@ public class FileSystemController {
     public void openDropbox() {
         DropboxAPI api = App.sInstance.getDropboxApi();
         if (api.getAuthorizedAccountsCount() == 0) {
-            // no authorized accounts
             startDropboxAuthentication();
         } else {
             resetNetworkAuth();
@@ -1469,8 +1484,6 @@ public class FileSystemController {
         final Dialog dialog = new FtpAuthDialog(getActivePanel().getActivity(), mInAppAuthHandler);
         dialog.show();
         adjustDialogSize(dialog);
-//        BitcasaLoginDialog dialog = new BitcasaLoginDialog(getActivePanel().getActivity(), mInAppAuthHandler);
-//        dialog.showAtLocation(mMainView, Gravity.CENTER, 0, 0);
     }
 
     private void startSmbAuthentication() {
@@ -1479,6 +1492,12 @@ public class FileSystemController {
 
     private void startSmbAuthentication(String selectedIp) {
         final Dialog dialog = new SmbAuthDialog(getActivePanel().getActivity(), mInAppAuthHandler, selectedIp);
+        dialog.show();
+        adjustDialogSize(dialog);
+    }
+
+    private void startMediaFireAuthentication() {
+        final Dialog dialog = new MediaFireAuthDialog(getActivePanel().getActivity(), mInAppAuthHandler);
         dialog.show();
         adjustDialogSize(dialog);
     }
@@ -1750,6 +1769,8 @@ public class FileSystemController {
                     App.sInstance.getGoogleDriveApi().setup(account);
                     openNetworkPanel(NetworkEnum.GoogleDrive);
                 }
+            } else if (msg.what == MEDIA_FIRE_CONNECTED) {
+                openNetworkPanel(NetworkEnum.MediaFire);
             }
         }
     };

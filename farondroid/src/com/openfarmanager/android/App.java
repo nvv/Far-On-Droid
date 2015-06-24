@@ -5,12 +5,14 @@ import android.content.res.Configuration;
 import android.preference.PreferenceManager;
 import com.openfarmanager.android.controllers.FileSystemController;
 import com.openfarmanager.android.core.Settings;
+import com.openfarmanager.android.core.ThreadPool;
 import com.openfarmanager.android.core.appmanager.AppManager;
 import com.openfarmanager.android.core.bookmark.BookmarkManager;
 import com.openfarmanager.android.core.network.NetworkApi;
 import com.openfarmanager.android.core.network.dropbox.DropboxAPI;
 import com.openfarmanager.android.core.network.ftp.FtpAPI;
 import com.openfarmanager.android.core.network.googledrive.GoogleDriveApi;
+import com.openfarmanager.android.core.network.mediafire.MediaFireApi;
 import com.openfarmanager.android.core.network.skydrive.SkyDriveAPI;
 import com.openfarmanager.android.core.network.smb.SmbAPI;
 import com.openfarmanager.android.core.network.yandexdisk.YandexDiskApi;
@@ -29,12 +31,15 @@ public class App extends Application {
 
     private FileSystemController mFileSystemController;
 
+    private ThreadPool mThreadPool;
+
     protected DropboxAPI mDropboxApi;
     protected SkyDriveAPI mSkyDriveAPI;
     protected FtpAPI mFtpAPI;
     protected SmbAPI mSmbAPI;
     protected YandexDiskApi mYandexDiskApi;
     protected GoogleDriveApi mGoogleDriveApi;
+    protected MediaFireApi mMediaFireApi;
 
     @Override
     public void onCreate() {
@@ -53,8 +58,24 @@ public class App extends Application {
         mSmbAPI = new SmbAPI();
         mYandexDiskApi = new YandexDiskApi();
         mGoogleDriveApi = new GoogleDriveApi();
+        mMediaFireApi = new MediaFireApi();
 
         setLocale();
+    }
+
+    @Override
+    public void onTerminate() {
+        if (mThreadPool != null) {
+            mThreadPool.shutdown();
+        }
+        super.onTerminate();
+    }
+
+    public synchronized ThreadPool getThreadPool() {
+        if (mThreadPool == null) {
+            mThreadPool = new ThreadPool();
+        }
+        return mThreadPool;
     }
 
     private void setLocale() {
@@ -117,6 +138,10 @@ public class App extends Application {
         return mGoogleDriveApi;
     }
 
+    public MediaFireApi getMediaFireApi() {
+        return mMediaFireApi;
+    }
+
     public NetworkApi getNetworkApi(NetworkEnum networkType) {
         switch (networkType) {
             case FTP:
@@ -131,6 +156,8 @@ public class App extends Application {
                 return mYandexDiskApi;
             case GoogleDrive:
                 return mGoogleDriveApi;
+            case MediaFire:
+                return mMediaFireApi;
         }
     }
 }

@@ -9,20 +9,18 @@ import java.util.concurrent.ThreadPoolExecutor;
 
 public class Extensions {
 
-    private static ExecutorService sService = Executors.newFixedThreadPool(3);
-
     public static void runAsynk(Callable callable) {
         //noinspection unchecked
-        sService.submit(callable);
+        App.sInstance.getThreadPool().getExecutor().submit(callable);
     }
 
     public static void runAsynk(Runnable runnable) {
         //noinspection unchecked
-        sService.submit(runnable);
+        App.sInstance.getThreadPool().getExecutor().submit(runnable);
     }
 
     public static ExecutorService getThreadPool() {
-        return sService;
+        return App.sInstance.getThreadPool().getExecutor();
     }
 
     public static int tryParse(String string, int defaultValue) {
