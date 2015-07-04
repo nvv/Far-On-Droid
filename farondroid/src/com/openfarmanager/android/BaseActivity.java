@@ -1,7 +1,6 @@
 package com.openfarmanager.android;
 
 import android.annotation.SuppressLint;
-import android.content.res.Configuration;
 import android.os.Handler;
 import android.support.v4.app.FragmentActivity;
 import android.view.Gravity;
@@ -12,7 +11,7 @@ import android.view.ViewTreeObserver;
 import com.openfarmanager.android.fragments.MainToolbarPanel;
 import com.openfarmanager.android.tips.HideToolbarTips;
 import com.openfarmanager.android.toolbar.MenuItemImpl;
-import com.openfarmanager.android.view.QuickPopupDialog;
+import com.openfarmanager.android.dialogs.QuickPopupDialog;
 
 import java.util.ArrayList;
 

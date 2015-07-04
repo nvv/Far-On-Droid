@@ -1,10 +1,8 @@
 package com.openfarmanager.android.fragments;
 
 import android.app.Dialog;
-import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -26,6 +24,11 @@ import com.openfarmanager.android.core.AbstractCommand;
 import com.openfarmanager.android.core.Settings;
 import com.openfarmanager.android.core.archive.ArchiveUtils;
 import com.openfarmanager.android.core.archive.MimeTypes;
+import com.openfarmanager.android.dialogs.CopyMoveFileDialog;
+import com.openfarmanager.android.dialogs.CreateBookmarkDialog;
+import com.openfarmanager.android.dialogs.CreateFileDialog;
+import com.openfarmanager.android.dialogs.DeleteFileDialog;
+import com.openfarmanager.android.dialogs.ExtractArchiveDialog;
 import com.openfarmanager.android.filesystem.FileProxy;
 import com.openfarmanager.android.filesystem.FileSystemFile;
 import com.openfarmanager.android.filesystem.FileSystemScanner;
@@ -37,8 +40,8 @@ import com.openfarmanager.android.model.TaskStatusEnum;
 import com.openfarmanager.android.utils.CustomFormatter;
 import com.openfarmanager.android.utils.FileUtilsExt;
 import com.openfarmanager.android.utils.SystemUtils;
-import com.openfarmanager.android.view.QuickPopupDialog;
-import com.openfarmanager.android.view.SelectDialog;
+import com.openfarmanager.android.dialogs.QuickPopupDialog;
+import com.openfarmanager.android.dialogs.SelectDialog;
 import com.openfarmanager.android.view.ToastNotification;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
@@ -86,8 +89,6 @@ public class MainPanel extends BaseFileSystemPanel {
     protected boolean mIsActivePanel;
 
     private int mLastListPosition;
-
-    protected ConfirmActionDialog mConfirmDialog;
 
     protected TextView mSelectedFilesSize;
 
@@ -611,45 +612,29 @@ public class MainPanel extends BaseFileSystemPanel {
             rename = forceRename || isTheSameFolders && getSelectedFiles().size() == 1;
         }
 
-        try {
-            ConfirmActionDialog.newInstance(FileActionEnum.MOVE, getMoveCommand(inactivePanel), rename,
-                    rename ? getSelectedFileProxies().get(0).getName() : inactivePanel.getCurrentPath(), rename).
-                    show(fragmentManager(), "confirmDialog");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        showDialog(new CopyMoveFileDialog(getActivity(), mFileActionHandler, inactivePanel, rename,
+                rename ? getSelectedFileProxies().get(0).getName() : inactivePanel.getCurrentPath()));
     }
 
     public void createBookmark(final MainPanel inactivePanel) {
-        try {
-            ConfirmActionDialog.newInstance(FileActionEnum.CREATE_BOOKMARK, mCreateBookmarkCommand, mBaseDir.getAbsolutePath(), false).
-                    show(fragmentManager(), "confirmDialog");
-        } catch (Exception e) {
-        }
+        showDialog(new CreateBookmarkDialog(getActivity(), mFileActionHandler, inactivePanel, mBaseDir.getAbsolutePath()));
     }
 
     public void delete(final MainPanel inactivePanel) {
-        AbstractCommand deleteCommand = getDeleteCommand(inactivePanel, getLastSelectedFile());
-
-        try {
-            ConfirmActionDialog.newInstance(FileActionEnum.DELETE, deleteCommand, null, false).
-                show(fragmentManager(), "confirmDialog");
-        } catch (Exception e) {
-        }
+        showDialog(new DeleteFileDialog(getActivity(), mFileActionHandler, inactivePanel));
     }
 
     public void createFile(final MainPanel inactivePanel) {
-        try {
-            ConfirmActionDialog.newInstance(FileActionEnum.NEW, getCreateNewCommand(), (this instanceof NetworkPanel), null, false).
-                show(fragmentManager(), "confirmDialog");
-        } catch (Exception e) {
-        }
+        showDialog(new CreateFileDialog(getActivity(), mFileActionHandler, inactivePanel, this instanceof NetworkPanel));
+    }
+
+    public void showDialog(Dialog dialog) {
+        dialog.show();
+        adjustDialogSize(dialog);
     }
 
     public void showSelectDialog() {
-        SelectDialog dialog = new SelectDialog(getActivity(), mSelectFilesCommand);
-        dialog.show();
-        adjustDialogSize(dialog);
+        showDialog(new SelectDialog(getActivity(), mSelectFilesCommand));
     }
 
     public void showSearchDialog() {
@@ -705,12 +690,7 @@ public class MainPanel extends BaseFileSystemPanel {
     }
 
     public void copy(final MainPanel inactivePanel) {
-        mConfirmDialog = ConfirmActionDialog.newInstance(FileActionEnum.COPY, getCopyToCommand(inactivePanel),
-                inactivePanel.getCurrentPath(), false);
-        try {
-            mConfirmDialog.show(fragmentManager(), "confirmDialog");
-        } catch (Exception e) {
-        }
+        showDialog(new CopyMoveFileDialog(getActivity(), mFileActionHandler, inactivePanel));
     }
 
     public void export(final MainPanel inactivePanel, String downloadLink, String destination) {
@@ -754,11 +734,7 @@ public class MainPanel extends BaseFileSystemPanel {
 
         final boolean isCompressed = ArchiveUtils.isCompressionSupported(mLastSelectedFile);
 
-        try {
-            ConfirmActionDialog.newInstance(FileActionEnum.ARCHIVE_EXTRACT, mExtractArchiveCommand,
-                    isCompressed, defaultPath, false).show(fragmentManager(), "mConfirmDialog");
-        } catch (Exception e) {
-        }
+        showDialog(new ExtractArchiveDialog(getActivity(), mFileActionHandler, inactivePanel, isCompressed, defaultPath));
     }
 
     public void createArchive(final MainPanel inactivePanel) {
@@ -809,21 +785,7 @@ public class MainPanel extends BaseFileSystemPanel {
     public void setIsMultiSelectMode(boolean value) {
         mIsMultiSelectMode = value;
     }
-/*
-    public void showAltTip(boolean value) {
-        if (value) {
-            if (!mAltTipsPopup.isShowing()) {
 
-                int offset = (int) (50 * getResources().getDisplayMetrics().density);
-
-                mAltTipsPopup.showAtLocation(mFileSystemList, (mPanelLocation == LEFT_PANEL ?
-                        Gravity.LEFT : Gravity.RIGHT) | Gravity.TOP, offset, 2 * offset);
-            }
-        } else {
-            mAltTipsPopup.dismiss();
-        }
-    }
-*/
     public boolean switchMultiSelectMode() {
         return (mIsMultiSelectMode = !mIsMultiSelectMode);
     }
@@ -1229,6 +1191,52 @@ public class MainPanel extends BaseFileSystemPanel {
             dialog.getWindow().setAttributes(params);
         }
     }
+
+    public static final int FILE_CREATE = 1000;
+    public static final int FILE_DELETE = 1001;
+    public static final int FILE_COPY = 1002;
+    public static final int FILE_MOVE = 1003;
+    public static final int FILE_CREATE_BOOKMARK = 1004;
+    public static final int FILE_EXTRACT_ARCHIVE = 1005;
+
+    protected Handler mFileActionHandler = new Handler() {
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case FILE_CREATE:
+                    CreateFileDialog.NewFileResult newFileResult = (CreateFileDialog.NewFileResult) msg.obj;
+                    getCreateNewCommand().execute(newFileResult.inactivePanel,
+                            newFileResult.destination, newFileResult.isFolder);
+                    break;
+                case FILE_DELETE:
+                    DeleteFileDialog.DeleteFileResult deleteFileResult = (DeleteFileDialog.DeleteFileResult) msg.obj;
+                    getDeleteCommand(deleteFileResult.inactivePanel, getLastSelectedFile()).execute(
+                            deleteFileResult.inactivePanel, deleteFileResult.destination);
+                    break;
+                case FILE_COPY:
+                    CopyMoveFileDialog.CopyMoveFileResult copyMoveFileResult = (CopyMoveFileDialog.CopyMoveFileResult) msg.obj;
+                    getCopyToCommand(copyMoveFileResult.inactivePanel).execute(
+                            copyMoveFileResult.inactivePanel, copyMoveFileResult.destination);
+                    break;
+                case FILE_MOVE:
+                    copyMoveFileResult = (CopyMoveFileDialog.CopyMoveFileResult) msg.obj;
+                    getMoveCommand(copyMoveFileResult.inactivePanel).execute(copyMoveFileResult.inactivePanel,
+                            copyMoveFileResult.destination, null, copyMoveFileResult.isRename);
+                    break;
+                case FILE_CREATE_BOOKMARK:
+                    CreateBookmarkDialog.CreateBookmarkResult createBookmarkResult = (CreateBookmarkDialog.CreateBookmarkResult) msg.obj;
+                    mCreateBookmarkCommand.execute(createBookmarkResult.inactivePanel, createBookmarkResult.link,
+                            null, createBookmarkResult.label);
+                    break;
+                case FILE_EXTRACT_ARCHIVE:
+                    ExtractArchiveDialog.ExtractArchiveResult extractArchiveResult = (ExtractArchiveDialog.ExtractArchiveResult) msg.obj;
+                    mExtractArchiveCommand.execute(extractArchiveResult.inactivePanel, extractArchiveResult.destination,
+                            null, extractArchiveResult.isCompressed);
+                    break;
+            }
+        }
+    };
 
     protected boolean isDataLoading() {
         return mIsDataLoading;

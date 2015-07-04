@@ -10,7 +10,6 @@ import android.support.v4.app.Fragment;
 import android.text.Layout;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.util.Pair;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -30,9 +29,8 @@ import com.openfarmanager.android.model.ViewerBigFileTextViewer;
 import com.openfarmanager.android.model.ViewerTextBuffer;
 import com.openfarmanager.android.utils.FileUtilsExt;
 import com.openfarmanager.android.utils.ReversedIterator;
-import com.openfarmanager.android.view.QuickPopupDialog;
-import com.openfarmanager.android.view.SearchableTextView;
-import com.openfarmanager.android.view.SelectEncodingDialog;
+import com.openfarmanager.android.dialogs.QuickPopupDialog;
+import com.openfarmanager.android.dialogs.SelectEncodingDialog;
 import com.openfarmanager.android.view.ToastNotification;
 import org.apache.commons.io.IOCase;
 
@@ -48,7 +46,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.FutureTask;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 

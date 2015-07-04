@@ -1,4 +1,4 @@
-package com.openfarmanager.android.view;
+package com.openfarmanager.android.dialogs;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -13,7 +13,7 @@ import android.widget.TextView;
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.R;
 import com.openfarmanager.android.controllers.FileSystemController;
-import com.openfarmanager.android.model.exeptions.InAppAuthException;
+import com.openfarmanager.android.core.network.mediafire.MediaFireApi;
 
 import static com.openfarmanager.android.utils.Extensions.isNullOrEmpty;
 import static com.openfarmanager.android.utils.Extensions.runAsynk;
@@ -21,30 +21,26 @@ import static com.openfarmanager.android.utils.Extensions.runAsynk;
 /**
  * author: Vlad Namashko
  */
-public class SmbAuthDialog extends Dialog {
+public class MediaFireAuthDialog extends Dialog {
 
     private Handler mHandler;
     private View mDialogView;
     private TextView mError;
-    private EditText mDomain;
     private EditText mUserName;
     private EditText mPassword;
-    private String mSelectedIp;
 
-    public SmbAuthDialog(Context context, Handler handler, String selectedIp) {
+    public MediaFireAuthDialog(Context context, Handler handler) {
         super(context, R.style.Action_Dialog);
         mHandler = handler;
-        mSelectedIp = selectedIp;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-        mDialogView = View.inflate(App.sInstance.getApplicationContext(), R.layout.dialog_smb_authentication, null);
+        mDialogView = View.inflate(App.sInstance.getApplicationContext(), R.layout.dialog_mediafire_authentication, null);
 
-        mDomain = (EditText) mDialogView.findViewById(R.id.smb_domain);
-        mUserName = (EditText) mDialogView.findViewById(R.id.smb_username);
-        mPassword = (EditText) mDialogView.findViewById(R.id.smb_password);
+        mUserName = (EditText) mDialogView.findViewById(R.id.mediafire_username);
+        mPassword = (EditText) mDialogView.findViewById(R.id.mediafire_password);
 
         mError = (TextView) mDialogView.findViewById(R.id.error);
 
@@ -67,26 +63,13 @@ public class SmbAuthDialog extends Dialog {
             }
         });
 
-        mDialogView.findViewById(R.id.smb_scan_network).setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View view) {
-                dismiss();
-                mHandler.sendEmptyMessage(FileSystemController.SMB_SCAN_NETWORK_REQUESTED);
-            }
-        });
-
-        if (mSelectedIp != null) {
-            mDomain.setText(mSelectedIp);
-        }
-
         setContentView(mDialogView);
     }
 
     private boolean validate() {
 
-        if (isNullOrEmpty(mDomain.getText().toString())) {
-            setErrorMessage(App.sInstance.getString(R.string.error_empty_domain));
+        if (isNullOrEmpty(mUserName.getText().toString())) {
+            setErrorMessage(App.sInstance.getString(R.string.error_yandex_account_empty));
             return false;
         }
 
@@ -127,22 +110,31 @@ public class SmbAuthDialog extends Dialog {
         runAsynk(mConnectRunnable);
     }
 
-    Runnable mConnectRunnable = new Runnable() {
+    private Runnable mConnectRunnable = new Runnable() {
         @Override
         public void run() {
 
             try {
-                App.sInstance.getSmbAPI().connectAndSave(mDomain.getText().toString(),
-                        mUserName.getText().toString(), mPassword.getText().toString());
-            } catch (InAppAuthException e) {
-                setErrorMessage(e.getErrorMessage());
+                MediaFireApi api = App.sInstance.getMediaFireApi();
+                api.startNewSession(mUserName.getText().toString(), mPassword.getText().toString());
+
+//                MediaFire mf = new MediaFire(MediaFireApi.APP_ID, MediaFireApi.APP_KEY);
+//                mf.startSessionWithEmail("VNamashko@gmail.com", "tubooR1r", null);
+//                mf.startSessionWithEmail(mUserName.getText().toString(), mPassword.getText().toString(), null);
+//                LinkedHashMap<String, Object> requestParams = new LinkedHashMap<String, Object>();
+//                requestParams.put("response_format", "json");
+//                requestParams.put("content_type", "files");
+//                requestParams.put("chunk_size", 150);
+//                FolderGetContentsResponse response = FolderApi.getContent(mf, requestParams, "1.3", FolderGetContentsResponse.class);
+            } catch (Exception e) {
                 setLoading(false);
+                setErrorMessage(App.sInstance.getString(R.string.error_smb_wrong_credentials));
                 return;
             }
 
             dismiss();
 
-            mHandler.sendEmptyMessage(FileSystemController.SMB_CONNECTED);
+            mHandler.sendEmptyMessage(FileSystemController.MEDIA_FIRE_CONNECTED);
         }
     };
 }

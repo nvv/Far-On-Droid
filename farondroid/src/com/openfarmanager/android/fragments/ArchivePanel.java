@@ -20,6 +20,7 @@ import com.openfarmanager.android.core.CancelableCommand;
 import com.openfarmanager.android.core.Settings;
 import com.openfarmanager.android.core.archive.ArchiveScanner;
 import com.openfarmanager.android.core.archive.ArchiveUtils;
+import com.openfarmanager.android.dialogs.ExtractArchiveDialog;
 import com.openfarmanager.android.filesystem.ArchiveFile;
 import com.openfarmanager.android.filesystem.FileSystemScanner;
 import com.openfarmanager.android.model.FileActionEnum;
@@ -114,13 +115,8 @@ public class ArchivePanel extends MainPanel {
             return;
         }
 
-        String defaultPath = inactivePanel.getCurrentDir().getAbsolutePath();
-
-        try {
-            ConfirmActionDialog.newInstance(FileActionEnum.ARCHIVE_EXTRACT, mExtractArchiveCommand,
-                    mIsArchiveCompressed, defaultPath, false).show(fragmentManager(), "mConfirmDialog");
-        } catch (Exception e) {
-        }
+        showDialog(new ExtractArchiveDialog(getActivity(), mFileActionHandler, inactivePanel,
+                mIsArchiveCompressed, inactivePanel.getCurrentDir().getAbsolutePath()));
     }
 
     public void openCompressedArchive(final File item) {

@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
@@ -25,8 +24,8 @@ import com.openfarmanager.android.core.Settings;
 import com.openfarmanager.android.filesystem.FileSystemScanner;
 import com.openfarmanager.android.filesystem.actions.RootTask;
 import com.openfarmanager.android.utils.SystemUtils;
-import com.openfarmanager.android.view.FontSetupDialog;
-import com.openfarmanager.android.view.MarginSetupDialog;
+import com.openfarmanager.android.dialogs.FontSetupDialog;
+import com.openfarmanager.android.dialogs.MarginSetupDialog;
 import com.openfarmanager.android.view.ToastNotification;
 import com.openfarmanager.android.view.YesNoPreference;
 

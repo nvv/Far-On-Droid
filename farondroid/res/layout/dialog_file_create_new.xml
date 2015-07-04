@@ -2,74 +2,90 @@
 
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
              android:layout_width="fill_parent"
+             android:layout_height="fill_parent"
              android:background="@color/main_grey"
-             android:padding="5dp"
-             android:layout_height="fill_parent">
+             android:padding="5dp">
 
     <LinearLayout
-            android:orientation="vertical"
-            android:layout_marginTop="10dp"
-            android:paddingTop="40dp"
-            android:paddingLeft="30dp"
-            android:paddingRight="30dp"
-            android:background="@drawable/confirm_dialog_frame"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent">
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/confirm_dialog_frame"
+        android:orientation="vertical"
+        android:paddingLeft="30dp"
+        android:paddingRight="30dp"
+        android:paddingTop="40dp">
 
         <TextView
-                android:id="@+id/destination_label"
-                android:text="@string/destination"
-                android:textColor="@color/white"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"/>
+            android:id="@+id/error"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:textColor="@color/error_red"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:visibility="gone"/>
+
+        <TextView
+            android:id="@+id/destination_label"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/new_file_name"
+            android:textColor="@color/white"/>
 
         <EditText
-                android:id="@+id/destination"
-                android:background="@color/selected_item"
-                android:inputType="text"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"/>
+            android:id="@+id/destination"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/selected_item"
+            android:textColor="@color/black"/>
 
         <RadioGroup
-                android:layout_width="fill_parent"
+            android:id="@+id/new_item_type"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/create_file"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:orientation="horizontal"
-                android:id="@+id/new_item_type">
+                android:layout_marginRight="20dp"
+                android:button="@drawable/radio_selector"
+                android:text="@string/new_file"/>
 
-            <RadioButton android:id="@+id/create_file" android:button="@drawable/radio_selector"
-                         android:layout_width="wrap_content" android:layout_height="wrap_content"
-                         android:layout_marginRight="20dp"
-                         android:text="@string/new_file"/>
-
-            <RadioButton android:id="@+id/create_folder" android:button="@drawable/radio_selector"
-                         android:layout_width="wrap_content" android:layout_height="wrap_content"
-                         android:checked="true"
-                         android:text="@string/new_folder"/>
+            <RadioButton
+                android:id="@+id/create_folder"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:button="@drawable/radio_selector"
+                android:checked="true"
+                android:text="@string/new_folder"/>
 
         </RadioGroup>
 
         <LinearLayout
-                android:orientation="horizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/ok"
+                style="@style/dialog_button"
                 android:layout_width="fill_parent"
-                android:layout_marginTop="30dp"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:layout_weight="0.5"
+                android:text="@string/btn_ok"/>
 
             <Button
-                    android:id="@+id/ok"
-                    android:text="@string/btn_ok"
-                    style="@style/dialog_button"
-                    android:layout_weight="0.5"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"/>
-
-            <Button
-                    android:id="@+id/cancel"
-                    android:text="@string/btn_cancel"
-                    style="@style/dialog_button"
-                    android:layout_weight="0.5"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"/>
+                android:id="@+id/cancel"
+                style="@style/dialog_button"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.5"
+                android:text="@string/btn_cancel"/>
 
         </LinearLayout>
 
@@ -78,16 +94,16 @@
 
 
     <TextView
-            android:id="@+id/current_action"
-            android:text="@string/dialog_actions"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
-            android:textSize="16dp"
-            android:textColor="@color/white"
-            android:ellipsize="middle"
-            android:background="@color/main_grey"
-            android:layout_gravity="center_horizontal"/>
+        android:id="@+id/current_action"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:background="@color/main_grey"
+        android:ellipsize="middle"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:text="@string/create_new"
+        android:textColor="@color/white"
+        android:textSize="16dp"/>
 
 </FrameLayout>

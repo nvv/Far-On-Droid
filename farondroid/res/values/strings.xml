@@ -37,6 +37,7 @@
 
     <string name="error">Error</string>
     <string name="error_enter_name">Enter new name</string>
+    <string name="error_destination_empty">Destination path can\'t be empty</string>
     <string name="error_unknown_unexpected_error">An unknown error has occurred. Previous action is canceled.</string>
     <string name="error_cannot_create_file">Can\'t create file or folder \n\n %s</string>
     <string name="error_cannot_delete_files">Can\'t delete selected file (s)</string>
@@ -109,6 +110,7 @@
     <string name="archive_compression">Compression</string>
     <string name="make_folder">Make folder</string>
     <string name="create_new">Create new</string>
+    <string name="new_file_name">File/Directory name</string>
     <string name="delete_files">Delete selected file(s)?</string>
     <string name="move_files">Move files/directories to</string>
     <string name="rename_file">Rename to</string>

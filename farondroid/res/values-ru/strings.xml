@@ -35,6 +35,7 @@
 
     <string name="error">Ошибка</string>
     <string name="error_enter_name">Введите новое имя</string>
+    <string name="error_destination_empty">Директория не может быть пустой</string>
     <string name="error_unknown_unexpected_error">Неизвестная ошибка. Предыдущее действие отменено.</string>
     <string name="error_cannot_create_file">Не удается создать файл или папку \n\n %s</string>
     <string name="error_cannot_delete_files">Не удается удалить файл(ы)</string>

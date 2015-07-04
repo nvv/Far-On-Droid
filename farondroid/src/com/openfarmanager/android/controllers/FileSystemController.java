@@ -13,15 +13,12 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.util.DisplayMetrics;
 import android.util.Pair;
-import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.webkit.URLUtil;
 import android.widget.*;
 
-import com.mediafire.sdk.MediaFire;
 import com.openfarmanager.android.*;
 import com.openfarmanager.android.R;
 import com.openfarmanager.android.adapters.*;
@@ -49,25 +46,22 @@ import static com.openfarmanager.android.utils.Extensions.*;
 
 import com.openfarmanager.android.model.exeptions.InAppAuthException;
 import com.openfarmanager.android.model.exeptions.InitYandexDiskException;
-import com.openfarmanager.android.utils.FileUtilsExt;
 import com.openfarmanager.android.utils.NetworkUtil;
 import com.openfarmanager.android.utils.SystemUtils;
-import com.openfarmanager.android.view.BookmarksListDialog;
+import com.openfarmanager.android.dialogs.BookmarksListDialog;
 import com.openfarmanager.android.view.ExpandPanelAnimation;
-import com.openfarmanager.android.view.FtpAuthDialog;
-import com.openfarmanager.android.view.MediaFireAuthDialog;
-import com.openfarmanager.android.view.NetworkScanDialog;
-import com.openfarmanager.android.view.QuickPopupDialog;
-import com.openfarmanager.android.view.SelectEncodingDialog;
-import com.openfarmanager.android.view.SmbAuthDialog;
+import com.openfarmanager.android.dialogs.FtpAuthDialog;
+import com.openfarmanager.android.dialogs.MediaFireAuthDialog;
+import com.openfarmanager.android.dialogs.NetworkScanDialog;
+import com.openfarmanager.android.dialogs.SelectEncodingDialog;
+import com.openfarmanager.android.dialogs.SmbAuthDialog;
 import com.openfarmanager.android.view.ToastNotification;
-import com.openfarmanager.android.view.YandexDiskNameRequestDialog;
+import com.openfarmanager.android.dialogs.YandexDiskNameRequestDialog;
 import com.yandex.disk.client.Credentials;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.nio.charset.Charset;
-import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 

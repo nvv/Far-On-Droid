@@ -1,4 +1,4 @@
-package com.openfarmanager.android.view;
+package com.openfarmanager.android.dialogs;
 
 import android.app.DatePickerDialog;
 import android.app.Dialog;

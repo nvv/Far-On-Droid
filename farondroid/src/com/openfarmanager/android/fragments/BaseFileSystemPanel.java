@@ -4,20 +4,16 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Build;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.FragmentManager;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListPopupWindow;
 import android.widget.Toast;
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.R;
-import com.openfarmanager.android.adapters.LauncherAdapter;
 import com.openfarmanager.android.core.AbstractCommand;
 import com.openfarmanager.android.core.CancelableCommand;
 import com.openfarmanager.android.core.archive.ArchiveScanner;
@@ -35,9 +31,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Deque;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 
 import static com.openfarmanager.android.controllers.FileSystemController.*;
@@ -184,7 +178,7 @@ public abstract class BaseFileSystemPanel extends BasePanel {
         if (inactivePanel instanceof NetworkPanel) {
             return mMoveToNetworkCommand;
         } else if (this instanceof NetworkPanel) {
-            return mMoveFromDropboxCommand;
+            return mMoveFromNetworkCommand;
         }
 
         return mMoveCommand;
@@ -536,7 +530,7 @@ public abstract class BaseFileSystemPanel extends BasePanel {
         }
     };
 
-    protected AbstractCommand mMoveFromDropboxCommand = new AbstractCommand() {
+    protected AbstractCommand mMoveFromNetworkCommand = new AbstractCommand() {
         @Override
         public void execute(final Object... args) {
             if ((Boolean) args[3]) {
