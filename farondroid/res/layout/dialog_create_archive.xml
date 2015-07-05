@@ -2,124 +2,159 @@
 
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
              android:layout_width="fill_parent"
+             android:layout_height="fill_parent"
              android:background="@color/main_grey"
-             android:padding="5dp"
-             android:layout_height="fill_parent">
+             android:padding="5dp">
 
     <ScrollView
-            android:layout_marginTop="10dp"
-            android:paddingTop="40dp"
-            android:background="@drawable/confirm_dialog_frame"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent">
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/confirm_dialog_frame"
+        android:paddingTop="40dp">
 
         <LinearLayout
-                android:orientation="vertical"
-                android:paddingLeft="30dp"
-                android:paddingRight="30dp"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent">
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:orientation="vertical"
+            android:paddingLeft="30dp"
+            android:paddingRight="30dp">
 
             <TextView
-                    android:text="@string/archive_name"
-                    android:textColor="@color/white"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"/>
+                android:id="@+id/error"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                android:textColor="@color/error_red"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:visibility="gone"/>
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/archive_name"
+                android:textColor="@color/white"/>
 
             <EditText
-                    android:id="@+id/archive_name"
-                    android:background="@color/selected_item"
-                    android:inputType="text"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"/>
+                android:id="@+id/archive_name"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/selected_item"
+                android:inputType="text"
+                android:textColor="@color/black"/>
 
             <RadioGroup
-                        android:layout_width="fill_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:id="@+id/archive_types">
+                android:id="@+id/archive_types"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
 
-                <RadioButton android:id="@+id/archive_type_zip" android:button="@drawable/radio_selector"
-                             android:layout_width="wrap_content" android:layout_height="wrap_content"
-                             android:layout_marginRight="20dp"
-                             android:checked="true"
-                             android:text="zip"/>
+                <RadioButton
+                    android:id="@+id/archive_type_zip"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="20dp"
+                    android:button="@drawable/radio_selector"
+                    android:checked="true"
+                    android:text="zip"/>
 
-                <RadioButton android:id="@+id/archive_type_tar" android:button="@drawable/radio_selector"
-                             android:layout_width="wrap_content" android:layout_height="wrap_content"
-                             android:layout_marginRight="20dp"
-                             android:text="tar"/>
+                <RadioButton
+                    android:id="@+id/archive_type_tar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="20dp"
+                    android:button="@drawable/radio_selector"
+                    android:text="tar"/>
 
-                <RadioButton android:id="@+id/archive_type_jar" android:button="@drawable/radio_selector"
-                             android:layout_width="wrap_content" android:layout_height="wrap_content"
-                             android:layout_marginRight="20dp"
-                             android:text="jar"/>
+                <RadioButton
+                    android:id="@+id/archive_type_jar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="20dp"
+                    android:button="@drawable/radio_selector"
+                    android:text="jar"/>
 
-                <RadioButton android:id="@+id/archive_type_ar" android:button="@drawable/radio_selector"
-                             android:layout_width="wrap_content" android:layout_height="wrap_content"
-                             android:layout_marginRight="20dp"
-                             android:text="ar"/>
+                <RadioButton
+                    android:id="@+id/archive_type_ar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="20dp"
+                    android:button="@drawable/radio_selector"
+                    android:text="ar"/>
 
-                <RadioButton android:id="@+id/archive_type_cpio" android:button="@drawable/radio_selector"
-                             android:layout_width="wrap_content" android:layout_height="wrap_content"
-                             android:text="cpio"/>
+                <RadioButton
+                    android:id="@+id/archive_type_cpio"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:button="@drawable/radio_selector"
+                    android:text="cpio"/>
 
             </RadioGroup>
 
             <CheckBox
-                    android:id="@+id/archive_compression"
-                    android:text="@string/archive_compression"
-                    android:layout_marginTop="10dp"
-                    android:button="@drawable/check_box_selector"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
+                android:id="@+id/archive_compression"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:button="@drawable/check_box_selector"
+                android:text="@string/archive_compression"/>
 
             <RadioGroup
-                    android:layout_width="fill_parent"
+                android:id="@+id/archive_compression_types"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:orientation="horizontal">
+
+                <RadioButton
+                    android:id="@+id/archive_compression_gzip"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginTop="10dp"
-                    android:id="@+id/archive_compression_types">
+                    android:layout_marginRight="20dp"
+                    android:button="@drawable/radio_selector"
+                    android:checked="true"
+                    android:text="gzip"/>
 
-                <RadioButton android:id="@+id/archive_compression_gzip" android:button="@drawable/radio_selector"
-                             android:layout_width="wrap_content" android:layout_height="wrap_content"
-                             android:checked="true"
-                             android:layout_marginRight="20dp"
-                             android:text="gzip"/>
+                <RadioButton
+                    android:id="@+id/archive_compression_bzip2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="20dp"
+                    android:button="@drawable/radio_selector"
+                    android:text="bzip2"/>
 
-                <RadioButton android:id="@+id/archive_compression_bzip2" android:button="@drawable/radio_selector"
-                             android:layout_width="wrap_content" android:layout_height="wrap_content"
-                             android:layout_marginRight="20dp"
-                             android:text="bzip2"/>
-
-                <RadioButton android:id="@+id/archive_compression_xz" android:button="@drawable/radio_selector"
-                             android:layout_width="wrap_content" android:layout_height="wrap_content"
-                             android:layout_marginRight="20dp"
-                             android:text="xz"/>
+                <RadioButton
+                    android:id="@+id/archive_compression_xz"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="20dp"
+                    android:button="@drawable/radio_selector"
+                    android:text="xz"/>
 
             </RadioGroup>
 
             <LinearLayout
-                    android:orientation="horizontal"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/ok"
+                    style="@style/dialog_button"
                     android:layout_width="fill_parent"
-                    android:layout_marginTop="30dp"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.5"
+                    android:text="@string/btn_ok"/>
 
                 <Button
-                        android:id="@+id/ok"
-                        android:text="@string/btn_ok"
-                        style="@style/dialog_button"
-                        android:layout_weight="0.5"
-                        android:layout_width="fill_parent"
-                        android:layout_height="wrap_content"/>
-
-                <Button
-                        android:id="@+id/cancel"
-                        android:text="@string/btn_cancel"
-                        style="@style/dialog_button"
-                        android:layout_weight="0.5"
-                        android:layout_width="fill_parent"
-                        android:layout_height="wrap_content"/>
+                    android:id="@+id/cancel"
+                    style="@style/dialog_button"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.5"
+                    android:text="@string/btn_cancel"/>
 
             </LinearLayout>
 
@@ -128,16 +163,16 @@
     </ScrollView>
 
     <TextView
-            android:id="@+id/current_action"
-            android:text="@string/action_create_archive"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
-            android:textSize="16dp"
-            android:textColor="@color/white"
-            android:ellipsize="middle"
-            android:background="@color/main_grey"
-            android:layout_gravity="center_horizontal"/>
+        android:id="@+id/current_action"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:background="@color/main_grey"
+        android:ellipsize="middle"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:text="@string/action_create_archive"
+        android:textColor="@color/white"
+        android:textSize="16dp"/>
 
 </FrameLayout>

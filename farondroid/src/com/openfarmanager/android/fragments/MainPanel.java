@@ -24,11 +24,8 @@ import com.openfarmanager.android.core.AbstractCommand;
 import com.openfarmanager.android.core.Settings;
 import com.openfarmanager.android.core.archive.ArchiveUtils;
 import com.openfarmanager.android.core.archive.MimeTypes;
-import com.openfarmanager.android.dialogs.CopyMoveFileDialog;
-import com.openfarmanager.android.dialogs.CreateBookmarkDialog;
-import com.openfarmanager.android.dialogs.CreateFileDialog;
-import com.openfarmanager.android.dialogs.DeleteFileDialog;
-import com.openfarmanager.android.dialogs.ExtractArchiveDialog;
+import com.openfarmanager.android.dialogs.*;
+import com.openfarmanager.android.dialogs.CreateArchiveDialog;
 import com.openfarmanager.android.filesystem.FileProxy;
 import com.openfarmanager.android.filesystem.FileSystemFile;
 import com.openfarmanager.android.filesystem.FileSystemScanner;
@@ -40,8 +37,6 @@ import com.openfarmanager.android.model.TaskStatusEnum;
 import com.openfarmanager.android.utils.CustomFormatter;
 import com.openfarmanager.android.utils.FileUtilsExt;
 import com.openfarmanager.android.utils.SystemUtils;
-import com.openfarmanager.android.dialogs.QuickPopupDialog;
-import com.openfarmanager.android.dialogs.SelectDialog;
 import com.openfarmanager.android.view.ToastNotification;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
@@ -57,6 +52,15 @@ public class MainPanel extends BaseFileSystemPanel {
 
     public static final int LEFT_PANEL = 0;
     public static final int RIGHT_PANEL = 1;
+
+    public static final int SELECT_ACTION = 100;
+    public static final int FILE_CREATE = 1000;
+    public static final int FILE_DELETE = 1001;
+    public static final int FILE_COPY = 1002;
+    public static final int FILE_MOVE = 1003;
+    public static final int FILE_CREATE_BOOKMARK = 1004;
+    public static final int FILE_EXTRACT_ARCHIVE = 1005;
+    public static final int FILE_CREATE_ARCHIVE = 1006;
 
     private File mBaseDir;
     protected TextView mCurrentPathView;
@@ -93,8 +97,6 @@ public class MainPanel extends BaseFileSystemPanel {
     protected TextView mSelectedFilesSize;
 
     protected QuickPopupDialog mQuickActionPopup;
-
-    //protected PopupWindow mAltTipsPopup;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -481,20 +483,8 @@ public class MainPanel extends BaseFileSystemPanel {
     }
 
     public void openFileActionMenu() {
-        final FileActionDialog dialog = FileActionDialog.newInstance(getAvailableActions(),
-                new FileActionDialog.OnActionSelectedListener() {
-                    @Override
-                    public void onActionSelected(FileActionEnum action) {
-                        Message message = mHandler.obtainMessage();
-                        message.what = FILE_ACTION;
-                        message.obj = action;
-                        mHandler.sendMessage(message);
-                    }
-                });
-        try {
-            dialog.show(fragmentManager(), "dialog");
-        } catch (Exception e) {
-        }
+        showDialog(new com.openfarmanager.android.dialogs.FileActionDialog(getActivity(),
+                getAvailableActions(), mFileActionHandler));
     }
 
     protected FileActionEnum[] getAvailableActions() {
@@ -738,11 +728,8 @@ public class MainPanel extends BaseFileSystemPanel {
     }
 
     public void createArchive(final MainPanel inactivePanel) {
-        try {
-            CreateArchiveDialog.newInstance(mCreateArchiveCommand,
-                    FilenameUtils.removeExtension(mSelectedFiles.get(0).getName())).show(fragmentManager(), "mConfirmDialog");
-        } catch (Exception e) {
-        }
+        showDialog(new CreateArchiveDialog(getActivity(), mFileActionHandler, inactivePanel,
+                mSelectedFiles.size() > 0 ? mSelectedFiles.get(0).getName() : ""));
     }
 
     public void invalidatePanels(MainPanel inactivePanel) {
@@ -1192,13 +1179,6 @@ public class MainPanel extends BaseFileSystemPanel {
         }
     }
 
-    public static final int FILE_CREATE = 1000;
-    public static final int FILE_DELETE = 1001;
-    public static final int FILE_COPY = 1002;
-    public static final int FILE_MOVE = 1003;
-    public static final int FILE_CREATE_BOOKMARK = 1004;
-    public static final int FILE_EXTRACT_ARCHIVE = 1005;
-
     protected Handler mFileActionHandler = new Handler() {
 
         @Override
@@ -1233,6 +1213,14 @@ public class MainPanel extends BaseFileSystemPanel {
                     ExtractArchiveDialog.ExtractArchiveResult extractArchiveResult = (ExtractArchiveDialog.ExtractArchiveResult) msg.obj;
                     mExtractArchiveCommand.execute(extractArchiveResult.inactivePanel, extractArchiveResult.destination,
                             null, extractArchiveResult.isCompressed);
+                    break;
+                case FILE_CREATE_ARCHIVE:
+                    CreateArchiveDialog.CreateArchiveResult createArchiveResult = (CreateArchiveDialog.CreateArchiveResult) msg.obj;
+                    mCreateArchiveCommand.execute(createArchiveResult.inactivePanel, createArchiveResult.archiveName,
+                            createArchiveResult.archiveType, createArchiveResult.isCompressionEnabled, createArchiveResult.compression);
+                    break;
+                case SELECT_ACTION:
+                    mHandler.sendMessage(Message.obtain(mHandler, FILE_ACTION, msg.obj));
                     break;
             }
         }
