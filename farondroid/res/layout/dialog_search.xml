@@ -16,6 +16,17 @@
             android:layout_width="fill_parent"
             android:layout_height="fill_parent">
 
+        <!-- just for compatibility -->
+        <TextView
+            android:id="@+id/error"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:textColor="@color/error_red"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:visibility="gone"/>
+
         <TextView
                 android:id="@+id/destination_label"
                 android:text="@string/file_mask"
@@ -25,6 +36,7 @@
 
         <EditText
                 android:id="@+id/destination"
+                android:textColor="@color/black"
                 android:background="@color/selected_item"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"/>
@@ -38,6 +50,7 @@
 
         <EditText
                 android:id="@+id/keyword"
+                android:textColor="@color/black"
                 android:background="@color/selected_item"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"/>

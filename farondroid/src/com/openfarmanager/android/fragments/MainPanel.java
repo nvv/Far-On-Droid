@@ -26,6 +26,7 @@ import com.openfarmanager.android.core.archive.ArchiveUtils;
 import com.openfarmanager.android.core.archive.MimeTypes;
 import com.openfarmanager.android.dialogs.*;
 import com.openfarmanager.android.dialogs.CreateArchiveDialog;
+import com.openfarmanager.android.dialogs.SearchActionDialog;
 import com.openfarmanager.android.filesystem.FileProxy;
 import com.openfarmanager.android.filesystem.FileSystemFile;
 import com.openfarmanager.android.filesystem.FileSystemScanner;
@@ -54,6 +55,7 @@ public class MainPanel extends BaseFileSystemPanel {
     public static final int RIGHT_PANEL = 1;
 
     public static final int SELECT_ACTION = 100;
+    public static final int SEARCH_ACTION = 101;
     public static final int FILE_CREATE = 1000;
     public static final int FILE_DELETE = 1001;
     public static final int FILE_COPY = 1002;
@@ -628,55 +630,15 @@ public class MainPanel extends BaseFileSystemPanel {
     }
 
     public void showSearchDialog() {
-        try {
-            if (!isSearchSupported()) {
-                ToastNotification.makeText(App.sInstance.getApplicationContext(),
-                        getSafeString(R.string.error_search_not_supported, getPanelType()), Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            final boolean isNetworkPanel = this instanceof NetworkPanel;
-            SearchActionDialog.newInstance(isNetworkPanel, new SearchActionDialog.OnSearchConfirmedListener() {
-                @Override
-                public void onSearchConfirmed(String fileMask, String keyword, boolean isCaseSensitive, boolean isWholeWords) {
-                    try {
-                        SearchResult.newInstance(isNetworkPanel, isNetworkPanel ? ((NetworkPanel) MainPanel.this).getNetworkType() : null,
-                                getCurrentPath(), fileMask, keyword, isCaseSensitive, isWholeWords, new SearchResult.SearchResultListener() {
-                            @Override
-                            public void onGotoFile(final FileProxy f) {
-                                if (MainPanel.this instanceof NetworkPanel) {
-                                    ((NetworkPanel) MainPanel.this).openDirectoryAndSelect(f.getParentPath(),
-                                            new ArrayList<FileProxy>() {{ add(f); }});
-
-                                } else {
-                                    File file = (FileSystemFile) f;
-                                    setCurrentDir(file.isDirectory() ? file : file.getParentFile());
-                                    invalidate();
-                                }
-                            }
-
-                            @Override
-                            public void onViewFile(FileProxy f) {
-                                File file = (FileSystemFile) f;
-                                if (file.isDirectory()) {
-                                    setCurrentDir(file);
-                                    invalidate();
-                                } else {
-                                    openFile(file);
-                                }
-                            }
-
-                            @Override
-                            public void onResetSearch() {
-                                showSearchDialog();
-                            }
-                        }).show(fragmentManager(), "searchResult");
-                    } catch (Exception e) {
-                    }
-                }
-            }).show(fragmentManager(), "confirmDialog");
-        } catch (Exception e) {
+         if (!isSearchSupported()) {
+            ToastNotification.makeText(App.sInstance.getApplicationContext(),
+                    getSafeString(R.string.error_search_not_supported, getPanelType()), Toast.LENGTH_SHORT).show();
+            return;
         }
+
+        final boolean isNetworkPanel = this instanceof NetworkPanel;
+        showDialog(new SearchActionDialog(getActivity(), mFileActionHandler,
+                null, isNetworkPanel));
     }
 
     public void copy(final MainPanel inactivePanel) {
@@ -1222,6 +1184,48 @@ public class MainPanel extends BaseFileSystemPanel {
                 case SELECT_ACTION:
                     mHandler.sendMessage(Message.obtain(mHandler, FILE_ACTION, msg.obj));
                     break;
+                case SEARCH_ACTION:
+                    try {
+                        SearchActionDialog.SearchActionResult result = (SearchActionDialog.SearchActionResult) msg.obj;
+                        SearchResult.newInstance(result.isNetworkPanel, result.isNetworkPanel ? ((NetworkPanel) MainPanel.this).getNetworkType() : null,
+                                getCurrentPath(), result.fileMask, result.keyword,
+                                result.caseSensitive, result.wholeWords, new SearchResult.SearchResultListener() {
+                                    @Override
+                                    public void onGotoFile(final FileProxy f) {
+                                        if (MainPanel.this instanceof NetworkPanel) {
+                                            ((NetworkPanel) MainPanel.this).openDirectoryAndSelect(f.getParentPath(),
+                                                    new ArrayList<FileProxy>() {{
+                                                        add(f);
+                                                    }});
+
+                                        } else {
+                                            File file = (FileSystemFile) f;
+                                            setCurrentDir(file.isDirectory() ? file : file.getParentFile());
+                                            invalidate();
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onViewFile(FileProxy f) {
+                                        File file = (FileSystemFile) f;
+                                        if (file.isDirectory()) {
+                                            setCurrentDir(file);
+                                            invalidate();
+                                        } else {
+                                            openFile(file);
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onResetSearch() {
+                                        showSearchDialog();
+                                    }
+                                }).show(fragmentManager(), "searchResult");
+                    } catch (Exception e) {
+                    }
+
+                    break;
+
             }
         }
     };
