@@ -12,6 +12,9 @@ import com.openfarmanager.android.App;
 import com.openfarmanager.android.R;
 import com.openfarmanager.android.fragments.MainPanel;
 
+/**
+ * @author Vlad Namashko.
+ */
 public class SearchActionDialog extends BaseFileDialog {
 
     public static final String SEARCH_DIALOG = "SEARCH_DIALOG";

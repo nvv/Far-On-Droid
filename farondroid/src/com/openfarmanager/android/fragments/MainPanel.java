@@ -462,7 +462,7 @@ public class MainPanel extends BaseFileSystemPanel {
         mSelectedFilesSize.setText(getString(R.string.selected_files, CustomFormatter.formatBytes(size), mSelectedFiles.size()));
     }
 
-    protected void showQuickActionPanel() {
+    public void showQuickActionPanel() {
 
         if (mQuickActionPopup == null) {
             return;
@@ -1187,40 +1187,39 @@ public class MainPanel extends BaseFileSystemPanel {
                 case SEARCH_ACTION:
                     try {
                         SearchActionDialog.SearchActionResult result = (SearchActionDialog.SearchActionResult) msg.obj;
-                        SearchResult.newInstance(result.isNetworkPanel, result.isNetworkPanel ? ((NetworkPanel) MainPanel.this).getNetworkType() : null,
-                                getCurrentPath(), result.fileMask, result.keyword,
-                                result.caseSensitive, result.wholeWords, new SearchResult.SearchResultListener() {
-                                    @Override
-                                    public void onGotoFile(final FileProxy f) {
-                                        if (MainPanel.this instanceof NetworkPanel) {
-                                            ((NetworkPanel) MainPanel.this).openDirectoryAndSelect(f.getParentPath(),
-                                                    new ArrayList<FileProxy>() {{
-                                                        add(f);
-                                                    }});
+                        showDialog(new SearchResultDialog(getActivity(), result.isNetworkPanel ? ((NetworkPanel) MainPanel.this).getNetworkType() : null,
+                                getCurrentPath(), result, new SearchResultDialog.SearchResultListener() {
+                            @Override
+                            public void onGotoFile(final FileProxy fileProxy) {
+                                if (MainPanel.this instanceof NetworkPanel) {
+                                    ((NetworkPanel) MainPanel.this).openDirectoryAndSelect(fileProxy.getParentPath(),
+                                            new ArrayList<FileProxy>() {{
+                                                add(fileProxy);
+                                            }});
 
-                                        } else {
-                                            File file = (FileSystemFile) f;
-                                            setCurrentDir(file.isDirectory() ? file : file.getParentFile());
-                                            invalidate();
-                                        }
-                                    }
+                                } else {
+                                    File file = (FileSystemFile) fileProxy;
+                                    openDirectory(file.isDirectory() ? file : file.getParentFile());
+                                    invalidate();
+                                }
+                            }
 
-                                    @Override
-                                    public void onViewFile(FileProxy f) {
-                                        File file = (FileSystemFile) f;
-                                        if (file.isDirectory()) {
-                                            setCurrentDir(file);
-                                            invalidate();
-                                        } else {
-                                            openFile(file);
-                                        }
-                                    }
+                            @Override
+                            public void onViewFile(FileProxy fileProxy) {
+                                File file = (FileSystemFile) fileProxy;
+                                if (file.isDirectory()) {
+                                    setCurrentDir(file);
+                                    invalidate();
+                                } else {
+                                    openFile(file);
+                                }
+                            }
 
-                                    @Override
-                                    public void onResetSearch() {
-                                        showSearchDialog();
-                                    }
-                                }).show(fragmentManager(), "searchResult");
+                            @Override
+                            public void onResetSearch() {
+                                showSearchDialog();
+                            }
+                        }));
                     } catch (Exception e) {
                     }
 
