@@ -454,6 +454,11 @@ public class MainPanel extends BaseFileSystemPanel {
     }
 
     protected void calculateSelectedFilesSize() {
+
+        if (!App.sInstance.getSettings().isShowSelectedFilesSize()) {
+            return;
+        }
+
         long size = 0;
         for (FileProxy f : mSelectedFiles) {
             size += f.isDirectory() ? 0 : f.getSize();
@@ -1198,8 +1203,14 @@ public class MainPanel extends BaseFileSystemPanel {
                                             }});
 
                                 } else {
-                                    File file = (FileSystemFile) fileProxy;
+                                    final File file = (FileSystemFile) fileProxy;
                                     openDirectory(file.isDirectory() ? file : file.getParentFile());
+                                    if (!file.isDirectory()) {
+                                        addSelectedFiles(new LinkedHashSet<File>() {{
+                                            add(file);
+                                        }});
+                                        calculateSelectedFilesSize();
+                                    }
                                     invalidate();
                                 }
                             }

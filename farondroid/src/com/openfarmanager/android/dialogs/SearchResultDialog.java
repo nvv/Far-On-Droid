@@ -50,6 +50,8 @@ public class SearchResultDialog extends Dialog {
     private ListView mList;
     private View mDialogView;
 
+    private int mSelectedFilePosition = -1;
+
     private final List<FileProxy> mData = Collections.synchronizedList(new LinkedList<FileProxy>());
 
     private FolderScanner mScanner;
@@ -134,17 +136,8 @@ public class SearchResultDialog extends Dialog {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 mSelected = (FileProxy) view.getTag();
-
-                if (!checkFileSelected()) {
-                    return;
-                }
-
-                if ((mNetworkType != null ? mNetworkType.ordinal() : -1) == -1) {
-                    mListener.onViewFile(mSelected);
-                } else {
-                    mListener.onGotoFile(mSelected);
-                    dismiss();
-                }
+                mSelectedFilePosition = i;
+                ((BaseAdapter) mList.getAdapter()).notifyDataSetChanged();
             }
         });
 
@@ -193,6 +186,7 @@ public class SearchResultDialog extends Dialog {
                 FileProxy f = (FileProxy) getItem(i);
                 textView.setText(f.getName());
                 textView.setTag(f);
+                textView.setBackgroundResource(mSelectedFilePosition == i ? R.color.selected_item : R.color.main_grey);
                 return textView;
             }
 
