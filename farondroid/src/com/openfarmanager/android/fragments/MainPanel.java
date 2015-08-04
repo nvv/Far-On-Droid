@@ -1,9 +1,11 @@
 package com.openfarmanager.android.fragments;
 
+import android.annotation.TargetApi;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -32,9 +34,11 @@ import com.openfarmanager.android.filesystem.FileSystemFile;
 import com.openfarmanager.android.filesystem.FileSystemScanner;
 import com.openfarmanager.android.filesystem.actions.FileActionTask;
 import com.openfarmanager.android.filesystem.actions.network.ExportAsTask;
+import com.openfarmanager.android.filesystem.commands.CommandsFactory;
 import com.openfarmanager.android.model.FileActionEnum;
 import com.openfarmanager.android.model.SelectParams;
 import com.openfarmanager.android.model.TaskStatusEnum;
+import com.openfarmanager.android.model.exeptions.SdcardPermissionException;
 import com.openfarmanager.android.utils.CustomFormatter;
 import com.openfarmanager.android.utils.FileUtilsExt;
 import com.openfarmanager.android.utils.SystemUtils;
@@ -422,6 +426,15 @@ public class MainPanel extends BaseFileSystemPanel {
         if (mQuickActionPopup != null) {
             getSelectedFiles().clear();
             mQuickActionPopup.dismiss();
+        }
+    }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_CODE_REQUEST_PERMISSION && Build.VERSION.SDK_INT >= 21) {
+            getActivity().getContentResolver().takePersistableUriPermission(data.getData(),
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
         }
     }
 
@@ -1146,6 +1159,8 @@ public class MainPanel extends BaseFileSystemPanel {
         }
     }
 
+    private static final int REQUEST_CODE_REQUEST_PERMISSION = 442;
+
     protected Handler mFileActionHandler = new Handler() {
 
         @Override
@@ -1153,8 +1168,15 @@ public class MainPanel extends BaseFileSystemPanel {
             switch (msg.what) {
                 case FILE_CREATE:
                     CreateFileDialog.NewFileResult newFileResult = (CreateFileDialog.NewFileResult) msg.obj;
-                    getCreateNewCommand().execute(newFileResult.inactivePanel,
-                            newFileResult.destination, newFileResult.isFolder);
+                    try {
+                        CommandsFactory.getCreateNewCommand(MainPanel.this).execute(newFileResult.inactivePanel,
+                                newFileResult.destination, newFileResult.isFolder);
+                    } catch (SdcardPermissionException e) {
+                        if (Build.VERSION.SDK_INT >= 21) {
+                            Intent ii = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+                            startActivityForResult(ii, REQUEST_CODE_REQUEST_PERMISSION);
+                        }
+                    }
                     break;
                 case FILE_DELETE:
                     DeleteFileDialog.DeleteFileResult deleteFileResult = (DeleteFileDialog.DeleteFileResult) msg.obj;

@@ -112,7 +112,7 @@ public abstract class BaseFileSystemPanel extends BasePanel {
         return true;
     }
 
-    protected FragmentManager fragmentManager() throws Exception {
+    public FragmentManager fragmentManager() throws Exception {
         Activity parent = getActivity();
         FragmentManager result = null;
         if (parent != null) {
@@ -184,21 +184,12 @@ public abstract class BaseFileSystemPanel extends BasePanel {
         return mMoveCommand;
     }
 
-    public AbstractCommand getCreateNewCommand() {
-        if (this instanceof NetworkPanel) {
-            return mCreateNewAtNetworkCommand;
-        }
-
-        return mCreateNewCommand;
-    }
-
-
     private void doRename(Object[] args) {
         doRename(args, false);
     }
 
     @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
-    private void handleNetworkActionResult(TaskStatusEnum status, Object[] args) {
+    public void handleNetworkActionResult(TaskStatusEnum status, Object[] args) {
         if (status != TaskStatusEnum.OK) {
             String error;
             error = status == TaskStatusEnum.ERROR_CREATE_DIRECTORY ?
@@ -385,54 +376,6 @@ public abstract class BaseFileSystemPanel extends BasePanel {
             Bookmark bookmark = ((FileProxy) mLastSelectedFile).getBookmark();
             App.sInstance.getBookmarkManager().deleteBookmark(bookmark);
             invalidatePanels((MainPanel) args[0]);
-        }
-    };
-
-    protected AbstractCommand mCreateNewCommand = new AbstractCommand() {
-        @Override
-        public void execute(final Object... args) {
-            boolean createDirectory = (Boolean) args[2];
-            File destination = new File(getCurrentDir(), (String) args[1]);
-            boolean result;
-            try {
-                File parentFile = destination.getParentFile();
-                boolean isRootRequired = !parentFile.canRead() || !parentFile.canWrite();
-                result = isRootRequired ? RootTask.create(destination, createDirectory) :
-                        createDirectory ?
-                                destination.mkdir() : destination.createNewFile();
-            } catch (IOException e) {
-                result = false;
-            }
-
-            if (!result) {
-                try {
-                    ErrorDialog.newInstance(App.sInstance.getString(R.string.error_cannot_create_file, (String) args[1])).show(fragmentManager(), "errorDialog");
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-            invalidatePanels((MainPanel) args[0]);
-        }
-    };
-
-    protected AbstractCommand mCreateNewAtNetworkCommand = new AbstractCommand() {
-        @Override
-        public void execute(final Object... args) {
-            FileActionTask task = null;
-            String destination = getCurrentPath() + (getCurrentPath().endsWith("/") ? "" : "/") + args[1];
-            try {
-                task = new CreateNewAtNetworkTask(((NetworkPanel) BaseFileSystemPanel.this).getNetworkType(),
-                        fragmentManager(),
-                        new FileActionTask.OnActionListener() {
-                            @Override
-                            public void onActionFinish(TaskStatusEnum status) {
-                                handleNetworkActionResult(status, args);
-                            }
-                        }, destination);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            task.execute();
         }
     };
 

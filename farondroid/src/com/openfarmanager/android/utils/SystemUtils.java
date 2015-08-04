@@ -3,9 +3,20 @@ package com.openfarmanager.android.utils;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Build;
+import android.os.Environment;
 import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.WindowManager;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import rx.Observable;
+import rx.Subscription;
+import rx.functions.Action1;
+import rx.functions.Func1;
 
 /**
  * System utilities methods.
@@ -61,4 +72,42 @@ public class SystemUtils {
     public static boolean isTablet() {
         return sIsTablet;
     }
+
+    public static String getExternalStorage(final String fullPath) {
+
+        Observable<String> sdCardNames = Observable.from(Arrays.asList("ext_card", "external_sd",
+                "ext_sd", "external", "extSdCard", "externalSdCard"));
+
+        Observable<File> mnt = sdCardNames.map(new Func1<String, File>() {
+            @Override
+            public File call(String sdCard) {
+                return new File("/mnt/", sdCard);
+            }
+        });
+
+        Observable<File> storage = sdCardNames.map(new Func1<String, File>() {
+            @Override
+            public File call(String sdCard) {
+                return new File("/storage/", sdCard);
+            }
+        });
+
+        final SimpleWrapper<String> sdCard = new SimpleWrapper<>();
+        Subscription subscription = Observable.merge(mnt, storage).filter(new Func1<File, Boolean>() {
+            @Override
+            public Boolean call(File file) {
+                return file.isDirectory() && fullPath.startsWith(file.getAbsolutePath());
+            }
+        }).subscribe(new Action1<File>() {
+            @Override
+            public void call(File file) {
+                sdCard.value = file.getAbsolutePath();
+            }
+        });
+
+        subscription.unsubscribe();
+        return sdCard.value;
+    }
+
+
 }
