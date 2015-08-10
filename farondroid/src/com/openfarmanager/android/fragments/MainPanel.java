@@ -55,6 +55,8 @@ import static com.openfarmanager.android.model.FileActionEnum.*;
 
 public class MainPanel extends BaseFileSystemPanel {
 
+    private static final int REQUEST_CODE_REQUEST_PERMISSION = 442;
+
     public static final int LEFT_PANEL = 0;
     public static final int RIGHT_PANEL = 1;
 
@@ -1159,24 +1161,20 @@ public class MainPanel extends BaseFileSystemPanel {
         }
     }
 
-    private static final int REQUEST_CODE_REQUEST_PERMISSION = 442;
-
     protected Handler mFileActionHandler = new Handler() {
 
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case FILE_CREATE:
-                    CreateFileDialog.NewFileResult newFileResult = (CreateFileDialog.NewFileResult) msg.obj;
-                    try {
-                        CommandsFactory.getCreateNewCommand(MainPanel.this).execute(newFileResult.inactivePanel,
-                                newFileResult.destination, newFileResult.isFolder);
-                    } catch (SdcardPermissionException e) {
-                        if (Build.VERSION.SDK_INT >= 21) {
-                            Intent ii = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
-                            startActivityForResult(ii, REQUEST_CODE_REQUEST_PERMISSION);
+                    final CreateFileDialog.NewFileResult newFileResult = (CreateFileDialog.NewFileResult) msg.obj;
+                    executeCommand(new Runnable() {
+                        @Override
+                        public void run() {
+                            CommandsFactory.getCreateNewCommand(MainPanel.this).execute(newFileResult.inactivePanel,
+                                    newFileResult.destination, newFileResult.isFolder);
                         }
-                    }
+                    });
                     break;
                 case FILE_DELETE:
                     DeleteFileDialog.DeleteFileResult deleteFileResult = (DeleteFileDialog.DeleteFileResult) msg.obj;
@@ -1261,6 +1259,17 @@ public class MainPanel extends BaseFileSystemPanel {
             }
         }
     };
+
+    public void executeCommand(Runnable runnable) {
+        try {
+            runnable.run();
+        } catch (SdcardPermissionException e) {
+            if (Build.VERSION.SDK_INT >= 21) {
+                Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+                startActivityForResult(intent, REQUEST_CODE_REQUEST_PERMISSION);
+            }
+        }
+    }
 
     protected boolean isDataLoading() {
         return mIsDataLoading;
