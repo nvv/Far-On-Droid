@@ -432,7 +432,7 @@ public class MainPanel extends BaseFileSystemPanel {
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_CODE_REQUEST_PERMISSION && Build.VERSION.SDK_INT >= 21) {
+        if (requestCode == REQUEST_CODE_REQUEST_PERMISSION && Build.VERSION.SDK_INT >= 21 && data != null) {
             getActivity().getContentResolver().takePersistableUriPermission(data.getData(),
                     Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
         }

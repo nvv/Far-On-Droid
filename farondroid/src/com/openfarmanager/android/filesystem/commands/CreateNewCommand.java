@@ -1,6 +1,9 @@
 package com.openfarmanager.android.filesystem.commands;
 
 import android.content.UriPermission;
+import android.net.Uri;
+import android.os.Build;
+import android.provider.DocumentsContract;
 
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.R;
@@ -30,13 +33,29 @@ public class CreateNewCommand implements AbstractCommand {
     public void execute(final Object... args) {
         boolean createDirectory = (Boolean) args[2];
         File destination = new File(mPanel.getCurrentDir(), (String) args[1]);
-        boolean result = false;
+        boolean result;
         try {
             String sdCardPath = SystemUtils.getExternalStorage(destination.getAbsolutePath());
-            if (sdCardPath != null) {
+            if (sdCardPath != null && Build.VERSION.SDK_INT >= 21) {
                 List<UriPermission> persistedUriPermissions = App.sInstance.getContentResolver().getPersistedUriPermissions();
                 if (persistedUriPermissions != null && persistedUriPermissions.size() > 0 && persistedUriPermissions.get(0).isWritePermission()) {
+                    UriPermission permission = persistedUriPermissions.get(0);
+                    Uri uri = permission.getUri();
 
+                    String currentPath = mPanel.getCurrentPath();
+                    String subDir = currentPath.substring(sdCardPath.length());
+                    if (subDir.startsWith(File.separator)) {
+                        subDir = subDir.substring(1);
+                    }
+
+                    Uri docUri = DocumentsContract.buildDocumentUriUsingTree(uri,
+                            DocumentsContract.getTreeDocumentId(Uri.parse(uri.getEncodedPath() +
+                                    subDir.replace("/", "%2F"))));
+
+                    Uri fileUri = DocumentsContract.createDocument(App.sInstance.getContentResolver(),
+                            docUri, createDirectory ? DocumentsContract.Document.MIME_TYPE_DIR : "",
+                            (String) args[1]);
+                    result = fileUri != null;
                 } else {
                     throw new SdcardPermissionException();
                 }
