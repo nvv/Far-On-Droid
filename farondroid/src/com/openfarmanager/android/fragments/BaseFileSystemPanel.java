@@ -166,14 +166,6 @@ public abstract class BaseFileSystemPanel extends BasePanel {
         return mCopyCommand;
     }
 
-    public AbstractCommand getDeleteCommand(MainPanel inactivePanel, FileProxy lastSelectedFile) {
-        if (this instanceof NetworkPanel) {
-            return mDeleteFromNetworkCommand;
-        }
-
-        return (lastSelectedFile != null && lastSelectedFile.isBookmark()) ? mDeleteBookmarkCommand : mDeleteCommand;
-    }
-
     public AbstractCommand getMoveCommand(MainPanel inactivePanel) {
         if (inactivePanel instanceof NetworkPanel) {
             return mMoveToNetworkCommand;
@@ -321,61 +313,6 @@ public abstract class BaseFileSystemPanel extends BasePanel {
                 e.printStackTrace();
             }
             task.execute();
-        }
-    };
-
-    protected AbstractCommand mDeleteCommand = new AbstractCommand() {
-        @Override
-        public void execute(final Object... args) {
-            FileActionTask task = null;
-            try {
-                task = new DeleteTask(fragmentManager(),
-                        new FileActionTask.OnActionListener() {
-                            @Override
-                            public void onActionFinish(TaskStatusEnum status) {
-                                if (status != TaskStatusEnum.OK) {
-                                    try {
-                                        ErrorDialog.newInstance(TaskStatusEnum.getErrorString(status)).show(fragmentManager(), "errorDialog");
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                    }
-                                }
-                                invalidatePanels((MainPanel) args[0]);
-                            }
-                        }, getSelectedFiles());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            task.execute();
-        }
-    };
-
-    protected AbstractCommand mDeleteFromNetworkCommand = new AbstractCommand() {
-        @Override
-        public void execute(final Object... args) {
-            FileActionTask task = null;
-            try {
-                task = new DeleteFromNetworkTask(((NetworkPanel) BaseFileSystemPanel.this).getNetworkType(),
-                        fragmentManager(),
-                        new FileActionTask.OnActionListener() {
-                            @Override
-                            public void onActionFinish(TaskStatusEnum status) {
-                                handleNetworkActionResult(status, args);
-                            }
-                        }, getSelectedFileProxies());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            task.execute();
-        }
-    };
-
-    protected AbstractCommand mDeleteBookmarkCommand = new AbstractCommand() {
-        @Override
-        public void execute(final Object... args) {
-            Bookmark bookmark = ((FileProxy) mLastSelectedFile).getBookmark();
-            App.sInstance.getBookmarkManager().deleteBookmark(bookmark);
-            invalidatePanels((MainPanel) args[0]);
         }
     };
 

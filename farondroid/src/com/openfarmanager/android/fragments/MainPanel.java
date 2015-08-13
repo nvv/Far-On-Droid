@@ -1177,9 +1177,15 @@ public class MainPanel extends BaseFileSystemPanel {
                     });
                     break;
                 case FILE_DELETE:
-                    DeleteFileDialog.DeleteFileResult deleteFileResult = (DeleteFileDialog.DeleteFileResult) msg.obj;
-                    getDeleteCommand(deleteFileResult.inactivePanel, getLastSelectedFile()).execute(
-                            deleteFileResult.inactivePanel, deleteFileResult.destination);
+                    final DeleteFileDialog.DeleteFileResult deleteFileResult = (DeleteFileDialog.DeleteFileResult) msg.obj;
+                    executeCommand(new Runnable() {
+                        @Override
+                        public void run() {
+                            CommandsFactory.getDeleteCommand(MainPanel.this).execute(deleteFileResult.inactivePanel,
+                                    deleteFileResult.destination, getLastSelectedFile());
+                        }
+                    });
+
                     break;
                 case FILE_COPY:
                     CopyMoveFileDialog.CopyMoveFileResult copyMoveFileResult = (CopyMoveFileDialog.CopyMoveFileResult) msg.obj;
