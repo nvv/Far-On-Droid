@@ -3,6 +3,7 @@ package com.openfarmanager.android.fragments;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
@@ -21,14 +22,12 @@ import com.openfarmanager.android.core.archive.ArchiveUtils;
 import com.openfarmanager.android.filesystem.FileProxy;
 import com.openfarmanager.android.filesystem.actions.*;
 import com.openfarmanager.android.filesystem.actions.network.*;
-import com.openfarmanager.android.model.Bookmark;
 import com.openfarmanager.android.model.SelectParams;
 import com.openfarmanager.android.model.TaskStatusEnum;
 import com.openfarmanager.android.view.OnSwipeTouchListener;
 import com.openfarmanager.android.view.ToastNotification;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -41,6 +40,8 @@ import static com.openfarmanager.android.controllers.FileSystemController.*;
  */
 @SuppressWarnings("ConstantConditions")
 public abstract class BaseFileSystemPanel extends BasePanel {
+
+    protected static final int REQUEST_CODE_REQUEST_PERMISSION = 442;
 
     protected File mLastSelectedFile;
 
@@ -257,10 +258,15 @@ public abstract class BaseFileSystemPanel extends BasePanel {
                             public void onActionFinish(TaskStatusEnum status) {
                                 try {
                                     if (!status.equals(TaskStatusEnum.OK)) {
+                                        if (status == TaskStatusEnum.ERROR_STORAGE_PERMISSION_REQUIRED) {
+                                            BaseFileSystemPanel.this.requestSdcardPermission();
+                                            return;
+                                        }
+
                                         ErrorDialog.newInstance(
                                                 status.equals(TaskStatusEnum.ERROR_COPY) ?
                                                         App.sInstance.getString(R.string.error_cannot_copy_files, args[1]):
-                                                        TaskStatusEnum.getErrorString(status)).
+                                                        String.format(TaskStatusEnum.getErrorString(status), args[1])).
                                                 show(fragmentManager(), "errorDialog");
                                     }
                                 } catch (Exception e) {
@@ -500,6 +506,13 @@ public abstract class BaseFileSystemPanel extends BasePanel {
 
         }
     };
+
+    public void requestSdcardPermission() {
+        if (Build.VERSION.SDK_INT >= 21) {
+            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+            startActivityForResult(intent, REQUEST_CODE_REQUEST_PERMISSION);
+        }
+    }
 
     public abstract FileProxy getLastSelectedFile();
 

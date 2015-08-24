@@ -31,7 +31,8 @@ public class DeleteCommand extends AbstractPermissionCommand {
                             if (status != TaskStatusEnum.OK) {
 
                                 if (status == TaskStatusEnum.ERROR_STORAGE_PERMISSION_REQUIRED) {
-                                    throw new SdcardPermissionException();
+                                    mPanel.requestSdcardPermission();
+                                    return;
                                 }
 
                                 try {

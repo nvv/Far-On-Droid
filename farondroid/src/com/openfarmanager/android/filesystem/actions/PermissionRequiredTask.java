@@ -36,6 +36,16 @@ public abstract class PermissionRequiredTask extends FileActionTask {
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     protected Uri checkForPermissionAndGetDestinationUrl(Uri uri, String sdCardPath, String currentPath) {
+        return checkForPermissionAndGetDestinationUrl(uri, sdCardPath, currentPath, true);
+    }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    protected Uri checkForPermissionAndGetDestinationUrl(Uri uri, String sdCardPath, String currentPath, boolean appendFileName) {
+
+        if (!appendFileName) {
+            currentPath = currentPath.substring(0, currentPath.lastIndexOf(File.separator));
+        }
+
         String subDir = currentPath.substring(sdCardPath.length());
         if (subDir.startsWith(File.separator)) {
             subDir = subDir.substring(1);
@@ -43,7 +53,7 @@ public abstract class PermissionRequiredTask extends FileActionTask {
 
         return DocumentsContract.buildDocumentUriUsingTree(uri,
                 DocumentsContract.getTreeDocumentId(Uri.parse(uri.getEncodedPath() +
-                        subDir.replace("/", "%2F"))));
+                        subDir.replace("/", "%2F").replace(":", "%3A").replace(" ", "%20"))));
     }
 
     protected boolean checkVersion() {

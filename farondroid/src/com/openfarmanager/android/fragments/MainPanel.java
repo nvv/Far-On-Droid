@@ -55,8 +55,6 @@ import static com.openfarmanager.android.model.FileActionEnum.*;
 
 public class MainPanel extends BaseFileSystemPanel {
 
-    private static final int REQUEST_CODE_REQUEST_PERMISSION = 442;
-
     public static final int LEFT_PANEL = 0;
     public static final int RIGHT_PANEL = 1;
 
@@ -1179,13 +1177,13 @@ public class MainPanel extends BaseFileSystemPanel {
                 case FILE_DELETE:
                     final DeleteFileDialog.DeleteFileResult deleteFileResult = (DeleteFileDialog.DeleteFileResult) msg.obj;
                     executeCommand(new Runnable() {
-                        @Override
-                        public void run() {
-                            CommandsFactory.getDeleteCommand(MainPanel.this).execute(deleteFileResult.inactivePanel,
-                                    deleteFileResult.destination, getLastSelectedFile());
-                        }
-                    });
-
+                                       @Override
+                                       public void run() {
+                                           CommandsFactory.getDeleteCommand(MainPanel.this).execute(deleteFileResult.inactivePanel,
+                                                   deleteFileResult.destination, getLastSelectedFile());
+                                       }
+                                   }
+                    );
                     break;
                 case FILE_COPY:
                     CopyMoveFileDialog.CopyMoveFileResult copyMoveFileResult = (CopyMoveFileDialog.CopyMoveFileResult) msg.obj;
@@ -1270,10 +1268,7 @@ public class MainPanel extends BaseFileSystemPanel {
         try {
             runnable.run();
         } catch (SdcardPermissionException e) {
-            if (Build.VERSION.SDK_INT >= 21) {
-                Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
-                startActivityForResult(intent, REQUEST_CODE_REQUEST_PERMISSION);
-            }
+            requestSdcardPermission();
         }
     }
 
