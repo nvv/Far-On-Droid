@@ -236,6 +236,8 @@ public abstract class BaseFileSystemPanel extends BasePanel {
         } else {
             TaskStatusEnum status = new RenameTask(mLastSelectedFile, (String) args[1]).execute();
             if (status != TaskStatusEnum.OK) {
+                if (checkIfPermissionRequired(status)) return;
+
                 try {
                     ErrorDialog.newInstance(TaskStatusEnum.getErrorString(status)).show(fragmentManager(), "errorDialog");
                 } catch (Exception e) {
@@ -258,10 +260,7 @@ public abstract class BaseFileSystemPanel extends BasePanel {
                             public void onActionFinish(TaskStatusEnum status) {
                                 try {
                                     if (!status.equals(TaskStatusEnum.OK)) {
-                                        if (status == TaskStatusEnum.ERROR_STORAGE_PERMISSION_REQUIRED) {
-                                            BaseFileSystemPanel.this.requestSdcardPermission();
-                                            return;
-                                        }
+                                        if (checkIfPermissionRequired(status)) return;
 
                                         ErrorDialog.newInstance(
                                                 status.equals(TaskStatusEnum.ERROR_COPY) ?
@@ -281,6 +280,14 @@ public abstract class BaseFileSystemPanel extends BasePanel {
             task.execute();
         }
     };
+
+    private boolean checkIfPermissionRequired(TaskStatusEnum status) {
+        if (status == TaskStatusEnum.ERROR_STORAGE_PERMISSION_REQUIRED) {
+            BaseFileSystemPanel.this.requestSdcardPermission();
+            return true;
+        }
+        return false;
+    }
 
     protected AbstractCommand mCopyToNetworkCommand = new AbstractCommand() {
 
@@ -376,6 +383,7 @@ public abstract class BaseFileSystemPanel extends BasePanel {
                                 @Override
                                 public void onActionFinish(TaskStatusEnum status) {
                                     if (!status.equals(TaskStatusEnum.OK)) {
+                                        if (checkIfPermissionRequired(status)) return;
                                         try {
                                             ErrorDialog.newInstance(TaskStatusEnum.getErrorString(status)).show(fragmentManager(), "error");
                                         } catch (Exception e) {

@@ -4,7 +4,6 @@ import android.net.Uri;
 import android.provider.DocumentsContract;
 import android.support.v4.app.FragmentManager;
 
-import com.google.common.io.Files;
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.model.TaskStatusEnum;
 import com.openfarmanager.android.model.exeptions.SdcardPermissionException;
@@ -15,14 +14,15 @@ import java.io.*;
 import java.util.ConcurrentModificationException;
 import java.util.List;
 
+import static com.openfarmanager.android.utils.StorageUtils.*;
 import static com.openfarmanager.android.model.TaskStatusEnum.*;
 
 /**
  * User: sokhotnyi
  */
-public class CopyTask extends PermissionRequiredTask {
+public class CopyTask extends FileActionTask {
 
-    private final static byte[] BUFFER = new byte[256 * 1024];
+    public final static byte[] BUFFER = new byte[256 * 1024];
 
     protected File mDestinationFolder;
 
@@ -99,19 +99,7 @@ public class CopyTask extends PermissionRequiredTask {
 
             OutputStream out;
             if (checkUseStorageApi(sdCardPath)) {
-                String originalName = destination.getName();
-                String newName = destination.getName().replace(":", "_");
-                String destinationFile = destination.getAbsolutePath().replace(originalName, newName);
-                Uri baseUri = checkForPermissionAndGetBaseUri();
-
-                Uri outputFileUri = checkForPermissionAndGetDestinationUrl(baseUri, sdCardPath, destinationFile, false);
-                if (!destination.exists()) {
-                    DocumentsContract.createDocument(App.sInstance.getContentResolver(),
-                            outputFileUri, "",
-                            newName);
-                }
-                out = App.sInstance.getContentResolver().openOutputStream(
-                        checkForPermissionAndGetDestinationUrl(baseUri, sdCardPath, destinationFile));
+                out = getStorageOutputFileStream(destination, sdCardPath);
             } else {
                 out = new FileOutputStream(destination);
             }
@@ -125,6 +113,22 @@ public class CopyTask extends PermissionRequiredTask {
             in.close();
             out.close();
         }
+    }
+
+    public static OutputStream getStorageOutputFileStream(File destination, String sdCardPath) throws FileNotFoundException {
+        String originalName = destination.getName();
+        String newName = destination.getName().replace(":", "_");
+        String destinationFile = destination.getAbsolutePath().replace(originalName, newName);
+        Uri baseUri = checkForPermissionAndGetBaseUri();
+
+        Uri outputFileUri = getDestinationFileUri(baseUri, sdCardPath, destinationFile, false);
+        if (!destination.exists()) {
+            DocumentsContract.createDocument(App.sInstance.getContentResolver(),
+                    outputFileUri, "",
+                    newName);
+        }
+        return App.sInstance.getContentResolver().openOutputStream(
+                getDestinationFileUri(baseUri, sdCardPath, destinationFile));
     }
 
 }

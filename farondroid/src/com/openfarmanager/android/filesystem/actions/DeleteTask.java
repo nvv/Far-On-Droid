@@ -7,6 +7,7 @@ import android.support.v4.app.FragmentManager;
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.model.TaskStatusEnum;
 import com.openfarmanager.android.model.exeptions.SdcardPermissionException;
+import com.openfarmanager.android.utils.StorageUtils;
 import com.openfarmanager.android.utils.SystemUtils;
 
 import org.apache.commons.io.FileDeleteStrategy;
@@ -22,7 +23,7 @@ import static com.openfarmanager.android.model.TaskStatusEnum.*;
 /**
  * author: vnamashko
  */
-public class DeleteTask extends PermissionRequiredTask {
+public class DeleteTask extends FileActionTask {
 
     public DeleteTask(FragmentManager fragmentManager, OnActionListener listener, List<File> items) {
         super(fragmentManager, listener, items);
@@ -39,11 +40,11 @@ public class DeleteTask extends PermissionRequiredTask {
         List<File> items = new ArrayList<>(mItems);
         String sdCardPath = SystemUtils.getExternalStorage(mItems.get(0).getParent());
 
-        if (checkUseStorageApi(sdCardPath)) {
+        if (StorageUtils.checkUseStorageApi(sdCardPath)) {
             try {
-                Uri baseUri = checkForPermissionAndGetBaseUri();
+                Uri baseUri = StorageUtils.checkForPermissionAndGetBaseUri();
                 for (File file : items) {
-                    Uri uri = checkForPermissionAndGetDestinationUrl(baseUri, sdCardPath, file.getAbsolutePath());
+                    Uri uri = StorageUtils.getDestinationFileUri(baseUri, sdCardPath, file.getAbsolutePath());
                     doneSize += FileUtils.sizeOf(file);
                     if (!DocumentsContract.deleteDocument(App.sInstance.getContentResolver(), uri)) {
                         return ERROR_DELETE_FILE;
