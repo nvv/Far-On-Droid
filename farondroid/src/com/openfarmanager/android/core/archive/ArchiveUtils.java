@@ -6,8 +6,12 @@ import android.webkit.MimeTypeMap;
 import com.github.junrar.Archive;
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.R;
+import com.openfarmanager.android.filesystem.actions.CopyTask;
 import com.openfarmanager.android.model.exeptions.CreateArchiveException;
+import com.openfarmanager.android.model.exeptions.SdcardPermissionException;
 import com.openfarmanager.android.utils.FileUtilsExt;
+import com.openfarmanager.android.utils.SystemUtils;
+
 import net.lingala.zip4j.model.FileHeader;
 import org.apache.commons.compress.archivers.*;
 import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
@@ -26,6 +30,9 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 
 import static com.openfarmanager.android.core.archive.MimeTypes.*;
+import static com.openfarmanager.android.model.TaskStatusEnum.ERROR_STORAGE_PERMISSION_REQUIRED;
+import static com.openfarmanager.android.utils.StorageUtils.checkForPermissionAndGetBaseUri;
+import static com.openfarmanager.android.utils.StorageUtils.checkUseStorageApi;
 
 public class ArchiveUtils {
 
@@ -401,8 +408,18 @@ public class ArchiveUtils {
             listener.beforeStarted(FileUtilsExt.getFilesCount(inputFiles));
         }
 
+        OutputStream out;
+
+        String sdCardPath = SystemUtils.getExternalStorage(outputFile);
+        boolean checkUseStorageApi = checkUseStorageApi(sdCardPath);
         // output file stream
-        OutputStream out = new FileOutputStream((output));
+        if (checkUseStorageApi) {
+            checkForPermissionAndGetBaseUri();
+            out = CopyTask.getStorageOutputFileStream(output, sdCardPath);
+        } else {
+            out = new FileOutputStream((output));
+        }
+
         ArchiveOutputStream outputStream = new ArchiveStreamFactory().createArchiveOutputStream(targetArchiveType.name(), out);
 
         addFilesToArchiveStream(inputFiles, "", targetArchiveType, compressionForZip, outputStream, listener);

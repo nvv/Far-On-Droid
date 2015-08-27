@@ -482,6 +482,7 @@ public abstract class BaseFileSystemPanel extends BasePanel {
                             @Override
                             public void onActionFinish(TaskStatusEnum status) {
                                 if (!status.equals(TaskStatusEnum.OK)) {
+                                    if (checkIfPermissionRequired(status)) return;
                                     try {
                                         ErrorDialog.newInstance(TaskStatusEnum.getErrorString(status)).show(fragmentManager(), "error");
                                     } catch (Exception e) {

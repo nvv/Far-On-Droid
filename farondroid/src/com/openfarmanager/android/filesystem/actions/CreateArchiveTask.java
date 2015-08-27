@@ -3,9 +3,13 @@ package com.openfarmanager.android.filesystem.actions;
 import android.support.v4.app.FragmentManager;
 import com.openfarmanager.android.core.archive.ArchiveUtils;
 import com.openfarmanager.android.model.TaskStatusEnum;
+import com.openfarmanager.android.model.exeptions.SdcardPermissionException;
 
 import java.io.File;
 import java.util.List;
+
+import static com.openfarmanager.android.model.TaskStatusEnum.ERROR_CREATE_ARCHIVE;
+import static com.openfarmanager.android.model.TaskStatusEnum.ERROR_STORAGE_PERMISSION_REQUIRED;
 
 /**
  * @author Vlad Namashko
@@ -31,8 +35,10 @@ public class CreateArchiveTask extends FileActionTask {
     protected TaskStatusEnum doInBackground(Void... voids) {
         try {
             ArchiveUtils.addToArchive(mItems, mArchiveName, mArchiveType, mCompression, mCompressionEnabled, mListener);
+        } catch (SdcardPermissionException e) {
+            return ERROR_STORAGE_PERMISSION_REQUIRED;
         } catch (Exception e) {
-            return TaskStatusEnum.ERROR_CREATE_ARCHIVE;
+            return ERROR_CREATE_ARCHIVE;
         }
 
         return TaskStatusEnum.OK;
