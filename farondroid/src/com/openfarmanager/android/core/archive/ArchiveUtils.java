@@ -1,6 +1,7 @@
 package com.openfarmanager.android.core.archive;
 
 import android.net.Uri;
+import android.provider.DocumentsContract;
 import android.webkit.MimeTypeMap;
 
 import com.github.junrar.Archive;
@@ -10,6 +11,7 @@ import com.openfarmanager.android.filesystem.actions.CopyTask;
 import com.openfarmanager.android.model.exeptions.CreateArchiveException;
 import com.openfarmanager.android.model.exeptions.SdcardPermissionException;
 import com.openfarmanager.android.utils.FileUtilsExt;
+import com.openfarmanager.android.utils.StorageUtils;
 import com.openfarmanager.android.utils.SystemUtils;
 
 import net.lingala.zip4j.model.FileHeader;
@@ -30,7 +32,6 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 
 import static com.openfarmanager.android.core.archive.MimeTypes.*;
-import static com.openfarmanager.android.model.TaskStatusEnum.ERROR_STORAGE_PERMISSION_REQUIRED;
 import static com.openfarmanager.android.utils.StorageUtils.checkForPermissionAndGetBaseUri;
 import static com.openfarmanager.android.utils.StorageUtils.checkUseStorageApi;
 
@@ -413,12 +414,7 @@ public class ArchiveUtils {
         String sdCardPath = SystemUtils.getExternalStorage(outputFile);
         boolean checkUseStorageApi = checkUseStorageApi(sdCardPath);
         // output file stream
-        if (checkUseStorageApi) {
-            checkForPermissionAndGetBaseUri();
-            out = CopyTask.getStorageOutputFileStream(output, sdCardPath);
-        } else {
-            out = new FileOutputStream((output));
-        }
+        out = getOutputStream(output, sdCardPath, checkUseStorageApi);
 
         ArchiveOutputStream outputStream = new ArchiveStreamFactory().createArchiveOutputStream(targetArchiveType.name(), out);
 
@@ -437,11 +433,9 @@ public class ArchiveUtils {
             throw new CreateArchiveException();
         }
 
-        OutputStream outCompressed = new FileOutputStream(finalOutputFile);
+        OutputStream outCompressed = getOutputStream(finalOutputFile, sdCardPath, checkUseStorageApi);
         CompressorOutputStream stream = new CompressorStreamFactory().
                 createCompressorOutputStream(CompressionEnum.toString(additionalCompression), outCompressed);
-
-        //org.apache.commons.compress.utils.IOUtils.copy(new FileInputStream(output), stream);
 
         // manual copying to provide feedback about progress
         int bufferSize = 16384;
@@ -464,7 +458,32 @@ public class ArchiveUtils {
         stream.flush();
         stream.close();
 
-        output.delete();
+        if (checkUseStorageApi) {
+            Uri uri = StorageUtils.getDestinationFileUri(checkForPermissionAndGetBaseUri(), sdCardPath, output.getAbsolutePath());
+            DocumentsContract.deleteDocument(App.sInstance.getContentResolver(), uri);
+        } else {
+            output.delete();
+        }
+    }
+
+    /**
+     * Create archive output stream to support external storage api.
+     *
+     * @param output target file
+     * @param sdCardPath already extracted sdCard path
+     * @param checkUseStorageApi <code>true</code> if use storage api, <code>false</code> otherwise
+     *
+     * @return output stream to save file
+     */
+    private static OutputStream getOutputStream(File output, String sdCardPath, boolean checkUseStorageApi) throws FileNotFoundException {
+        OutputStream out;
+        if (checkUseStorageApi) {
+            checkForPermissionAndGetBaseUri();
+            out = CopyTask.getStorageOutputFileStream(output, sdCardPath);
+        } else {
+            out = new FileOutputStream((output));
+        }
+        return out;
     }
 
     /**
