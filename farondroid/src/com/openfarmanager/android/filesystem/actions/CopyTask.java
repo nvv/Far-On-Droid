@@ -1,10 +1,7 @@
 package com.openfarmanager.android.filesystem.actions;
 
-import android.net.Uri;
-import android.provider.DocumentsContract;
 import android.support.v4.app.FragmentManager;
 
-import com.openfarmanager.android.App;
 import com.openfarmanager.android.model.TaskStatusEnum;
 import com.openfarmanager.android.model.exeptions.SdcardPermissionException;
 import com.openfarmanager.android.utils.FileUtilsExt;
@@ -114,21 +111,4 @@ public class CopyTask extends FileActionTask {
             out.close();
         }
     }
-
-    public static OutputStream getStorageOutputFileStream(File destination, String sdCardPath) throws FileNotFoundException {
-        String originalName = destination.getName();
-        String newName = destination.getName().replace(":", "_");
-        String destinationFile = destination.getAbsolutePath().replace(originalName, newName);
-        Uri baseUri = checkForPermissionAndGetBaseUri();
-
-        Uri outputFileUri = getDestinationFileUri(baseUri, sdCardPath, destinationFile, false);
-        if (!destination.exists()) {
-            DocumentsContract.createDocument(App.sInstance.getContentResolver(),
-                    outputFileUri, "",
-                    newName);
-        }
-        return App.sInstance.getContentResolver().openOutputStream(
-                getDestinationFileUri(baseUri, sdCardPath, destinationFile));
-    }
-
 }

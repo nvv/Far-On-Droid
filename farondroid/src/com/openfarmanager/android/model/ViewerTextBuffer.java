@@ -9,6 +9,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -114,6 +115,10 @@ public class ViewerTextBuffer implements TextBuffer {
     }
 
     public void saveToFile(File file) throws IOException {
+        saveToFile(new FileOutputStream(file));
+    }
+
+    public void saveToFile(OutputStream stream) throws IOException {
         if (!isTextChanged()) {
             return;
         }
@@ -122,7 +127,7 @@ public class ViewerTextBuffer implements TextBuffer {
         try {
             String charset = App.sInstance.getSettings().getDefaultCharset();
             String encoding = charset != null ? charset : Charset.defaultCharset().name();
-            writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), encoding));
+            writer = new BufferedWriter(new OutputStreamWriter(stream, encoding));
             for (String string : mNumberOfLines) {
                 writer.write(string);
                 writer.newLine();
@@ -152,6 +157,11 @@ public class ViewerTextBuffer implements TextBuffer {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public void save(OutputStream stream) throws IOException {
+        saveToFile(stream);
+        syncStringLists();
     }
 
     public void save(File file) throws IOException {

@@ -479,7 +479,7 @@ public class ArchiveUtils {
         OutputStream out;
         if (checkUseStorageApi) {
             checkForPermissionAndGetBaseUri();
-            out = CopyTask.getStorageOutputFileStream(output, sdCardPath);
+            out = StorageUtils.getStorageOutputFileStream(output, sdCardPath);
         } else {
             out = new FileOutputStream((output));
         }

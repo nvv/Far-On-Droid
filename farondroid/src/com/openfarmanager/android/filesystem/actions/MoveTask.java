@@ -79,7 +79,7 @@ public class MoveTask extends FileActionTask {
             try {
                 doneSize += FileUtils.sizeOf(file);
                 if (useStorageApi) {
-                    OutputStream out = CopyTask.getStorageOutputFileStream(
+                    OutputStream out = StorageUtils.getStorageOutputFileStream(
                             new File(destinationFolder, file.getName()), sdCardPath);
                     int len;
                     InputStream in = new FileInputStream(file);

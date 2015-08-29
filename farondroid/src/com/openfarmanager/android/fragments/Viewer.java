@@ -1,8 +1,11 @@
 package com.openfarmanager.android.fragments;
 
+import android.annotation.TargetApi;
 import android.app.Dialog;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -24,13 +27,17 @@ import android.widget.Toast;
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.R;
 import com.openfarmanager.android.adapters.LinesAdapter;
+import com.openfarmanager.android.filesystem.actions.CopyTask;
 import com.openfarmanager.android.filesystem.actions.RootTask;
 import com.openfarmanager.android.model.ViewerBigFileTextViewer;
 import com.openfarmanager.android.model.ViewerTextBuffer;
+import com.openfarmanager.android.model.exeptions.SdcardPermissionException;
 import com.openfarmanager.android.utils.FileUtilsExt;
 import com.openfarmanager.android.utils.ReversedIterator;
 import com.openfarmanager.android.dialogs.QuickPopupDialog;
 import com.openfarmanager.android.dialogs.SelectEncodingDialog;
+import com.openfarmanager.android.utils.StorageUtils;
+import com.openfarmanager.android.utils.SystemUtils;
 import com.openfarmanager.android.view.ToastNotification;
 import org.apache.commons.io.IOCase;
 
@@ -39,6 +46,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -58,6 +66,8 @@ import static com.openfarmanager.android.controllers.EditViewController.MSG_BIG_
 import static com.openfarmanager.android.controllers.EditViewController.MSG_TEXT_CHANGED;
 import static com.openfarmanager.android.utils.Extensions.getThreadPool;
 import static com.openfarmanager.android.utils.Extensions.runAsynk;
+import static com.openfarmanager.android.utils.StorageUtils.checkForPermissionAndGetBaseUri;
+import static com.openfarmanager.android.utils.StorageUtils.checkUseStorageApi;
 
 /**
  * File viewer
@@ -114,6 +124,15 @@ public class Viewer extends Fragment {
         super.onConfigurationChanged(newConfig);
         if (mCharsetSelectDialog != null && mCharsetSelectDialog.isShowing()) {
             adjustDialogSize(mCharsetSelectDialog);
+        }
+    }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == BaseFileSystemPanel.REQUEST_CODE_REQUEST_PERMISSION && Build.VERSION.SDK_INT >= 21 && data != null) {
+            getActivity().getContentResolver().takePersistableUriPermission(data.getData(),
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
         }
     }
 
@@ -437,6 +456,10 @@ public class Viewer extends Fragment {
             @Override
             public void onError(Throwable e) {
                 e.printStackTrace();
+                if (e instanceof SdcardPermissionException && Build.VERSION.SDK_INT >= 21) {
+                    Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+                    startActivityForResult(intent, BaseFileSystemPanel.REQUEST_CODE_REQUEST_PERMISSION);
+                }
             }
 
             @Override
@@ -700,7 +723,14 @@ public class Viewer extends Fragment {
         @Override
         public void call(Subscriber<? super Boolean> subscriber) {
             try {
-                mText.save(mFile);
+                String sdCardPath = SystemUtils.getExternalStorage(mFile.getAbsolutePath());
+                if (checkUseStorageApi(sdCardPath)) {
+                    checkForPermissionAndGetBaseUri();
+                    OutputStream stream = StorageUtils.getStorageOutputFileStream(mFile, sdCardPath);
+                    mText.save(stream);
+                } else {
+                    mText.save(mFile);
+                }
             } catch (Exception e) {
                 subscriber.onError(e);
             }

@@ -10,6 +10,8 @@ import com.openfarmanager.android.App;
 import com.openfarmanager.android.model.exeptions.SdcardPermissionException;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.OutputStream;
 import java.util.List;
 
 /**
@@ -58,4 +60,19 @@ public class StorageUtils {
         return !Extensions.isNullOrEmpty(sdCardPath) && checkVersion();
     }
 
+    public static OutputStream getStorageOutputFileStream(File destination, String sdCardPath) throws FileNotFoundException {
+        String originalName = destination.getName();
+        String newName = destination.getName().replace(":", "_");
+        String destinationFile = destination.getAbsolutePath().replace(originalName, newName);
+        Uri baseUri = checkForPermissionAndGetBaseUri();
+
+        Uri outputFileUri = getDestinationFileUri(baseUri, sdCardPath, destinationFile, false);
+        if (!destination.exists()) {
+            DocumentsContract.createDocument(App.sInstance.getContentResolver(),
+                    outputFileUri, "",
+                    newName);
+        }
+        return App.sInstance.getContentResolver().openOutputStream(
+                getDestinationFileUri(baseUri, sdCardPath, destinationFile));
+    }
 }
