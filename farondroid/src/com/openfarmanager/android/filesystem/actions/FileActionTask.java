@@ -1,9 +1,12 @@
 package com.openfarmanager.android.filesystem.actions;
 
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v4.app.FragmentManager;
 import com.openfarmanager.android.fragments.FileActionProgressDialog;
 import com.openfarmanager.android.model.TaskStatusEnum;
+import com.openfarmanager.android.utils.StorageUtils;
+
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -82,6 +85,10 @@ public abstract class FileActionTask extends AsyncTask<Void, Integer, TaskStatus
         if (totalSize > 0) {
             publishProgress((int) (100 * doneSize / totalSize));
         }
+    }
+
+    protected boolean createDirectory(File outputDir, String sdCardPath, boolean useStorageApi, Uri baseUri) {
+        return useStorageApi ? StorageUtils.mkDir(baseUri, sdCardPath, outputDir) : outputDir.mkdirs();
     }
 
     public static interface OnActionListener {

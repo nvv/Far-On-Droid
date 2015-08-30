@@ -89,7 +89,7 @@ public class CopyTask extends FileActionTask {
     private void copyFileRoutine(File file, File destination) throws IOException {
         mCurrentFile = file.getName();
         File parentFile = destination.getParentFile();
-        if (!parentFile.exists() && !parentFile.mkdirs()) {
+        if (!parentFile.exists() && !createDirectory(parentFile, mSdCardPath, mUseStorageApi, mBaseUri)) {
             throw new IOException("Cannot create directory " + parentFile.getAbsolutePath());
         }
         if (!parentFile.canWrite() || !file.canRead()) {
