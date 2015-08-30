@@ -5,7 +5,10 @@ import android.support.v4.app.FragmentManager;
 import com.github.junrar.Archive;
 import com.openfarmanager.android.core.archive.ArchiveScanner;
 import com.openfarmanager.android.core.archive.ArchiveUtils;
+import com.openfarmanager.android.googledrive.model.exceptions.CreateFolderException;
 import com.openfarmanager.android.model.TaskStatusEnum;
+import com.openfarmanager.android.model.exeptions.SdcardPermissionException;
+
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.model.FileHeader;
 import org.apache.commons.compress.archivers.ArchiveEntry;
@@ -53,9 +56,6 @@ public class ExtractArchiveTask extends FileActionTask {
 
     @Override
     protected TaskStatusEnum doInBackground(Void... voids) {
-        if (!mDestinationFolder.exists() && !mDestinationFolder.mkdirs()) {
-            return TaskStatusEnum.ERROR_CAN_T_CREATE_DIRECTORY;
-        }
 
         if (mExtractTree == null) {
             try {
@@ -116,8 +116,9 @@ public class ExtractArchiveTask extends FileActionTask {
                 } else {
                     return TaskStatusEnum.ERROR_CREATING_ARCHIVE_FILES_TREE;
                 }
-            }
-            catch (Exception e) {
+            } catch (CreateFolderException e) {
+                return TaskStatusEnum.ERROR_CAN_T_CREATE_DIRECTORY;
+            } catch (Exception e) {
                 return TaskStatusEnum.ERROR_CREATING_ARCHIVE_FILES_TREE;
             }
             mExtractTree = ArchiveScanner.sInstance.root();
@@ -125,6 +126,8 @@ public class ExtractArchiveTask extends FileActionTask {
 
         try {
             ArchiveUtils.extractArchive(mArchiveFile, mDestinationFolder, mExtractTree, mIsCompressed, mEncryptedArchivePassword, mListener);
+        } catch (SdcardPermissionException e) {
+            return TaskStatusEnum.ERROR_STORAGE_PERMISSION_REQUIRED;
         } catch (Exception e) {
             return TaskStatusEnum.ERROR_EXTRACTING_ARCHIVE_FILES;
         }

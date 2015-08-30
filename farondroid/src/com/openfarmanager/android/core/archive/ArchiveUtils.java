@@ -8,6 +8,7 @@ import com.github.junrar.Archive;
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.R;
 import com.openfarmanager.android.filesystem.actions.CopyTask;
+import com.openfarmanager.android.googledrive.model.exceptions.CreateFolderException;
 import com.openfarmanager.android.model.exeptions.CreateArchiveException;
 import com.openfarmanager.android.model.exeptions.SdcardPermissionException;
 import com.openfarmanager.android.utils.FileUtilsExt;
@@ -34,6 +35,8 @@ import java.util.zip.ZipEntry;
 import static com.openfarmanager.android.core.archive.MimeTypes.*;
 import static com.openfarmanager.android.utils.StorageUtils.checkForPermissionAndGetBaseUri;
 import static com.openfarmanager.android.utils.StorageUtils.checkUseStorageApi;
+import static com.openfarmanager.android.utils.StorageUtils.getStorageOutputFileStream;
+import static com.openfarmanager.android.utils.StorageUtils.mkDir;
 
 public class ArchiveUtils {
 
@@ -167,9 +170,21 @@ public class ArchiveUtils {
                                       ArchiveScanner.File extractFileTree, boolean isCompressed, String encryptedZipPassword, ExtractArchiveListener listener)
             throws IOException, ArchiveException, CompressorException {
 
+        String sdCardPath = SystemUtils.getExternalStorage(outputDir.getAbsolutePath());
+        boolean useStorageApi = checkUseStorageApi(sdCardPath);
+        Uri baseUri = null;
+        if (useStorageApi) {
+            baseUri = checkForPermissionAndGetBaseUri();
+        }
+
         // if output directory doesn't exist and can't be created
-        if (!outputDir.exists() && !outputDir.mkdirs()) {
-            throw new FileNotFoundException(App.sInstance.getResources().getString(R.string.error_output_directory_doesnt_exists));
+        if (!outputDir.exists()) {
+            boolean directoryCreated = createDirectory(outputDir, sdCardPath, useStorageApi, baseUri);
+
+            if (!directoryCreated) {
+                //throw new FileNotFoundException(App.sInstance.getResources().getString(R.string.error_output_directory_doesnt_exists));
+                throw new CreateFolderException();
+            }
         }
 
         if (encryptedZipPassword != null && isZipArchive(inputFile)) {
@@ -242,9 +257,10 @@ public class ArchiveUtils {
                 }
 
                 try {
-                    String outputPath = adjustExtractDirectory(file, extractFileTree, outputDir);
+                    String outputPath = adjustExtractDirectory(file, extractFileTree, baseUri, sdCardPath, outputDir, useStorageApi);
 
-                    OutputStream stream = new FileOutputStream(new File(outputPath));
+                    File outputFile = new File(outputPath);
+                    OutputStream stream = getArchiveOutputStream(sdCardPath, useStorageApi, baseUri, outputFile);
                     arch.extractFile(fileHeader, stream);
                     stream.close();
                 } catch (Exception e) {
@@ -275,8 +291,8 @@ public class ArchiveUtils {
 
                 ArchiveScanner.File file = extractFileTree.findFile(entry.getName());
                 if (file != null && !file.isDirectory()) {
-                    String outputPath = adjustExtractDirectory(file, extractFileTree, outputDir);
-                    OutputStream stream = new FileOutputStream(new File(outputPath));
+                    String outputPath = adjustExtractDirectory(file, extractFileTree, baseUri, sdCardPath, outputDir, useStorageApi);
+                    OutputStream stream = getArchiveOutputStream(sdCardPath, useStorageApi, baseUri, new File(outputPath));
                     IOUtils.write(content, stream);
                     stream.close();
                 }
@@ -323,11 +339,12 @@ public class ArchiveUtils {
             String directoryPath = outputDir + internalPath;
             final File outputFile = new File(directoryPath, file.getName());
             File directory = new File(directoryPath);
-            if (!directory.exists() && !directory.mkdirs()) {
+            if (!directory.exists() && !createDirectory(directory, sdCardPath, useStorageApi, baseUri)) {
                 throw new FileNotFoundException(App.sInstance.getResources().getString(R.string.error_output_directory_doesnt_exists));
             }
 
-            final OutputStream outputFileStream = new FileOutputStream(outputFile);
+            //final OutputStream outputFileStream = new FileOutputStream(outputFile);
+            OutputStream outputFileStream = getArchiveOutputStream(sdCardPath, useStorageApi, baseUri, outputFile);
             IOUtils.copy(archiveInputStream, outputFileStream);
             outputFileStream.close();
 
@@ -340,7 +357,17 @@ public class ArchiveUtils {
 
     }
 
-    private static String adjustExtractDirectory(ArchiveScanner.File file, ArchiveScanner.File extractFileTree, File outputDir) {
+    private static boolean createDirectory(File outputDir, String sdCardPath, boolean useStorageApi, Uri baseUri) {
+        return useStorageApi ? StorageUtils.mkDir(baseUri, sdCardPath, outputDir) : outputDir.mkdirs();
+    }
+
+    private static OutputStream getArchiveOutputStream(String sdCardPath, boolean useStorageApi, Uri baseUri, File outputFile) throws FileNotFoundException {
+        return useStorageApi ? getStorageOutputFileStream(outputFile, baseUri, sdCardPath) :
+                new FileOutputStream(outputFile);
+    }
+
+    private static String adjustExtractDirectory(ArchiveScanner.File file, ArchiveScanner.File extractFileTree,
+                                                 Uri baseUri, String sdCardPath, File outputDir, boolean useStorageApi) {
 
         String internalPath = File.separator + file.getFullDirectoryPath();
         if (!extractFileTree.isRoot()) {
@@ -355,25 +382,10 @@ public class ArchiveUtils {
         final File outputFile = new File(directoryPath, file.getName());
         File directory = new File(directoryPath);
         if (!directory.exists()) {
-            directory.mkdirs();
+            createDirectory(directory, sdCardPath, useStorageApi, baseUri);
         }
 
         return outputFile.getPath();
-
-        /*
-        String outputPath = outputDir.getAbsolutePath();
-        if (!outputPath.endsWith(File.separator)) {
-            outputPath += "/";
-        }
-        outputPath += fileName.trim().replace("\\", "/");
-        String outputDirectory = outputPath.substring(0, outputPath.lastIndexOf("/"));
-
-        File outDir = new File(outputDirectory);
-        if (!outDir.exists()) {
-            outDir.mkdirs();
-        }
-        return outputPath;
-        */
     }
 
     /**

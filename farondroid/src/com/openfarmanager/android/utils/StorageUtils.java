@@ -60,11 +60,17 @@ public class StorageUtils {
         return !Extensions.isNullOrEmpty(sdCardPath) && checkVersion();
     }
 
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public static OutputStream getStorageOutputFileStream(File destination, String sdCardPath) throws FileNotFoundException {
+        Uri baseUri = checkForPermissionAndGetBaseUri();
+        return getStorageOutputFileStream(destination, baseUri, sdCardPath);
+    }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    public static OutputStream getStorageOutputFileStream(File destination, Uri baseUri, String sdCardPath) throws FileNotFoundException {
         String originalName = destination.getName();
         String newName = destination.getName().replace(":", "_");
         String destinationFile = destination.getAbsolutePath().replace(originalName, newName);
-        Uri baseUri = checkForPermissionAndGetBaseUri();
 
         Uri outputFileUri = getDestinationFileUri(baseUri, sdCardPath, destinationFile, false);
         if (!destination.exists()) {
@@ -74,5 +80,19 @@ public class StorageUtils {
         }
         return App.sInstance.getContentResolver().openOutputStream(
                 getDestinationFileUri(baseUri, sdCardPath, destinationFile));
+    }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    public static boolean mkDir(Uri baseUri, String sdCardPath, File outputDir) {
+
+        // ensure that parent path exists.
+        File parentFile = outputDir.getParentFile();
+        while (parentFile != null && !parentFile.exists()) {
+            mkDir(baseUri, sdCardPath, parentFile);
+        }
+
+        return DocumentsContract.createDocument(App.sInstance.getContentResolver(),
+                getDestinationFileUri(baseUri, sdCardPath, outputDir.getAbsolutePath(), false),
+                DocumentsContract.Document.MIME_TYPE_DIR, outputDir.getName()) != null;
     }
 }

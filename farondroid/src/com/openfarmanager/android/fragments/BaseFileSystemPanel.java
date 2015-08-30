@@ -354,6 +354,7 @@ public abstract class BaseFileSystemPanel extends BasePanel {
                                         e.printStackTrace();
                                     }
                                 } else {
+                                    if (checkIfPermissionRequired(status)) return;
                                     try {
                                         ErrorDialog.newInstance(TaskStatusEnum.getErrorString(status)).show(fragmentManager(), "error");
                                     } catch (Exception e) {
