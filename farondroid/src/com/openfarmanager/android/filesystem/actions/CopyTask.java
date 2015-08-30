@@ -1,5 +1,6 @@
 package com.openfarmanager.android.filesystem.actions;
 
+import android.net.Uri;
 import android.support.v4.app.FragmentManager;
 
 import com.openfarmanager.android.model.TaskStatusEnum;
@@ -23,6 +24,10 @@ public class CopyTask extends FileActionTask {
 
     protected File mDestinationFolder;
 
+    private String mSdCardPath;
+    private Uri mBaseUri;
+    private boolean mUseStorageApi;
+
     public CopyTask(FragmentManager fragmentManager, OnActionListener listener, List<File> items, File destination) {
         super(fragmentManager, listener, items);
         mDestinationFolder = destination;
@@ -35,9 +40,10 @@ public class CopyTask extends FileActionTask {
         }
 
         try {
-            String sdCardPath = SystemUtils.getExternalStorage(mDestinationFolder.getAbsolutePath());
-            if (checkUseStorageApi(sdCardPath)) {
-                checkForPermissionAndGetBaseUri();
+            mSdCardPath = SystemUtils.getExternalStorage(mDestinationFolder.getAbsolutePath());
+            if (checkUseStorageApi(mSdCardPath)) {
+                mUseStorageApi = true;
+                mBaseUri = checkForPermissionAndGetBaseUri();
             }
         } catch (SdcardPermissionException e) {
             return ERROR_STORAGE_PERMISSION_REQUIRED;
@@ -92,11 +98,11 @@ public class CopyTask extends FileActionTask {
             }
         } else {
             InputStream in = new FileInputStream(file);
-            String sdCardPath = SystemUtils.getExternalStorage(destination.getAbsolutePath());
 
             OutputStream out;
-            if (checkUseStorageApi(sdCardPath)) {
-                out = getStorageOutputFileStream(destination, sdCardPath);
+            if (mUseStorageApi) {
+                System.out.println(":::::::  storage api");
+                out = getStorageOutputFileStream(destination, mBaseUri, mSdCardPath);
             } else {
                 out = new FileOutputStream(destination);
             }
