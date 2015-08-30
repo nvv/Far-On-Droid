@@ -41,7 +41,7 @@ import static com.openfarmanager.android.controllers.FileSystemController.*;
 @SuppressWarnings("ConstantConditions")
 public abstract class BaseFileSystemPanel extends BasePanel {
 
-    protected static final int REQUEST_CODE_REQUEST_PERMISSION = 442;
+    public static final int REQUEST_CODE_REQUEST_PERMISSION = 442;
 
     protected File mLastSelectedFile;
 
