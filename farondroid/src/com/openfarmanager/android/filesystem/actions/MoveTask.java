@@ -1,10 +1,8 @@
 package com.openfarmanager.android.filesystem.actions;
 
 import android.net.Uri;
-import android.provider.DocumentsContract;
 import android.support.v4.app.FragmentManager;
 
-import com.openfarmanager.android.App;
 import com.openfarmanager.android.model.TaskStatusEnum;
 import com.openfarmanager.android.model.exeptions.SdcardPermissionException;
 import com.openfarmanager.android.utils.FileUtilsExt;
@@ -31,14 +29,14 @@ import static com.openfarmanager.android.utils.StorageUtils.checkUseStorageApi;
  */
 public class MoveTask extends FileActionTask {
 
-    protected File destinationFolder;
-    protected String destinationFileName;
+    protected File mDestinationFolder;
+    protected String mDestinationFileName;
     
     public MoveTask(FragmentManager fragmentManager, OnActionListener listener, List<File> items, File destination, 
                     String destinationFileName) {
         super(fragmentManager, listener, items);
-        this.destinationFolder = destination;
-        this.destinationFileName = destinationFileName;
+        mDestinationFolder = destination;
+        mDestinationFileName = destinationFileName;
     }
 
     @Override
@@ -49,20 +47,20 @@ public class MoveTask extends FileActionTask {
         }
 
         File srcFile = mItems.get(0); // first file from src folder
-        boolean theSameFolders = FileUtilsExt.isTheSameFolders(mItems, destinationFolder);
+        boolean theSameFolders = FileUtilsExt.isTheSameFolders(mItems, mDestinationFolder);
         if (mItems.size() == 1 && theSameFolders) {
             // move inside the same folder, perform rename
 
-            if (destinationFileName == null || destinationFileName.trim().equals("")) {
+            if (mDestinationFileName == null || mDestinationFileName.trim().equals("")) {
                 return ERROR_WRONG_DESTINATION_FILE_NAME;
             }
 
-            return new RenameTask(srcFile, destinationFileName).execute();
+            return new RenameTask(srcFile, mDestinationFileName).execute();
         } else if (theSameFolders) {
             return OK;
         }
 
-        String sdCardPath = SystemUtils.getExternalStorage(destinationFolder.getAbsolutePath());
+        String sdCardPath = SystemUtils.getExternalStorage(mDestinationFolder.getAbsolutePath());
         boolean useStorageApi = checkUseStorageApi(sdCardPath);
         Uri baseUri = null;
         try {
@@ -79,21 +77,13 @@ public class MoveTask extends FileActionTask {
             try {
                 doneSize += FileUtils.sizeOf(file);
                 if (useStorageApi) {
-                    OutputStream out = StorageUtils.getStorageOutputFileStream(
-                            new File(destinationFolder, file.getName()), sdCardPath);
-                    int len;
-                    InputStream in = new FileInputStream(file);
-                    while ((len = in.read(CopyTask.BUFFER)) > 0) {
-                        out.write(CopyTask.BUFFER, 0, len);
-                    }
-                    Uri uri = StorageUtils.getDestinationFileUri(baseUri, sdCardPath, file.getAbsolutePath());
-                    DocumentsContract.deleteDocument(App.sInstance.getContentResolver(), uri);
-                } else if (!destinationFolder.canWrite() || !file.getParentFile().canWrite()) {
-                    if (!RootTask.move(file, destinationFolder)) {
-                        throw new IOException("Cannot move file to " + destinationFolder.getAbsolutePath());
+                    moveOnSdcard(sdCardPath, baseUri, file, mDestinationFolder);
+                } else if (!mDestinationFolder.canWrite() || !file.getParentFile().canWrite()) {
+                    if (!RootTask.move(file, mDestinationFolder)) {
+                        throw new IOException("Cannot move file to " + mDestinationFolder.getAbsolutePath());
                     }
                 } else {
-                    FileUtils.moveToDirectory(file, destinationFolder, false);
+                    FileUtils.moveToDirectory(file, mDestinationFolder, false);
                 }
                 updateProgress();
             } catch (NullPointerException e) {
@@ -108,6 +98,29 @@ public class MoveTask extends FileActionTask {
         }
 
         return OK;
+    }
+
+    private void moveOnSdcard(String sdCardPath, Uri baseUri, File source, File destination) throws IOException {
+        if (source.isDirectory()) {
+            File destinationFolder = new File(destination, source.getName());
+            StorageUtils.mkDir(baseUri, sdCardPath, destinationFolder);
+            for (File child : source.listFiles()) {
+                moveOnSdcard(sdCardPath, baseUri, child, destinationFolder);
+            }
+        } else {
+            moveFileRoutine(sdCardPath, baseUri, source, destination);
+        }
+        StorageUtils.delete(baseUri, sdCardPath, source.getAbsolutePath());
+    }
+
+    private void moveFileRoutine(String sdCardPath, Uri baseUri, File source, File destination) throws IOException {
+        OutputStream out = StorageUtils.getStorageOutputFileStream(
+                new File(destination, source.getName()), sdCardPath);
+        int len;
+        InputStream in = new FileInputStream(source);
+        while ((len = in.read(CopyTask.BUFFER)) > 0) {
+            out.write(CopyTask.BUFFER, 0, len);
+        }
     }
 
 }

@@ -95,4 +95,10 @@ public class StorageUtils {
                 getDestinationFileUri(baseUri, sdCardPath, outputDir.getAbsolutePath(), false),
                 DocumentsContract.Document.MIME_TYPE_DIR, outputDir.getName()) != null;
     }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    public static boolean delete(Uri baseUri, String sdCardPath, String path) {
+        return DocumentsContract.deleteDocument(App.sInstance.getContentResolver(),
+                StorageUtils.getDestinationFileUri(baseUri, sdCardPath, path));
+    }
 }

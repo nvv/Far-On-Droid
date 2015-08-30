@@ -77,9 +77,9 @@ public class CopyTask extends FileActionTask {
             throw new InterruptedIOException();
         }
         if (source.isDirectory()) {
-            String[] files = source.list();
-            for (int i = 0; i < files.length; i++) {
-                copy(new File(source, files[i]), new File(destination, files[i]));
+            createDirectory(destination, mSdCardPath, mUseStorageApi, mBaseUri);
+            for (String file : source.list()) {
+                copy(new File(source, file), new File(destination, file));
             }
         } else {
             copyFileRoutine(source, destination);
@@ -101,7 +101,6 @@ public class CopyTask extends FileActionTask {
 
             OutputStream out;
             if (mUseStorageApi) {
-                System.out.println(":::::::  storage api");
                 out = getStorageOutputFileStream(destination, mBaseUri, mSdCardPath);
             } else {
                 out = new FileOutputStream(destination);
