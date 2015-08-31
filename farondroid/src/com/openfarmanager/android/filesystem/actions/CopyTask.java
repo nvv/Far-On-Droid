@@ -20,13 +20,7 @@ import static com.openfarmanager.android.model.TaskStatusEnum.*;
  */
 public class CopyTask extends FileActionTask {
 
-    public final static byte[] BUFFER = new byte[256 * 1024];
-
     protected File mDestinationFolder;
-
-    private String mSdCardPath;
-    private Uri mBaseUri;
-    private boolean mUseStorageApi;
 
     public CopyTask(FragmentManager fragmentManager, OnActionListener listener, List<File> items, File destination) {
         super(fragmentManager, listener, items);

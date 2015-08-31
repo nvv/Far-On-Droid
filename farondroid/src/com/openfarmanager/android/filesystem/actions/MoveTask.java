@@ -60,12 +60,11 @@ public class MoveTask extends FileActionTask {
             return OK;
         }
 
-        String sdCardPath = SystemUtils.getExternalStorage(mDestinationFolder.getAbsolutePath());
-        boolean useStorageApi = checkUseStorageApi(sdCardPath);
-        Uri baseUri = null;
+        mSdCardPath = SystemUtils.getExternalStorage(mDestinationFolder.getAbsolutePath());
+        mUseStorageApi = checkUseStorageApi(mSdCardPath);
         try {
-            if (useStorageApi) {
-                baseUri = checkForPermissionAndGetBaseUri();
+            if (mUseStorageApi) {
+                mBaseUri = checkForPermissionAndGetBaseUri();
             }
         } catch (SdcardPermissionException e) {
             return ERROR_STORAGE_PERMISSION_REQUIRED;
@@ -76,8 +75,8 @@ public class MoveTask extends FileActionTask {
         for (File file : items) {
             try {
                 doneSize += FileUtils.sizeOf(file);
-                if (useStorageApi) {
-                    moveOnSdcard(sdCardPath, baseUri, file, mDestinationFolder);
+                if (mUseStorageApi) {
+                    moveOnSdcard(file, mDestinationFolder);
                 } else if (!mDestinationFolder.canWrite() || !file.getParentFile().canWrite()) {
                     if (!RootTask.move(file, mDestinationFolder)) {
                         throw new IOException("Cannot move file to " + mDestinationFolder.getAbsolutePath());
@@ -100,27 +99,29 @@ public class MoveTask extends FileActionTask {
         return OK;
     }
 
-    private void moveOnSdcard(String sdCardPath, Uri baseUri, File source, File destination) throws IOException {
+    private void moveOnSdcard(File source, File destination) throws IOException {
         if (source.isDirectory()) {
             File destinationFolder = new File(destination, source.getName());
-            StorageUtils.mkDir(baseUri, sdCardPath, destinationFolder);
+            StorageUtils.mkDir(mBaseUri, mSdCardPath, destinationFolder);
             for (File child : source.listFiles()) {
-                moveOnSdcard(sdCardPath, baseUri, child, destinationFolder);
+                moveOnSdcard(child, destinationFolder);
             }
         } else {
-            moveFileRoutine(sdCardPath, source, destination);
+            moveFileRoutine(mSdCardPath, source, destination);
         }
-        StorageUtils.delete(baseUri, sdCardPath, source.getAbsolutePath());
+        StorageUtils.delete(mBaseUri, mSdCardPath, source.getAbsolutePath());
     }
 
     private void moveFileRoutine(String sdCardPath, File source, File destination) throws IOException {
         OutputStream out = StorageUtils.getStorageOutputFileStream(
-                new File(destination, source.getName()), sdCardPath);
+                new File(destination, source.getName()), mBaseUri, sdCardPath);
         int len;
         InputStream in = new FileInputStream(source);
-        while ((len = in.read(CopyTask.BUFFER)) > 0) {
-            out.write(CopyTask.BUFFER, 0, len);
+        while ((len = in.read(BUFFER)) > 0) {
+            out.write(BUFFER, 0, len);
         }
+        in.close();
+        out.close();
     }
 
 }
