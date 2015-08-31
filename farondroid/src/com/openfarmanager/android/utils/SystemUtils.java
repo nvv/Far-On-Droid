@@ -21,7 +21,7 @@ import rx.functions.Func1;
 /**
  * System utilities methods.
  *
- * @author: Vlad Namashko
+ * @author Vlad Namashko
  */
 public class SystemUtils {
 
@@ -93,12 +93,12 @@ public class SystemUtils {
         });
 
         final SimpleWrapper<String> sdCard = new SimpleWrapper<>();
-        Subscription subscription = Observable.merge(mnt, storage).filter(new Func1<File, Boolean>() {
+        final Subscription subscription = Observable.merge(mnt, storage).filter(new Func1<File, Boolean>() {
             @Override
             public Boolean call(File file) {
-                return file.isDirectory() && fullPath.startsWith(file.getAbsolutePath());
+                return fullPath.toLowerCase().startsWith(file.getAbsolutePath().toLowerCase());
             }
-        }).subscribe(new Action1<File>() {
+        }).first().subscribe(new Action1<File>() {
             @Override
             public void call(File file) {
                 sdCard.value = file.getAbsolutePath();

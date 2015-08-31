@@ -108,12 +108,12 @@ public class MoveTask extends FileActionTask {
                 moveOnSdcard(sdCardPath, baseUri, child, destinationFolder);
             }
         } else {
-            moveFileRoutine(sdCardPath, baseUri, source, destination);
+            moveFileRoutine(sdCardPath, source, destination);
         }
         StorageUtils.delete(baseUri, sdCardPath, source.getAbsolutePath());
     }
 
-    private void moveFileRoutine(String sdCardPath, Uri baseUri, File source, File destination) throws IOException {
+    private void moveFileRoutine(String sdCardPath, File source, File destination) throws IOException {
         OutputStream out = StorageUtils.getStorageOutputFileStream(
                 new File(destination, source.getName()), sdCardPath);
         int len;
