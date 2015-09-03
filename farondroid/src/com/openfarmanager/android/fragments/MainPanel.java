@@ -408,6 +408,8 @@ public class MainPanel extends BaseFileSystemPanel {
         mHomeRight.setBackgroundColor(color);
         mExitLeft.setBackgroundColor(color);
         mExitRight.setBackgroundColor(color);
+        mCharsetLeft.setBackgroundColor(color);
+        mCharsetRight.setBackgroundColor(color);
 
         mSelectedFilesSize.setBackgroundColor(App.sInstance.getSettings().getSecondaryColor());
         mSelectedFilesSize.setTextColor(App.sInstance.getSettings().getSelectedColor());
