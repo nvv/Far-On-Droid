@@ -235,13 +235,12 @@ public class SkyDriveAPI implements LiveAuthListener, NetworkApi {
         return !operation.getResult().has(JsonKeys.ERROR);
     }
 
-    public void download(FileProxy source, File destinationFile) throws LiveOperationException, IOException, JSONException {
+    public void download(FileProxy source, OutputStream outputStream) throws LiveOperationException, IOException, JSONException {
         // get file url
         LiveOperation operation = mSkyDriveConnectClient.get(source.getFullPath());
         // download file (via input stream)
         BufferedInputStream inputStream = new BufferedInputStream(new URL(operation.getResult().getString(JsonKeys.SOURCE)).openStream());
         int len;
-        OutputStream outputStream = new FileOutputStream(destinationFile);
         while ((len = inputStream.read(BUFFER)) > 0) {
             outputStream.write(BUFFER, 0, len);
         }

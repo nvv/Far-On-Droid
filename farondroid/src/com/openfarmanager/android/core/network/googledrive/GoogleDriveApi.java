@@ -154,11 +154,10 @@ public class GoogleDriveApi implements NetworkApi {
         mDriveApi.upload(parentId, title, file, listener);
     }
 
-    public void download(FileProxy source, java.io.File destination) throws IOException {
+    public void download(FileProxy source, OutputStream outputStream) throws IOException {
         BufferedInputStream inputStream = new BufferedInputStream(
                 mDriveApi.download(((GoogleDriveFile) source).getDownloadLink()));
         int len;
-        OutputStream outputStream = new FileOutputStream(destination);
         while ((len = inputStream.read(BUFFER)) > 0) {
             outputStream.write(BUFFER, 0, len);
         }

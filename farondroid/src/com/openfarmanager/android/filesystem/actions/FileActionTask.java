@@ -93,8 +93,13 @@ public abstract class FileActionTask extends AsyncTask<Void, Integer, TaskStatus
         }
     }
 
-    protected boolean createDirectory(File outputDir, String sdCardPath, boolean useStorageApi, Uri baseUri) {
-        return useStorageApi ? StorageUtils.mkDir(baseUri, sdCardPath, outputDir) : outputDir.mkdirs();
+    protected boolean createDirectoryIfNotExists(String dir) {
+        File outputDir = new File(dir);
+        return outputDir.exists() || (mUseStorageApi ? StorageUtils.mkDir(mBaseUri, mSdCardPath, outputDir) : outputDir.mkdirs());
+    }
+
+    protected boolean createDirectoryIfNotExists(File outputDir) {
+        return outputDir.exists() || (mUseStorageApi ? StorageUtils.mkDir(mBaseUri, mSdCardPath, outputDir) : outputDir.mkdirs());
     }
 
     public static interface OnActionListener {

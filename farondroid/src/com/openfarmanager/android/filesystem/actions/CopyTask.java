@@ -1,6 +1,5 @@
 package com.openfarmanager.android.filesystem.actions;
 
-import android.net.Uri;
 import android.support.v4.app.FragmentManager;
 
 import com.openfarmanager.android.model.TaskStatusEnum;
@@ -71,7 +70,7 @@ public class CopyTask extends FileActionTask {
             throw new InterruptedIOException();
         }
         if (source.isDirectory()) {
-            createDirectory(destination, mSdCardPath, mUseStorageApi, mBaseUri);
+            createDirectoryIfNotExists(destination);
             for (String file : source.list()) {
                 copy(new File(source, file), new File(destination, file));
             }
@@ -83,7 +82,7 @@ public class CopyTask extends FileActionTask {
     private void copyFileRoutine(File file, File destination) throws IOException {
         mCurrentFile = file.getName();
         File parentFile = destination.getParentFile();
-        if (!parentFile.exists() && !createDirectory(parentFile, mSdCardPath, mUseStorageApi, mBaseUri)) {
+        if (!parentFile.exists() && !createDirectoryIfNotExists(parentFile)) {
             throw new IOException("Cannot create directory " + parentFile.getAbsolutePath());
         }
         if (!parentFile.canWrite() || !file.canRead()) {

@@ -70,6 +70,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -583,18 +584,18 @@ public class TransportClient {
         }
     }
 
-    public void downloadFile(String path, File saveTo, ProgressListener progressListener)
+    public void downloadFile(String path, OutputStream fos, ProgressListener progressListener)
             throws IOException, WebdavUserNotInitialized, PreconditionFailedException, WebdavNotAuthorizedException, ServerWebdavException,
             CancelledDownloadException, UnknownServerWebdavException {
-        downloadFile(path, saveTo, 0, 0, progressListener);
+        downloadFile(path, fos, 0, 0, progressListener);
     }
 
-    public void downloadFile(String path, File saveTo, long length, long fileSize, ProgressListener progressListener)
+    public void downloadFile(String path, OutputStream fos, long length, long fileSize, ProgressListener progressListener)
             throws IOException, WebdavUserNotInitialized, PreconditionFailedException, WebdavNotAuthorizedException, ServerWebdavException,
             CancelledDownloadException, UnknownServerWebdavException {
         String url = getUrl()+encodeURL(path);
         HttpGet get = new HttpGet(url);
-        logMethod(get, " to "+saveTo);
+        //logMethod(get, " to "+saveTo);
         creds.addAuthHeader(get);
 
         if (length > 0) {
@@ -655,7 +656,7 @@ public class TransportClient {
 
         int count;
         InputStream content = response.getContent();
-        FileOutputStream fos = new FileOutputStream(saveTo, partialContent);
+        //FileOutputStream fos = new FileOutputStream(saveTo, partialContent);
         try {
             final byte[] downloadBuffer = new byte[1024];
             while ((count = content.read(downloadBuffer)) != -1) {

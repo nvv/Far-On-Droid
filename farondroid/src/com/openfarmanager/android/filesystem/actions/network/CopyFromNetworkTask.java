@@ -1,5 +1,6 @@
 package com.openfarmanager.android.filesystem.actions.network;
 
+import android.net.Uri;
 import android.support.v4.app.FragmentManager;
 
 import com.dropbox.client2.exception.DropboxException;
@@ -16,6 +17,8 @@ import com.openfarmanager.android.filesystem.FileProxy;
 import com.openfarmanager.android.model.NetworkEnum;
 import com.openfarmanager.android.model.TaskStatusEnum;
 import com.openfarmanager.android.model.exeptions.NetworkException;
+import com.openfarmanager.android.model.exeptions.SdcardPermissionException;
+import com.openfarmanager.android.utils.SystemUtils;
 import com.yandex.disk.client.ProgressListener;
 import com.yandex.disk.client.exceptions.WebdavException;
 
@@ -32,6 +35,9 @@ import it.sauronsoftware.ftp4j.FTPIllegalReplyException;
 import jcifs.smb.SmbFileInputStream;
 
 import static com.openfarmanager.android.model.TaskStatusEnum.*;
+import static com.openfarmanager.android.utils.StorageUtils.checkForPermissionAndGetBaseUri;
+import static com.openfarmanager.android.utils.StorageUtils.checkUseStorageApi;
+import static com.openfarmanager.android.utils.StorageUtils.getStorageOutputFileStream;
 
 /**
  * @author Vlad Namashko
@@ -55,6 +61,16 @@ public class CopyFromNetworkTask extends NetworkActionTask {
     protected TaskStatusEnum doInBackground(Void... voids) {
         // TODO: hack
         totalSize = 1;
+
+        try {
+            mSdCardPath = SystemUtils.getExternalStorage(mDestination);
+            if (checkUseStorageApi(mSdCardPath)) {
+                mUseStorageApi = true;
+                mBaseUri = checkForPermissionAndGetBaseUri();
+            }
+        } catch (SdcardPermissionException e) {
+            return ERROR_STORAGE_PERMISSION_REQUIRED;
+        }
 
         return doCopy();
     }
@@ -115,27 +131,24 @@ public class CopyFromNetworkTask extends NetworkActionTask {
 
         String fullSourceFilePath = destination + "/" + source.getName();
         if (source.isDirectory()) {
-            createDirectory(destination);
+            createDirectoryIfNotExists(destination);
 
             List<FileProxy> list = api.getDirectoryFiles(source.getFullPath());
 
             if (list.size() == 0) {
-                createDirectory(fullSourceFilePath);
+                createDirectoryIfNotExists(fullSourceFilePath);
             } else {
                 for (FileProxy file : list) {
                     copyFromGoogleDrive(file, fullSourceFilePath);
                 }
             }
         } else {
-            createDirectory(destination);
+            createDirectoryIfNotExists(destination);
 
-            File destinationFile = new File(fullSourceFilePath);
-            if (!destinationFile.exists() && !destinationFile.createNewFile()) {
-                throw new IOException();
-            }
+            File destinationFile = createFileIfNotExists(fullSourceFilePath);
 
             setCurrentFile(source);
-            api.download(source, destinationFile);
+            api.download(source, getOutputStream(mSdCardPath, mUseStorageApi, mBaseUri, destinationFile));
         }
     }
 
@@ -147,27 +160,24 @@ public class CopyFromNetworkTask extends NetworkActionTask {
 
         String fullSourceFilePath = destination + "/" + source.getName();
         if (source.isDirectory()) {
-            createDirectory(destination);
+            createDirectoryIfNotExists(destination);
 
             List<FileProxy> list = api.getDirectoryFiles(source.getFullPath());
 
             if (list.size() == 0) {
-                createDirectory(fullSourceFilePath);
+                createDirectoryIfNotExists(fullSourceFilePath);
             } else {
                 for (FileProxy file : list) {
                     copyFromSkyDrive(file, fullSourceFilePath);
                 }
             }
         } else {
-            createDirectory(destination);
+            createDirectoryIfNotExists(destination);
 
-            File destinationFile = new File(fullSourceFilePath);
-            if (!destinationFile.exists() && !destinationFile.createNewFile()) {
-                throw new IOException();
-            }
+            File destinationFile = createFileIfNotExists(fullSourceFilePath);
 
             setCurrentFile(source);
-            api.download(source, destinationFile);
+            api.download(source, getOutputStream(mSdCardPath, mUseStorageApi, mBaseUri, destinationFile));
         }
 
     }
@@ -181,11 +191,11 @@ public class CopyFromNetworkTask extends NetworkActionTask {
         String fullSourceFilePath = destination + "/" + source.getName();
         if (source.isDirectory()) {
             try {
-                createDirectory(destination);
+                createDirectoryIfNotExists(destination);
                 com.dropbox.client2.DropboxAPI.Entry currentNode = api.metadata(source.getFullPath(), -1, null, true, null);
 
                 if (currentNode.contents.size() == 0) {
-                    createDirectory(fullSourceFilePath);
+                    createDirectoryIfNotExists(fullSourceFilePath);
                 } else {
                     for (com.dropbox.client2.DropboxAPI.Entry entry : currentNode.contents) {
                         copyFromDropbox(new DropboxFile(entry), fullSourceFilePath);
@@ -195,15 +205,12 @@ public class CopyFromNetworkTask extends NetworkActionTask {
                 throw NetworkException.handleNetworkException(e);
             }
         } else {
-            createDirectory(destination);
+            createDirectoryIfNotExists(destination);
 
-            File destinationFile = new File(fullSourceFilePath);
-            if (!destinationFile.exists() && !destinationFile.createNewFile()) {
-                throw new IOException();
-            }
+            File destinationFile = createFileIfNotExists(fullSourceFilePath);
 
             setCurrentFile(source);
-            api.getFile(source.getFullPath(), null, new FileOutputStream(destinationFile), null);
+            api.getFile(source.getFullPath(), null, getOutputStream(mSdCardPath, mUseStorageApi, mBaseUri, destinationFile), null);
         }
     }
 
@@ -218,11 +225,11 @@ public class CopyFromNetworkTask extends NetworkActionTask {
         String fullSourceFilePath = destination + "/" + source.getName();
         if (source.isDirectory()) {
             try {
-                createDirectory(destination);
+                createDirectoryIfNotExists(destination);
                 List<FileProxy> files = api.getDirectoryFiles(source.getFullPath());
 
                 if (files.size() == 0) {
-                    createDirectory(fullSourceFilePath);
+                    createDirectoryIfNotExists(fullSourceFilePath);
                 } else {
                     for (FileProxy file : files) {
                         copyFromFTP(file, fullSourceFilePath);
@@ -232,15 +239,12 @@ public class CopyFromNetworkTask extends NetworkActionTask {
                 throw NetworkException.handleNetworkException(e);
             }
         } else {
-            createDirectory(destination);
+            createDirectoryIfNotExists(destination);
 
-            File destinationFile = new File(fullSourceFilePath);
-            if (!destinationFile.exists() && !destinationFile.createNewFile()) {
-                throw new IOException();
-            }
+            File destinationFile = createFileIfNotExists(fullSourceFilePath);
 
             setCurrentFile(source);
-            api.client().download(source.getFullPath(), destinationFile);
+            api.client().download(source.getFullPath(), getOutputStream(mSdCardPath, mUseStorageApi, mBaseUri, destinationFile), 0, null);
         }
     }
 
@@ -254,11 +258,11 @@ public class CopyFromNetworkTask extends NetworkActionTask {
         String fullSourceFilePath = destination + "/" + source.getName();
         if (source.isDirectory()) {
             try {
-                createDirectory(destination);
+                createDirectoryIfNotExists(destination);
                 List<FileProxy> files = api.getDirectoryFiles(source.getFullPath());
 
                 if (files.size() == 0) {
-                    createDirectory(fullSourceFilePath);
+                    createDirectoryIfNotExists(fullSourceFilePath);
                 } else {
                     for (FileProxy file : files) {
                         copyFromSmb(file, fullSourceFilePath);
@@ -268,16 +272,13 @@ public class CopyFromNetworkTask extends NetworkActionTask {
                 throw NetworkException.handleNetworkException(e);
             }
         } else {
-            createDirectory(destination);
+            createDirectoryIfNotExists(destination);
 
-            File destinationFile = new File(fullSourceFilePath);
-            if (!destinationFile.exists() && !destinationFile.createNewFile()) {
-                throw new IOException();
-            }
+            File destinationFile = createFileIfNotExists(fullSourceFilePath);
 
             setCurrentFile(source);
             SmbFileInputStream in = new SmbFileInputStream(api.createSmbFile(source.getFullPath()));
-            FileOutputStream out = new FileOutputStream(destinationFile);
+            OutputStream out = getOutputStream(mSdCardPath, mUseStorageApi, mBaseUri, destinationFile);
 
             int len;
             while ((len = in.read(BUFFER)) > 0) {
@@ -301,11 +302,11 @@ public class CopyFromNetworkTask extends NetworkActionTask {
         String fullSourceFilePath = destination + "/" + source.getName();
         if (source.isDirectory()) {
             try {
-                createDirectory(destination);
+                createDirectoryIfNotExists(destination);
                 List<FileProxy> files = api.getDirectoryFiles(source.getFullPath());
 
                 if (files.size() == 0) {
-                    createDirectory(fullSourceFilePath);
+                    createDirectoryIfNotExists(fullSourceFilePath);
                 } else {
                     for (FileProxy file : files) {
                         copyFromYandexDisk(file, fullSourceFilePath);
@@ -315,15 +316,12 @@ public class CopyFromNetworkTask extends NetworkActionTask {
                 throw NetworkException.handleNetworkException(e);
             }
         } else {
-            createDirectory(destination);
+            createDirectoryIfNotExists(destination);
 
-            File destinationFile = new File(fullSourceFilePath);
-            if (!destinationFile.exists() && !destinationFile.createNewFile()) {
-                throw new IOException();
-            }
+            File destinationFile = createFileIfNotExists(fullSourceFilePath);
 
             setCurrentFile(source);
-            api.client().downloadFile(source.getFullPath(), destinationFile, new ProgressListener() {
+            api.client().downloadFile(source.getFullPath(), getOutputStream(mSdCardPath, mUseStorageApi, mBaseUri, destinationFile), new ProgressListener() {
                 @Override
                 public void updateProgress(long loaded, long total) {
                 }
@@ -336,9 +334,12 @@ public class CopyFromNetworkTask extends NetworkActionTask {
         }
     }
 
-    private void createDirectory(String destination) {
-        File destinationFolders = new File(destination);
-        if (!destinationFolders.exists() && !destinationFolders.mkdirs()) { }
+    private File createFileIfNotExists(String fullSourceFilePath) throws IOException {
+        File destinationFile = new File(fullSourceFilePath);
+        if (!mUseStorageApi && !destinationFile.exists() && !destinationFile.createNewFile()) {
+            throw new IOException();
+        }
+        return destinationFile;
     }
 
     private void setCurrentFile(FileProxy source) {
@@ -346,4 +347,8 @@ public class CopyFromNetworkTask extends NetworkActionTask {
         updateProgress();
     }
 
+    private static OutputStream getOutputStream(String sdCardPath, boolean useStorageApi, Uri baseUri, File outputFile) throws FileNotFoundException {
+        return useStorageApi ? getStorageOutputFileStream(outputFile, baseUri, sdCardPath) :
+                new FileOutputStream(outputFile);
+    }
 }

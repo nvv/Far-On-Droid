@@ -98,10 +98,12 @@ public class SystemUtils {
             public Boolean call(File file) {
                 return fullPath.toLowerCase().startsWith(file.getAbsolutePath().toLowerCase());
             }
-        }).first().subscribe(new Action1<File>() {
+        }).firstOrDefault(null).subscribe(new Action1<File>() {
             @Override
             public void call(File file) {
-                sdCard.value = file.getAbsolutePath();
+                if (file != null) {
+                    sdCard.value = file.getAbsolutePath();
+                }
             }
         });
 

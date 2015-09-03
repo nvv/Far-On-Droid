@@ -202,6 +202,8 @@ public abstract class BaseFileSystemPanel extends BasePanel {
     protected void handleNetworkCopyActionResult(TaskStatusEnum status, Object[] args) {
         try {
             if (status != TaskStatusEnum.OK) {
+                if (checkIfPermissionRequired(status)) return;
+
                 String error = status == TaskStatusEnum.ERROR_COPY || status == TaskStatusEnum.ERROR_FILE_NOT_EXISTS ?
                         App.sInstance.getString(R.string.error_cannot_copy_files, args[1]):
                         TaskStatusEnum.getErrorString(status);
