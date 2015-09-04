@@ -263,6 +263,7 @@ public class SkyDriveAPI implements LiveAuthListener, NetworkApi {
     public void startAuthentication(Activity activity, OnLoginListener onLoginListener) {
         mOnLoginListener = onLoginListener;
         mAuthActivity = activity;
+        mSkyDriveAuthClient.logout(null);
         mSkyDriveAuthClient.login(mAuthActivity, Arrays.asList(SCOPES), this);
     }
 
@@ -276,6 +277,7 @@ public class SkyDriveAPI implements LiveAuthListener, NetworkApi {
             mSkyDriveConnectClient = new LiveConnectClient(session);
 
             if (mCurrentSkyDriveAccount == null) {
+                mOnLoginListener.onGetUserInfo();
                 mSkyDriveConnectClient.getAsync("me", new LiveOperationListener() {
                     @Override
                     public void onError(LiveOperationException exception, LiveOperation operation) {
@@ -288,8 +290,6 @@ public class SkyDriveAPI implements LiveAuthListener, NetworkApi {
 
                         if (result.has(JsonKeys.ERROR)) {
                             JSONObject error = result.optJSONObject(JsonKeys.ERROR);
-                            String code = error.optString(JsonKeys.CODE);
-                            String message = error.optString(JsonKeys.MESSAGE);
 
                             mOnLoginListener.onError(R.string.error_getting_account_info);
                         } else {
@@ -349,6 +349,8 @@ public class SkyDriveAPI implements LiveAuthListener, NetworkApi {
     }
 
     public static interface OnLoginListener {
+        public void onGetUserInfo();
+
         public void onComplete();
 
         public void onError(int errorCode);

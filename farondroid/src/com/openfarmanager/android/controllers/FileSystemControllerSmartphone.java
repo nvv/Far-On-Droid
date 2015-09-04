@@ -13,6 +13,8 @@ import com.openfarmanager.android.model.NetworkEnum;
 
 import java.io.File;
 
+import rx.subscriptions.CompositeSubscription;
+
 import static com.openfarmanager.android.fragments.MainPanel.LEFT_PANEL;
 
 /**
@@ -27,8 +29,9 @@ public class FileSystemControllerSmartphone extends FileSystemController {
     private View mLeftPanelSelector;
     private View mRightPanelSelector;
 
-    public FileSystemControllerSmartphone(FragmentManager manager, View rootView) {
+    public FileSystemControllerSmartphone(FragmentManager manager, View rootView, CompositeSubscription subscription) {
         mMainView = rootView;
+        mSubscription = subscription;
         mViewPager = (ViewPager) rootView.findViewById(R.id.view_pager);
         mLeftPanelSelector = rootView.findViewById(R.id.left_panel_selector);
         mRightPanelSelector = rootView.findViewById(R.id.right_panel_selector);
@@ -165,7 +168,7 @@ public class FileSystemControllerSmartphone extends FileSystemController {
 
         boolean isLeftPanel = activePanel.getPanelLocation() == LEFT_PANEL;
 
-        mHiddenPanel = (MainPanel) (isLeftPanel ? mRightVisibleFragment : mLeftVisibleFragment);
+        mHiddenPanel = isLeftPanel ? mRightVisibleFragment : mLeftVisibleFragment;
 
         if (isLeftPanel) {
             mPanelToChange = mRightVisibleFragment;

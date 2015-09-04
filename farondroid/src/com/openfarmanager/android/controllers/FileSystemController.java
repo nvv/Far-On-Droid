@@ -65,6 +65,8 @@ import java.nio.charset.Charset;
 import java.util.LinkedHashSet;
 import java.util.List;
 
+import rx.subscriptions.CompositeSubscription;
+
 import static com.openfarmanager.android.fragments.MainPanel.LEFT_PANEL;
 import static com.openfarmanager.android.fragments.MainPanel.RIGHT_PANEL;
 
@@ -154,12 +156,15 @@ public class FileSystemController {
 
     protected View mMainView;
 
+    protected CompositeSubscription mSubscription;
+
     protected FileSystemController() {
     }
 
-    public FileSystemController(FragmentManager manager, View view) {
+    public FileSystemController(FragmentManager manager, View view, CompositeSubscription subscription) {
 
         Context appContext = App.sInstance.getApplicationContext();
+        mSubscription = subscription;
 
         mMainView = view;
         mLeftPanel = (MainPanel) Fragment.instantiate(appContext, MainPanel.class.getName());
@@ -1585,7 +1590,7 @@ public class FileSystemController {
         adjustDialogSize(dialog);
     }
 
-    private void showProgressDialog(int messageId) {
+    public void showProgressDialog(int messageId) {
         try {
             getActivePanel().getActivity().runOnUiThread(mShowProgressRunnable);
             ((TextView) mProgressDialog.findViewById(R.id.progress_bar_text)).setText(messageId);
@@ -1594,7 +1599,7 @@ public class FileSystemController {
         }
     }
 
-    private void dismissProgressDialog() {
+    public void dismissProgressDialog() {
         runOnUiThread(mDismissProgressRunnable);
     }
 
@@ -1711,6 +1716,11 @@ public class FileSystemController {
 
     private SkyDriveAPI.OnLoginListener mOnSkyDriveLoginListener = new SkyDriveAPI.OnLoginListener() {
         @Override
+        public void onGetUserInfo() {
+            showProgressDialog(R.string.loading);
+        }
+
+        @Override
         public void onComplete() {
             dismissProgressDialog();
             openNetworkPanel(NetworkEnum.SkyDrive);
@@ -1770,6 +1780,8 @@ public class FileSystemController {
                     App.sInstance.getGoogleDriveApi().setup(account);
                     openNetworkPanel(NetworkEnum.GoogleDrive);
                 }
+            } else if (msg.what == GoogleDriveAuthWindow.MSG_SHOW_LOADING_DIALOG) {
+                showProgressDialog(R.string.loading);
             } else if (msg.what == MEDIA_FIRE_CONNECTED) {
                 openNetworkPanel(NetworkEnum.MediaFire);
             }

@@ -30,6 +30,15 @@ import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import rx.Observable;
+import rx.Scheduler;
+import rx.Subscriber;
+import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.schedulers.Schedulers;
+import rx.subscriptions.CompositeSubscription;
+
 public class Main extends BaseActivity {
 
     private static String TAG = "MainFragmentActivity";
@@ -40,6 +49,7 @@ public class Main extends BaseActivity {
     public static String RESULT_SHOW_HINT = "RESULT_SHOW_HINT";
 
     private FileSystemController mFileSystemController;
+    protected CompositeSubscription mSubscription;
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -68,11 +78,12 @@ public class Main extends BaseActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mSubscription = new CompositeSubscription();
         setContentView(App.sInstance.getSettings().isMultiPanelMode() ? R.layout.main_two_panels : R.layout.main_one_panel);
         if (findViewById(R.id.view_pager) == null) {
-            mFileSystemController = new FileSystemController(getSupportFragmentManager(), findViewById(R.id.root_view));
+            mFileSystemController = new FileSystemController(getSupportFragmentManager(), findViewById(R.id.root_view), mSubscription);
         } else {
-            mFileSystemController = new FileSystemControllerSmartphone(getSupportFragmentManager(), findViewById(R.id.root_view));
+            mFileSystemController = new FileSystemControllerSmartphone(getSupportFragmentManager(), findViewById(R.id.root_view), mSubscription);
         }
         App.sInstance.setFileSystemController(mFileSystemController);
 
@@ -124,35 +135,39 @@ public class Main extends BaseActivity {
     protected void onResume() {
         super.onResume();
 
-        final DropboxAPI dropboxAPI = App.sInstance.getDropboxApi();
+        (findViewById(R.id.panels_holder)).setBackgroundColor(App.sInstance.getSettings().getMainPanelColor());
 
+        final DropboxAPI dropboxAPI = App.sInstance.getDropboxApi();
         if (dropboxAPI == null) {
             return;
         }
-
         if (dropboxAPI.getSession().authenticationSuccessful() && mFileSystemController.isNetworkAuthRequested()) {
             dropboxAPI.getSession().finishAuthentication();
             mFileSystemController.resetNetworkAuth();
 
-            Extensions.runAsynk(new Runnable() {
+            mFileSystemController.showProgressDialog(R.string.loading);
+            Subscription subscription = Observable.create(new Observable.OnSubscribe<Void>() {
                 @Override
-                public void run() {
+                public void call(Subscriber<? super Void> subscriber) {
                     try {
                         com.dropbox.client2.DropboxAPI.Account account = dropboxAPI.accountInfo();
                         String userName = account.displayName + "(" + account.uid + ")";
                         dropboxAPI.storeAccessTokens(userName, dropboxAPI.getSession().getAccessTokenPair());
-                        mFileSystemController.openNetworkPanel(NetworkEnum.Dropbox);
                     } catch (DropboxException e) {
                         e.printStackTrace();
                     }
+                    subscriber.onNext(null);
+                }
+            }).subscribeOn(Schedulers.computation()).
+                    observeOn(AndroidSchedulers.mainThread()).subscribe(new Action1<Void>() {
+                @Override
+                public void call(Void aVoid) {
+                    mFileSystemController.dismissProgressDialog();
+                    mFileSystemController.openNetworkPanel(NetworkEnum.Dropbox);
                 }
             });
-
+            mSubscription.add(subscription);
         }
-
-        Settings settings = App.sInstance.getSettings();
-
-        (findViewById(R.id.panels_holder)).setBackgroundColor(App.sInstance.getSettings().getMainPanelColor());
     }
 
     @Override
@@ -163,6 +178,12 @@ public class Main extends BaseActivity {
         } catch (IllegalStateException ignore) {
             //something very unexpected, but there is a lot of crashes...
         }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mSubscription.unsubscribe();
     }
 
     @Override
