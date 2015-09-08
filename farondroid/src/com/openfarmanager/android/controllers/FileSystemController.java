@@ -65,6 +65,13 @@ import java.nio.charset.Charset;
 import java.util.LinkedHashSet;
 import java.util.List;
 
+import rx.Observable;
+import rx.Observer;
+import rx.Scheduler;
+import rx.Subscriber;
+import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 
 import static com.openfarmanager.android.fragments.MainPanel.LEFT_PANEL;
@@ -1344,18 +1351,40 @@ public class FileSystemController {
                         }
                         break;
                     case MediaFire:
-                        final MediaFireApi.MediaFireAccount account= (MediaFireApi.MediaFireAccount) view.getTag();
+                        final MediaFireApi.MediaFireAccount account = (MediaFireApi.MediaFireAccount) view.getTag();
                         if (account.getPassword() == null) { // new
                             startMediaFireAuthentication();
                         } else {
-                            try {
-                                App.sInstance.getMediaFireApi().startSession(account);
-                                openNetworkPanel(NetworkEnum.MediaFire);
-                            } catch (Exception e) {
-                                ToastNotification.makeText(App.sInstance.getApplicationContext(),
-                                        App.sInstance.getString(R.string.mediafire_connection_error), Toast.LENGTH_LONG).show();
+                            showProgressDialog(R.string.loading);
+                            Subscription subscription = Observable.create(new Observable.OnSubscribe<Void>() {
+                                @Override
+                                public void call(Subscriber<? super Void> subscriber) {
+                                    try {
+                                        App.sInstance.getMediaFireApi().startSession(account);
+                                        subscriber.onCompleted();
+                                    } catch (Exception e) {
+                                        subscriber.onError(e);
+                                    }
+                                }
+                            }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(new Observer<Void>() {
+                                @Override
+                                public void onCompleted() {
+                                    dismissProgressDialog();
+                                    openNetworkPanel(NetworkEnum.MediaFire);
+                                }
 
-                            }
+                                @Override
+                                public void onError(Throwable e) {
+                                    dismissProgressDialog();
+                                    ToastNotification.makeText(App.sInstance.getApplicationContext(),
+                                            App.sInstance.getString(R.string.mediafire_connection_error), Toast.LENGTH_LONG).show();
+                                }
+
+                                @Override
+                                public void onNext(Void aVoid) {
+                                }
+                            });
+                            mSubscription.add(subscription);
                         }
 
                         break;

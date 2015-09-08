@@ -37,7 +37,7 @@ private String mDestinationFileName;
         }
 
         try {
-            if (!getApi().rename(mSrcFile.getFullPath(), mSrcFile.getParentPath() +
+            if (!getApi().rename(mSrcFile, mSrcFile.getParentPath() +
                     (mSrcFile.getParentPath().endsWith("/") ? "" : "/") + mDestinationFileName)) {
                 return ERROR_RENAME_FILE;
             }

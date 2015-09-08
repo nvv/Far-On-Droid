@@ -1,7 +1,6 @@
 package com.openfarmanager.android.core.network.yandexdisk;
 
 import android.database.Cursor;
-import android.util.Log;
 
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.R;
@@ -19,14 +18,11 @@ import com.yandex.disk.client.ListItem;
 import com.yandex.disk.client.ListParsingHandler;
 import com.yandex.disk.client.TransportClient;
 import com.yandex.disk.client.exceptions.WebdavClientInitException;
-import com.yandex.disk.client.exceptions.WebdavException;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -194,8 +190,8 @@ public class YandexDiskApi implements NetworkApi {
     }
 
     @Override
-    public boolean rename(String fullPath, String s) throws Exception {
-        mTransportClient.move(fullPath, s);
+    public boolean rename(FileProxy srcFile, String s) throws Exception {
+        mTransportClient.move(srcFile.getFullPath(), s);
         return true;
     }
 

@@ -13,7 +13,6 @@ import com.openfarmanager.android.model.NetworkAccount;
 import com.openfarmanager.android.model.NetworkEnum;
 import com.openfarmanager.android.model.exeptions.InAppAuthException;
 import com.openfarmanager.android.model.exeptions.NetworkException;
-import com.yandex.disk.client.ListParser;
 
 import static com.openfarmanager.android.utils.Extensions.tryParse;
 
@@ -25,14 +24,10 @@ import java.net.SocketTimeoutException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.SortedMap;
 
 import it.sauronsoftware.ftp4j.FTPClient;
 import it.sauronsoftware.ftp4j.FTPException;
 import it.sauronsoftware.ftp4j.FTPFile;
-import it.sauronsoftware.ftp4j.FTPListParseException;
-import it.sauronsoftware.ftp4j.FTPListParser;
-import it.sauronsoftware.ftp4j.FTPTextualExtensionRecognizer;
 
 /**
  * @author Vlad Namashko
@@ -218,7 +213,8 @@ public class FtpAPI implements NetworkApi {
     }
 
     @Override
-    public boolean rename(String fullPath, String s) throws Exception {
+    public boolean rename(FileProxy srcFile, String s) throws Exception {
+        String fullPath = srcFile.getFullPath();
         String workingDir = fullPath.substring(0, fullPath.lastIndexOf('/') + 1);
         mFtpClient.changeDirectory(workingDir);
         mFtpClient.rename(fullPath.substring(fullPath.lastIndexOf('/') + 1), s.substring(s.lastIndexOf('/') + 1));

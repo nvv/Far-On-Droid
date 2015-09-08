@@ -220,7 +220,7 @@ public class SkyDriveAPI implements LiveAuthListener, NetworkApi {
     }
 
     @Override
-    public boolean rename(String fullPath, String name) throws Exception {
+    public boolean rename(FileProxy srcFile, String name) throws Exception {
         JSONObject postData = new JSONObject();
         name = name.substring(name.lastIndexOf("/") + 1, name.length());
         try {
@@ -231,7 +231,7 @@ public class SkyDriveAPI implements LiveAuthListener, NetworkApi {
         }
 
 
-        LiveOperation operation = mSkyDriveConnectClient.put(fullPath, postData);
+        LiveOperation operation = mSkyDriveConnectClient.put(srcFile.getFullPath(), postData);
         return !operation.getResult().has(JsonKeys.ERROR);
     }
 

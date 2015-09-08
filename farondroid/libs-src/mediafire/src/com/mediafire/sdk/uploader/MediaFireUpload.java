@@ -63,11 +63,12 @@ public class MediaFireUpload implements Runnable {
     private String folderPath;
     private final long id;
 
-    public MediaFireUpload(MediaFire mediaFire, int statusToFinish, File file, String filename, ActionOnInAccount actionOnInAccount, MediaFireUploadHandler handler, long id) {
+    public MediaFireUpload(MediaFire mediaFire, int statusToFinish, File file, String filename, String folderPath, ActionOnInAccount actionOnInAccount, MediaFireUploadHandler handler, long id) {
         this.mediaFire = mediaFire;
         this.statusToFinish = statusToFinish;
         this.file = file;
         this.filename = filename;
+        this.folderPath = folderPath;
         this.actionOnInAccount = actionOnInAccount;
         this.handler = handler;
         this.id = id;

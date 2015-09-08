@@ -21,5 +21,5 @@ public interface NetworkApi {
 
     List<FileProxy> search(String path, String query);
 
-    boolean rename(String fullPath, String s) throws Exception;
+    boolean rename(FileProxy srcFile, String s) throws Exception;
 }

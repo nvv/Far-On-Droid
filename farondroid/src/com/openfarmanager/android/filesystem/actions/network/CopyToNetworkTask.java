@@ -4,11 +4,18 @@ import android.support.v4.app.FragmentManager;
 
 import com.dropbox.client2.ProgressListener;
 import com.dropbox.client2.exception.DropboxException;
+import com.mediafire.sdk.MFApiException;
+import com.mediafire.sdk.MFException;
+import com.mediafire.sdk.MFSessionNotStartedException;
+import com.mediafire.sdk.uploader.MediaFireUpload;
+import com.mediafire.sdk.uploader.MediaFireUploadHandler;
+import com.mediafire.sdk.uploader.MediaFireUploader;
 import com.microsoft.live.OverwriteOption;
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.core.network.dropbox.DropboxAPI;
 import com.openfarmanager.android.core.network.ftp.FtpAPI;
 import com.openfarmanager.android.core.network.googledrive.GoogleDriveApi;
+import com.openfarmanager.android.core.network.mediafire.MediaFireApi;
 import com.openfarmanager.android.core.network.skydrive.SkyDriveAPI;
 import com.openfarmanager.android.core.network.smb.SmbAPI;
 import com.openfarmanager.android.core.network.yandexdisk.YandexDiskApi;
@@ -16,7 +23,7 @@ import com.openfarmanager.android.googledrive.api.GoogleDriveWebApi;
 import com.openfarmanager.android.model.NetworkEnum;
 import com.openfarmanager.android.model.TaskStatusEnum;
 import com.openfarmanager.android.model.exeptions.NetworkException;
-import com.yandex.disk.client.exceptions.WebdavException;
+import com.openfarmanager.android.utils.SystemUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -82,6 +89,9 @@ public class CopyToNetworkTask extends NetworkActionTask {
                         break;
                     case YandexDisk:
                         copyToYandexDisk(file, mDestination);
+                        break;
+                    case MediaFire:
+                        copyToMediaFire(file, mDestination);
                         break;
                 }
             } catch (NullPointerException e) {
@@ -278,22 +288,78 @@ public class CopyToNetworkTask extends NetworkActionTask {
             long tempSize = doneSize;
             api.client().uploadFile(source.getAbsolutePath(), destination + (destination.endsWith("/") ? "" : "/"),
                     new com.yandex.disk.client.ProgressListener() {
-                long mPrevProgress = 0;
+                        long mPrevProgress = 0;
 
-                @Override
-                public void updateProgress(long loaded, long total) {
-                    doneSize += (loaded - mPrevProgress);
-                    mPrevProgress = loaded;
-                    CopyToNetworkTask.this.updateProgress();
-                }
+                        @Override
+                        public void updateProgress(long loaded, long total) {
+                            doneSize += (loaded - mPrevProgress);
+                            mPrevProgress = loaded;
+                            CopyToNetworkTask.this.updateProgress();
+                        }
 
-                @Override
-                public boolean hasCancelled() {
-                    return false;
-                }
-            });
+                        @Override
+                        public boolean hasCancelled() {
+                            return false;
+                        }
+                    });
             doneSize = tempSize + source.length();
         }
     }
 
+    private void copyToMediaFire(final File source, String destination) throws Exception {
+        MediaFireApi api = App.sInstance.getMediaFireApi();
+        if (isCancelled()) {
+            throw new InterruptedIOException();
+        }
+
+        if (source.isDirectory()) {
+            api.createDirectory(destination + "/" + source.getName());
+
+            String[] files = source.list();
+            for (String file : files) {
+                copyToMediaFire(new File(source, file), destination + "/" + source.getName());
+            }
+        } else {
+            mCurrentFile = source.getName();
+            MediaFireUpload upload = new MediaFireUpload(api.getMediaFire(), 200, source, source.getName(), destination, MediaFireUpload.ActionOnInAccount.UPLOAD_ALWAYS,
+                    new MediaFireUploadHandler() {
+                        @Override
+                        public void uploadFailed(long id, MFException e) {
+                        }
+
+                        @Override
+                        public void uploadFailed(long id, MFApiException e) {
+                        }
+
+                        @Override
+                        public void uploadFailed(long id, MFSessionNotStartedException e) {
+                        }
+
+                        @Override
+                        public void uploadFailed(long id, IOException e) {
+                        }
+
+                        @Override
+                        public void uploadFailed(long id, InterruptedException e) {
+                        }
+
+                        @Override
+                        public void uploadProgress(long id, double percentFinished) {
+                        }
+
+                        @Override
+                        public void uploadFinished(long id, String quickKey, String fileName) {
+                            doneSize += source.length();
+                            updateProgress();
+                        }
+
+                        @Override
+                        public void uploadPolling(long id, int statusCode, String description) {
+                            updateProgress();
+                        }
+                    }, 1);
+            upload.run();
+
+        }
+    }
 }

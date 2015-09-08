@@ -265,8 +265,8 @@ public class GoogleDriveApi implements NetworkApi {
     }
 
     @Override
-    public boolean rename(String fullPath, String name) throws Exception {
-        return mDriveApi.rename(fullPath, name.substring(name.lastIndexOf("/") + 1, name.length()));
+    public boolean rename(FileProxy srcFile, String name) throws Exception {
+        return mDriveApi.rename(srcFile.getFullPath(), name.substring(name.lastIndexOf("/") + 1, name.length()));
     }
 
     public static class GoogleDriveAccount extends NetworkAccount {

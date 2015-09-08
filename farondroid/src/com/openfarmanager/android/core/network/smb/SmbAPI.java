@@ -9,7 +9,6 @@ import com.openfarmanager.android.core.dbadapters.NetworkAccountDbAdapter;
 import com.openfarmanager.android.core.network.NetworkApi;
 import com.openfarmanager.android.filesystem.FileProxy;
 import com.openfarmanager.android.filesystem.FileSystemScanner;
-import com.openfarmanager.android.filesystem.FtpFile;
 import com.openfarmanager.android.model.NetworkAccount;
 import com.openfarmanager.android.model.NetworkEnum;
 import com.openfarmanager.android.model.exeptions.InAppAuthException;
@@ -18,15 +17,11 @@ import com.openfarmanager.android.model.exeptions.NetworkException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
-import it.sauronsoftware.ftp4j.FTPClient;
-import it.sauronsoftware.ftp4j.FTPFile;
 import jcifs.UniAddress;
 import jcifs.smb.NtlmPasswordAuthentication;
 import jcifs.smb.SmbException;
@@ -161,8 +156,8 @@ public class SmbAPI implements NetworkApi {
     }
 
     @Override
-    public boolean rename(String fullPath, String s) throws Exception {
-        new SmbFile("smb://" + mDomain.getHostName() + fullPath, mAuthentication).renameTo(new SmbFile(s));
+    public boolean rename(FileProxy srcFile, String s) throws Exception {
+        new SmbFile("smb://" + mDomain.getHostName() + srcFile.getFullPath(), mAuthentication).renameTo(new SmbFile(s));
         return true;
     }
 

@@ -27,6 +27,7 @@ import com.openfarmanager.android.core.network.datasource.DataSource;
 import com.openfarmanager.android.core.network.datasource.DropboxDataSource;
 import com.openfarmanager.android.core.network.datasource.FtpDataSource;
 import com.openfarmanager.android.core.network.datasource.GoogleDriveDataSource;
+import com.openfarmanager.android.core.network.datasource.MediaFireDataSource;
 import com.openfarmanager.android.core.network.datasource.SkyDriveDataSource;
 import com.openfarmanager.android.core.network.datasource.SmbDataSource;
 import com.openfarmanager.android.core.network.datasource.YandexDiskDataSource;
@@ -161,6 +162,9 @@ public class NetworkPanel extends MainPanel {
                 break;
             case GoogleDrive:
                 mDataSource = new GoogleDriveDataSource(mHandler);
+                break;
+            case MediaFire:
+                mDataSource = new MediaFireDataSource(mHandler);
                 break;
         }
     }

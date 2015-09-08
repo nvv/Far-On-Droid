@@ -372,6 +372,8 @@ public class SearchResultDialog extends Dialog {
                     return App.sInstance.getSkyDriveApi();
                 case GoogleDrive:
                     return App.sInstance.getGoogleDriveApi();
+                case MediaFire:
+                    return App.sInstance.getMediaFireApi();
             }
         }
     }

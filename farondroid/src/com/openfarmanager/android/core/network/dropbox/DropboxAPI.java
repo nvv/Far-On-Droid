@@ -125,8 +125,8 @@ public class DropboxAPI extends com.dropbox.client2.DropboxAPI<AndroidAuthSessio
     }
 
     @Override
-    public boolean rename(String fromPath, String toPath) throws Exception {
-        return move(fromPath, toPath) != null;
+    public boolean rename(FileProxy file, String toPath) throws Exception {
+        return move(file.getFullPath(), toPath) != null;
     }
 
     public void setAuthTokensToSession(DropboxAccount account) {
