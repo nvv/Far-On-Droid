@@ -4,11 +4,18 @@ import android.net.Uri;
 import android.support.v4.app.FragmentManager;
 
 import com.dropbox.client2.exception.DropboxException;
+import com.mediafire.sdk.MFApiException;
+import com.mediafire.sdk.MFException;
+import com.mediafire.sdk.MFSessionNotStartedException;
+import com.mediafire.sdk.api.FileApi;
+import com.mediafire.sdk.api.responses.FileGetLinksResponse;
+import com.mediafire.sdk.api.responses.data_models.Link;
 import com.microsoft.live.LiveOperationException;
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.core.network.dropbox.DropboxAPI;
 import com.openfarmanager.android.core.network.ftp.FtpAPI;
 import com.openfarmanager.android.core.network.googledrive.GoogleDriveApi;
+import com.openfarmanager.android.core.network.mediafire.MediaFireApi;
 import com.openfarmanager.android.core.network.skydrive.SkyDriveAPI;
 import com.openfarmanager.android.core.network.smb.SmbAPI;
 import com.openfarmanager.android.core.network.yandexdisk.YandexDiskApi;
@@ -22,11 +29,17 @@ import com.openfarmanager.android.utils.SystemUtils;
 import com.yandex.disk.client.ProgressListener;
 import com.yandex.disk.client.exceptions.WebdavException;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.StatusLine;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONException;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Random;
 
 import it.sauronsoftware.ftp4j.FTPAbortedException;
 import it.sauronsoftware.ftp4j.FTPDataTransferException;
@@ -102,6 +115,9 @@ public class CopyFromNetworkTask extends NetworkActionTask {
                         break;
                     case YandexDisk:
                         copyFromYandexDisk(file, mDestination);
+                        break;
+                    case MediaFire:
+                        copyFromMediafire(file, mDestination);
                         break;
                 }
             } catch (NullPointerException e) {
@@ -331,6 +347,58 @@ public class CopyFromNetworkTask extends NetworkActionTask {
                     return false;
                 }
             });
+        }
+    }
+
+    private void copyFromMediafire(FileProxy source, String destination) throws IOException, MFApiException, MFSessionNotStartedException, MFException {
+        MediaFireApi api = App.sInstance.getMediaFireApi();
+
+        if (isCancelled()) {
+            throw new InterruptedIOException();
+        }
+
+        String fullSourceFilePath = destination + "/" + source.getName();
+        if (source.isDirectory()) {
+            try {
+                createDirectoryIfNotExists(destination);
+                List<FileProxy> files = api.openDirectory(source.getFullPath());
+
+                if (files.size() == 0) {
+                    createDirectoryIfNotExists(fullSourceFilePath);
+                } else {
+                    for (FileProxy file : files) {
+                        copyFromMediafire(file, fullSourceFilePath);
+                    }
+                }
+            } catch (Exception e) {
+                throw NetworkException.handleNetworkException(e);
+            }
+        } else {
+            createDirectoryIfNotExists(destination);
+            File destinationFile = createFileIfNotExists(fullSourceFilePath);
+            setCurrentFile(source);
+            LinkedHashMap<String, Object> query = new LinkedHashMap<>();
+            query.put("quick_key", source.getId());
+            query.put("link_type", "direct_download");
+            FileGetLinksResponse response = FileApi.getLinks(api.getMediaFire(), query, "1.4", FileGetLinksResponse.class);
+
+            Link link = response.getLinks()[new Random().nextInt(response.getLinks().length)];
+
+            HttpGet httpGet = new HttpGet(link.getDirectDownloadLink());
+            DefaultHttpClient httpClient = new DefaultHttpClient();
+            HttpResponse httpResponse = httpClient.execute(httpGet);
+            StatusLine statusLine = httpResponse.getStatusLine();
+            if (statusLine.getStatusCode() > 200) throw new RuntimeException();
+            InputStream in = httpResponse.getEntity().getContent();
+            OutputStream out = getOutputStream(mSdCardPath, mUseStorageApi, mBaseUri, destinationFile);
+            int len;
+            while ((len = in.read(BUFFER)) > 0) {
+                out.write(BUFFER, 0, len);
+            }
+
+            updateProgress();
+            out.close();
+            in.close();
         }
     }
 
