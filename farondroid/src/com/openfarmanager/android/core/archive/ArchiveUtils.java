@@ -412,8 +412,11 @@ public class ArchiveUtils {
                                     boolean compressionForZip, AddToArchiveListener listener)
             throws ArchiveException, CompressorException, IOException, CreateArchiveException {
 
+        String sdCardPath = SystemUtils.getExternalStorage(outputFile);
+        boolean checkUseStorageApi = checkUseStorageApi(sdCardPath);
+
         File output = new File(outputFile + "." + targetArchiveType.name());
-        if (!output.exists() && !output.createNewFile()) {
+        if (!output.exists() && (checkUseStorageApi ? !StorageUtils.createNewFile(output, sdCardPath) : !output.createNewFile())) {
             throw new CreateArchiveException();
         }
 
@@ -423,8 +426,6 @@ public class ArchiveUtils {
 
         OutputStream out;
 
-        String sdCardPath = SystemUtils.getExternalStorage(outputFile);
-        boolean checkUseStorageApi = checkUseStorageApi(sdCardPath);
         // output file stream
         out = getOutputStream(output, sdCardPath, checkUseStorageApi);
 
@@ -441,7 +442,7 @@ public class ArchiveUtils {
         }
 
         File finalOutputFile = new File(output.getAbsolutePath() + "." + CompressionEnum.toString(additionalCompression));
-        if (!finalOutputFile.exists() && !finalOutputFile.createNewFile()) {
+        if (!finalOutputFile.exists() && (checkUseStorageApi ? !StorageUtils.createNewFile(output, sdCardPath) : !output.createNewFile())) {
             throw new CreateArchiveException();
         }
 

@@ -83,6 +83,19 @@ public class StorageUtils {
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    public static boolean createNewFile(File destinationFile, String sdCardPath) {
+        if (!destinationFile.exists()) {
+            Uri outputFileUri = getDestinationFileUri(checkForPermissionAndGetBaseUri(),
+                    sdCardPath, destinationFile.getAbsolutePath(), false);
+            return DocumentsContract.createDocument(App.sInstance.getContentResolver(),
+                    outputFileUri, "",
+                    destinationFile.getName()) != null;
+        }
+
+        return true;
+    }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public static boolean mkDir(Uri baseUri, String sdCardPath, File outputDir) {
 
         // ensure that parent path exists.
