@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.openfarmanager.android"
           android:installLocation="auto"
-          android:versionCode="95"
-          android:versionName="0.7">
+          android:versionCode="183"
+          android:versionName="0.8.3">
 
     <uses-sdk android:minSdkVersion="8" android:targetSdkVersion="11"/>
 
