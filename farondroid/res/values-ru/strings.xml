@@ -358,5 +358,11 @@
     <string name="hide_bottom_toolbar_summary">Будет заменена полупрозрачной иконкой</string>
     <string name="full_screen_icon">Полноэкранный режим.</string>
     <string name="full_screen_icon_summary">Кликните по этой кнопке чтобы открыть список комманд.</string>
+    <string name="mediafire_auth_error">Ошибка при соединении с MediaFire. Пожалуйста, проверьте свои данные.</string>
+    <string name="mediafire_connection_error">Ошибка при соединении с MediaFire. Пожалуйста, проверьте свои данные или попробуйте позже.</string>
+    <string name="new_file_name">Имя Файла/Директории</string>
+    <string name="settings_viewer">Просмотрщик файлов</string>
+    <string name="show_delimiter">Показывать разделительные символы</string>
+    <string name="show_delimiter_summary">Разделительные символы не будут заменены пробелами</string>
 
 </resources>
