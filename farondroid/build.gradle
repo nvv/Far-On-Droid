@@ -2,6 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
 
+    useLibrary 'org.apache.http.legacy'
     compileSdkVersion rootProject.ext.compileSdkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
 
@@ -12,8 +13,8 @@ android {
 
     defaultConfig {
         minSdkVersion 8
-        versionCode 139
-        versionName "0.8.2"
+        versionCode 185
+        versionName "0.8.3.1"
     }
 
     sourceSets {
@@ -44,7 +45,6 @@ android {
         compile 'commons-logging:commons-logging-api:1.1'
         compile 'commons-io:commons-io:2.4'
         compile 'org.apache.commons:commons-compress:1.9'
-        compile 'de.greenrobot:eventbus:2.4.0'
 
         compile fileTree(dir: 'libs', include: '*.jar')
     }

@@ -1,6 +1,8 @@
 package com.openfarmanager.android;
 
 import android.annotation.SuppressLint;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Handler;
 import android.support.v4.app.FragmentActivity;
 import android.view.Gravity;
@@ -14,11 +16,17 @@ import com.openfarmanager.android.toolbar.MenuItemImpl;
 import com.openfarmanager.android.dialogs.QuickPopupDialog;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Vlad Namashko.
  */
 public abstract class BaseActivity extends FragmentActivity {
+
+    final private int REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS = 1024;
 
     protected QuickPopupDialog mMenuPopup;
 
@@ -52,7 +60,8 @@ public abstract class BaseActivity extends FragmentActivity {
                                         });
                                 try {
                                     dialog.show(BaseActivity.this.getSupportFragmentManager(), "dialog");
-                                } catch (Exception ignore) {}
+                                } catch (Exception ignore) {
+                                }
                             }
                         });
                     }
@@ -68,6 +77,50 @@ public abstract class BaseActivity extends FragmentActivity {
             if (mMenuPopup != null) {
                 mMenuPopup.dismiss();
             }
+        }
+    }
+
+    protected boolean askPermission(String[] permissions) {
+
+        if (Build.VERSION.SDK_INT < 23) {
+            return true;
+        }
+
+        final List<String> permissionsRequested = new ArrayList<>();
+        for (String permission : permissions) {
+            if (checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED) {
+                continue;
+            }
+            permissionsRequested.add(permission);
+        }
+
+        if (!permissionsRequested.isEmpty()) {
+            requestPermissions(permissionsRequested.toArray(new String[permissionsRequested.size()]),
+                    REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS);
+            return false;
+        }
+
+        return true;
+    }
+
+    protected void onPermissionsResult(Map<String, Integer> permissions) {
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        switch (requestCode) {
+
+            case REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS: {
+
+                Map<String, Integer> hash = new HashMap<>();
+                for (int i = 0; i < permissions.length; i++) {
+                    hash.put(permissions[i], grantResults[i]);
+                }
+                onPermissionsResult(hash);
+            }
+            break;
+            default:
+                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         }
     }
 

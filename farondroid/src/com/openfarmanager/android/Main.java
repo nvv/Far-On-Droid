@@ -1,5 +1,6 @@
 package com.openfarmanager.android;
 
+import android.Manifest;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.net.Uri;
@@ -88,6 +89,10 @@ public class Main extends BaseActivity {
         App.sInstance.setFileSystemController(mFileSystemController);
 
         mFileSystemController.restorePanelState();
+
+        if (!askPermission(new String[] { Manifest.permission.WRITE_EXTERNAL_STORAGE })) {
+            return;
+        }
 
         showTips();
 

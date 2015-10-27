@@ -68,7 +68,7 @@ public class YesNoDialog extends BaseDialog {
         return view;
     }
 
-    private YesNoDialogListener getListener() {
+    protected YesNoDialogListener getListener() {
         return ((ParcelableWrapper<YesNoDialogListener>) getArguments().getParcelable("listener")).value;
     }
 

@@ -374,5 +374,6 @@ More network stuff will appear in future versions.
     </string>
     <string name="hide_bottom_toolbar">Hide bottom toolbar</string>
     <string name="hide_bottom_toolbar_summary">Will be replaced by semi-transparent icon</string>
+    <string name="sd_card_access_request"><![CDATA[Please provide access to <b>root of external SD</b> to FAR]]></string>
 
 </resources>
