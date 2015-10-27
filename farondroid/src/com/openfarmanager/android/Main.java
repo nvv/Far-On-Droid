@@ -2,6 +2,7 @@ package com.openfarmanager.android;
 
 import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
@@ -28,6 +29,7 @@ import com.openfarmanager.android.utils.Extensions;
 import com.openfarmanager.android.view.ToastNotification;
 
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -90,11 +92,9 @@ public class Main extends BaseActivity {
 
         mFileSystemController.restorePanelState();
 
-        if (!askPermission(new String[] { Manifest.permission.WRITE_EXTERNAL_STORAGE })) {
-            return;
+        if (askPermission(new String[] { Manifest.permission.WRITE_EXTERNAL_STORAGE })) {
+            showTips();
         }
-
-        showTips();
 
         if (getIntent() != null && getIntent().getData() != null) {
             onLogin();
@@ -105,6 +105,10 @@ public class Main extends BaseActivity {
         }
 
         setupToolbarVisibility();
+    }
+
+    protected void onPermissionsResult(Map<String, Integer> permissions) {
+        showTips();
     }
 
     private boolean isHardwareKeyboardAvailable() {
