@@ -14,6 +14,8 @@ import com.openfarmanager.android.controllers.FileSystemController;
 import com.openfarmanager.android.filesystem.FileProxy;
 import com.openfarmanager.android.model.FileActionEnum;
 
+import rx.subscriptions.CompositeSubscription;
+
 /**
  * Created on 11/10/2013.
  *
@@ -24,11 +26,14 @@ public class GenericPanel extends MainPanel {
     public static final int START_LOADING = 10000;
     public static final int STOP_LOADING = 10001;
 
+    private CompositeSubscription mSubscription;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         setupHandler();
         View view = super.onCreateView(inflater, container, savedInstanceState);
 
+        mSubscription = new CompositeSubscription();
         mFileSystemList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
@@ -57,7 +62,7 @@ public class GenericPanel extends MainPanel {
         mCurrentPathView.setText(getString(R.string.applications));
         mCurrentPathView.setOnLongClickListener(null);
 
-        mFileSystemList.setAdapter(new LauncherAdapter(mAdapterHandler));
+        mFileSystemList.setAdapter(new LauncherAdapter(mAdapterHandler, mSubscription));
         return view;
     }
 
@@ -90,6 +95,12 @@ public class GenericPanel extends MainPanel {
             mSelectedFiles.clear();
             adapter.refresh();
         }
+    }
+
+    @Override
+    public void onDetach () {
+        super.onDetach();
+        mSubscription.unsubscribe();
     }
 
     protected FileActionEnum[] getAvailableActions() {
