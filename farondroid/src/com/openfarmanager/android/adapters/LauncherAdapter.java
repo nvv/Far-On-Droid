@@ -43,29 +43,34 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 
+import rx.Observable;
+import rx.Observer;
+import rx.Subscriber;
+import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.schedulers.Schedulers;
+import rx.subscriptions.CompositeSubscription;
+
 public class LauncherAdapter extends FlatFileSystemAdapter {
 
     private Handler mHandler;
 
     private List<String> mSelectedPackages = new ArrayList<String>();
+    private CompositeSubscription mSubscription;
 
-    public LauncherAdapter(Handler handler) {
+    public LauncherAdapter(Handler handler, CompositeSubscription subscription) {
         mHandler = handler;
+        mSubscription = subscription;
         refresh();
     }
 
     public void refresh() {
-        new AsyncTask<Void, Void, List<FileProxy>>() {
-
+        mSelectedPackages.clear();
+        mHandler.sendEmptyMessage(GenericPanel.START_LOADING);
+        Subscription subscription = Observable.create(new Observable.OnSubscribe<List<FileProxy>>() {
             @Override
-            protected void onPreExecute() {
-                super.onPreExecute();
-                mSelectedPackages.clear();
-                mHandler.sendEmptyMessage(GenericPanel.START_LOADING);
-            }
-
-            @Override
-            protected List<FileProxy> doInBackground(Void... voids) {
+            public void call(final Subscriber<? super List<FileProxy>> subscriber) {
                 List<FileProxy> result = new LinkedList<FileProxy>();
 
                 final Intent mainIntent = new Intent(Intent.ACTION_MAIN, null);
@@ -94,25 +99,26 @@ public class LauncherAdapter extends FlatFileSystemAdapter {
                         return applicationInfo.getName().compareToIgnoreCase(applicationInfo2.getName());
                     }
                 });
-
-                return result;
+                subscriber.onNext(result);
             }
-
+        }).subscribeOn(Schedulers.computation()).observeOn(AndroidSchedulers.mainThread()).subscribe(new Action1<List<FileProxy>>() {
             @Override
-            protected void onPostExecute(List<FileProxy> result) {
+            public void call(List<FileProxy> result) {
                 mFiles = result;
                 notifyDataSetChanged();
                 mHandler.sendEmptyMessage(GenericPanel.STOP_LOADING);
                 populateApplicationSize();
             }
-        }.execute();
+        });
+
+        mSubscription.add(subscription);
     }
 
     private void populateApplicationSize() {
-        new AsyncTask<Void, Void, Void>() {
 
+        Subscription subscription = Observable.create(new Observable.OnSubscribe<Void>() {
             @Override
-            protected Void doInBackground(Void... params) {
+            public void call(final Subscriber<? super Void> subscriber) {
                 try {
                     final PackageManager manager = App.sInstance.getPackageManager();
                     Method getPackageSizeInfo = manager.getClass().getMethod("getPackageSizeInfo",
@@ -122,7 +128,6 @@ public class LauncherAdapter extends FlatFileSystemAdapter {
                     final Semaphore codeSizeSemaphore = new Semaphore(1, true);
 
                     for (FileProxy param : mFiles) {
-
                         try {
                             codeSizeSemaphore.acquire();
                         } catch (InterruptedException e) {
@@ -136,7 +141,7 @@ public class LauncherAdapter extends FlatFileSystemAdapter {
                                             throws RemoteException {
                                         ((ComponentProxy) final_param).mSize = pStats.codeSize + pStats.dataSize;
                                         codeSizeSemaphore.release();
-                                        publishProgress();
+                                        subscriber.onNext(null);
                                     }
                                 });
                     }
@@ -145,14 +150,15 @@ public class LauncherAdapter extends FlatFileSystemAdapter {
                 } catch (Exception e) {
                     e.printStackTrace(System.err);
                 }
-                return null;
             }
-
+        }).subscribeOn(Schedulers.computation()).observeOn(AndroidSchedulers.mainThread()).subscribe(new Action1<Void>() {
             @Override
-            protected void onProgressUpdate(Void... values) {
+            public void call(Void aVoid) {
                 notifyDataSetChanged();
             }
-        }.execute();
+        });
+
+        mSubscription.add(subscription);
     }
 
     public void setSelectedFiles(List<FileProxy> selectedFiles) {
