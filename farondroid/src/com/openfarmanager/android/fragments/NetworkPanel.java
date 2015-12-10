@@ -5,7 +5,6 @@ import android.app.Dialog;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -54,7 +53,6 @@ import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
-import rx.subscriptions.CompositeSubscription;
 
 import static com.openfarmanager.android.controllers.FileSystemController.EXIT_FROM_NETWORK_STORAGE;
 
@@ -75,7 +73,7 @@ public class NetworkPanel extends MainPanel {
 
     private Dialog mProgressDialog;
 
-    private CompositeSubscription mSubscription;
+    private Subscription mSubscription;
     private OpenDirectoryAction mOpenDirectoryAction = new OpenDirectoryAction();
     private Observable<List<FileProxy>> mOpenDirectoryObservable = Observable.create(mOpenDirectoryAction);
     private OpenDirectoryObserver mOpenDirectoryObserver = new OpenDirectoryObserver();
@@ -198,7 +196,9 @@ public class NetworkPanel extends MainPanel {
         super.onDestroyView();
         mCharsetLeft.setVisibility(View.GONE);
         mCharsetRight.setVisibility(View.GONE);
-        mSubscription.unsubscribe();
+        if (mSubscription != null && !mSubscription.isUnsubscribed()) {
+            mSubscription.unsubscribe();
+        }
     }
 
     protected boolean onLongClick(AdapterView<?> adapterView, int i) {
@@ -288,15 +288,10 @@ public class NetworkPanel extends MainPanel {
             return;
         }
 
-        if (mSubscription == null) {
-            mSubscription = new CompositeSubscription();
-        }
-
         mOpenDirectoryAction.setPath(path);
         mOpenDirectoryObserver.init(path, restorePosition);
-        Subscription subscription = mOpenDirectoryObservable.subscribeOn(Schedulers.computation()).
+        mSubscription = mOpenDirectoryObservable.subscribeOn(Schedulers.computation()).
                 observeOn(AndroidSchedulers.mainThread()).subscribe(mOpenDirectoryObserver);
-        mSubscription.add(subscription);
     }
 
     public void invalidate() {
@@ -578,6 +573,10 @@ public class NetworkPanel extends MainPanel {
             }
             showQuickActionPanel();
             setSelectedFilesSizeVisibility();
+
+            if (!mSubscription.isUnsubscribed()) {
+                mSubscription.unsubscribe();
+            }
         }
     }
 
