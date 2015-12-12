@@ -87,10 +87,11 @@ public class GoogleDriveWebApi extends Api {
         HttpResponse response = null;
 
         JSONObject postData = new JSONObject();
+        SimpleMultipartEntity entity = null;
         try {
             setupFileNameData(title, parentId, postData);
 
-            SimpleMultipartEntity entity = new SimpleMultipartEntity(file.getName().replace(".", "_"), listener);
+            entity = new SimpleMultipartEntity(file.getName().replace(".", "_"), listener);
             entity.addPart("meta", postData.toString());
             entity.addPart("content", file.getName(), new FileInputStream(file));
 
@@ -98,12 +99,14 @@ public class GoogleDriveWebApi extends Api {
 
             response = httpClient.execute(httpPost);
 
-        } catch (ClientProtocolException e) {
-            throw new ResponseException(0);
         } catch (IOException e) {
             throw new ResponseException(0);
         } catch (JSONException e) {
             e.printStackTrace();
+        } finally {
+            if (entity != null) {
+                entity.reset();
+            }
         }
 
         StatusLine statusLine = response.getStatusLine();

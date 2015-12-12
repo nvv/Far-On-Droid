@@ -28,7 +28,7 @@ public class SimpleMultipartEntity implements HttpEntity {
 
     private String mBoundary = null;
 
-    ByteArrayOutputStream mOut= new ByteArrayOutputStream();
+    ByteArrayOutputStream mOut = new ByteArrayOutputStream();
     boolean mIsSetLast = false;
     boolean mIsSetFirst = false;
 
@@ -120,6 +120,13 @@ public class SimpleMultipartEntity implements HttpEntity {
         } catch (final FileNotFoundException e) {
             Log.e("SimpleMultipartEntity", e.getMessage(), e);
         }
+    }
+
+    public void reset() {
+        try {
+            mOut.reset();
+            mOut.close();
+        } catch (Exception ignore) {}
     }
 
     @Override
