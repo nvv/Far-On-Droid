@@ -2,6 +2,7 @@ package com.openfarmanager.android.core.network.dropbox;
 
 import android.database.Cursor;
 import com.dropbox.client2.android.AndroidAuthSession;
+import com.dropbox.client2.exception.DropboxServerException;
 import com.dropbox.client2.session.AccessTokenPair;
 import com.dropbox.client2.session.AppKeyPair;
 import com.dropbox.client2.session.Session;
@@ -140,7 +141,15 @@ public class DropboxAPI extends com.dropbox.client2.DropboxAPI<AndroidAuthSessio
 
     @Override
     public void delete(FileProxy file) throws Exception {
-        delete(file.getFullPath());
+        try {
+            delete(file.getFullPath());
+        } catch (DropboxServerException e) {
+            if (e.error == DropboxServerException._503_SERVICE_UNAVAILABLE) {
+                delete(file);
+            } else {
+                throw e;
+            }
+        }
     }
 
     public static class DropboxAccount extends NetworkAccount {
