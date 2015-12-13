@@ -27,7 +27,6 @@ import android.widget.Toast;
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.R;
 import com.openfarmanager.android.adapters.LinesAdapter;
-import com.openfarmanager.android.filesystem.actions.CopyTask;
 import com.openfarmanager.android.filesystem.actions.RootTask;
 import com.openfarmanager.android.model.ViewerBigFileTextViewer;
 import com.openfarmanager.android.model.ViewerTextBuffer;
@@ -65,7 +64,6 @@ import rx.schedulers.Schedulers;
 import static com.openfarmanager.android.controllers.EditViewController.MSG_BIG_FILE;
 import static com.openfarmanager.android.controllers.EditViewController.MSG_TEXT_CHANGED;
 import static com.openfarmanager.android.utils.Extensions.getThreadPool;
-import static com.openfarmanager.android.utils.Extensions.runAsynk;
 import static com.openfarmanager.android.utils.StorageUtils.checkForPermissionAndGetBaseUri;
 import static com.openfarmanager.android.utils.StorageUtils.checkUseStorageApi;
 

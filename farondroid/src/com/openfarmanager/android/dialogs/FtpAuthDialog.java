@@ -128,7 +128,7 @@ public class FtpAuthDialog extends Dialog {
 
     private void connect() {
         setLoading(true);
-        runAsynk(mConnectRunnable);
+        runAsync(mConnectRunnable);
     }
 
     Runnable mConnectRunnable = new Runnable() {

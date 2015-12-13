@@ -2,6 +2,7 @@ package com.openfarmanager.android.filesystem.commands;
 
 import com.openfarmanager.android.core.AbstractCommand;
 import com.openfarmanager.android.filesystem.actions.FileActionTask;
+import com.openfarmanager.android.filesystem.actions.OnActionListener;
 import com.openfarmanager.android.filesystem.actions.network.CreateNewAtNetworkTask;
 import com.openfarmanager.android.fragments.MainPanel;
 import com.openfarmanager.android.fragments.NetworkPanel;
@@ -25,7 +26,7 @@ public class CreateNewAtNetworkCommand implements AbstractCommand {
         try {
             new CreateNewAtNetworkTask(((NetworkPanel) mNetworkPanel).getNetworkType(),
                     mNetworkPanel.fragmentManager(),
-                    new FileActionTask.OnActionListener() {
+                    new OnActionListener() {
                         @Override
                         public void onActionFinish(TaskStatusEnum status) {
                             mNetworkPanel.handleNetworkActionResult(status, args);

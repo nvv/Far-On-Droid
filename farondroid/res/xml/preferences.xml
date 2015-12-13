@@ -66,6 +66,13 @@
                 android:widgetLayout="@layout/check_box_preference"
                 android:defaultValue="true"/>
 
+        <CheckBoxPreference
+            android:key="support_multithread_tasks"
+            android:title="@string/support_multithread_tasks"
+            android:summary="@string/support_multithread_tasks_summary"
+            android:widgetLayout="@layout/check_box_preference"
+            android:defaultValue="true"/>
+
     </PreferenceCategory>
     <PreferenceCategory
         android:title="@string/settings_viewer"

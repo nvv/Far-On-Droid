@@ -5,18 +5,17 @@ import com.openfarmanager.android.App;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
 
 public class Extensions {
 
-    public static void runAsynk(Callable callable) {
-        //noinspection unchecked
-        App.sInstance.getThreadPool().getExecutor().submit(callable);
+    public static Future runAsync(Callable callable) {
+        return App.sInstance.getThreadPool().getExecutor().submit(callable);
     }
 
-    public static void runAsynk(Runnable runnable) {
-        //noinspection unchecked
-        App.sInstance.getThreadPool().getExecutor().submit(runnable);
+    public static Future runAsync(Runnable runnable) {
+        return App.sInstance.getThreadPool().getExecutor().submit(runnable);
     }
 
     public static ExecutorService getThreadPool() {

@@ -1,6 +1,7 @@
 package com.openfarmanager.android.filesystem.actions;
 
-import com.openfarmanager.android.filesystem.FileSystemFile;
+import com.openfarmanager.android.utils.Extensions;
+
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -8,7 +9,6 @@ import java.io.IOException;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import static com.openfarmanager.android.utils.Extensions.runAsynk;
 import static com.openfarmanager.android.utils.FileUtilsExt.findFileByName;
 
 public class DiffDirectoriesTask {
@@ -26,7 +26,7 @@ public class DiffDirectoriesTask {
     }
 
     public void execute() {
-        runAsynk(new Runnable() {
+        Extensions.runAsync(new Runnable() {
             @Override
             public void run() {
                 LinkedHashSet<File> activePanelDiffFiles = new LinkedHashSet<File>();

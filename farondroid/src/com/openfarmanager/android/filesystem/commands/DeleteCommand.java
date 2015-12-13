@@ -4,6 +4,7 @@ import android.net.Uri;
 
 import com.openfarmanager.android.filesystem.actions.DeleteTask;
 import com.openfarmanager.android.filesystem.actions.FileActionTask;
+import com.openfarmanager.android.filesystem.actions.OnActionListener;
 import com.openfarmanager.android.fragments.ErrorDialog;
 import com.openfarmanager.android.fragments.MainPanel;
 import com.openfarmanager.android.model.TaskStatusEnum;
@@ -25,7 +26,7 @@ public class DeleteCommand extends AbstractPermissionCommand {
         FileActionTask task = null;
         try {
             task = new DeleteTask(mPanel.fragmentManager(),
-                    new FileActionTask.OnActionListener() {
+                    new OnActionListener() {
                         @Override
                         public void onActionFinish(TaskStatusEnum status) {
                             if (status != TaskStatusEnum.OK) {

@@ -376,4 +376,7 @@ More network stuff will appear in future versions.
     <string name="hide_bottom_toolbar_summary">Will be replaced by semi-transparent icon</string>
     <string name="sd_card_access_request"><![CDATA[Please provide access to <b>root of external SD</b> to FAR]]></string>
 
+    <string name="support_multithread_tasks">Multithreading support for network actions</string>
+    <string name="support_multithread_tasks_summary">Enable multithreading for networks actions to improve performance</string>
+
 </resources>

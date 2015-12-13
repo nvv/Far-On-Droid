@@ -22,7 +22,6 @@ import com.openfarmanager.android.App;
 import com.openfarmanager.android.R;
 import com.openfarmanager.android.adapters.FlatFileSystemAdapter;
 import com.openfarmanager.android.controllers.FileSystemController;
-import com.openfarmanager.android.core.AbstractCommand;
 import com.openfarmanager.android.core.Settings;
 import com.openfarmanager.android.core.archive.ArchiveUtils;
 import com.openfarmanager.android.core.archive.MimeTypes;
@@ -33,6 +32,7 @@ import com.openfarmanager.android.filesystem.FileProxy;
 import com.openfarmanager.android.filesystem.FileSystemFile;
 import com.openfarmanager.android.filesystem.FileSystemScanner;
 import com.openfarmanager.android.filesystem.actions.FileActionTask;
+import com.openfarmanager.android.filesystem.actions.OnActionListener;
 import com.openfarmanager.android.filesystem.actions.network.ExportAsTask;
 import com.openfarmanager.android.filesystem.commands.CommandsFactory;
 import com.openfarmanager.android.model.FileActionEnum;
@@ -43,7 +43,7 @@ import com.openfarmanager.android.utils.CustomFormatter;
 import com.openfarmanager.android.utils.FileUtilsExt;
 import com.openfarmanager.android.utils.SystemUtils;
 import com.openfarmanager.android.view.ToastNotification;
-import org.apache.commons.io.FilenameUtils;
+
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 
 import java.io.File;
@@ -669,7 +669,7 @@ public class MainPanel extends BaseFileSystemPanel {
         FileActionTask task = null;
         try {
             task = new ExportAsTask(fragmentManager(),
-                    new FileActionTask.OnActionListener() {
+                    new OnActionListener() {
                         @Override
                         public void onActionFinish(TaskStatusEnum status) {
                             try {

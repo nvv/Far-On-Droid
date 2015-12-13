@@ -1,6 +1,8 @@
 package com.openfarmanager.android.filesystem.actions.network;
 
 import android.support.v4.app.FragmentManager;
+
+import com.openfarmanager.android.filesystem.actions.OnActionListener;
 import com.openfarmanager.android.filesystem.actions.network.CopyToNetworkTask;
 import com.openfarmanager.android.model.NetworkEnum;
 import com.openfarmanager.android.model.TaskStatusEnum;

@@ -3,6 +3,7 @@ package com.openfarmanager.android.filesystem.actions.network;
 import android.support.v4.app.FragmentManager;
 
 import com.openfarmanager.android.App;
+import com.openfarmanager.android.filesystem.actions.OnActionListener;
 import com.openfarmanager.android.model.TaskStatusEnum;
 
 import java.io.File;

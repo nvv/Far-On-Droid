@@ -17,7 +17,7 @@ import java.util.List;
  */
 public abstract class FileActionTask extends AsyncTask<Void, Integer, TaskStatusEnum> {
 
-    protected final static byte[] BUFFER = new byte[256 * 1024];
+    protected final static byte[] BUFFER = new byte[512 * 1024];
 
     protected List<File> mItems;
     protected FileActionProgressDialog mProgressDialog;
@@ -102,7 +102,4 @@ public abstract class FileActionTask extends AsyncTask<Void, Integer, TaskStatus
         return outputDir.exists() || (mUseStorageApi ? StorageUtils.mkDir(mBaseUri, mSdCardPath, outputDir) : outputDir.mkdirs());
     }
 
-    public static interface OnActionListener {
-        void onActionFinish(TaskStatusEnum status);
-    }
 }

@@ -56,6 +56,7 @@ public class Settings {
     public static final String SHOW_QUICK_ACTION_PANEL = "show_quick_action_panel";
     public static final String HIDE_MAIN_TOOLBAR = "hide_main_toolbar";
     public static final String REPLACE_DELIMETERS = "replace_delimeters";
+    public static final String MULTI_THREAD_TASKS = "support_multithread_tasks";
 
     private static File sSdCard;
     public static String sSdPath;
@@ -409,6 +410,10 @@ public class Settings {
 
     public boolean isReplaceDelimeters() {
         return getSharedPreferences().getBoolean(REPLACE_DELIMETERS, false);
+    }
+
+    public boolean isMultiThreadTasksEnabled() {
+        return getSharedPreferences().getBoolean(MULTI_THREAD_TASKS, true);
     }
 
     public int getHiddenColor() {

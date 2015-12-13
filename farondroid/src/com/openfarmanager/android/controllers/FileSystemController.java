@@ -67,7 +67,6 @@ import java.util.List;
 
 import rx.Observable;
 import rx.Observer;
-import rx.Scheduler;
 import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
@@ -1237,7 +1236,7 @@ public class FileSystemController {
                             startFtpAuthentication();
                         } else {
                             showProgressDialog(R.string.connecting_to_ftp);
-                            runAsynk(new Runnable() {
+                            runAsync(new Runnable() {
                                 @Override
                                 public void run() {
                                     try {
@@ -1274,7 +1273,7 @@ public class FileSystemController {
                             startSmbAuthentication();
                         } else {
                             showProgressDialog(R.string.connecting_to_smb);
-                            runAsynk(new Runnable() {
+                            runAsync(new Runnable() {
                                 @Override
                                 public void run() {
                                     try {

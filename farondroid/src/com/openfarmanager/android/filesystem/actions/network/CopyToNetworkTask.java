@@ -19,6 +19,7 @@ import com.openfarmanager.android.core.network.mediafire.MediaFireApi;
 import com.openfarmanager.android.core.network.skydrive.SkyDriveAPI;
 import com.openfarmanager.android.core.network.smb.SmbAPI;
 import com.openfarmanager.android.core.network.yandexdisk.YandexDiskApi;
+import com.openfarmanager.android.filesystem.actions.OnActionListener;
 import com.openfarmanager.android.googledrive.api.GoogleDriveWebApi;
 import com.openfarmanager.android.model.NetworkEnum;
 import com.openfarmanager.android.model.TaskStatusEnum;
@@ -40,7 +41,6 @@ import static com.openfarmanager.android.model.TaskStatusEnum.CANCELED;
 import static com.openfarmanager.android.model.TaskStatusEnum.ERROR_COPY;
 import static com.openfarmanager.android.model.TaskStatusEnum.ERROR_FILE_NOT_EXISTS;
 import static com.openfarmanager.android.model.TaskStatusEnum.createNetworkError;
-import static com.openfarmanager.android.utils.Extensions.runAsynk;
 
 /**
  * @author Vlad Namashko

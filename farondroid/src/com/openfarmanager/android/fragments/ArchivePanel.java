@@ -1,15 +1,11 @@
 package com.openfarmanager.android.fragments;
 
 import android.os.Bundle;
-import android.os.Message;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ListView;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.github.junrar.Archive;
@@ -17,14 +13,12 @@ import com.openfarmanager.android.App;
 import com.openfarmanager.android.R;
 import com.openfarmanager.android.adapters.ArchiveEntryAdapter;
 import com.openfarmanager.android.core.CancelableCommand;
-import com.openfarmanager.android.core.Settings;
 import com.openfarmanager.android.core.archive.ArchiveScanner;
 import com.openfarmanager.android.core.archive.ArchiveUtils;
 import com.openfarmanager.android.dialogs.ExtractArchiveDialog;
 import com.openfarmanager.android.filesystem.ArchiveFile;
-import com.openfarmanager.android.filesystem.FileSystemScanner;
-import com.openfarmanager.android.model.FileActionEnum;
 import com.openfarmanager.android.model.exeptions.NoPasswordException;
+import com.openfarmanager.android.utils.Extensions;
 import com.openfarmanager.android.view.ToastNotification;
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.model.FileHeader;
@@ -44,7 +38,6 @@ import java.util.List;
 
 import static com.openfarmanager.android.controllers.FileSystemController.*;
 import static com.openfarmanager.android.utils.Extensions.isNullOrEmpty;
-import static com.openfarmanager.android.utils.Extensions.runAsynk;
 
 public class ArchivePanel extends MainPanel {
 
@@ -169,7 +162,7 @@ public class ArchivePanel extends MainPanel {
     private void openArchive(final File archiveFile, final InputStream stream) {
         setIsLoading(true);
         mOpenArchiveTask.init(archiveFile, stream, mEncryptedArchivePassword);
-        runAsynk(mOpenArchiveTask);
+        Extensions.runAsync(mOpenArchiveTask);
     }
 
     private void openArchiveDirectory(ArchiveScanner.File selectedDirectory) {

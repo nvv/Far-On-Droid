@@ -14,9 +14,9 @@ import com.openfarmanager.android.App;
 import com.openfarmanager.android.R;
 import com.openfarmanager.android.controllers.FileSystemController;
 import com.openfarmanager.android.core.network.mediafire.MediaFireApi;
+import com.openfarmanager.android.utils.Extensions;
 
 import static com.openfarmanager.android.utils.Extensions.isNullOrEmpty;
-import static com.openfarmanager.android.utils.Extensions.runAsynk;
 
 /**
  * author: Vlad Namashko
@@ -107,7 +107,7 @@ public class MediaFireAuthDialog extends Dialog {
 
     private void connect() {
         setLoading(true);
-        runAsynk(mConnectRunnable);
+        Extensions.runAsync(mConnectRunnable);
     }
 
     private Runnable mConnectRunnable = new Runnable() {

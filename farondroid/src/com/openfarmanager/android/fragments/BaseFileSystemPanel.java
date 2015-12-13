@@ -21,7 +21,12 @@ import com.openfarmanager.android.core.archive.ArchiveScanner;
 import com.openfarmanager.android.core.archive.ArchiveUtils;
 import com.openfarmanager.android.filesystem.FileProxy;
 import com.openfarmanager.android.filesystem.actions.*;
+import com.openfarmanager.android.filesystem.actions.multi.MultiActionTask;
+import com.openfarmanager.android.filesystem.actions.multi.MultiCopyTask;
+import com.openfarmanager.android.filesystem.actions.multi.network.CopyToNetworkMultiTask;
 import com.openfarmanager.android.filesystem.actions.network.*;
+import com.openfarmanager.android.filesystem.commands.CommandsFactory;
+import com.openfarmanager.android.model.NetworkEnum;
 import com.openfarmanager.android.model.SelectParams;
 import com.openfarmanager.android.model.TaskStatusEnum;
 import com.openfarmanager.android.view.OnSwipeTouchListener;
@@ -223,7 +228,7 @@ public abstract class BaseFileSystemPanel extends BasePanel {
             RenameOnNetworkTask task = null;
             try {
                 task = new RenameOnNetworkTask(((NetworkPanel) this).getNetworkType(), fragmentManager(),
-                        new FileActionTask.OnActionListener() {
+                        new OnActionListener() {
                             @Override
                             public void onActionFinish(TaskStatusEnum status) {
                                 handleNetworkActionResult(status, args);
@@ -257,7 +262,7 @@ public abstract class BaseFileSystemPanel extends BasePanel {
             FileActionTask task = null;
             try {
                 task = new CopyTask(fragmentManager(),
-                        new FileActionTask.OnActionListener() {
+                        new OnActionListener() {
                             @Override
                             public void onActionFinish(TaskStatusEnum status) {
                                 try {
@@ -295,19 +300,21 @@ public abstract class BaseFileSystemPanel extends BasePanel {
 
         @Override
         public void execute(final Object ... args) {
-            FileActionTask task = null;
             try {
-                task = new CopyToNetworkTask(((NetworkPanel) args[0]).getNetworkType(), fragmentManager(),
-                        new FileActionTask.OnActionListener() {
-                            @Override
-                            public void onActionFinish(TaskStatusEnum status) {
-                                handleNetworkCopyActionResult(status, args);
-                            }
-                        }, getSelectedFiles(), (String) args[1]);
+                NetworkPanel networkPanel = (NetworkPanel) args[0];
+                NetworkEnum type = networkPanel.getNetworkType();
+                List<File> files = getSelectedFiles();
+                if (App.sInstance.getSettings().isMultiThreadTasksEnabled()) {
+                    new CopyToNetworkMultiTask(getActivity(), type,
+                            createListener(args), files, (String) args[1]).execute();
+                } else {
+                    new CopyToNetworkTask(type, fragmentManager(),
+                            createListener(args), files, (String) args[1]).execute();
+                }
+
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            task.execute();
         }
     };
 
@@ -318,7 +325,7 @@ public abstract class BaseFileSystemPanel extends BasePanel {
             FileActionTask task = null;
             try {
                 task = new CopyFromNetworkTask(((NetworkPanel) BaseFileSystemPanel.this).getNetworkType(), fragmentManager(),
-                        new FileActionTask.OnActionListener() {
+                        new OnActionListener() {
                             @Override
                             public void onActionFinish(TaskStatusEnum status) {
                                 handleNetworkCopyActionResult(status, args);
@@ -344,7 +351,7 @@ public abstract class BaseFileSystemPanel extends BasePanel {
             FileActionTask task = null;
             try {
                 task = new ExtractArchiveTask(fragmentManager(),
-                        new FileActionTask.OnActionListener() {
+                        new OnActionListener() {
                             @Override
                             public void onActionFinish(TaskStatusEnum status) {
                                 if (status == TaskStatusEnum.OK) {
@@ -382,7 +389,7 @@ public abstract class BaseFileSystemPanel extends BasePanel {
                 FileActionTask task = null;
                 try {
                     task = new MoveTask(fragmentManager(),
-                            new FileActionTask.OnActionListener() {
+                            new OnActionListener() {
                                 @Override
                                 public void onActionFinish(TaskStatusEnum status) {
                                     if (!status.equals(TaskStatusEnum.OK)) {
@@ -413,7 +420,7 @@ public abstract class BaseFileSystemPanel extends BasePanel {
                 FileActionTask task = null;
                 try {
                     task = new MoveToNetworkTask(((NetworkPanel) args[0]).getNetworkType(), fragmentManager(),
-                            new FileActionTask.OnActionListener() {
+                            new OnActionListener() {
                                 @Override
                                 public void onActionFinish(TaskStatusEnum status) {
                                     invalidatePanels((MainPanel) args[0]);
@@ -436,7 +443,7 @@ public abstract class BaseFileSystemPanel extends BasePanel {
                 FileActionTask task = null;
                 try {
                     task = new MoveFromNetworkTask(((NetworkPanel) BaseFileSystemPanel.this).getNetworkType(), fragmentManager(),
-                            new FileActionTask.OnActionListener() {
+                            new OnActionListener() {
                                 @Override
                                 public void onActionFinish(TaskStatusEnum status) {
                                     invalidatePanels((MainPanel) args[0]);
@@ -481,7 +488,7 @@ public abstract class BaseFileSystemPanel extends BasePanel {
             FileActionTask task = null;
             try {
                 task = new CreateArchiveTask(fragmentManager(),
-                        new FileActionTask.OnActionListener() {
+                        new OnActionListener() {
                             @Override
                             public void onActionFinish(TaskStatusEnum status) {
                                 if (!status.equals(TaskStatusEnum.OK)) {
@@ -518,6 +525,15 @@ public abstract class BaseFileSystemPanel extends BasePanel {
 
         }
     };
+
+    private OnActionListener createListener(final Object[] args) {
+        return new OnActionListener() {
+            @Override
+            public void onActionFinish(TaskStatusEnum status) {
+                handleNetworkActionResult(status, args);
+            }
+        };
+    }
 
     public void requestSdcardPermission() {
         if (Build.VERSION.SDK_INT >= 21) {

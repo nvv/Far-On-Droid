@@ -5,6 +5,7 @@ import com.dropbox.client2.exception.DropboxException;
 import com.microsoft.live.LiveOperationException;
 import com.openfarmanager.android.core.network.NetworkApi;
 import com.openfarmanager.android.filesystem.actions.FileActionTask;
+import com.openfarmanager.android.filesystem.actions.OnActionListener;
 import com.openfarmanager.android.model.NetworkEnum;
 import com.openfarmanager.android.model.TaskStatusEnum;
 import com.openfarmanager.android.model.exeptions.NetworkException;
@@ -22,7 +23,7 @@ public class CreateNewAtNetworkTask extends NetworkActionTask {
 
     protected String mDestination;
 
-    public CreateNewAtNetworkTask(NetworkEnum networkType, FragmentManager fragmentManager, FileActionTask.OnActionListener listener,
+    public CreateNewAtNetworkTask(NetworkEnum networkType, FragmentManager fragmentManager, OnActionListener listener,
                                  String destination) {
         // TODO: temporary
         super.mItems = new ArrayList<File>();

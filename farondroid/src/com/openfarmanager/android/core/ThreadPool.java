@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit;
 
 public class ThreadPool {
     protected static final int CPU_COUNT = Runtime.getRuntime().availableProcessors();
-    protected static final int KEEP_ALIVE = 1;
+    protected static final int KEEP_ALIVE = CPU_COUNT;
     protected static final int MAXIMUM_QUEUE_SIZE = 128;
 
     protected ThreadPoolExecutor mExecutor;

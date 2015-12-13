@@ -82,7 +82,7 @@ public class DropboxDataSource implements DataSource {
     public void open(final FileProxy file) {
         mHandler.sendEmptyMessage(MSG_NETWORK_SHOW_PROGRESS);
 
-        Extensions.runAsynk(new Runnable() {
+        Extensions.runAsync(new Runnable() {
             @Override
             public void run() {
                 try {

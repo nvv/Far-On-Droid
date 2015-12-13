@@ -365,4 +365,7 @@
     <string name="show_delimiter">Показывать разделительные символы</string>
     <string name="show_delimiter_summary">Разделительные символы не будут заменены пробелами</string>
     <string name="sd_card_access_request"><![CDATA[Пожалуйста предоставьте доступ к <b>корню внешней SD карты</b> для FAR]]></string>
+
+    <string name="support_multithread_tasks">Поддержка многопоточности для сетевых задач</string>
+    <string name="support_multithread_tasks_summary">Разрешить многопоточность для сетевых задач для улучшения производительности</string>
 </resources>
