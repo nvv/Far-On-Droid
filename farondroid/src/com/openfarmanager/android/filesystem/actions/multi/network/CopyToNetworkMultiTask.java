@@ -106,7 +106,18 @@ public class CopyToNetworkMultiTask extends NetworkActionMultiTask {
 
     @Override
     public TaskStatusEnum handleSubTaskException(Exception e) {
-        return null;
+        if (e instanceof NullPointerException) {
+            return ERROR_FILE_NOT_EXISTS;
+        } else if (e instanceof InterruptedIOException) {
+            return CANCELED;
+        } else if (e instanceof IOException || e instanceof IllegalArgumentException || e instanceof FTPDataTransferException) {
+            return ERROR_COPY;
+        } else if  (e instanceof DropboxException) {
+            return createNetworkError(NetworkException.handleNetworkException(e));
+        } else {
+            e.printStackTrace();
+            return ERROR_COPY;
+        }
     }
 
     private void copyToGoogleDrive(final File source, final String destination) throws Exception {
