@@ -5,6 +5,8 @@ import android.support.v4.app.FragmentManager;
 
 import com.dropbox.client2.ProgressListener;
 import com.dropbox.client2.exception.DropboxException;
+import com.dropbox.client2.exception.DropboxPartialFileException;
+import com.dropbox.client2.exception.DropboxUnlinkedException;
 import com.mediafire.sdk.MFApiException;
 import com.mediafire.sdk.MFException;
 import com.mediafire.sdk.MFSessionNotStartedException;
@@ -31,9 +33,11 @@ import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 
 import it.sauronsoftware.ftp4j.FTPDataTransferException;
 import it.sauronsoftware.ftp4j.FTPDataTransferListener;
+import jcifs.smb.SmbAuthException;
 import jcifs.smb.SmbFile;
 import jcifs.smb.SmbFileOutputStream;
 
@@ -58,7 +62,7 @@ public class CopyToNetworkMultiTask extends NetworkActionMultiTask {
     public TaskStatusEnum doAction() {
         for (File file : mItems) {
             if (isCancelled()) {
-                return CANCELED;
+                onTaskDone(CANCELED);
             }
             try {
                 switch (mNetworkType) {
@@ -89,7 +93,9 @@ public class CopyToNetworkMultiTask extends NetworkActionMultiTask {
             } catch (InterruptedIOException e) {
                 return CANCELED;
             } catch (IOException e) {
-                return ERROR_COPY;
+                NetworkException ex = NetworkException.handleNetworkException(e);
+                return ex.getErrorCause() == NetworkException.ErrorCause.Unknown_Error ?
+                        ERROR_COPY : createNetworkError(ex);
             } catch (IllegalArgumentException e) {
                 return ERROR_COPY;
             } catch (DropboxException e) {
@@ -110,13 +116,13 @@ public class CopyToNetworkMultiTask extends NetworkActionMultiTask {
             return ERROR_FILE_NOT_EXISTS;
         } else if (e instanceof InterruptedIOException) {
             return CANCELED;
-        } else if (e instanceof IOException || e instanceof IllegalArgumentException || e instanceof FTPDataTransferException) {
+        } else if (e instanceof IllegalArgumentException || e instanceof FTPDataTransferException) {
             return ERROR_COPY;
-        } else if  (e instanceof DropboxException) {
-            return createNetworkError(NetworkException.handleNetworkException(e));
         } else {
             e.printStackTrace();
-            return ERROR_COPY;
+            NetworkException ex = NetworkException.handleNetworkException(e);
+            return ex.getErrorCause() == NetworkException.ErrorCause.Unknown_Error ?
+                    ERROR_COPY : createNetworkError(ex);
         }
     }
 
@@ -280,8 +286,9 @@ public class CopyToNetworkMultiTask extends NetworkActionMultiTask {
                     SmbFileOutputStream out = new SmbFileOutputStream(destinationFile, true);
                     FileInputStream in = new FileInputStream(source);
                     int len;
-                    while ((len = in.read(BUFFER)) > 0) {
-                        out.write(BUFFER, 0, len);
+                    byte[] buf = new byte[512 * 1024];
+                    while ((len = in.read(buf)) > 0) {
+                        out.write(buf, 0, len);
                         mDoneSize += len;
                         updateProgress();
                     }

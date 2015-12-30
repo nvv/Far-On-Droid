@@ -515,11 +515,11 @@ public class NetworkPanel extends MainPanel {
                 case FTP_Connection_Closed:
                     // exit from network
                     handleError(exception);
-                    exitFromNetwork();
+                    //exitFromNetwork();
                 case Yandex_Disk_Error:
                     // exit from network
                     handleUnlinkedError(exception);
-                    exitFromNetwork();
+                    //exitFromNetwork();
                     break;
                 case IO_Error: case Common_Error: case Cancel_Error: case Server_error: case Socket_Timeout:
                     // error, propose to retry

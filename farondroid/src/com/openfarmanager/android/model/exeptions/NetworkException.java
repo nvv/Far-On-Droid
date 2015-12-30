@@ -31,6 +31,13 @@ public class NetworkException extends RuntimeException {
         Yandex_Disk_Not_Initialized_Error, Unknown_Error
     }
 
+    public NetworkException() {}
+
+    public NetworkException(String error, ErrorCause cause) {
+        mLocalizedError = error;
+        mErrorCause = cause;
+    }
+
     public static NetworkException handleNetworkException(Exception e) {
         NetworkException exception = new NetworkException();
 

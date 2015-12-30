@@ -21,11 +21,11 @@ import com.openfarmanager.android.core.archive.ArchiveScanner;
 import com.openfarmanager.android.core.archive.ArchiveUtils;
 import com.openfarmanager.android.filesystem.FileProxy;
 import com.openfarmanager.android.filesystem.actions.*;
-import com.openfarmanager.android.filesystem.actions.multi.MultiActionTask;
-import com.openfarmanager.android.filesystem.actions.multi.MultiCopyTask;
+import com.openfarmanager.android.filesystem.actions.multi.network.CopyFromNetworkMultiTask;
 import com.openfarmanager.android.filesystem.actions.multi.network.CopyToNetworkMultiTask;
+import com.openfarmanager.android.filesystem.actions.multi.network.MoveFromNetworkMultiTask;
+import com.openfarmanager.android.filesystem.actions.multi.network.MoveToNetworkMultiTask;
 import com.openfarmanager.android.filesystem.actions.network.*;
-import com.openfarmanager.android.filesystem.commands.CommandsFactory;
 import com.openfarmanager.android.model.NetworkEnum;
 import com.openfarmanager.android.model.SelectParams;
 import com.openfarmanager.android.model.TaskStatusEnum;
@@ -191,7 +191,7 @@ public abstract class BaseFileSystemPanel extends BasePanel {
         if (status != TaskStatusEnum.OK) {
             String error;
             error = status == TaskStatusEnum.ERROR_CREATE_DIRECTORY ?
-                    getSafeString(R.string.error_cannot_create_file, (String) args[1]) : TaskStatusEnum.getErrorString(status);
+                    getSafeString(R.string.error_cannot_create_file, (String) args[1]) : TaskStatusEnum.getErrorString(status, (String) args[1]);
             if (status == TaskStatusEnum.ERROR_NETWORK && status.getNetworkErrorException() != null) {
                 error = status.getNetworkErrorException().getLocalizedError();
             }
@@ -322,6 +322,7 @@ public abstract class BaseFileSystemPanel extends BasePanel {
 
         @Override
         public void execute(final Object ... args) {
+            /*
             FileActionTask task = null;
             try {
                 task = new CopyFromNetworkTask(((NetworkPanel) BaseFileSystemPanel.this).getNetworkType(), fragmentManager(),
@@ -335,6 +336,21 @@ public abstract class BaseFileSystemPanel extends BasePanel {
                 e.printStackTrace();
             }
             task.execute();
+            */
+            NetworkPanel panel = (NetworkPanel) BaseFileSystemPanel.this;
+            NetworkEnum type = panel.getNetworkType();
+            String destination = (String) args[1];
+            try {
+                if (App.sInstance.getSettings().isMultiThreadTasksEnabled()) {
+                    new CopyFromNetworkMultiTask(getActivity(), type, createListener(args),
+                            panel.getFiles(), destination).execute();
+                } else {
+                    new CopyFromNetworkTask(type, fragmentManager(), createListener(args),
+                            panel.getFiles(), destination).execute();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     };
 
@@ -417,19 +433,19 @@ public abstract class BaseFileSystemPanel extends BasePanel {
             if ((Boolean) args[3]) {
                 doRename(args, true);
             } else {
-                FileActionTask task = null;
                 try {
-                    task = new MoveToNetworkTask(((NetworkPanel) args[0]).getNetworkType(), fragmentManager(),
-                            new OnActionListener() {
-                                @Override
-                                public void onActionFinish(TaskStatusEnum status) {
-                                    invalidatePanels((MainPanel) args[0]);
-                                }
-                            }, getSelectedFiles(), ((MainPanel) args[0]).getCurrentPath());
+                    NetworkPanel panel = (NetworkPanel) args[0];
+                    NetworkEnum type = panel.getNetworkType();
+                    if (App.sInstance.getSettings().isMultiThreadTasksEnabled()) {
+                        new MoveToNetworkMultiTask(getActivity(), type, createListener(args),
+                                getSelectedFiles(), panel.getCurrentPath()).execute();
+                    } else {
+                        new MoveToNetworkTask(type, fragmentManager(), createListener(args),
+                                getSelectedFiles(), panel.getCurrentPath()).execute();
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                task.execute();
             }
         }
     };
@@ -440,19 +456,20 @@ public abstract class BaseFileSystemPanel extends BasePanel {
             if ((Boolean) args[3]) {
                 doRename(args, true);
             } else {
-                FileActionTask task = null;
                 try {
-                    task = new MoveFromNetworkTask(((NetworkPanel) BaseFileSystemPanel.this).getNetworkType(), fragmentManager(),
-                            new OnActionListener() {
-                                @Override
-                                public void onActionFinish(TaskStatusEnum status) {
-                                    invalidatePanels((MainPanel) args[0]);
-                                }
-                            }, getSelectedFileProxies(), ((MainPanel) args[0]).getCurrentPath());
+                    NetworkEnum type = ((NetworkPanel) BaseFileSystemPanel.this).getNetworkType();
+                    String destination = ((MainPanel) args[0]).getCurrentPath();
+                    if (App.sInstance.getSettings().isMultiThreadTasksEnabled()) {
+                        new MoveFromNetworkMultiTask(getActivity(), type, createListener(args),
+                                getSelectedFileProxies(), destination).execute();
+                    } else {
+                        new MoveFromNetworkTask(type, fragmentManager(), createListener(args),
+                                getSelectedFileProxies(), destination).execute();
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                task.execute();
+
             }
         }
     };

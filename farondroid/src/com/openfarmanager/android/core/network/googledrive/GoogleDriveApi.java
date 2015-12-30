@@ -44,7 +44,7 @@ public class GoogleDriveApi implements NetworkApi {
     private HashMap<String, String> mFoldersAliases = new HashMap<String, String>();
     private GoogleDriveAccount mCurrentAccount;
 
-    private final static byte[] BUFFER = new byte[256 * 1024];
+    private final static byte[] BUFFER = new byte[512 * 1024];
 
     public GoogleDriveApi() {
         mDriveApi = new GoogleDriveWebApi();
@@ -155,11 +155,15 @@ public class GoogleDriveApi implements NetworkApi {
     }
 
     public void download(FileProxy source, OutputStream outputStream) throws IOException {
+        download(source, outputStream, BUFFER);
+    }
+
+    public void download(FileProxy source, OutputStream outputStream, byte[] buffer) throws IOException {
         BufferedInputStream inputStream = new BufferedInputStream(
                 mDriveApi.download(((GoogleDriveFile) source).getDownloadLink()));
         int len;
-        while ((len = inputStream.read(BUFFER)) > 0) {
-            outputStream.write(BUFFER, 0, len);
+        while ((len = inputStream.read(buffer)) > 0) {
+            outputStream.write(buffer, 0, len);
         }
         inputStream.close();
         outputStream.close();
