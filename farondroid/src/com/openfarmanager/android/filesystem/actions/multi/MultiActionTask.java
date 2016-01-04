@@ -8,28 +8,26 @@ import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 
-import com.openfarmanager.android.App;
 import com.openfarmanager.android.BuildConfig;
-import com.openfarmanager.android.R;
 import com.openfarmanager.android.core.network.smb.SmbAPI;
 import com.openfarmanager.android.dialogs.FileActionProgressDialog;
+import com.openfarmanager.android.filesystem.FileProxy;
 import com.openfarmanager.android.filesystem.actions.OnActionListener;
 import com.openfarmanager.android.model.TaskStatusEnum;
-import com.openfarmanager.android.model.exeptions.NetworkException;
 import com.openfarmanager.android.utils.StorageUtils;
 
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
-import java.lang.reflect.Constructor;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import jcifs.smb.SmbAuthException;
-import jcifs.smb.SmbException;
 
 import static com.openfarmanager.android.utils.Extensions.*;
 
@@ -40,6 +38,7 @@ public abstract class MultiActionTask {
 
     private static final int MSG_PROGRESS = 0;
     private static final int MSG_POST_RESULT = 1;
+    private static final int MSG_SET_HEADER = 2;
 
     protected final static byte[] BUFFER = new byte[512 * 1024];
 
@@ -66,6 +65,8 @@ public abstract class MultiActionTask {
 
     private TaskResult mTaskResult;
     private List<Future> mSubTasksAsynk = new LinkedList<>();
+    private Map<Future, String> mSubTasksAsynkLabels = new HashMap<>();
+    private StringBuilder mActiveSubTasksListBuilder = new StringBuilder();
 
     public MultiActionTask(final Context context, OnActionListener listener, List<File> items) {
         mItems = items;
@@ -101,8 +102,34 @@ public abstract class MultiActionTask {
         runAsync(getActionRunnable());
     }
 
-    public void runSubTaskAsynk(Callable subTask) {
-        mSubTasksAsynk.add(runAsync(subTask));
+    public void runSubTaskAsynk(Callable subTask, File file) {
+        Future future = runAsync(subTask);
+        mSubTasksAsynk.add(future);
+        mSubTasksAsynkLabels.put(future, file.getName());
+    }
+
+    public void runSubTaskAsynk(Callable subTask, FileProxy file) {
+        Future future = runAsync(subTask);
+        mSubTasksAsynk.add(future);
+        mSubTasksAsynkLabels.put(future, file.getName());
+    }
+
+    protected String getActiveSubTasksFiles() {
+        mActiveSubTasksListBuilder.setLength(0);
+        for (String file : mSubTasksAsynkLabels.values()) {
+            mActiveSubTasksListBuilder.append(file).append("  ");
+        }
+        return mActiveSubTasksListBuilder.toString();
+    }
+
+    protected void setHeader(String header) {
+        mTaskResult.header = header;
+        getHandler().obtainMessage(MSG_SET_HEADER, mTaskResult).sendToTarget();
+    }
+
+    protected void publishProgress() {
+        mTaskResult.fileName = mCurrentFile == null ? "" : mCurrentFile;
+        getHandler().obtainMessage(MSG_PROGRESS, mTaskResult).sendToTarget();
     }
 
     protected void publishProgress(final int value) {
@@ -120,9 +147,17 @@ public abstract class MultiActionTask {
         getHandler().obtainMessage(MSG_POST_RESULT, mTaskResult).sendToTarget();
     }
 
+    /**
+     * Update progress on dialog.
+     *
+     * In of <code>mTotalSize</code> equals 0 most likely we have indeterminate and should update
+     * only title text on dialog (if text is not empty).
+     */
     protected void updateProgress() {
         if (mTotalSize > 0) {
             publishProgress((int) (100 * mDoneSize / mTotalSize));
+        } else if (!isNullOrEmpty(mCurrentFile)) {
+            publishProgress();
         }
     }
 
@@ -153,7 +188,7 @@ public abstract class MultiActionTask {
             if (!future.isDone()) {
                 future.cancel(true);
             }
-            onSubTaskDone();
+            onSubTaskDone(future);
         }
     }
 
@@ -190,7 +225,7 @@ public abstract class MultiActionTask {
             try {
                 for (Future future : mSubTasksAsynk) {
                     future.get();
-                    onSubTaskDone();
+                    onSubTaskDone(future);
                 }
             } catch (ExecutionException e) {
                 handleExecutionException(e);
@@ -238,7 +273,8 @@ public abstract class MultiActionTask {
         return "MultiActionTask";
     }
 
-    public void onSubTaskDone() {
+    public void onSubTaskDone(Future future) {
+        mSubTasksAsynkLabels.remove(future);
     }
 
     public abstract TaskStatusEnum doAction();
@@ -264,6 +300,9 @@ public abstract class MultiActionTask {
                         taskResult.task.mListener.onActionFinish(taskResult.status);
                     }
                     break;
+                case MSG_SET_HEADER:
+                    taskResult.task.mProgressDialog.setHeader(taskResult.header);
+                    break;
                 case MSG_PROGRESS:
                     taskResult.task.mProgressDialog.updateProgress(taskResult.fileName, taskResult.progress);
                     break;
@@ -275,6 +314,7 @@ public abstract class MultiActionTask {
         MultiActionTask task;
         int progress;
         String fileName;
+        String header;
         TaskStatusEnum status;
     }
 

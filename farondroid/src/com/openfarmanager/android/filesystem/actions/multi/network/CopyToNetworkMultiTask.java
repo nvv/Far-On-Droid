@@ -34,6 +34,7 @@ import java.io.InterruptedIOException;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import it.sauronsoftware.ftp4j.FTPDataTransferException;
 import it.sauronsoftware.ftp4j.FTPDataTransferListener;
@@ -107,6 +108,10 @@ public class CopyToNetworkMultiTask extends NetworkActionMultiTask {
                 return ERROR_COPY;
             }
         }
+
+        mCurrentFile = getActiveSubTasksFiles();
+        updateProgress();
+
         return TaskStatusEnum.OK;
     }
 
@@ -124,6 +129,13 @@ public class CopyToNetworkMultiTask extends NetworkActionMultiTask {
             return ex.getErrorCause() == NetworkException.ErrorCause.Unknown_Error ?
                     ERROR_COPY : createNetworkError(ex);
         }
+    }
+
+    @Override
+    public void onSubTaskDone(Future future) {
+        super.onSubTaskDone(future);
+        mCurrentFile = getActiveSubTasksFiles();
+        updateProgress();
     }
 
     private void copyToGoogleDrive(final File source, final String destination) throws Exception {
@@ -154,7 +166,7 @@ public class CopyToNetworkMultiTask extends NetworkActionMultiTask {
                     });
                     return null;
                 }
-            });
+            }, source);
         }
     }
 
@@ -184,7 +196,7 @@ public class CopyToNetworkMultiTask extends NetworkActionMultiTask {
                     });
                     return null;
                 }
-            });
+            }, source);
         }
     }
 
@@ -212,7 +224,7 @@ public class CopyToNetworkMultiTask extends NetworkActionMultiTask {
                     updateProgress();
                     return null;
                 }
-            });
+            }, source);
         }
     }
 
@@ -260,7 +272,7 @@ public class CopyToNetworkMultiTask extends NetworkActionMultiTask {
                     });
                     return null;
                 }
-            });
+            }, source);
         }
     }
 
@@ -298,7 +310,7 @@ public class CopyToNetworkMultiTask extends NetworkActionMultiTask {
 
                     return null;
                 }
-            });
+            }, source);
         }
     }
 
@@ -337,7 +349,7 @@ public class CopyToNetworkMultiTask extends NetworkActionMultiTask {
 
                     return null;
                 }
-            });
+            }, source);
         }
     }
 
@@ -398,7 +410,7 @@ public class CopyToNetworkMultiTask extends NetworkActionMultiTask {
                     upload.run();
                     return null;
                 }
-            });
+            }, source);
         }
     }
 

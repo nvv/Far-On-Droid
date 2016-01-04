@@ -141,6 +141,7 @@ public class GoogleDriveWebApi extends Api {
 
             return statusLine.getStatusCode() == 204;
         } catch (Exception e) {
+            e.printStackTrace();
             return false;
         }
     }

@@ -50,6 +50,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 
 import it.sauronsoftware.ftp4j.FTPAbortedException;
 import it.sauronsoftware.ftp4j.FTPDataTransferException;
@@ -96,6 +97,13 @@ public class CopyFromNetworkMultiTask extends NetworkActionMultiTask {
 
     @Override
     protected void calculateSize() {
+    }
+
+    @Override
+    public void onSubTaskDone(Future future) {
+        super.onSubTaskDone(future);
+        mCurrentFile = getActiveSubTasksFiles();
+        updateProgress();
     }
 
     @Override
@@ -151,6 +159,10 @@ public class CopyFromNetworkMultiTask extends NetworkActionMultiTask {
                 return ERROR_COPY;
             }
         }
+
+        mCurrentFile = getActiveSubTasksFiles();
+        updateProgress();
+
         return TaskStatusEnum.OK;
     }
 
@@ -195,11 +207,10 @@ public class CopyFromNetworkMultiTask extends NetworkActionMultiTask {
                 public Object call() throws Exception {
                     createDirectoryIfNotExists(destination);
                     File destinationFile = createFileIfNotExists(fullSourceFilePath);
-                    setCurrentFile(source);
                     api.download(source, getOutputStream(mSdCardPath, mUseStorageApi, mBaseUri, destinationFile), new byte[512 * 1024]);
                     return null;
                 }
-            });
+            }, source);
         }
     }
 
@@ -228,11 +239,10 @@ public class CopyFromNetworkMultiTask extends NetworkActionMultiTask {
                 public Object call() throws Exception {
                     createDirectoryIfNotExists(destination);
                     File destinationFile = createFileIfNotExists(fullSourceFilePath);
-                    setCurrentFile(source);
                     api.download(source, getOutputStream(mSdCardPath, mUseStorageApi, mBaseUri, destinationFile));
                     return null;
                 }
-            });
+            }, source);
         }
 
     }
@@ -265,11 +275,10 @@ public class CopyFromNetworkMultiTask extends NetworkActionMultiTask {
                 public Object call() throws Exception {
                     createDirectoryIfNotExists(destination);
                     File destinationFile = createFileIfNotExists(fullSourceFilePath);
-                    setCurrentFile(source);
                     api.getFile(source.getFullPath(), null, getOutputStream(mSdCardPath, mUseStorageApi, mBaseUri, destinationFile), null);
                     return null;
                 }
-            });
+            }, source);
         }
     }
 
@@ -303,11 +312,10 @@ public class CopyFromNetworkMultiTask extends NetworkActionMultiTask {
                 public Object call() throws Exception {
                     createDirectoryIfNotExists(destination);
                     File destinationFile = createFileIfNotExists(fullSourceFilePath);
-                    setCurrentFile(source);
                     api.client().download(source.getFullPath(), getOutputStream(mSdCardPath, mUseStorageApi, mBaseUri, destinationFile), 0, null);
                     return null;
                 }
-            });
+            }, source);
         }
     }
 
@@ -340,7 +348,6 @@ public class CopyFromNetworkMultiTask extends NetworkActionMultiTask {
                 public Object call() throws Exception {
                     createDirectoryIfNotExists(destination);
                     File destinationFile = createFileIfNotExists(fullSourceFilePath);
-                    setCurrentFile(source);
                     SmbFileInputStream in = new SmbFileInputStream(api.createSmbFile(source.getFullPath()));
                     OutputStream out = getOutputStream(mSdCardPath, mUseStorageApi, mBaseUri, destinationFile);
 
@@ -354,7 +361,7 @@ public class CopyFromNetworkMultiTask extends NetworkActionMultiTask {
                     in.close();
                     return null;
                 }
-            });
+            }, source);
         }
     }
 
@@ -387,7 +394,6 @@ public class CopyFromNetworkMultiTask extends NetworkActionMultiTask {
                 public Object call() throws Exception {
                     createDirectoryIfNotExists(destination);
                     File destinationFile = createFileIfNotExists(fullSourceFilePath);
-                    setCurrentFile(source);
                     api.client().downloadFile(source.getFullPath(), getOutputStream(mSdCardPath, mUseStorageApi, mBaseUri, destinationFile), new ProgressListener() {
                         @Override
                         public void updateProgress(long loaded, long total) {
@@ -400,7 +406,7 @@ public class CopyFromNetworkMultiTask extends NetworkActionMultiTask {
                     });
                     return null;
                 }
-            });
+            }, source);
         }
     }
 
@@ -433,7 +439,6 @@ public class CopyFromNetworkMultiTask extends NetworkActionMultiTask {
                 public Object call() throws Exception {
                     createDirectoryIfNotExists(destination);
                     File destinationFile = createFileIfNotExists(fullSourceFilePath);
-                    setCurrentFile(source);
                     LinkedHashMap<String, Object> query = new LinkedHashMap<>();
                     query.put("quick_key", source.getId());
                     query.put("link_type", "direct_download");
@@ -458,7 +463,7 @@ public class CopyFromNetworkMultiTask extends NetworkActionMultiTask {
                     in.close();
                     return null;
                 }
-            });
+            }, source);
         }
     }
 
@@ -468,11 +473,6 @@ public class CopyFromNetworkMultiTask extends NetworkActionMultiTask {
             throw new IOException();
         }
         return destinationFile;
-    }
-
-    private void setCurrentFile(FileProxy source) {
-        mCurrentFile = source.getName();
-        updateProgress();
     }
 
     private static OutputStream getOutputStream(String sdCardPath, boolean useStorageApi, Uri baseUri, File outputFile) throws FileNotFoundException {

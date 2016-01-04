@@ -20,6 +20,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 
 import jcifs.smb.SmbAuthException;
 
@@ -61,8 +62,11 @@ public class DeleteFromNetworkTask extends NetworkActionMultiTask {
                     api.delete(file);
                     return null;
                 }
-            });
+            }, file);
         }
+
+        mCurrentFile = getActiveSubTasksFiles();
+        updateProgress();
 
         return OK;
     }
@@ -79,8 +83,10 @@ public class DeleteFromNetworkTask extends NetworkActionMultiTask {
     }
 
     @Override
-    public void onSubTaskDone() {
+    public void onSubTaskDone(Future future) {
+        super.onSubTaskDone(future);
         mDoneSize++;
+        mCurrentFile = getActiveSubTasksFiles();
         updateProgress();
     }
 

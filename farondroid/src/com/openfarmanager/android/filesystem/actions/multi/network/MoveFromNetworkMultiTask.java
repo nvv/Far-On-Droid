@@ -3,6 +3,8 @@ package com.openfarmanager.android.filesystem.actions.multi.network;
 import android.content.Context;
 
 import com.dropbox.client2.exception.DropboxException;
+import com.openfarmanager.android.App;
+import com.openfarmanager.android.R;
 import com.openfarmanager.android.core.network.NetworkApi;
 import com.openfarmanager.android.filesystem.FileProxy;
 import com.openfarmanager.android.filesystem.actions.OnActionListener;
@@ -44,13 +46,17 @@ public class MoveFromNetworkMultiTask extends CopyFromNetworkMultiTask {
     public TaskStatusEnum doAction() {
         final NetworkApi api = getApi();
         for (final FileProxy file : mItems) {
+            if (isCancelled()) {
+                break;
+            }
+
             runSubTaskAsynk(new Callable<Void>() {
                 @Override
                 public Void call() throws Exception {
                     api.delete(file);
                     return null;
                 }
-            });
+            }, file);
         }
         return TaskStatusEnum.OK;
     }
@@ -62,13 +68,14 @@ public class MoveFromNetworkMultiTask extends CopyFromNetworkMultiTask {
     private Runnable mActionRunnable = new Runnable() {
         @Override
         public void run() {
-            calculateSize();
+            setHeader(App.sInstance.getString(R.string.action_copy));
             TaskStatusEnum status = MoveFromNetworkMultiTask.super.doAction();
 
             if (hasSubTasks() && handleSubTasks(status)) {
                 return;
             }
 
+            setHeader(App.sInstance.getString(R.string.action_delete));
             status = doAction();
 
             if (hasSubTasks() && handleSubTasks(status)) {
