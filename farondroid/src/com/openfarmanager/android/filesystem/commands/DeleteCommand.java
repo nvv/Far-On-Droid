@@ -42,7 +42,7 @@ public class DeleteCommand extends AbstractPermissionCommand {
                                     e.printStackTrace();
                                 }
                             }
-                            mPanel.invalidatePanels((MainPanel) args[0]);
+                            mPanel.invalidatePanels((MainPanel) args[0], false);
                         }
                     }, mPanel.getSelectedFiles());
         } catch (Exception e) {

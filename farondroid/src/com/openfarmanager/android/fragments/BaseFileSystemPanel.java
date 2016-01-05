@@ -186,8 +186,12 @@ public abstract class BaseFileSystemPanel extends BasePanel {
         doRename(args, false);
     }
 
-    @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
     public void handleNetworkActionResult(TaskStatusEnum status, Object[] args) {
+        handleNetworkActionResult(status, true, args);
+    }
+
+    @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
+    public void handleNetworkActionResult(TaskStatusEnum status, boolean forceInvalidate, Object[] args) {
         if (status != TaskStatusEnum.OK) {
             String error;
             error = status == TaskStatusEnum.ERROR_CREATE_DIRECTORY ?
@@ -200,7 +204,7 @@ public abstract class BaseFileSystemPanel extends BasePanel {
                 ErrorDialog.newInstance(error).show(fragmentManager(), "errorDialog");
             } catch (Exception ignore) {}
         }
-        invalidatePanels((MainPanel) args[0]);
+        invalidatePanels((MainPanel) args[0], forceInvalidate);
     }
 
     @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
@@ -585,4 +589,6 @@ public abstract class BaseFileSystemPanel extends BasePanel {
     protected abstract void onNavigationItemSelected(int pos, List<String> items);
 
     protected abstract void invalidatePanels(MainPanel inactivePanel);
+
+    protected abstract void invalidatePanels(MainPanel inactivePanel, boolean force);
 }

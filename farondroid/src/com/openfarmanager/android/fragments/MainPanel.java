@@ -714,15 +714,22 @@ public class MainPanel extends BaseFileSystemPanel {
                 mSelectedFiles.size() > 0 ? mSelectedFiles.get(0).getName() : ""));
     }
 
+    @Override
     public void invalidatePanels(MainPanel inactivePanel) {
+        invalidatePanels(inactivePanel, true);
+    }
+
+    @Override
+    public void invalidatePanels(MainPanel inactivePanel, boolean force) {
         getSelectedFiles().clear();
         invalidate();
         // inactivePanel may be null when 'quick view' is opened.
         if (inactivePanel != null) {
             try {
-                inactivePanel.invalidate();
+                if (force || isTheSameFolders(inactivePanel)) {
+                    inactivePanel.invalidate();
+                }
             } catch (Exception ignore) {
-
             }
         }
     }
@@ -1076,6 +1083,16 @@ public class MainPanel extends BaseFileSystemPanel {
             // use current dir.
             openDirectory(parentFile == null ? mBaseDir : parentFile);
         }
+    }
+
+    /**
+     * Determines when both panels (this and inactive) have the same type (local or network)
+     * and open the same folder.
+     *
+     * @return <code>true</code> when folders are the same ond opened the same folders, <code>false</code> otherwise.
+     */
+    private boolean isTheSameFolders(MainPanel inactivePanel) {
+        return getClass() == inactivePanel.getClass() && getCurrentPath().equals(inactivePanel.getCurrentPath());
     }
 
     /**

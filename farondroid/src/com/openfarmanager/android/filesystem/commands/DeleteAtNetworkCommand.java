@@ -45,7 +45,7 @@ public class DeleteAtNetworkCommand implements AbstractCommand {
         return new OnActionListener() {
             @Override
             public void onActionFinish(TaskStatusEnum status) {
-                mNetworkPanel.handleNetworkActionResult(status, args);
+                mNetworkPanel.handleNetworkActionResult(status, false, args);
             }
         };
     }
