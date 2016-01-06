@@ -209,7 +209,7 @@ public class MainPanel extends BaseFileSystemPanel {
             @Override
             public void onClick(View v) {
                 unselectAll();
-                invalidate();
+                invalidate(false);
             }
         });
 
@@ -742,6 +742,16 @@ public class MainPanel extends BaseFileSystemPanel {
     }
 
     public void invalidate() {
+        invalidate(true);
+    }
+
+    /**
+     * Reload panel with <code>mSelectedFiles</code>.
+     *
+     * @see MainPanel#mSelectedFiles
+     * @param forceReloadFiles force panel to reload files.
+     */
+    public void invalidate(boolean forceReloadFiles) {
         FlatFileSystemAdapter adapter = (FlatFileSystemAdapter) mFileSystemList.getAdapter();
         adapter.setBaseDir(mBaseDir);
         adapter.setSelectedFiles(mSelectedFiles);

@@ -294,8 +294,16 @@ public class NetworkPanel extends MainPanel {
                 observeOn(AndroidSchedulers.mainThread()).subscribe(mOpenDirectoryObserver);
     }
 
-    public void invalidate() {
-        openDirectory(mDataSource.getParentPath(getCurrentPath()), false);
+    @Override
+    public void invalidate(boolean forceReloadFiles) {
+        ListAdapter adapter = mFileSystemList.getAdapter();
+        if (forceReloadFiles) {
+            openDirectory(mDataSource.getParentPath(getCurrentPath()), false);
+        } else if (adapter != null && adapter instanceof NetworkEntryAdapter) {
+            NetworkEntryAdapter listAdapter = (NetworkEntryAdapter) adapter;
+            listAdapter.setSelectedFiles(mSelectedFiles);
+            listAdapter.notifyDataSetChanged();
+        }
         setSelectedFilesSizeVisibility();
         showQuickActionPanel();
     }
