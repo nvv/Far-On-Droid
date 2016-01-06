@@ -34,6 +34,9 @@
                 android:layout_height="wrap_content"
                 android:paddingLeft="10dp"
                 android:paddingRight="10dp"
+                android:maxLines="5"
+                android:ellipsize="end"
+                android:singleLine="false"
                 android:textSize="12sp"
                 android:textColor="@color/white"/>
 
