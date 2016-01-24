@@ -2,26 +2,23 @@ package com.openfarmanager.android.googledrive.api;
 
 import com.openfarmanager.android.googledrive.R;
 import com.openfarmanager.android.googledrive.model.About;
-import com.openfarmanager.android.googledrive.model.exceptions.ResponseException;
 import com.openfarmanager.android.googledrive.model.Token;
-import com.openfarmanager.android.googledrive.model.exceptions.TokenExpiredException;
+import com.openfarmanager.android.googledrive.model.exceptions.ResponseException;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.StatusLine;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.utils.URLEncodedUtils;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 
-import java.util.ArrayList;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
 import static com.openfarmanager.android.googledrive.GoogleDriveConstants.ABOUT_URL;
@@ -29,14 +26,20 @@ import static com.openfarmanager.android.googledrive.GoogleDriveConstants.AUTH_U
 import static com.openfarmanager.android.googledrive.GoogleDriveConstants.CLIENT_ID;
 import static com.openfarmanager.android.googledrive.GoogleDriveConstants.REDIRECT_URL;
 import static com.openfarmanager.android.googledrive.GoogleDriveConstants.TOKEN_URL;
-
-import static com.openfarmanager.android.googledrive.api.Fields.*;
+import static com.openfarmanager.android.googledrive.api.Fields.ACCESS_TOKEN;
+import static com.openfarmanager.android.googledrive.api.Fields.AUTHORIZATION_CODE;
 import static com.openfarmanager.android.googledrive.api.Fields.CODE;
+import static com.openfarmanager.android.googledrive.api.Fields.GRANT_TYPE;
+import static com.openfarmanager.android.googledrive.api.Fields.REFRESH_TOKEN;
 
 /**
  * author: Vlad Namashko
  */
 public class Api {
+
+    protected static final String METHOD_DELETE = "DELETE";
+    protected static final String METHOD_PUT = "PUT";
+    protected static final String METHOD_POST = "POST";
 
     private static final String AUTH_CODE_URL = AUTH_URL + "?" +
             "client_id=" + CLIENT_ID + "&" +
@@ -56,13 +59,13 @@ public class Api {
 
     public Token refreshToken(final Token token) {
         try {
-            HttpResponse response = prepareTokenRequest(REFRESH_TOKEN, new ArrayList<BasicNameValuePair>() {{
-                    add(new BasicNameValuePair(REFRESH_TOKEN, token.getRefreshToken()));
-                }});
+            HttpURLConnection connection = prepareTokenRequest(REFRESH_TOKEN, new HashMap<String, String>() {{
+                put(REFRESH_TOKEN, token.getRefreshToken());
+            }});
 
-            if ((response.getStatusLine().getStatusCode() == 201 ||
-                    response.getStatusLine().getStatusCode() == 200)) {
-                return new Token(EntityUtils.toString(response.getEntity()), token.getRefreshToken());
+            int responseCode = connection.getResponseCode();
+            if (responseCode == 201 || responseCode == 200) {
+                return new Token(streamToString(connection.getInputStream()), token.getRefreshToken());
             }
         } catch (JSONException e) {
             throw new ResponseException(R.string.response_error);
@@ -79,14 +82,14 @@ public class Api {
         final String code = extractAuthCode(url);
 
         try {
-            HttpResponse response = prepareTokenRequest(AUTHORIZATION_CODE, new ArrayList<BasicNameValuePair>() {{
-                add(new BasicNameValuePair(CODE, code));
-                add(new BasicNameValuePair(Fields.REDIRECT_URI, REDIRECT_URL));
+            HttpURLConnection connection = prepareTokenRequest(AUTHORIZATION_CODE, new HashMap<String, String>() {{
+                put(CODE, code);
+                put(Fields.REDIRECT_URI, REDIRECT_URL);
             }});
 
-            if ((response.getStatusLine().getStatusCode() == 201 ||
-                    response.getStatusLine().getStatusCode() == 200)) {
-                return new Token(EntityUtils.toString(response.getEntity()));
+            int responseCode = connection.getResponseCode();
+            if (responseCode == 201 || responseCode == 200) {
+                return new Token(streamToString(connection.getInputStream()));
             }
 
 
@@ -102,43 +105,71 @@ public class Api {
     }
 
     public About getAbout(Token token) throws Exception {
+        HttpURLConnection connection = (HttpURLConnection) new URL(ABOUT_URL + "?" + getAuth(token)).openConnection();
+        connection.setRequestProperty("Cache-Control", "no-cache");
+        int responseCode = connection.getResponseCode();
+        if (isTokenExpired(responseCode, connection.getResponseMessage())) {
+            setupToken(refreshToken(mToken));
+            return getAbout(mToken);
+        }
 
-        HttpGet httpGet = new HttpGet(ABOUT_URL + "?" + getAuth(token));
-        DefaultHttpClient httpClient = new DefaultHttpClient();
-        HttpResponse response =  httpClient.execute(httpGet);
-
-        StatusLine statusLine = response.getStatusLine();
-
-        if (isTokenExpired(statusLine)) {}
-
-        if ((statusLine.getStatusCode() == 201 || statusLine.getStatusCode() == 200)) {
-            return new About(EntityUtils.toString(response.getEntity()));
+        if (responseCode == 201 || responseCode == 200) {
+            return new About(streamToString(connection.getInputStream()));
         }
 
         return null;
     }
 
-    private HttpResponse prepareTokenRequest(String grantType, ArrayList<BasicNameValuePair> extraParams) throws Exception {
-        HttpPost httpPost = new HttpPost(TOKEN_URL);
-        DefaultHttpClient httpClient = new DefaultHttpClient();
-        httpPost.setHeader("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
-        httpPost.setHeader("Cache-Control", "no-cache");
-        List<NameValuePair> params = new ArrayList<NameValuePair>(4);
-        params.add(new BasicNameValuePair(GRANT_TYPE, grantType));
-        params.add(new BasicNameValuePair(Fields.CLIENT_ID, CLIENT_ID));
-        params.addAll(extraParams);
-        httpPost.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
-        return httpClient.execute(httpPost);
+    private HttpURLConnection prepareTokenRequest(String grantType, HashMap<String, String> params) throws Exception {
+        HttpURLConnection connection = (HttpURLConnection) new URL(TOKEN_URL).openConnection();
+        connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
+        connection.setRequestProperty("Cache-Control", "no-cache");
+        connection.setRequestMethod(METHOD_POST);
+
+        params.put(GRANT_TYPE, grantType);
+        params.put(Fields.CLIENT_ID, CLIENT_ID);
+
+        OutputStream os = connection.getOutputStream();
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
+        writer.write(getPostDataString(params));
+
+        writer.flush();
+        writer.close();
+        MultipartUtility.closeStream(writer);
+        MultipartUtility.closeStream(os);
+
+        return connection;
+    }
+
+    private String getPostDataString(HashMap<String, String> params) throws UnsupportedEncodingException {
+        StringBuilder result = new StringBuilder();
+        boolean first = true;
+        for(Map.Entry<String, String> entry : params.entrySet()){
+            if (first) {
+                first = false;
+            } else {
+                result.append("&");
+            }
+            result.append(URLEncoder.encode(entry.getKey(), "UTF-8"));
+            result.append("=");
+            result.append(URLEncoder.encode(entry.getValue(), "UTF-8"));
+        }
+
+        return result.toString();
     }
 
     protected String getAuth() {
         return getAuth(mToken);
     }
 
-    private String getAuth(Token token) {
-        List<NameValuePair> params = new LinkedList<NameValuePair>();
-        params.add(new BasicNameValuePair(ACCESS_TOKEN, token.getAccessToken()));
-        return URLEncodedUtils.format(params, "utf-8");
+    private String getAuth(final Token token) {
+        try {
+            return getPostDataString(new HashMap<String, String>() {{
+                put(ACCESS_TOKEN, token.getAccessToken());
+            }});
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public String extractAuthCode(String url) {
@@ -146,7 +177,34 @@ public class Api {
         return url.substring(pos + 5, pos + url.indexOf("&", pos) - pos);
     }
 
-    protected boolean isTokenExpired(StatusLine statusLine) {
-        return statusLine.getStatusCode() == 401 && statusLine.getReasonPhrase().equals("Unauthorized");
+    protected boolean isTokenExpired(int statusCode, String message) {
+        return statusCode == 401 && message.equals("Unauthorized");
+    }
+
+    protected String streamToString(InputStream is) {
+
+        BufferedReader br = null;
+        StringBuilder sb = new StringBuilder();
+
+        String line;
+        try {
+            br = new BufferedReader(new InputStreamReader(is));
+            while ((line = br.readLine()) != null) {
+                sb.append(line);
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (br != null) {
+                try {
+                    br.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        return sb.toString();
     }
 }

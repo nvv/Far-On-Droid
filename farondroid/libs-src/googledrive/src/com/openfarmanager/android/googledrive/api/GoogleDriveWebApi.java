@@ -2,25 +2,16 @@ package com.openfarmanager.android.googledrive.api;
 
 import com.openfarmanager.android.googledrive.model.File;
 import com.openfarmanager.android.googledrive.model.exceptions.CreateFolderException;
-import com.openfarmanager.android.googledrive.model.exceptions.ResponseException;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.StatusLine;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
@@ -63,83 +54,52 @@ public class GoogleDriveWebApi extends Api {
     }
 
     public InputStream download(String downloadLink) throws IOException {
-        HttpGet httpGet = new HttpGet(downloadLink + '&' + getAuth());
-        DefaultHttpClient httpClient = new DefaultHttpClient();
+        URL url = new URL(downloadLink + '&' + getAuth());
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
-        HttpResponse response = httpClient.execute(httpGet);
-
-        StatusLine statusLine = response.getStatusLine();
-        if (isTokenExpired(statusLine)) {
+        int statusCode = connection.getResponseCode();
+        if (isTokenExpired(statusCode, connection.getResponseMessage())) {
             setupToken(refreshToken(mToken));
             download(downloadLink);
         }
 
-        if (statusLine.getStatusCode() > 200) throw new RuntimeException();
+        if (statusCode > 200) throw new RuntimeException();
 
-        return response.getEntity().getContent();
+        return connection.getInputStream();
     }
 
     public void upload(String parentId, String title, java.io.File file, UploadListener listener) {
-        HttpPost httpPost = new HttpPost(UPLOAD_URL + '?' + getAuth() + "&uploadType=multipart");
-        httpPost.setHeader("Content-Type", String.format("multipart/related; boundary=\"%s\"", file.getName().replace(".", "_")));
-        httpPost.setHeader("Cache-Control", "no-cache");
-        DefaultHttpClient httpClient = new DefaultHttpClient();
-        HttpResponse response = null;
-
-        JSONObject postData = new JSONObject();
-        SimpleMultipartEntity entity = null;
         try {
+            JSONObject postData = new JSONObject();
             setupFileNameData(title, parentId, postData);
 
-            entity = new SimpleMultipartEntity(file.getName().replace(".", "_"), listener);
-            entity.addPart("meta", postData.toString());
-            entity.addPart("content", file.getName(), new FileInputStream(file));
-
-            httpPost.setEntity(entity);
-
-            response = httpClient.execute(httpPost);
-
-        } catch (IOException e) {
-            throw new ResponseException(0);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        } finally {
-            if (entity != null) {
-                entity.reset();
-            }
-        }
-
-        StatusLine statusLine = response.getStatusLine();
-        if (isTokenExpired(statusLine)) {
-            setupToken(refreshToken(mToken));
-            upload(parentId, title, file, listener);
-        }
-
-        if ((statusLine.getStatusCode() == 201 || statusLine.getStatusCode() == 200)) {
+            MultipartUtility multipartUtility = new MultipartUtility(new URL(UPLOAD_URL + '?' + getAuth() + "&uploadType=multipart"));
             try {
+                multipartUtility.addFormField("meta", postData.toString(), "application/json");
+                multipartUtility.addFilePart("content", file, listener);
 
-            } catch (Exception e) {
-                e.printStackTrace();
+                int statusCode = multipartUtility.doRequest();
+                String message = multipartUtility.getResponseMessage();
+
+                if (isTokenExpired(statusCode, message)) {
+                    setupToken(refreshToken(mToken));
+                    upload(parentId, title, file, listener);
+                }
+
+            } finally {
+                multipartUtility.close();
             }
-        }
 
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public boolean delete(String fileId) {
-        HttpDelete httpDelete = new HttpDelete(LIST_URL + "/" + fileId + '?' + getAuth());
-        httpDelete.setHeader("Content-Type", "application/json; charset=utf-8");
-        httpDelete.setHeader("Cache-Control", "no-cache");
-        DefaultHttpClient httpClient = new DefaultHttpClient();
-
         try {
-            StatusLine statusLine = httpClient.execute(httpDelete).getStatusLine();
-
-            if (isTokenExpired(statusLine)) {
-                setupToken(refreshToken(mToken));
-                return delete(fileId);
-            }
-
-            return statusLine.getStatusCode() == 204;
+            HttpURLConnection connection = createConnection(new URL(LIST_URL + "/" + fileId + '?' + getAuth()));
+            connection.setRequestMethod(METHOD_DELETE);
+            return connection.getResponseCode() >= 200 && connection.getResponseCode() <= 204;
         } catch (Exception e) {
             e.printStackTrace();
             return false;
@@ -147,77 +107,58 @@ public class GoogleDriveWebApi extends Api {
     }
 
     public File createDirectory(String title, String parentId) {
-        HttpPost httpPost = new HttpPost(LIST_URL + '?' + getAuth());
-        httpPost.setHeader("Content-Type", "application/json; charset=utf-8");
-        httpPost.setHeader("Cache-Control", "no-cache");
-        DefaultHttpClient httpClient = new DefaultHttpClient();
-        JSONObject postData = new JSONObject();
-        HttpResponse response = null;
-
         try {
+            HttpURLConnection connection = createConnection(new URL(LIST_URL + '?' + getAuth()));
+            connection.setRequestMethod(METHOD_POST);
+
+            JSONObject postData = new JSONObject();
             postData.put(MIME_TYPE, FOLDER_MIME_TYPE);
-
             setupFileNameData(title, parentId, postData);
-            httpPost.setEntity(new StringEntity(postData.toString()));
 
-            response = httpClient.execute(httpPost);
+            OutputStreamWriter out = new OutputStreamWriter(connection.getOutputStream());
+            out.write(postData.toString());
+            out.close();
 
-        } catch (ClientProtocolException e) {
-            throw new ResponseException(0);
-        } catch (IOException e) {
-            throw new ResponseException(0);
-        } catch (JSONException e) {
+            int statusCode = connection.getResponseCode();
+
+            if (isTokenExpired(statusCode, connection.getResponseMessage())) {
+                setupToken(refreshToken(mToken));
+                return createDirectory(title, parentId);
+            }
+
+            if (statusCode == 201 || statusCode == 200) {
+                return new File(streamToString(connection.getInputStream()));
+            }
+
+            throw new CreateFolderException();
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
-
-        StatusLine statusLine = response.getStatusLine();
-
-        if (isTokenExpired(statusLine)) {
-            setupToken(refreshToken(mToken));
-            return createDirectory(title, parentId);
-        }
-
-        if ((statusLine.getStatusCode() == 201 || statusLine.getStatusCode() == 200)) {
-            try {
-                return new File(EntityUtils.toString(response.getEntity()));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-        throw new CreateFolderException();
-    }
-
-    private void setupFileNameData(String title, String parentId, JSONObject postData) throws JSONException {
-        postData.put(TITLE, title);
-        JSONArray parents = new JSONArray();
-        JSONObject parent = new JSONObject();
-        parent.put(ID, parentId);
-        postData.put(PARENTS, parents.put(parent));
     }
 
     public boolean rename(String fileId, String newTitle) {
-        HttpPut httpPut = new HttpPut(LIST_URL + "/" + fileId + '?' + getAuth());
-        httpPut.setHeader("Content-Type", "application/json; charset=utf-8");
-        httpPut.setHeader("Cache-Control", "no-cache");
-
         try {
+            HttpURLConnection connection = createConnection(new URL(LIST_URL + "/" + fileId + '?' + getAuth()));
+            connection.setRequestMethod(METHOD_PUT);
+
             JSONObject obj = new JSONObject();
             obj.put(TITLE, newTitle);
-            httpPut.setEntity(new StringEntity(obj.toString()));
 
-            DefaultHttpClient httpClient = new DefaultHttpClient();
+            OutputStreamWriter out = new OutputStreamWriter(connection.getOutputStream());
+            out.write(obj.toString());
+            out.close();
 
-            StatusLine statusLine = httpClient.execute(httpPut).getStatusLine();
+            int statusCode = connection.getResponseCode();
 
-            if (isTokenExpired(statusLine)) {
+            if (isTokenExpired(statusCode, connection.getResponseMessage())) {
                 setupToken(refreshToken(mToken));
                 return delete(fileId);
             }
 
-            return statusLine.getStatusCode() == 200;
+            return statusCode == 200;
         } catch (Exception e) {
+            e.printStackTrace();
             return false;
         }
     }
@@ -229,20 +170,18 @@ public class GoogleDriveWebApi extends Api {
             url += "&pageToken=" + URLEncoder.encode(nextPageToken, "UTF-8");
         }
 
-        HttpGet httpGet = new HttpGet(url);
-        DefaultHttpClient httpClient = new DefaultHttpClient();
-        HttpResponse response =  httpClient.execute(httpGet);
+        URL urlConnection = new URL(url);
+        HttpURLConnection connection = (HttpURLConnection) urlConnection.openConnection();
 
-        StatusLine statusLine = response.getStatusLine();
-
-        if (isTokenExpired(statusLine)) {
+        int statusCode = connection.getResponseCode();
+        if (isTokenExpired(statusCode, connection.getResponseMessage())) {
             setupToken(refreshToken(mToken));
             list(files, nextPageToken, query);
             return;
         }
 
-        if ((statusLine.getStatusCode() == 201 || statusLine.getStatusCode() == 200)) {
-            String json = EntityUtils.toString(response.getEntity());
+        if (statusCode == 201 || statusCode == 200) {
+            String json = streamToString(connection.getInputStream());
             JSONObject responseObject = new JSONObject(json);
             JSONArray items = responseObject.getJSONArray("items");
 
@@ -264,6 +203,21 @@ public class GoogleDriveWebApi extends Api {
                 list(files, pageToken, query);
             }
         }
+    }
+
+    private HttpURLConnection createConnection(URL url) throws IOException {
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestProperty("Content-Type", "application/json; charset=utf-8");
+        connection.setRequestProperty("Cache-Control", "no-cache");
+        return connection;
+    }
+
+    private void setupFileNameData(String title, String parentId, JSONObject postData) throws JSONException {
+        postData.put(TITLE, title);
+        JSONArray parents = new JSONArray();
+        JSONObject parent = new JSONObject();
+        parent.put(ID, parentId);
+        postData.put(PARENTS, parents.put(parent));
     }
 
     public static interface UploadListener {
