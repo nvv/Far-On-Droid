@@ -25,6 +25,7 @@ public class FileActionProgressDialog extends Dialog {
     public FileActionProgressDialog(Context context, OnDismissListener listener) {
         super(context, R.style.Action_Dialog);
         mOnDismissListener = listener;
+        setCancelable(false);
     }
 
     @Override
