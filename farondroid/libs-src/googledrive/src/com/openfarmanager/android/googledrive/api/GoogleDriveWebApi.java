@@ -99,7 +99,11 @@ public class GoogleDriveWebApi extends Api {
         try {
             HttpURLConnection connection = createConnection(new URL(LIST_URL + "/" + fileId + '?' + getAuth()));
             connection.setRequestMethod(METHOD_DELETE);
-            return connection.getResponseCode() >= 200 && connection.getResponseCode() <= 204;
+            int responseCode = connection.getResponseCode();
+            if (responseCode == 403) {
+                return delete(fileId);
+            }
+            return responseCode >= 200 && responseCode <= 204;
         } catch (Exception e) {
             e.printStackTrace();
             return false;
