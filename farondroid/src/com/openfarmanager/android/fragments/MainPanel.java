@@ -205,6 +205,14 @@ public class MainPanel extends BaseFileSystemPanel {
             }
         });
 
+        layout.findViewById(R.id.quick_action_select).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                selectAll();
+                invalidate(false);
+            }
+        });
+
         layout.findViewById(R.id.quick_action_deselect).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -345,6 +353,13 @@ public class MainPanel extends BaseFileSystemPanel {
             openDirectory(new File(App.sInstance.getSettings().getHomeFolder()));
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    public void selectAll() {
+        mSelectedFiles.clear();
+        for (File file : mBaseDir.listFiles()) {
+            mSelectedFiles.add(new FileSystemFile(file.getAbsolutePath()));
         }
     }
 

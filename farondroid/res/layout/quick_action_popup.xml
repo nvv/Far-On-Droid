@@ -18,6 +18,12 @@
         android:layout_height="36dp"/>
 
     <ImageView
+        android:id="@+id/quick_action_select"
+        android:src="@drawable/i_e_selectall"
+        android:layout_width="36dp"
+        android:layout_height="36dp"/>
+
+    <ImageView
         android:id="@+id/quick_action_deselect"
         android:src="@drawable/i_e_deselectall_dark"
         android:layout_width="36dp"
