@@ -231,7 +231,7 @@
     <string name="feedback_subject">[Far On Droid %s] Feedback</string>
     <string name="rate_app_url">https://play.google.com/store/apps/details?id=com.openfarmanager.android</string>
     <string name="no_email_client">Please install and configure an email client for this operation to succeed.</string>
-    <string name="restoring_skydrive_session">Restoring SkyDrive session…</string>
+    <string name="restoring_skydrive_session">Restoring OneDrive session…</string>
     <string name="tips_swipe">Swipe to open second panel</string>
     <string name="tips_swipe_left_right">Swipe left/right to expand/constrict panel.</string>
     <string name="force_use_en_locale">Force use english language</string>
@@ -369,7 +369,7 @@ Support for ZIP, encrypted ZIP, TAR, JAR, CPIO, GZIP and BZIP2.\n\n
     </string>
     <string name="tips_cloud_page">
 Connect your device with \'clouds\'!\n\n
-With <b>Far On Droid</b> you can access your resources from different kind of network storage, like Dropbox or SkyDrive.\n\n
+With <b>Far On Droid</b> you can access your resources from different kind of network storage, like Dropbox or OneDrive.\n\n
 More network stuff will appear in future versions.
     </string>
     <string name="hide_bottom_toolbar">Hide bottom toolbar</string>

@@ -17,7 +17,7 @@ public enum  NetworkEnum {
             case FTP: return "FTP";
             case SMB: return App.sInstance.getString(R.string.local_network);
             case Dropbox: return "Dropbox";
-            case SkyDrive: return "SkyDrive";
+            case SkyDrive: return "OneDrive";
             case GoogleDrive: return "Google Drive";
             case YandexDisk: return "Yandex Disk";
             case MediaFire: return "MediaFire";

@@ -192,7 +192,7 @@
     <string name="margin_size">Размер отступа</string>
 
     <string name="no_email_client">Пожалуйста, установите и настройте почтовый клиент для этой операции.</string>
-    <string name="restoring_skydrive_session">Восстановление сессии SkyDrive…</string>
+    <string name="restoring_skydrive_session">Восстановление сессии OneDrive…</string>
     <string name="tips_swipe">Проведите пальцем чтобы открыть вторую панель</string>
     <string name="tips_swipe_left_right">Проведите пальцем (влево/вправо) чтобы увеличить/уменьшить панель.</string>
     <string name="force_use_en_locale">Принудительное использование англиского языка</string>
@@ -254,7 +254,7 @@
     </string>
     <string name="tips_cloud_page">
         Подключитесь к "облакам"!\n\n
-        Far On Droid позволяет вам подключиться к облачным сетевым хранилищам, таким как: FTP, локальная сеть, DropBox, Skydrive, Yandex Disk.\n\n
+        Far On Droid позволяет вам подключиться к облачным сетевым хранилищам, таким как: FTP, локальная сеть, DropBox, OneDrive, Yandex Disk.\n\n
         И ожидайте поддержки большего количества сервисов в будующих версиях приложения.
     </string>
     <string name="action_exit">Выход</string>
