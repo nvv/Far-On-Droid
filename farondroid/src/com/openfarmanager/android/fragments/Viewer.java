@@ -112,7 +112,7 @@ public class Viewer extends Fragment {
 
         view.findViewById(R.id.root_view).setBackgroundColor(App.sInstance.getSettings().getViewerColor());
 
-        mSearchResultsPopup = new QuickPopupDialog(view, R.layout.search_results_popup);
+        mSearchResultsPopup = new QuickPopupDialog(getActivity(), view, R.layout.search_results_popup);
         mSearchResultsPopup.setPosition(Gravity.RIGHT | Gravity.TOP, (int) (50 * getResources().getDisplayMetrics().density));
         return view;
     }

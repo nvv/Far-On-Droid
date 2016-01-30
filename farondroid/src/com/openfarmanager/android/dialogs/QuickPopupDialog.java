@@ -19,7 +19,8 @@ public class QuickPopupDialog extends PopupWindow {
     private int mGravity;
     private int mOffset;
 
-    public QuickPopupDialog(View view, int layoutId) {
+    public QuickPopupDialog(Context context, View view, int layoutId) {
+        super(context);
 
         mParentView = view;
 

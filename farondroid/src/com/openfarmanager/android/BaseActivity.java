@@ -44,7 +44,7 @@ public abstract class BaseActivity extends FragmentActivity {
                     view.getViewTreeObserver().removeGlobalOnLayoutListener(this);
                     int offset = (int) (10 * getResources().getDisplayMetrics().density);
                     if (mMenuPopup == null) {
-                        mMenuPopup = new QuickPopupDialog(view, R.layout.quick_action_menu_popup);
+                        mMenuPopup = new QuickPopupDialog(BaseActivity.this, view, R.layout.quick_action_menu_popup);
                         mMenuPopup.setPosition(Gravity.LEFT | Gravity.BOTTOM, offset);
 
                         mMenuPopup.getContentView().findViewById(R.id.quick_action_menu).setOnClickListener(new View.OnClickListener() {

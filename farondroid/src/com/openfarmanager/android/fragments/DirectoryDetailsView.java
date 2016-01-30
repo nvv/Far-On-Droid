@@ -43,6 +43,10 @@ public class DirectoryDetailsView extends BasePanel {
             return;
         }
 
+        if (file == null) {
+            return;
+        }
+
         mRootView.findViewById(R.id.current_path).setBackgroundColor(App.sInstance.getSettings().getMainPanelColor());
 
         mSelectedFile = file;
