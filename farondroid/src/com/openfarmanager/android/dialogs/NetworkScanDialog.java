@@ -106,7 +106,9 @@ public class NetworkScanDialog extends Dialog {
             @Override
             public void onClick(View view) {
                 if (mIsScanning) {
-                    mThreadPoolExecutor.shutdownNow();
+                    if (mThreadPoolExecutor != null) {
+                        mThreadPoolExecutor.shutdownNow();
+                    }
                     stopScanning(0);
                 } else {
                     mError.setVisibility(View.GONE);

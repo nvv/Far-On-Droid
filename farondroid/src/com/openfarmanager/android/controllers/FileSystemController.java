@@ -307,7 +307,9 @@ public class FileSystemController {
                     openQuickPanel(activePanel, inactivePanel);
                     break;
                 case EXIT:
-                    mLeftVisibleFragment.getActivity().finish();
+                    if (activity != null && !activity.isFinishing()) {
+                        activity.finish();
+                    }
                     break;
                 case FILTER:
                     filter((String) msg.obj);
@@ -407,7 +409,10 @@ public class FileSystemController {
                     }
                     break;
                 case GAIN_FOCUS:
-                    setActivePanel(msg.arg1 == LEFT_PANEL ? (MainPanel) mLeftVisibleFragment : (MainPanel) mRightVisibleFragment);
+                    BasePanel panel = msg.arg1 == LEFT_PANEL ? mLeftVisibleFragment : mRightVisibleFragment;
+                    if (panel instanceof MainPanel) {
+                        setActivePanel((MainPanel) panel);
+                    }
                     break;
                 case DIRECTORY_CHANGED:
                     if (isDetailsPanelVisible()) {
@@ -697,8 +702,9 @@ public class FileSystemController {
         if (inactivePanel instanceof NetworkPanel) {
             final NetworkPanel inactiveNetworkPanel = (NetworkPanel) inactivePanel;
             NetworkAccount newAccount = App.sInstance.getNetworkApi(networkType).getCurrentNetworkAccount();
+            NetworkAccount account = inactiveNetworkPanel.getCurrentNetworkAccount();
 
-            if (newAccount.getId() == inactiveNetworkPanel.getCurrentNetworkAccount().getId()) {
+            if (account != null && newAccount.getId() == account.getId()) {
                 return;
             }
 
