@@ -182,7 +182,7 @@ public class Main extends BaseActivity {
     @Override
     protected void onPause() {
         try {
-            super.onStop();
+            super.onPause();
             mFileSystemController.savePanelState();
         } catch (IllegalStateException ignore) {
             //something very unexpected, but there is a lot of crashes...

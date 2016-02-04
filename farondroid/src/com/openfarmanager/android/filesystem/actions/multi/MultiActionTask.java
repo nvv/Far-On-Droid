@@ -8,7 +8,10 @@ import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 
+import com.openfarmanager.android.App;
 import com.openfarmanager.android.BuildConfig;
+import com.openfarmanager.android.R;
+import com.openfarmanager.android.core.Settings;
 import com.openfarmanager.android.core.network.smb.SmbAPI;
 import com.openfarmanager.android.dialogs.FileActionProgressDialog;
 import com.openfarmanager.android.filesystem.FileProxy;
@@ -68,11 +71,14 @@ public abstract class MultiActionTask {
     private Map<Future, String> mSubTasksAsynkLabels = new HashMap<>();
     private StringBuilder mActiveSubTasksListBuilder = new StringBuilder();
 
+    private int mLabelType;
+
     public MultiActionTask(final Context context, OnActionListener listener, List<File> items) {
         mItems = items;
         mListener = listener;
         mTaskResult = new TaskResult();
         mTaskResult.task = this;
+        mLabelType = App.sInstance.getSettings().getMultiActionLabelType();
         init(context);
     }
 
@@ -114,12 +120,24 @@ public abstract class MultiActionTask {
         mSubTasksAsynkLabels.put(future, file.getName());
     }
 
-    protected String getActiveSubTasksFiles() {
+    protected String getProgressText() {
+        if (mLabelType == Settings.MULTI_ACTION_LABEL_TYPE_FILES_NUM) {
+            return getActiveSubTaskStatus();
+        } else {
+            return getActiveSubTaskFiles();
+        }
+    }
+
+    private String getActiveSubTaskFiles() {
         mActiveSubTasksListBuilder.setLength(0);
         for (String file : mSubTasksAsynkLabels.values()) {
             mActiveSubTasksListBuilder.append(file).append("  ");
         }
         return mActiveSubTasksListBuilder.toString();
+    }
+
+    private String getActiveSubTaskStatus() {
+        return App.sInstance.getResources().getString(R.string.processing_files, mSubTasksAsynkLabels.size());
     }
 
     protected void setHeader(String header) {

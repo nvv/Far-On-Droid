@@ -32,6 +32,7 @@ import com.openfarmanager.android.core.network.datasource.SmbDataSource;
 import com.openfarmanager.android.core.network.datasource.YandexDiskDataSource;
 import com.openfarmanager.android.filesystem.FakeFile;
 import com.openfarmanager.android.filesystem.FileProxy;
+import com.openfarmanager.android.filesystem.FileSystemFile;
 import com.openfarmanager.android.model.FileActionEnum;
 import com.openfarmanager.android.model.NetworkAccount;
 import com.openfarmanager.android.model.NetworkEnum;
@@ -42,6 +43,7 @@ import com.openfarmanager.android.view.ToastNotification;
 
 import org.apache.commons.io.FilenameUtils;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -211,6 +213,12 @@ public class NetworkPanel extends MainPanel {
             }
         }
         return true;
+    }
+
+    @Override
+    public void selectAll() {
+        mSelectedFiles.clear();
+        mSelectedFiles.addAll(((NetworkEntryAdapter) mFileSystemList.getAdapter()).getFiles());
     }
 
     protected void updateLongClickSelection(AdapterView<?> adapterView, FileProxy file, boolean longClick) {

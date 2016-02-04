@@ -1,12 +1,9 @@
 package com.openfarmanager.android.filesystem.actions.multi.network;
 
 import android.content.Context;
-import android.support.v4.app.FragmentManager;
 
 import com.dropbox.client2.ProgressListener;
 import com.dropbox.client2.exception.DropboxException;
-import com.dropbox.client2.exception.DropboxPartialFileException;
-import com.dropbox.client2.exception.DropboxUnlinkedException;
 import com.mediafire.sdk.MFApiException;
 import com.mediafire.sdk.MFException;
 import com.mediafire.sdk.MFSessionNotStartedException;
@@ -33,12 +30,10 @@ import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import it.sauronsoftware.ftp4j.FTPDataTransferException;
 import it.sauronsoftware.ftp4j.FTPDataTransferListener;
-import jcifs.smb.SmbAuthException;
 import jcifs.smb.SmbFile;
 import jcifs.smb.SmbFileOutputStream;
 
@@ -109,7 +104,7 @@ public class CopyToNetworkMultiTask extends NetworkActionMultiTask {
             }
         }
 
-        mCurrentFile = getActiveSubTasksFiles();
+        mCurrentFile = getProgressText();
         updateProgress();
 
         return TaskStatusEnum.OK;
@@ -134,7 +129,7 @@ public class CopyToNetworkMultiTask extends NetworkActionMultiTask {
     @Override
     public void onSubTaskDone(Future future) {
         super.onSubTaskDone(future);
-        mCurrentFile = getActiveSubTasksFiles();
+        mCurrentFile = getProgressText();
         updateProgress();
     }
 

@@ -2,7 +2,6 @@ package com.openfarmanager.android.filesystem.actions.multi.network;
 
 import android.content.Context;
 import android.net.Uri;
-import android.support.v4.app.FragmentManager;
 
 import com.dropbox.client2.exception.DropboxException;
 import com.mediafire.sdk.MFApiException;
@@ -23,7 +22,6 @@ import com.openfarmanager.android.core.network.yandexdisk.YandexDiskApi;
 import com.openfarmanager.android.filesystem.DropboxFile;
 import com.openfarmanager.android.filesystem.FileProxy;
 import com.openfarmanager.android.filesystem.actions.OnActionListener;
-import com.openfarmanager.android.googledrive.api.GoogleDriveWebApi;
 import com.openfarmanager.android.model.NetworkEnum;
 import com.openfarmanager.android.model.TaskStatusEnum;
 import com.openfarmanager.android.model.exeptions.NetworkException;
@@ -102,7 +100,7 @@ public class CopyFromNetworkMultiTask extends NetworkActionMultiTask {
     @Override
     public void onSubTaskDone(Future future) {
         super.onSubTaskDone(future);
-        mCurrentFile = getActiveSubTasksFiles();
+        mCurrentFile = getProgressText();
         updateProgress();
     }
 
@@ -160,7 +158,7 @@ public class CopyFromNetworkMultiTask extends NetworkActionMultiTask {
             }
         }
 
-        mCurrentFile = getActiveSubTasksFiles();
+        mCurrentFile = getProgressText();
         updateProgress();
 
         return TaskStatusEnum.OK;

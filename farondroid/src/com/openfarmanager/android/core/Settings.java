@@ -57,6 +57,10 @@ public class Settings {
     public static final String HIDE_MAIN_TOOLBAR = "hide_main_toolbar";
     public static final String REPLACE_DELIMETERS = "replace_delimeters";
     public static final String MULTI_THREAD_TASKS = "support_multithread_tasks";
+    public static final String MULTI_ACTION_LABEL_TYPE = "multi_action_label_type";
+
+    public static final int MULTI_ACTION_LABEL_TYPE_FILES_NUM = 0;
+    public static final int MULTI_ACTION_LABEL_TYPE_LIST_FILES = 1;
 
     private static File sSdCard;
     public static String sSdPath;
@@ -414,6 +418,10 @@ public class Settings {
 
     public boolean isMultiThreadTasksEnabled() {
         return getSharedPreferences().getBoolean(MULTI_THREAD_TASKS, true);
+    }
+
+    public int getMultiActionLabelType() {
+        return getSharedPreferences().getInt(MULTI_ACTION_LABEL_TYPE, MULTI_ACTION_LABEL_TYPE_FILES_NUM);
     }
 
     public int getHiddenColor() {

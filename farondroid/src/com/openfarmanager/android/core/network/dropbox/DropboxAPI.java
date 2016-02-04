@@ -1,7 +1,10 @@
 package com.openfarmanager.android.core.network.dropbox;
 
 import android.database.Cursor;
+
+import com.dropbox.client2.ProgressListener;
 import com.dropbox.client2.android.AndroidAuthSession;
+import com.dropbox.client2.exception.DropboxException;
 import com.dropbox.client2.exception.DropboxServerException;
 import com.dropbox.client2.session.AccessTokenPair;
 import com.dropbox.client2.session.AppKeyPair;
@@ -20,6 +23,7 @@ import org.json.JSONObject;
 
 import static com.openfarmanager.android.utils.Extensions.*;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -146,6 +150,19 @@ public class DropboxAPI extends com.dropbox.client2.DropboxAPI<AndroidAuthSessio
         } catch (DropboxServerException e) {
             if (e.error == DropboxServerException._503_SERVICE_UNAVAILABLE) {
                 delete(file);
+            } else {
+                throw e;
+            }
+        }
+    }
+
+    @Override
+    public DropboxAPI.Entry putFileOverwrite(String path, InputStream is, long length, ProgressListener listener) throws DropboxException {
+        try {
+            return super.putFileOverwrite(path, is, length, listener);
+        } catch (DropboxServerException e) {
+            if (e.error == DropboxServerException._503_SERVICE_UNAVAILABLE) {
+                return putFileOverwrite(path, is, length, listener);
             } else {
                 throw e;
             }

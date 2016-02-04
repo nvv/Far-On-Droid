@@ -368,4 +368,6 @@
 
     <string name="support_multithread_tasks">Поддержка многопоточности для сетевых задач</string>
     <string name="support_multithread_tasks_summary">Разрешить многопоточность для сетевых задач для улучшения производительности</string>
+
+    <string name="processing_files">Обрабатываемые файлы: %s</string>
 </resources>
