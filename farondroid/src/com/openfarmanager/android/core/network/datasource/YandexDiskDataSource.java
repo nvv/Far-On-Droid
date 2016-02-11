@@ -65,6 +65,11 @@ public class YandexDiskDataSource implements DataSource {
     }
 
     @Override
+    public boolean isChangeEncodingSupported() {
+        return false;
+    }
+
+    @Override
     public void open(FileProxy file) {
 
         YandexDiskFile diskFile = (YandexDiskFile) file;

@@ -25,6 +25,9 @@ public class MoveFromNetworkTask extends CopyFromNetworkTask {
     @Override
     protected TaskStatusEnum doInBackground(Void... voids) {
 
+        // TODO: hack
+        totalSize = 1;
+
         if (mItems.size() < 1) {
             return OK;
         }

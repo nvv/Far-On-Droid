@@ -263,6 +263,8 @@ public abstract class MultiActionTask {
 
     private void handleExecutionException(ExecutionException e) {
         // attempt to extract execution exception
+
+        System.out.println(":::::::::   " + e.getCause().toString());
         String[] messages = e.getCause().toString().split(":");
         try {
             Class clazz = Class.forName(messages[0].trim());

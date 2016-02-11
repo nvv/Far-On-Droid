@@ -26,5 +26,7 @@ public interface DataSource {
 
     boolean isSearchSupported();
 
+    boolean isChangeEncodingSupported();
+
     void open(FileProxy file);
 }

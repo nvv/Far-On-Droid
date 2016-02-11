@@ -30,7 +30,7 @@ public class DeleteAtNetworkCommand implements AbstractCommand {
         try {
             NetworkEnum type = ((NetworkPanel) mNetworkPanel).getNetworkType();
             List<FileProxy> files = mNetworkPanel.getSelectedFileProxies();
-            if (App.sInstance.getSettings().isMultiThreadTasksEnabled()) {
+            if (App.sInstance.getSettings().isMultiThreadTasksEnabled(type)) {
                 new com.openfarmanager.android.filesystem.actions.multi.network.DeleteFromNetworkTask(
                         mNetworkPanel.getActivity(), type, createListener(args), files).execute();
             } else {

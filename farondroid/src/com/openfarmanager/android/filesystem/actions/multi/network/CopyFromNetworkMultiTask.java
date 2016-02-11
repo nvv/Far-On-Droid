@@ -4,6 +4,7 @@ import android.content.Context;
 import android.net.Uri;
 
 import com.dropbox.client2.exception.DropboxException;
+import com.jcraft.jsch.SftpException;
 import com.mediafire.sdk.MFApiException;
 import com.mediafire.sdk.MFException;
 import com.mediafire.sdk.MFSessionNotStartedException;
@@ -14,6 +15,7 @@ import com.microsoft.live.LiveOperationException;
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.core.network.dropbox.DropboxAPI;
 import com.openfarmanager.android.core.network.ftp.FtpAPI;
+import com.openfarmanager.android.core.network.ftp.SftpAPI;
 import com.openfarmanager.android.core.network.googledrive.GoogleDriveApi;
 import com.openfarmanager.android.core.network.mediafire.MediaFireApi;
 import com.openfarmanager.android.core.network.skydrive.SkyDriveAPI;
@@ -130,6 +132,9 @@ public class CopyFromNetworkMultiTask extends NetworkActionMultiTask {
                         break;
                     case FTP:
                         copyFromFTP(file, mDestination);
+                        break;
+                    case SFTP:
+                        copyFromSFTP(file, mDestination);
                         break;
                     case SMB:
                         copyFromSmb(file, mDestination);
@@ -311,6 +316,42 @@ public class CopyFromNetworkMultiTask extends NetworkActionMultiTask {
                     createDirectoryIfNotExists(destination);
                     File destinationFile = createFileIfNotExists(fullSourceFilePath);
                     api.client().download(source.getFullPath(), getOutputStream(mSdCardPath, mUseStorageApi, mBaseUri, destinationFile), 0, null);
+                    return null;
+                }
+            }, source);
+        }
+    }
+
+    private void copyFromSFTP(final FileProxy source, final String destination) throws IOException, SftpException {
+        final SftpAPI api = App.sInstance.getSftpApi();
+
+        if (isCancelled()) {
+            throw new InterruptedIOException();
+        }
+
+        final String fullSourceFilePath = destination + "/" + source.getName();
+        if (source.isDirectory()) {
+            try {
+                createDirectoryIfNotExists(destination);
+                List<FileProxy> files = api.getDirectoryFiles(source.getFullPath());
+
+                if (files.size() == 0) {
+                    createDirectoryIfNotExists(fullSourceFilePath);
+                } else {
+                    for (FileProxy file : files) {
+                        copyFromSFTP(file, fullSourceFilePath);
+                    }
+                }
+            } catch (Exception e) {
+                throw NetworkException.handleNetworkException(e);
+            }
+        } else {
+            runSubTaskAsynk(new Callable() {
+                @Override
+                public Object call() throws Exception {
+                    createDirectoryIfNotExists(destination);
+                    File destinationFile = createFileIfNotExists(fullSourceFilePath);
+                    api.writeFileToStream(source.getFullPath(), getOutputStream(mSdCardPath, mUseStorageApi, mBaseUri, destinationFile));
                     return null;
                 }
             }, source);

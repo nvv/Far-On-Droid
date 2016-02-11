@@ -295,22 +295,6 @@ public class MainPanel extends BaseFileSystemPanel {
             }
         });
 
-        mCharsetLeft.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                gainFocus();
-                mHandler.sendMessage(mHandler.obtainMessage(FileSystemController.OPEN_ENCODING_DIALOG));
-            }
-        });
-
-        mCharsetRight.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                gainFocus();
-                mHandler.sendMessage(mHandler.obtainMessage(FileSystemController.OPEN_ENCODING_DIALOG));
-            }
-        });
-
         mExitLeft.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

@@ -4,6 +4,7 @@ import android.net.Uri;
 import android.support.v4.app.FragmentManager;
 
 import com.dropbox.client2.exception.DropboxException;
+import com.jcraft.jsch.SftpException;
 import com.mediafire.sdk.MFApiException;
 import com.mediafire.sdk.MFException;
 import com.mediafire.sdk.MFSessionNotStartedException;
@@ -14,6 +15,7 @@ import com.microsoft.live.LiveOperationException;
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.core.network.dropbox.DropboxAPI;
 import com.openfarmanager.android.core.network.ftp.FtpAPI;
+import com.openfarmanager.android.core.network.ftp.SftpAPI;
 import com.openfarmanager.android.core.network.googledrive.GoogleDriveApi;
 import com.openfarmanager.android.core.network.mediafire.MediaFireApi;
 import com.openfarmanager.android.core.network.skydrive.SkyDriveAPI;
@@ -58,7 +60,7 @@ import static com.openfarmanager.android.utils.StorageUtils.getStorageOutputFile
  */
 public class CopyFromNetworkTask extends NetworkActionTask {
 
-    private final static byte[] BUFFER = new byte[256 * 1024];
+    private final static byte[] BUFFER = new byte[512 * 1024];
 
     protected String mDestination;
     protected List<FileProxy> mItems;
@@ -91,8 +93,6 @@ public class CopyFromNetworkTask extends NetworkActionTask {
 
     protected TaskStatusEnum doCopy() {
 
-        long t = System.currentTimeMillis();
-
         // avoid concurrent modification
         ArrayList<FileProxy> items = new ArrayList<FileProxy>(mItems);
         for (FileProxy file : items) {
@@ -112,6 +112,9 @@ public class CopyFromNetworkTask extends NetworkActionTask {
                         break;
                     case FTP:
                         copyFromFTP(file, mDestination);
+                        break;
+                    case SFTP:
+                        copyFromSFTP(file, mDestination);
                         break;
                     case SMB:
                         copyFromSmb(file, mDestination);
@@ -140,7 +143,6 @@ public class CopyFromNetworkTask extends NetworkActionTask {
             }
         }
 
-        System.out.println("::::::::   >>>>  " + (System.currentTimeMillis() - t));
         return TaskStatusEnum.OK;
     }
 
@@ -269,6 +271,37 @@ public class CopyFromNetworkTask extends NetworkActionTask {
         }
     }
 
+    private void copyFromSFTP(FileProxy source, String destination) throws IOException, SftpException {
+        SftpAPI api = App.sInstance.getSftpApi();
+
+        if (isCancelled()) {
+            throw new InterruptedIOException();
+        }
+
+        String fullSourceFilePath = destination + "/" + source.getName();
+        if (source.isDirectory()) {
+            try {
+                createDirectoryIfNotExists(destination);
+                List<FileProxy> files = api.getDirectoryFiles(source.getFullPath());
+
+                if (files.size() == 0) {
+                    createDirectoryIfNotExists(fullSourceFilePath);
+                } else {
+                    for (FileProxy file : files) {
+                        copyFromSFTP(file, fullSourceFilePath);
+                    }
+                }
+            } catch (Exception e) {
+                throw NetworkException.handleNetworkException(e);
+            }
+        } else {
+            createDirectoryIfNotExists(destination);
+            File destinationFile = createFileIfNotExists(fullSourceFilePath);
+            setCurrentFile(source);
+            api.writeFileToStream(source.getFullPath(), getOutputStream(mSdCardPath, mUseStorageApi, mBaseUri, destinationFile));
+        }
+    }
+
     private void copyFromSmb(FileProxy source, String destination) throws IOException {
         SmbAPI api = App.sInstance.getSmbAPI();
 
@@ -304,8 +337,6 @@ public class CopyFromNetworkTask extends NetworkActionTask {
             int len;
             while ((len = in.read(BUFFER)) > 0) {
                 out.write(BUFFER, 0, len);
-                //doneSize += len;
-                //updateProgress();
             }
 
             out.close();

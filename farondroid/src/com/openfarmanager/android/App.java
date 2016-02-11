@@ -11,6 +11,7 @@ import com.openfarmanager.android.core.bookmark.BookmarkManager;
 import com.openfarmanager.android.core.network.NetworkApi;
 import com.openfarmanager.android.core.network.dropbox.DropboxAPI;
 import com.openfarmanager.android.core.network.ftp.FtpAPI;
+import com.openfarmanager.android.core.network.ftp.SftpAPI;
 import com.openfarmanager.android.core.network.googledrive.GoogleDriveApi;
 import com.openfarmanager.android.core.network.mediafire.MediaFireApi;
 import com.openfarmanager.android.core.network.skydrive.SkyDriveAPI;
@@ -36,6 +37,7 @@ public class App extends Application {
     protected DropboxAPI mDropboxApi;
     protected SkyDriveAPI mSkyDriveAPI;
     protected FtpAPI mFtpAPI;
+    protected SftpAPI mSftpApi;
     protected SmbAPI mSmbAPI;
     protected YandexDiskApi mYandexDiskApi;
     protected GoogleDriveApi mGoogleDriveApi;
@@ -55,6 +57,7 @@ public class App extends Application {
         mDropboxApi = new DropboxAPI(DropboxAPI.createSession());
         mSkyDriveAPI = new SkyDriveAPI();
         mFtpAPI = new FtpAPI();
+        mSftpApi = new SftpAPI();
         mSmbAPI = new SmbAPI();
         mYandexDiskApi = new YandexDiskApi();
         mGoogleDriveApi = new GoogleDriveApi();
@@ -126,6 +129,10 @@ public class App extends Application {
         return mFtpAPI;
     }
 
+    public SftpAPI getSftpApi() {
+        return mSftpApi;
+    }
+
     public SmbAPI getSmbAPI() {
         return mSmbAPI;
     }
@@ -146,6 +153,8 @@ public class App extends Application {
         switch (networkType) {
             case FTP:
                 return mFtpAPI;
+            case SFTP:
+                return mSftpApi;
             case Dropbox: default:
                 return mDropboxApi;
             case SkyDrive:

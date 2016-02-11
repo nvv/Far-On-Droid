@@ -11,9 +11,12 @@ import android.widget.AdapterView;
 import android.widget.CheckBox;
 import android.widget.ListView;
 
+import com.jcraft.jsch.ChannelSftp;
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.R;
 import com.openfarmanager.android.adapters.SelectEncodingAdapter;
+import com.openfarmanager.android.model.NetworkEnum;
+
 import static com.openfarmanager.android.controllers.EditViewController.*;
 
 import java.io.File;
@@ -26,12 +29,18 @@ public class SelectEncodingDialog extends Dialog {
 
     private Handler mHandler;
     private File mSelectedFile;
+    private NetworkEnum mNetworkType;
     private View mDialogView;
     private CheckBox mSaveAsDefault;
     private boolean mShowSaveOption;
 
     public SelectEncodingDialog(Context context, Handler handler, File selectedFile) {
         this(context, handler, selectedFile, true);
+    }
+
+    public SelectEncodingDialog(Context context, Handler handler, NetworkEnum networkType, boolean showSaveOption) {
+        this(context, handler, (File) null, showSaveOption);
+        mNetworkType = networkType;
     }
 
     public SelectEncodingDialog(Context context, Handler handler, File selectedFile, boolean showSaveOption) {
@@ -58,7 +67,7 @@ public class SelectEncodingDialog extends Dialog {
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Charset character = (Charset) view.getTag();
                 mHandler.sendMessage(mHandler.obtainMessage(MSG_SELECT_ENCODING,
-                        new Pair<Boolean, Charset>(mSaveAsDefault.isChecked(), character)));
+                        new SelectedEncodingInfo(mSaveAsDefault.isChecked(), character, mNetworkType)));
                 dismiss();
             }
         });
@@ -71,4 +80,15 @@ public class SelectEncodingDialog extends Dialog {
         return charset != null ? charset : Charset.defaultCharset().name();
     }
 
+    public static class SelectedEncodingInfo {
+        public boolean saveAsDefault;
+        public Charset charset;
+        public NetworkEnum networkType;
+
+        public SelectedEncodingInfo(boolean saveAsDefault, Charset charset, NetworkEnum networkType) {
+            this.saveAsDefault = saveAsDefault;
+            this.charset = charset;
+            this.networkType = networkType;
+        }
+    }
 }

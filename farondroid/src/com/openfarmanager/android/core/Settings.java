@@ -8,6 +8,7 @@ import android.preference.PreferenceManager;
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.R;
 import com.openfarmanager.android.filesystem.FileSystemScanner;
+import com.openfarmanager.android.model.NetworkEnum;
 import com.openfarmanager.android.utils.SystemUtils;
 
 import java.io.File;
@@ -109,6 +110,14 @@ public class Settings {
 
     public String getCharset(String host) {
         return getHostCharset().getString(host, null);
+    }
+
+    public void saveSftpCharset(String host, String charset) {
+        getHostCharset().edit().putString("sftp_" + host, charset).commit();
+    }
+
+    public String getSftpCharset(String host) {
+        return getHostCharset().getString("sftp_" + host, null);
     }
 
     public SharedPreferences getPanelSettings() {
@@ -416,7 +425,10 @@ public class Settings {
         return getSharedPreferences().getBoolean(REPLACE_DELIMETERS, false);
     }
 
-    public boolean isMultiThreadTasksEnabled() {
+    public boolean isMultiThreadTasksEnabled(NetworkEnum networkType) {
+        if (networkType == NetworkEnum.SFTP) {
+            return false;
+        }
         return getSharedPreferences().getBoolean(MULTI_THREAD_TASKS, true);
     }
 

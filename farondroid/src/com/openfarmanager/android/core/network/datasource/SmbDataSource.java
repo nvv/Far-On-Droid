@@ -61,6 +61,11 @@ public class SmbDataSource implements DataSource {
     }
 
     @Override
+    public boolean isChangeEncodingSupported() {
+        return false;
+    }
+
+    @Override
     public void open(FileProxy file) {
 
     }

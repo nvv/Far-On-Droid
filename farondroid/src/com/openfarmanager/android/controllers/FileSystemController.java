@@ -27,11 +27,13 @@ import com.openfarmanager.android.core.dbadapters.NetworkAccountDbAdapter;
 import com.openfarmanager.android.core.network.NetworkApi;
 import com.openfarmanager.android.core.network.dropbox.DropboxAPI;
 import com.openfarmanager.android.core.network.ftp.FtpAPI;
+import com.openfarmanager.android.core.network.ftp.SftpAPI;
 import com.openfarmanager.android.core.network.googledrive.GoogleDriveApi;
 import com.openfarmanager.android.core.network.mediafire.MediaFireApi;
 import com.openfarmanager.android.core.network.skydrive.SkyDriveAPI;
 import com.openfarmanager.android.core.network.smb.SmbAPI;
 import com.openfarmanager.android.core.network.yandexdisk.YandexDiskApi;
+import com.openfarmanager.android.dialogs.SftpAuthDialog;
 import com.openfarmanager.android.filesystem.GoogleDriveFile;
 import com.openfarmanager.android.filesystem.actions.DiffDirectoriesTask;
 import com.openfarmanager.android.filesystem.actions.RootTask;
@@ -129,6 +131,7 @@ public class FileSystemController {
     public static final int OPEN_WEB = 125;
     public static final int OPEN_ENCODING_DIALOG = 126;
     public static final int MEDIA_FIRE_CONNECTED = 127;
+    public static final int SFTP_CONNECTED = 128;
 
     public static final int ARG_FORCE_OPEN_FILE_IN_EDITOR = 1000;
     public static final int ARG_EXPAND_LEFT_PANEL = 1001;
@@ -505,12 +508,16 @@ public class FileSystemController {
                     }
                     break;
                 case OPEN_ENCODING_DIALOG:
-                    showSelectEncodingDialog();
+                    showSelectEncodingDialog((NetworkEnum) msg.obj);
                     break;
                 case EditViewController.MSG_SELECT_ENCODING:
-                    Pair<Boolean, Charset> values = (Pair<Boolean, Charset>) msg.obj;
+                    SelectEncodingDialog.SelectedEncodingInfo info = (SelectEncodingDialog.SelectedEncodingInfo) msg.obj;
 
-                    App.sInstance.getFtpApi().setCharset(values.second);
+                    if (info.networkType == NetworkEnum.SFTP) {
+                        App.sInstance.getSftpApi().setCharset(info.charset);
+                    } else {
+                        App.sInstance.getFtpApi().setCharset(info.charset);
+                    }
                     activePanel.invalidatePanels(inactivePanel);
                     break;
             }
@@ -1163,6 +1170,9 @@ public class FileSystemController {
                     case FTP:
                         openFTP();
                         break;
+                    case SFTP:
+                        openSFTP();
+                        break;
                     case SMB:
                         openSmb();
                         break;
@@ -1250,23 +1260,32 @@ public class FileSystemController {
                                         dismissProgressDialog();
                                         openNetworkPanel(NetworkEnum.FTP);
                                     } catch (final InAppAuthException e) {
-                                        runOnUiThread(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                ToastNotification.makeText(App.sInstance.getApplicationContext(), e.getErrorMessage(), Toast.LENGTH_LONG).show();
-                                            }
-                                        });
-                                        dismissProgressDialog();
+                                        handleInAppAuthError(e);
                                     } catch (final Exception e) {
-                                        runOnUiThread(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                ToastNotification.makeText(App.sInstance.getApplicationContext(),
-                                                        App.sInstance.getString(R.string.error_unknown_unexpected_error), Toast.LENGTH_LONG).show();
-                                            }
-                                        });
+                                        handleNetworkAuthError(e);
+                                    }
+                                }
+                            });
+                        }
+
+                        break;
+                    case SFTP:
+                        final SftpAPI.SftpAccount sftpAccount = (SftpAPI.SftpAccount) view.getTag();
+                        if (sftpAccount.getServer() == null) { // new
+                            startSftpAuthentication();
+                        } else {
+                            showProgressDialog(R.string.connecting_to_sftp);
+                            runAsync(new Runnable() {
+                                @Override
+                                public void run() {
+                                    try {
+                                        App.sInstance.getSftpApi().connect(sftpAccount);
                                         dismissProgressDialog();
-                                        e.printStackTrace();
+                                        openNetworkPanel(NetworkEnum.SFTP);
+                                    } catch (final InAppAuthException e) {
+                                        handleInAppAuthError(e);
+                                    } catch (final Exception e) {
+                                        handleNetworkAuthError(e);
                                     }
                                 }
                             });
@@ -1287,23 +1306,9 @@ public class FileSystemController {
                                         dismissProgressDialog();
                                         openNetworkPanel(NetworkEnum.SMB);
                                     } catch (final InAppAuthException e) {
-                                        runOnUiThread(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                ToastNotification.makeText(App.sInstance.getApplicationContext(), e.getErrorMessage(), Toast.LENGTH_LONG).show();
-                                            }
-                                        });
-                                        dismissProgressDialog();
+                                        handleInAppAuthError(e);
                                     } catch (final Exception e) {
-                                        runOnUiThread(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                ToastNotification.makeText(App.sInstance.getApplicationContext(),
-                                                        App.sInstance.getString(R.string.error_unknown_unexpected_error), Toast.LENGTH_LONG).show();
-                                            }
-                                        });
-                                        dismissProgressDialog();
-                                        e.printStackTrace();
+                                        handleNetworkAuthError(e);
                                     }
                                 }
                             });
@@ -1407,8 +1412,30 @@ public class FileSystemController {
         adjustDialogSize(dialog);
     }
 
-    public void showSelectEncodingDialog() {
-        Dialog mCharsetSelectDialog = new SelectEncodingDialog(getActivePanel().getActivity(), mPanelHandler, null, false);
+    private void handleNetworkAuthError(Exception e) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                ToastNotification.makeText(App.sInstance.getApplicationContext(),
+                        App.sInstance.getString(R.string.error_unknown_unexpected_error), Toast.LENGTH_LONG).show();
+            }
+        });
+        dismissProgressDialog();
+        e.printStackTrace();
+    }
+
+    private void handleInAppAuthError(final InAppAuthException e) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                ToastNotification.makeText(App.sInstance.getApplicationContext(), e.getErrorMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
+        dismissProgressDialog();
+    }
+
+    public void showSelectEncodingDialog(NetworkEnum network) {
+        Dialog mCharsetSelectDialog = new SelectEncodingDialog(getActivePanel().getActivity(), mPanelHandler, network, false);
         mCharsetSelectDialog.setCancelable(true);
         mCharsetSelectDialog.show();
         adjustDialogSize(mCharsetSelectDialog, 0.6f);
@@ -1510,6 +1537,15 @@ public class FileSystemController {
         }
     }
 
+    public void openSFTP() {
+        SftpAPI api = App.sInstance.getSftpApi();
+        if (api.getAuthorizedAccountsCount() == 0) {
+            startSftpAuthentication();
+        } else {
+            showSelectAccountDialog(NetworkEnum.SFTP);
+        }
+    }
+
     public void openDropbox() {
         DropboxAPI api = App.sInstance.getDropboxApi();
         if (api.getAuthorizedAccountsCount() == 0) {
@@ -1522,6 +1558,12 @@ public class FileSystemController {
 
     private void startFtpAuthentication() {
         final Dialog dialog = new FtpAuthDialog(getActivePanel().getActivity(), mInAppAuthHandler);
+        dialog.show();
+        adjustDialogSize(dialog);
+    }
+
+    private void startSftpAuthentication() {
+        final Dialog dialog = new SftpAuthDialog(getActivePanel().getActivity(), mInAppAuthHandler);
         dialog.show();
         adjustDialogSize(dialog);
     }
@@ -1775,6 +1817,8 @@ public class FileSystemController {
 
             if (msg.what == FTP_CONNECTED) {
                 openNetworkPanel(NetworkEnum.FTP);
+            } else if (msg.what == SFTP_CONNECTED) {
+                openNetworkPanel(NetworkEnum.SFTP);
             } else if (msg.what == SMB_CONNECTED) {
                 openNetworkPanel(NetworkEnum.SMB);
             } else if (msg.what == YANDEX_DISK_USERNAME_RECEIVED) {

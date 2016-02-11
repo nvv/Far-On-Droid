@@ -4,48 +4,40 @@ import android.os.Handler;
 
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.filesystem.FileProxy;
-import com.openfarmanager.android.filesystem.FileSystemScanner;
-import com.openfarmanager.android.filesystem.FtpFile;
 import com.openfarmanager.android.model.NetworkEnum;
-import com.openfarmanager.android.model.exeptions.NetworkException;
 
-import java.io.IOException;
-import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.List;
-
-import it.sauronsoftware.ftp4j.FTPClient;
-import it.sauronsoftware.ftp4j.FTPFile;
 
 /**
  * @author Vlad Namashko
  */
-public class FtpDataSource implements DataSource {
+public class SftpDataSource implements DataSource {
 
     public Handler mHandler;
 
-    public FtpDataSource(Handler handler) {
+    public SftpDataSource(Handler handler) {
         mHandler = handler;
     }
 
     @Override
     public String getNetworkType() {
-        return "FTP";
+        return "SFTP";
     }
 
     @Override
     public NetworkEnum getNetworkTypeEnum() {
-        return NetworkEnum.FTP;
+        return NetworkEnum.SFTP;
     }
 
     @Override
-    public List<FileProxy> openDirectory(String path) throws NetworkException {
-        return App.sInstance.getFtpApi().getDirectoryFiles(path);
+    public List<FileProxy> openDirectory(String path) throws RuntimeException {
+        return App.sInstance.getSftpApi().getDirectoryFiles(path);
     }
 
     @Override
     public void onUnlinkedAccount() {
-        //To change body of implemented methods use File | Settings | File Templates.
+
     }
 
     @Override
@@ -60,6 +52,7 @@ public class FtpDataSource implements DataSource {
 
     @Override
     public void exitFromNetwork() {
+        App.sInstance.getSftpApi().closeChannel();
     }
 
     @Override

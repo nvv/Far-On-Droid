@@ -21,15 +21,15 @@ import static com.openfarmanager.android.utils.Extensions.*;
  */
 public class FtpAuthDialog extends Dialog {
 
-    private Handler mHandler;
-    private View mDialogView;
-    private TextView mError;
-    private EditText mServer;
-    private EditText mPort;
-    private RadioGroup mMode;
-    private EditText mUserName;
-    private EditText mPassword;
-    private CheckBox mAnonymous;
+    protected Handler mHandler;
+    protected View mDialogView;
+    protected TextView mError;
+    protected EditText mServer;
+    protected EditText mPort;
+    protected RadioGroup mMode;
+    protected EditText mUserName;
+    protected EditText mPassword;
+    protected CheckBox mAnonymous;
 
     public FtpAuthDialog(Context context, Handler handler) {
         super(context, R.style.Action_Dialog);
@@ -80,7 +80,7 @@ public class FtpAuthDialog extends Dialog {
         setContentView(mDialogView);
     }
 
-    private boolean validate() {
+    protected boolean validate() {
 
         if (isNullOrEmpty(mServer.getText().toString())) {
             setErrorMessage(App.sInstance.getString(R.string.error_empty_server));
@@ -97,15 +97,15 @@ public class FtpAuthDialog extends Dialog {
         return true;
     }
 
-    private void clearError() {
+    protected void clearError() {
         updateErrorState("", View.GONE);
     }
 
-    private void setErrorMessage(final String errorMessage) {
+    protected void setErrorMessage(final String errorMessage) {
         updateErrorState(errorMessage, View.VISIBLE);
     }
 
-    private void setLoading(final boolean isLoading) {
+    protected void setLoading(final boolean isLoading) {
         Message.obtain(mHandler, new Runnable() {
             @Override
             public void run() {
@@ -116,7 +116,7 @@ public class FtpAuthDialog extends Dialog {
 
     }
 
-    private void updateErrorState(final String errorMessage, final int visibility) {
+    protected void updateErrorState(final String errorMessage, final int visibility) {
         Message.obtain(mHandler, new Runnable() {
             @Override
             public void run() {
@@ -126,9 +126,13 @@ public class FtpAuthDialog extends Dialog {
         }).sendToTarget();
     }
 
-    private void connect() {
+    protected void connect() {
         setLoading(true);
-        runAsync(mConnectRunnable);
+        runAsync(getConnectRunnable());
+    }
+
+    protected Runnable getConnectRunnable() {
+        return mConnectRunnable;
     }
 
     Runnable mConnectRunnable = new Runnable() {

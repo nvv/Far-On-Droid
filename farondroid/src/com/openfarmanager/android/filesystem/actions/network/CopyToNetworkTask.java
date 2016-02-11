@@ -9,11 +9,11 @@ import com.mediafire.sdk.MFException;
 import com.mediafire.sdk.MFSessionNotStartedException;
 import com.mediafire.sdk.uploader.MediaFireUpload;
 import com.mediafire.sdk.uploader.MediaFireUploadHandler;
-import com.mediafire.sdk.uploader.MediaFireUploader;
 import com.microsoft.live.OverwriteOption;
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.core.network.dropbox.DropboxAPI;
 import com.openfarmanager.android.core.network.ftp.FtpAPI;
+import com.openfarmanager.android.core.network.ftp.SftpAPI;
 import com.openfarmanager.android.core.network.googledrive.GoogleDriveApi;
 import com.openfarmanager.android.core.network.mediafire.MediaFireApi;
 import com.openfarmanager.android.core.network.skydrive.SkyDriveAPI;
@@ -24,12 +24,12 @@ import com.openfarmanager.android.googledrive.api.GoogleDriveWebApi;
 import com.openfarmanager.android.model.NetworkEnum;
 import com.openfarmanager.android.model.TaskStatusEnum;
 import com.openfarmanager.android.model.exeptions.NetworkException;
-import com.openfarmanager.android.utils.SystemUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InterruptedIOException;
+import java.io.OutputStream;
 import java.util.List;
 
 import it.sauronsoftware.ftp4j.FTPDataTransferException;
@@ -47,7 +47,7 @@ import static com.openfarmanager.android.model.TaskStatusEnum.createNetworkError
  */
 public class CopyToNetworkTask extends NetworkActionTask {
 
-    private final static byte[] BUFFER = new byte[256 * 1024];
+    private final static byte[] BUFFER = new byte[512 * 1024];
 
     protected String mDestination;
 
@@ -83,6 +83,9 @@ public class CopyToNetworkTask extends NetworkActionTask {
                         break;
                     case FTP:
                         copyToFtp(file, mDestination);
+                        break;
+                    case SFTP:
+                        copyToSftp(file, mDestination);
                         break;
                     case SMB:
                         copyToSmb(file, mDestination);
@@ -239,6 +242,27 @@ public class CopyToNetworkTask extends NetworkActionTask {
         }
     }
 
+    private void copyToSftp(File source, String destination) throws Exception {
+        SftpAPI api = App.sInstance.getSftpApi();
+
+        if (isCancelled()) {
+            throw new InterruptedIOException();
+        }
+
+        api.changeDirectory(destination);
+        if (source.isDirectory()) {
+            api.createDirectory(destination + "/" + source.getName());
+
+            String[] files = source.list();
+            for (String file : files) {
+                copyToSftp(new File(source, file), destination + "/" + source.getName());
+            }
+        } else {
+            OutputStream out = api.getUploadStream(destination + "/" + source.getName());
+            copyStreamRoutine(source, out);
+        }
+    }
+
     private void copyToSmb(File source, String destination) throws Exception {
         SmbAPI api = App.sInstance.getSmbAPI();
 
@@ -256,18 +280,7 @@ public class CopyToNetworkTask extends NetworkActionTask {
         } else {
             SmbFile destinationFile = api.createSmbFile(destination + "/" + source.getName());
             SmbFileOutputStream out = new SmbFileOutputStream(destinationFile, true);
-
-            mCurrentFile = source.getName();
-            FileInputStream in = new FileInputStream(source);
-            int len;
-            while ((len = in.read(BUFFER)) > 0) {
-                out.write(BUFFER, 0, len);
-                doneSize += len;
-                updateProgress();
-            }
-
-            out.close();
-            in.close();
+            copyStreamRoutine(source, out);
         }
     }
 
@@ -361,5 +374,19 @@ public class CopyToNetworkTask extends NetworkActionTask {
             upload.run();
 
         }
+    }
+
+    private void copyStreamRoutine(File source, OutputStream out) throws IOException {
+        mCurrentFile = source.getName();
+        FileInputStream in = new FileInputStream(source);
+        int len;
+        while ((len = in.read(BUFFER)) > 0) {
+            out.write(BUFFER, 0, len);
+            doneSize += len;
+            updateProgress();
+        }
+
+        out.close();
+        in.close();
     }
 }

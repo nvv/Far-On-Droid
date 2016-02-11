@@ -22,11 +22,13 @@ import android.widget.Toast;
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.R;
 import com.openfarmanager.android.adapters.NetworkEntryAdapter;
+import com.openfarmanager.android.controllers.FileSystemController;
 import com.openfarmanager.android.core.network.datasource.DataSource;
 import com.openfarmanager.android.core.network.datasource.DropboxDataSource;
 import com.openfarmanager.android.core.network.datasource.FtpDataSource;
 import com.openfarmanager.android.core.network.datasource.GoogleDriveDataSource;
 import com.openfarmanager.android.core.network.datasource.MediaFireDataSource;
+import com.openfarmanager.android.core.network.datasource.SftpDataSource;
 import com.openfarmanager.android.core.network.datasource.SkyDriveDataSource;
 import com.openfarmanager.android.core.network.datasource.SmbDataSource;
 import com.openfarmanager.android.core.network.datasource.YandexDiskDataSource;
@@ -56,7 +58,7 @@ import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
-import static com.openfarmanager.android.controllers.FileSystemController.EXIT_FROM_NETWORK_STORAGE;
+import static com.openfarmanager.android.controllers.FileSystemController.*;
 
 /**
  * Panel for 'network filesystem' (like Dropbox, Google Drive etc).
@@ -139,9 +141,26 @@ public class NetworkPanel extends MainPanel {
 
         mCurrentNetworkAccount = App.sInstance.getNetworkApi(getNetworkType()).getCurrentNetworkAccount();
 
-        if (mDataSource.getNetworkTypeEnum() == NetworkEnum.FTP) {
+        if (mDataSource.isChangeEncodingSupported()) {
             mCharsetLeft.setVisibility(mPanelLocation == LEFT_PANEL ? View.VISIBLE : View.GONE);
             mCharsetRight.setVisibility(mPanelLocation == RIGHT_PANEL ? View.VISIBLE : View.GONE);
+
+            mCharsetLeft.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    gainFocus();
+                    mHandler.sendMessage(mHandler.obtainMessage(OPEN_ENCODING_DIALOG, mDataSource.getNetworkTypeEnum()));
+                }
+            });
+
+            mCharsetRight.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    gainFocus();
+                    mHandler.sendMessage(mHandler.obtainMessage(OPEN_ENCODING_DIALOG, mDataSource.getNetworkTypeEnum()));
+                }
+            });
+
         }
 
         mExitLeft.setVisibility(mPanelLocation == LEFT_PANEL ? View.VISIBLE : View.GONE);
@@ -176,6 +195,9 @@ public class NetworkPanel extends MainPanel {
                 break;
             case MediaFire:
                 mDataSource = new MediaFireDataSource(mHandler);
+                break;
+            case SFTP:
+                mDataSource = new SftpDataSource(mHandler);
                 break;
         }
     }

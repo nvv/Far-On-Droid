@@ -13,6 +13,7 @@ import com.microsoft.live.OverwriteOption;
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.core.network.dropbox.DropboxAPI;
 import com.openfarmanager.android.core.network.ftp.FtpAPI;
+import com.openfarmanager.android.core.network.ftp.SftpAPI;
 import com.openfarmanager.android.core.network.googledrive.GoogleDriveApi;
 import com.openfarmanager.android.core.network.mediafire.MediaFireApi;
 import com.openfarmanager.android.core.network.skydrive.SkyDriveAPI;
@@ -28,6 +29,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InterruptedIOException;
+import java.io.OutputStream;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
@@ -73,6 +75,9 @@ public class CopyToNetworkMultiTask extends NetworkActionMultiTask {
                         break;
                     case FTP:
                         copyToFtp(file, mDestination);
+                        break;
+                    case SFTP:
+                        copyToSftp(file, mDestination);
                         break;
                     case SMB:
                         copyToSmb(file, mDestination);
@@ -271,6 +276,33 @@ public class CopyToNetworkMultiTask extends NetworkActionMultiTask {
         }
     }
 
+    private void copyToSftp(final File source, final String destination) throws Exception {
+        final SftpAPI api = App.sInstance.getSftpApi();
+
+        if (isCancelled()) {
+            throw new InterruptedIOException();
+        }
+
+        api.changeDirectory(destination);
+        if (source.isDirectory()) {
+            api.createDirectory(destination + "/" + source.getName());
+
+            String[] files = source.list();
+            for (String file : files) {
+                copyToSftp(new File(source, file), destination + "/" + source.getName());
+            }
+        } else {
+            runSubTaskAsynk(new Callable() {
+                @Override
+                public Object call() throws Exception {
+                    OutputStream out = api.getUploadStream(destination + "/" + source.getName());
+                    copyStreamRoutine(source, out);
+                    return null;
+                }
+            }, source);
+        }
+    }
+
     private void copyToSmb(final File source, final String destination) throws Exception {
         final SmbAPI api = App.sInstance.getSmbAPI();
 
@@ -291,18 +323,7 @@ public class CopyToNetworkMultiTask extends NetworkActionMultiTask {
                 public Object call() throws Exception {
                     SmbFile destinationFile = api.createSmbFile(destination + "/" + source.getName());
                     SmbFileOutputStream out = new SmbFileOutputStream(destinationFile, true);
-                    FileInputStream in = new FileInputStream(source);
-                    int len;
-                    byte[] buf = new byte[512 * 1024];
-                    while ((len = in.read(buf)) > 0) {
-                        out.write(buf, 0, len);
-                        mDoneSize += len;
-                        updateProgress();
-                    }
-
-                    out.close();
-                    in.close();
-
+                    copyStreamRoutine(source, out);
                     return null;
                 }
             }, source);
@@ -407,6 +428,20 @@ public class CopyToNetworkMultiTask extends NetworkActionMultiTask {
                 }
             }, source);
         }
+    }
+
+    private void copyStreamRoutine(File source, OutputStream out) throws IOException {
+        FileInputStream in = new FileInputStream(source);
+        int len;
+        byte[] buf = new byte[512 * 1024];
+        while ((len = in.read(buf)) > 0) {
+            out.write(buf, 0, len);
+            mDoneSize += len;
+            updateProgress();
+        }
+
+        out.close();
+        in.close();
     }
 
 }

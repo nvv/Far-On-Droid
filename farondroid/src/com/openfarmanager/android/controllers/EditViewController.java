@@ -10,6 +10,7 @@ import android.view.inputmethod.InputMethodManager;
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.R;
 import com.openfarmanager.android.adapters.LinesAdapter;
+import com.openfarmanager.android.dialogs.SelectEncodingDialog;
 import com.openfarmanager.android.fragments.*;
 
 /**
@@ -87,11 +88,11 @@ public class EditViewController {
                     mViewerToolbar.setBigFileMode(false);
                     break;
                 case MSG_SELECT_ENCODING:
-                    Pair<Boolean, Charset> values = (Pair<Boolean, Charset>) msg.obj;
-                    mViewer.setEncoding(values.second);
-                    if (values.first) {
+                    SelectEncodingDialog.SelectedEncodingInfo info = (SelectEncodingDialog.SelectedEncodingInfo) msg.obj;
+                    mViewer.setEncoding(info.charset);
+                    if (info.saveAsDefault) {
                         // save default charset
-                        App.sInstance.getSettings().setDefaultCharset(values.second.name());
+                        App.sInstance.getSettings().setDefaultCharset(info.charset.name());
                     }
                     break;
             }

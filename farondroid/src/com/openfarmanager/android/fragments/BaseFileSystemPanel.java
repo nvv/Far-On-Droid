@@ -308,7 +308,7 @@ public abstract class BaseFileSystemPanel extends BasePanel {
                 NetworkPanel networkPanel = (NetworkPanel) args[0];
                 NetworkEnum type = networkPanel.getNetworkType();
                 List<File> files = getSelectedFiles();
-                if (App.sInstance.getSettings().isMultiThreadTasksEnabled()) {
+                if (App.sInstance.getSettings().isMultiThreadTasksEnabled(type)) {
                     new CopyToNetworkMultiTask(getActivity(), type,
                             createListener(args), files, (String) args[1]).execute();
                 } else {
@@ -326,26 +326,12 @@ public abstract class BaseFileSystemPanel extends BasePanel {
 
         @Override
         public void execute(final Object ... args) {
-            /*
-            FileActionTask task = null;
-            try {
-                task = new CopyFromNetworkTask(((NetworkPanel) BaseFileSystemPanel.this).getNetworkType(), fragmentManager(),
-                        new OnActionListener() {
-                            @Override
-                            public void onActionFinish(TaskStatusEnum status) {
-                                handleNetworkCopyActionResult(status, args);
-                            }
-                        }, ((NetworkPanel) BaseFileSystemPanel.this).getFiles(), (String) args[1]);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            task.execute();
-            */
+
             NetworkPanel panel = (NetworkPanel) BaseFileSystemPanel.this;
             NetworkEnum type = panel.getNetworkType();
             String destination = (String) args[1];
             try {
-                if (App.sInstance.getSettings().isMultiThreadTasksEnabled()) {
+                if (App.sInstance.getSettings().isMultiThreadTasksEnabled(type)) {
                     new CopyFromNetworkMultiTask(getActivity(), type, createListener(args),
                             panel.getFiles(), destination).execute();
                 } else {
@@ -440,7 +426,7 @@ public abstract class BaseFileSystemPanel extends BasePanel {
                 try {
                     NetworkPanel panel = (NetworkPanel) args[0];
                     NetworkEnum type = panel.getNetworkType();
-                    if (App.sInstance.getSettings().isMultiThreadTasksEnabled()) {
+                    if (App.sInstance.getSettings().isMultiThreadTasksEnabled(type)) {
                         new MoveToNetworkMultiTask(getActivity(), type, createListener(args),
                                 getSelectedFiles(), panel.getCurrentPath()).execute();
                     } else {
@@ -463,7 +449,7 @@ public abstract class BaseFileSystemPanel extends BasePanel {
                 try {
                     NetworkEnum type = ((NetworkPanel) BaseFileSystemPanel.this).getNetworkType();
                     String destination = ((MainPanel) args[0]).getCurrentPath();
-                    if (App.sInstance.getSettings().isMultiThreadTasksEnabled()) {
+                    if (App.sInstance.getSettings().isMultiThreadTasksEnabled(type)) {
                         new MoveFromNetworkMultiTask(getActivity(), type, createListener(args),
                                 getSelectedFileProxies(), destination).execute();
                     } else {

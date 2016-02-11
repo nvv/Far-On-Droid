@@ -65,6 +65,11 @@ public class GoogleDriveDataSource implements DataSource {
     }
 
     @Override
+    public boolean isChangeEncodingSupported() {
+        return false;
+    }
+
+    @Override
     public void open(FileProxy file) {
         mHandler.sendMessage(mHandler.obtainMessage(MSG_NETWORK_OPEN, new Pair<FileProxy, String>(file,
                 App.sInstance.getGoogleDriveApi().getDownloadLink(file))));

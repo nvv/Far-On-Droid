@@ -239,7 +239,9 @@
 
     <string name="one_network_instance">Only one instance of certain network panel can be opened at once. Another instance will be closed.</string>
     <string name="connecting_to_ftp">Connecting to the FTP server…</string>
+    <string name="connecting_to_sftp">Connecting to the SFTP server…</string>
     <string name="ftp_server">FTP Server</string>
+    <string name="sftp_server">SFTP Server</string>
     <string name="server">Server</string>
     <string name="port">Port</string>
     <string name="mode">Mode</string>
@@ -249,8 +251,9 @@
     <string name="anonymous">Anonymous</string>
     <string name="error_empty_server">Server must not be empty</string>
     <string name="error_wrong_port">The port number must be a number between 0 and 65535</string>
-    <string name="error_wrong_ftp_host">Unable to connect to the ftp server</string>
-    <string name="error_wrong_credentials">Unable to login on ftp server: wrong username or password</string>
+    <string name="error_wrong_ftp_host">Unable to connect to the FTP server</string>
+    <string name="error_sftp_connection_error">Unable to connect to the SFTP server: wrong host or not valid credentials</string>
+    <string name="error_wrong_credentials">Unable to login to the ftp server: wrong username or password</string>
     <string name="error_ftp_io">Unexpected IO error. Please, try again.</string>
 
     <string name="domain">Domain</string>

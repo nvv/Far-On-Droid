@@ -79,6 +79,11 @@ public class DropboxDataSource implements DataSource {
     }
 
     @Override
+    public boolean isChangeEncodingSupported() {
+        return false;
+    }
+
+    @Override
     public void open(final FileProxy file) {
         mHandler.sendEmptyMessage(MSG_NETWORK_SHOW_PROGRESS);
 
