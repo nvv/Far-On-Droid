@@ -121,11 +121,11 @@ public class FlatFileSystemAdapter extends BaseAdapter {
             setColor(name, info, settings.getTextColor());
         }
 
-        if (item.isDirectory()) {
+        if (item.isUpNavigator()) {
+            info.setText(R.string.folder_up);
+        } else if (item.isDirectory()) {
             if (item.isRoot()) {
                 info.setText(R.string.folder_root);
-            } else if (item.isUpNavigator()) {
-                info.setText(R.string.folder_up);
             } else if (item.isVirtualDirectory()) {
                 info.setText(R.string.virtual_folder);
             } else {
