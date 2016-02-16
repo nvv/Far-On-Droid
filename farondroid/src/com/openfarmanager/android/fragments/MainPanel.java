@@ -35,6 +35,7 @@ import com.openfarmanager.android.filesystem.actions.FileActionTask;
 import com.openfarmanager.android.filesystem.actions.OnActionListener;
 import com.openfarmanager.android.filesystem.actions.network.ExportAsTask;
 import com.openfarmanager.android.filesystem.commands.CommandsFactory;
+import com.openfarmanager.android.model.Bookmark;
 import com.openfarmanager.android.model.FileActionEnum;
 import com.openfarmanager.android.model.SelectParams;
 import com.openfarmanager.android.model.TaskStatusEnum;
@@ -104,6 +105,8 @@ public class MainPanel extends BaseFileSystemPanel {
 
     protected QuickPopupDialog mQuickActionPopup;
 
+    protected String mBookmarkPath;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         setupHandler();
@@ -141,7 +144,12 @@ public class MainPanel extends BaseFileSystemPanel {
                 }
 
                 if (file != null && file.isBookmark()) {
-                    openDirectory(new File(file.getBookmark().getBookmarkPath()));
+                    Bookmark bookmark = file.getBookmark();
+                    if (bookmark.isNetworkLink()) {
+                        mHandler.sendMessage(mHandler.obtainMessage(FileSystemController.OPEN_NETWORK, bookmark));
+                    } else {
+                        openDirectory(new File(bookmark.getBookmarkPath()));
+                    }
                     return;
                 }
 
@@ -889,8 +897,8 @@ public class MainPanel extends BaseFileSystemPanel {
         mChangePathToLeft.setVisibility(!forceHide && isCopyFolderSupported && mPanelLocation == LEFT_PANEL ? View.VISIBLE : View.GONE);
         mChangePathToRight.setVisibility(!forceHide && isCopyFolderSupported && mPanelLocation == RIGHT_PANEL ? View.VISIBLE : View.GONE);
 
-        mAddToBookmarksLeft.setVisibility(!forceHide && isCopyFolderSupported && mPanelLocation == LEFT_PANEL ? View.VISIBLE : View.GONE);
-        mAddToBookmarksRight.setVisibility(!forceHide && isCopyFolderSupported && mPanelLocation == RIGHT_PANEL ? View.VISIBLE : View.GONE);
+        mAddToBookmarksLeft.setVisibility(!forceHide && mPanelLocation == LEFT_PANEL ? View.VISIBLE : View.GONE);
+        mAddToBookmarksRight.setVisibility(!forceHide && mPanelLocation == RIGHT_PANEL ? View.VISIBLE : View.GONE);
 
         mNetworkLeft.setVisibility(!forceHide && isCopyFolderSupported && mPanelLocation == LEFT_PANEL ? View.VISIBLE : View.GONE);
         mNetworkRight.setVisibility(!forceHide && isCopyFolderSupported && mPanelLocation == RIGHT_PANEL ? View.VISIBLE : View.GONE);
@@ -1226,7 +1234,7 @@ public class MainPanel extends BaseFileSystemPanel {
                 case FILE_CREATE_BOOKMARK:
                     CreateBookmarkDialog.CreateBookmarkResult createBookmarkResult = (CreateBookmarkDialog.CreateBookmarkResult) msg.obj;
                     mCreateBookmarkCommand.execute(createBookmarkResult.inactivePanel, createBookmarkResult.link,
-                            null, createBookmarkResult.label);
+                            null, createBookmarkResult.label, createBookmarkResult.networkAccount);
                     break;
                 case FILE_EXTRACT_ARCHIVE:
                     ExtractArchiveDialog.ExtractArchiveResult extractArchiveResult = (ExtractArchiveDialog.ExtractArchiveResult) msg.obj;
@@ -1249,7 +1257,7 @@ public class MainPanel extends BaseFileSystemPanel {
                             @Override
                             public void onGotoFile(final FileProxy fileProxy) {
                                 if (MainPanel.this instanceof NetworkPanel) {
-                                    ((NetworkPanel) MainPanel.this).openDirectoryAndSelect(fileProxy.getParentPath(),
+                                    ((NetworkPanel) MainPanel.this).openDirectoryAndSelect(fileProxy,
                                             new ArrayList<FileProxy>() {{
                                                 add(fileProxy);
                                             }});

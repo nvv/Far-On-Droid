@@ -14,7 +14,7 @@ public interface DataSource {
 
     NetworkEnum getNetworkTypeEnum();
 
-    List<FileProxy> openDirectory(String path) throws RuntimeException;
+    List<FileProxy> openDirectory(FileProxy directory) throws RuntimeException;
 
     void onUnlinkedAccount();
 

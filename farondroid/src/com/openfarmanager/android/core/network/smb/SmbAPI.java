@@ -198,6 +198,10 @@ public class SmbAPI implements NetworkApi {
         private String mUser;
         private String mPassword;
 
+        public SmbAccount(long id, String userName, JSONObject data) throws JSONException {
+            this(id, userName, data.getString(SMB_DOMAIN), data.getString(SMB_USER), data.getString(SMB_PASSWORD));
+        }
+
         public SmbAccount(long id, String userName, String domain, String user, String password) {
             mId = id;
             mUserName = userName;
@@ -218,5 +222,9 @@ public class SmbAPI implements NetworkApi {
             return mPassword;
         }
 
+        @Override
+        public NetworkEnum getNetworkType() {
+            return NetworkEnum.SMB;
+        }
     }
 }

@@ -49,6 +49,8 @@ public class SkyDriveAPI implements LiveAuthListener, NetworkApi {
 
     public OnLoginListener mOnLoginListener;
 
+    private String mDriveDefaultPath;
+
     public static final String[] SCOPES = {
             "wl.signin",
             "wl.basic",
@@ -128,7 +130,7 @@ public class SkyDriveAPI implements LiveAuthListener, NetworkApi {
 
     @Override
     public NetworkAccount newAccount() {
-        return new SkyDriveAccount(-1, App.sInstance.getResources().getString(com.openfarmanager.android.R.string.btn_new), null);
+        return new SkyDriveAccount(-1, App.sInstance.getResources().getString(com.openfarmanager.android.R.string.btn_new), (String) null);
     }
 
     @Override
@@ -248,7 +250,7 @@ public class SkyDriveAPI implements LiveAuthListener, NetworkApi {
         outputStream.close();
     }
 
-    public void setAuthTokensToSession(SkyDriveAccount account, OnLoginListener onLoginListener) {
+    public void setAuthTokensToSession(SkyDriveAccount account, OnLoginListener onLoginListener, String defaultPath) {
         mCurrentSkyDriveAccount = account;
 
         SharedPreferences settings =
@@ -257,6 +259,7 @@ public class SkyDriveAPI implements LiveAuthListener, NetworkApi {
         editor.putString(PreferencesConstants.REFRESH_TOKEN_KEY, account.getToken()).commit();
 
         mOnLoginListener = onLoginListener;
+        mDriveDefaultPath = defaultPath;
         mSkyDriveAuthClient.initialize(this);
     }
 
@@ -301,7 +304,7 @@ public class SkyDriveAPI implements LiveAuthListener, NetworkApi {
                                         result.optString("name") + "(" + result.optString("id") + ")",
                                         NetworkEnum.SkyDrive.ordinal(), authData.toString());
 
-                                mOnLoginListener.onComplete();
+                                mOnLoginListener.onComplete(mDriveDefaultPath);
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
@@ -309,7 +312,7 @@ public class SkyDriveAPI implements LiveAuthListener, NetworkApi {
                     }
                 });
             } else {
-                mOnLoginListener.onComplete();
+                mOnLoginListener.onComplete(mDriveDefaultPath);
             }
 
         } else {
@@ -336,6 +339,10 @@ public class SkyDriveAPI implements LiveAuthListener, NetworkApi {
 
         private String mToken;
 
+        public SkyDriveAccount(long id, String userName, JSONObject data) throws JSONException {
+            this(id, userName, data.getString(SKYDRIVE_REFRESH_TOKEN));
+        }
+
         public SkyDriveAccount(long id, String userName, String token) {
             mId = id;
             mUserName = userName;
@@ -346,12 +353,16 @@ public class SkyDriveAPI implements LiveAuthListener, NetworkApi {
             return mToken;
         }
 
+        @Override
+        public NetworkEnum getNetworkType() {
+            return NetworkEnum.SkyDrive;
+        }
     }
 
     public static interface OnLoginListener {
         public void onGetUserInfo();
 
-        public void onComplete();
+        public void onComplete(String defaultPath);
 
         public void onError(int errorCode);
     }

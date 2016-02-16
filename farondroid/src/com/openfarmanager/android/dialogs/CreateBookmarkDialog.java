@@ -9,6 +9,7 @@ import android.widget.TextView;
 
 import com.openfarmanager.android.R;
 import com.openfarmanager.android.fragments.MainPanel;
+import com.openfarmanager.android.model.NetworkAccount;
 
 /**
  * author: Vlad Namashko
@@ -16,10 +17,16 @@ import com.openfarmanager.android.fragments.MainPanel;
 public class CreateBookmarkDialog extends BaseFileDialog {
 
     private String mDestinationText;
+    private NetworkAccount mNetworkAccount;
 
     public CreateBookmarkDialog(Context context, Handler handler, MainPanel inactivePanel, String destination) {
+        this(context, handler, inactivePanel, destination, null);
+    }
+
+    public CreateBookmarkDialog(Context context, Handler handler, MainPanel inactivePanel, String destination, NetworkAccount account) {
         super(context, handler, inactivePanel);
         mDestinationText = destination;
+        mNetworkAccount = account;
     }
 
     @Override
@@ -57,18 +64,20 @@ public class CreateBookmarkDialog extends BaseFileDialog {
         mHandler.sendMessage(mHandler.obtainMessage(MainPanel.FILE_CREATE_BOOKMARK,
                 new CreateBookmarkResult(mInactivePanel,
                         ((EditText) mDialogView.findViewById(R.id.bookmark_label)).getText().toString().trim(),
-                        mDestination.getText().toString().trim())));
+                        mDestination.getText().toString().trim(), mNetworkAccount)));
     }
 
     public class CreateBookmarkResult {
         public MainPanel inactivePanel;
         public String label;
         public String link;
+        public NetworkAccount networkAccount;
 
-        public CreateBookmarkResult(MainPanel panel, String label, String dest) {
+        public CreateBookmarkResult(MainPanel panel, String label, String dest, NetworkAccount account) {
             inactivePanel = panel;
             this.label = label;
             link = dest;
+            networkAccount = account;
         }
     }
 }

@@ -35,8 +35,8 @@ public class YandexDiskDataSource implements DataSource {
     }
 
     @Override
-    public List<FileProxy> openDirectory(String path) throws RuntimeException {
-        return App.sInstance.getYandexDiskApi().getDirectoryFiles(path);
+    public List<FileProxy> openDirectory(FileProxy directory) throws RuntimeException {
+        return App.sInstance.getYandexDiskApi().getDirectoryFiles(directory.getFullPath());
     }
 
     @Override

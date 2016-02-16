@@ -6,7 +6,6 @@ import com.openfarmanager.android.App;
 import com.openfarmanager.android.filesystem.FileProxy;
 import com.openfarmanager.android.model.NetworkEnum;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -31,8 +30,8 @@ public class SmbDataSource implements DataSource {
     }
 
     @Override
-    public List<FileProxy> openDirectory(String path) throws RuntimeException {
-        return App.sInstance.getSmbAPI().getDirectoryFiles(path);
+    public List<FileProxy> openDirectory(FileProxy directory) throws RuntimeException {
+        return App.sInstance.getSmbAPI().getDirectoryFiles(directory.getFullPath());
     }
 
     @Override

@@ -39,11 +39,11 @@ public class DropboxDataSource implements DataSource {
         return NetworkEnum.Dropbox;
     }
 
-    public List<FileProxy> openDirectory(String path) {
+    public List<FileProxy> openDirectory(FileProxy directory) {
         List<FileProxy> files = new ArrayList<FileProxy>();
         DropboxAPI.Entry currentNode;
         try {
-            currentNode = App.sInstance.getDropboxApi().metadata(path, -1, null, true, null);
+            currentNode = App.sInstance.getDropboxApi().metadata(directory.getFullPath(), -1, null, true, null);
             for (DropboxAPI.Entry entry : currentNode.contents) {
                 files.add(new DropboxFile(entry));
             }

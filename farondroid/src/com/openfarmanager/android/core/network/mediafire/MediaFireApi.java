@@ -241,5 +241,10 @@ public class MediaFireApi implements NetworkApi {
         public String getPassword() {
             return mPassword;
         }
+
+        @Override
+        public NetworkEnum getNetworkType() {
+            return NetworkEnum.MediaFire;
+        }
     }
 }

@@ -2,17 +2,10 @@ package com.openfarmanager.android.core.network.datasource;
 
 import android.os.Handler;
 
-import com.mediafire.sdk.MediaFire;
-import com.mediafire.sdk.api.FolderApi;
-import com.mediafire.sdk.api.responses.FolderGetContentsResponse;
-import com.mediafire.sdk.api.responses.data_models.Folder;
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.filesystem.FileProxy;
-import com.openfarmanager.android.filesystem.MediaFireFile;
 import com.openfarmanager.android.model.NetworkEnum;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 
 import static com.openfarmanager.android.utils.Extensions.isNullOrEmpty;
@@ -39,8 +32,8 @@ public class MediaFireDataSource implements DataSource {
     }
 
     @Override
-    public List<FileProxy> openDirectory(String path) throws RuntimeException {
-        return App.sInstance.getMediaFireApi().openDirectory(path);
+    public List<FileProxy> openDirectory(FileProxy directory) throws RuntimeException {
+        return App.sInstance.getMediaFireApi().openDirectory(directory.getId());
     }
 
     @Override
@@ -62,6 +55,7 @@ public class MediaFireDataSource implements DataSource {
     @Override
     public void exitFromNetwork() {
         App.sInstance.getMediaFireApi().endSession();
+        App.sInstance.getMediaFireApi().getFoldersAliases().clear();
     }
 
     @Override

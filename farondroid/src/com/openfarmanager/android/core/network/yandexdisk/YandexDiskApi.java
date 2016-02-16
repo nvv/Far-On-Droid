@@ -165,7 +165,7 @@ public class YandexDiskApi implements NetworkApi {
 
     @Override
     public NetworkAccount newAccount() {
-        return new YandexDiskAccount(-1, App.sInstance.getResources().getString(R.string.btn_new), null);
+        return new YandexDiskAccount(-1, App.sInstance.getResources().getString(R.string.btn_new), (String) null);
     }
 
     @Override
@@ -199,6 +199,10 @@ public class YandexDiskApi implements NetworkApi {
 
         private String mToken;
 
+        public YandexDiskAccount(long id, String userName, JSONObject data) throws JSONException {
+            this(id, userName, data.getString(YANDEX_TOKEN));
+        }
+
         public YandexDiskAccount(long id, String userName, String token) {
             mId = id;
             mUserName = userName;
@@ -207,6 +211,11 @@ public class YandexDiskApi implements NetworkApi {
 
         public String getToken() {
             return mToken;
+        }
+
+        @Override
+        public NetworkEnum getNetworkType() {
+            return NetworkEnum.YandexDisk;
         }
     }
 }

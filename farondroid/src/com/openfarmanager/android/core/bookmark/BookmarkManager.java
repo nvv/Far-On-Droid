@@ -6,7 +6,10 @@ import android.database.sqlite.SQLiteException;
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.core.DataStorageHelper;
 import com.openfarmanager.android.core.dbadapters.BookmarkDBAdapter;
+import com.openfarmanager.android.core.dbadapters.NetworkAccountDbAdapter;
 import com.openfarmanager.android.model.Bookmark;
+import com.openfarmanager.android.model.NetworkAccount;
+import com.openfarmanager.android.model.NetworkEnum;
 import com.openfarmanager.android.model.TaskStatusEnum;
 
 import java.util.ArrayList;
@@ -35,8 +38,8 @@ public class BookmarkManager {
         return App.sInstance.getSharedPreferences("bookmark_settings", 0);
     }
 
-    public TaskStatusEnum createBookmark(String path, String label) {
-        Bookmark bookmark = new Bookmark(path, label);
+    public TaskStatusEnum createBookmark(String path, String label, NetworkAccount account) {
+        Bookmark bookmark = new Bookmark(path, label, account);
         long id = -1;
         try {
             id = BookmarkDBAdapter.insert(bookmark);
@@ -65,9 +68,16 @@ public class BookmarkManager {
                 int idxId = cursor.getColumnIndex(BookmarkDBAdapter.Columns.ID);
                 int idxLabel = cursor.getColumnIndex(BookmarkDBAdapter.Columns.LABEL);
                 int idxPath = cursor.getColumnIndex(BookmarkDBAdapter.Columns.PATH);
+                int idxNetworkAccountId = cursor.getColumnIndex(BookmarkDBAdapter.Columns.NETWORK_ACCOUNT_ID);
 
                 while (cursor.moveToNext()) {
-                    Bookmark bookmark = new Bookmark(cursor.getString(idxPath), cursor.getString(idxLabel));
+                    NetworkAccount account = null;
+                    int networkAccountId = cursor.getInt(idxNetworkAccountId);
+                    if (networkAccountId != -1) {
+                        account = NetworkAccountDbAdapter.loadAccountById(cursor.getInt(idxNetworkAccountId));
+                    }
+
+                    Bookmark bookmark = new Bookmark(cursor.getString(idxPath), cursor.getString(idxLabel), account);
                     bookmark.setBookmarkId(cursor.getLong(idxId));
                     bookmarks.add(bookmark);
                 }

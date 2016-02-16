@@ -25,6 +25,7 @@ import com.openfarmanager.android.adapters.*;
 import com.openfarmanager.android.core.Settings;
 import com.openfarmanager.android.core.dbadapters.NetworkAccountDbAdapter;
 import com.openfarmanager.android.core.network.NetworkApi;
+import com.openfarmanager.android.core.network.NetworkConnectionManager;
 import com.openfarmanager.android.core.network.dropbox.DropboxAPI;
 import com.openfarmanager.android.core.network.ftp.FtpAPI;
 import com.openfarmanager.android.core.network.ftp.SftpAPI;
@@ -41,6 +42,7 @@ import com.openfarmanager.android.fragments.*;
 import com.openfarmanager.android.googledrive.GoogleDriveAuthWindow;
 import com.openfarmanager.android.googledrive.model.About;
 import com.openfarmanager.android.googledrive.model.Token;
+import com.openfarmanager.android.model.Bookmark;
 import com.openfarmanager.android.model.FileActionEnum;
 import com.openfarmanager.android.model.NetworkAccount;
 import com.openfarmanager.android.model.NetworkEnum;
@@ -157,23 +159,18 @@ public class FileSystemController {
     protected View mLeftFragmentContainer;
     protected View mRightFragmentContainer;
 
-    protected boolean mNetworkAuthRequested;
-
     private Dialog mProgressDialog;
 
     private PanelsState mPanelsState = PanelsState.EQUALS;
 
     protected View mMainView;
 
-    protected CompositeSubscription mSubscription;
-
     protected FileSystemController() {
     }
 
-    public FileSystemController(FragmentManager manager, View view, CompositeSubscription subscription) {
+    public FileSystemController(FragmentManager manager, View view) {
 
         Context appContext = App.sInstance.getApplicationContext();
-        mSubscription = subscription;
 
         mMainView = view;
         mLeftPanel = (MainPanel) Fragment.instantiate(appContext, MainPanel.class.getName());
@@ -199,14 +196,6 @@ public class FileSystemController {
                 commit();
 
         initPanels();
-    }
-
-    public boolean isNetworkAuthRequested() {
-        return mNetworkAuthRequested;
-    }
-
-    public void resetNetworkAuth() {
-        mNetworkAuthRequested = false;
     }
 
     public void invalidateToolbar() {
@@ -349,16 +338,7 @@ public class FileSystemController {
                     }
                     break;
                 case NETWORK:
-                    showNetworksDialog();
-                    break;
-                case NETWORK_DROPBOX:
-                    openDropbox();
-                    break;
-                case NETWORK_SKYDRIVE:
-                    openSkyDrive();
-                    break;
-                case NETWORK_YANDEX:
-                    openYandexDisk();
+                    App.sInstance.getNetworkConnectionManager().openAvailableCloudsList();
                     break;
                 case APPLAUNCHER:
                     openAppLaucnher();
@@ -466,10 +446,12 @@ public class FileSystemController {
                     }
                     break;
                 case OPEN_NETWORK:
-                    if (NetworkUtil.isNetworkAvailable()) {
-                        showNetworksDialog();
+                    Bookmark bookmark = (Bookmark) msg.obj;
+                    NetworkConnectionManager manager = App.sInstance.getNetworkConnectionManager();
+                    if (bookmark != null) {
+                        manager.openNetworkBookmark(bookmark);
                     } else {
-                        ToastNotification.makeText(activePanel.getActivity(), App.sInstance.getString(R.string.error_no_network),  Toast.LENGTH_LONG).show();
+                        manager.openAvailableCloudsList();
                     }
                     break;
                 case EXIT_FROM_NETWORK_STORAGE:
@@ -682,6 +664,10 @@ public class FileSystemController {
     }
 
     public void openNetworkPanel(NetworkEnum networkType) {
+        openNetworkPanel(networkType, null);
+    }
+
+    public void openNetworkPanel(NetworkEnum networkType, String path) {
         MainPanel activePanel = getActivePanel();
         boolean isLeftPanel = activePanel.getPanelLocation() == MainPanel.LEFT_PANEL;
         NetworkPanel networkPanel;
@@ -1004,24 +990,13 @@ public class FileSystemController {
         List<ResolveInfo> infoList = App.sInstance.getAppManager().getIntentActivities(intent);
         List<ResolveInfo> allInfoList = App.sInstance.getAppManager().getAllCallableActivities(item);
         showChooserDialog(intent, item, infoList, allInfoList);
-
-/*
-        if (infoList.size() == 0) {
-            Activity activity = getActivePanel().getActivity();
-            ToastNotification.makeText(activity, activity.getString(R.string.error_no_app_to_open_file), Toast.LENGTH_LONG).show();
-        } else {
-            showChooserDialog(intent, infoList);
-        }
-*/
     }
-
 
     public void openBookmarkList(Activity activity) {
         final Dialog dialog = new BookmarksListDialog(activity, mPanelHandler);
         dialog.show();
         adjustDialogSize(dialog);
     }
-
 
     /**
      * Show customized chooser dialog with available applications for current <code>intent</code>.
@@ -1135,305 +1110,6 @@ public class FileSystemController {
         adjustDialogSize(dialog);
     }
 
-    /**
-     * Show dialog with available networks (clouds).
-     */
-    private void showNetworksDialog() {
-
-        if (getActivePanel() == null || getActivePanel().getActivity() == null) {
-            // very weired situation; try to avoid crash.
-            return;
-        }
-
-        final Dialog dialog = new Dialog(getActivePanel().getActivity(), R.style.Action_Dialog);
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        View dialogView = View.inflate(App.sInstance.getApplicationContext(), R.layout.network_type_chooser, null);
-
-        final ListView networks = (ListView) dialogView.findViewById(R.id.network_types);
-        final NetworkChooserAdapter adapter = new NetworkChooserAdapter();
-        networks.setAdapter(adapter);
-
-        dialogView.findViewById(R.id.cancel).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                dialog.dismiss();
-            }
-        });
-
-        networks.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                NetworkEnum network = (NetworkEnum) view.getTag();
-
-                switch (network) {
-                    case FTP:
-                        openFTP();
-                        break;
-                    case SFTP:
-                        openSFTP();
-                        break;
-                    case SMB:
-                        openSmb();
-                        break;
-                    case Dropbox:
-                        openDropbox();
-                        break;
-                    case SkyDrive:
-                        openSkyDrive();
-                        break;
-                    case YandexDisk:
-                        openYandexDisk();
-                        break;
-                    case GoogleDrive:
-                        openGoogleDrive();
-                        break;
-                    case MediaFire:
-                        openMediaFire();
-                        break;
-                }
-
-                if (dialog.isShowing()) {
-                    dialog.dismiss();
-                }
-            }
-        });
-
-        dialog.setContentView(dialogView);
-        dialog.show();
-
-        adjustDialogSize(dialog);
-    }
-
-    /**
-     * Show dialog with available networks (clouds).
-     */
-    private void showSelectAccountDialog(final NetworkEnum networkType) {
-
-        if (getActivePanel() == null || getActivePanel().getActivity() == null) {
-            // very weired situation; try to avoid crash.
-            return;
-        }
-
-        final Dialog dialog = new Dialog(getActivePanel().getActivity(), R.style.Action_Dialog);
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        View dialogView = View.inflate(App.sInstance.getApplicationContext(), R.layout.network_type_chooser, null);
-        ((TextView) dialogView.findViewById(R.id.network_dialog_title)).setText(App.sInstance.getString(R.string.action_select_account));
-
-        final ListView networks = (ListView) dialogView.findViewById(R.id.network_types);
-
-        NetworkApi api = App.sInstance.getNetworkApi(networkType);
-
-        final BaseAdapter adapter = new NetworkAccountChooserAdapter(api, new NetworkAccountChooserAdapter.OnDeleteItemListener() {
-            @Override
-            public void onAccountDelete(NetworkAccount account) {
-                NetworkAccountDbAdapter.delete(account.getId());
-                ((NetworkAccountChooserAdapter) networks.getAdapter()).dataSetChanged();
-            }
-        });
-
-        networks.setAdapter(adapter);
-
-        dialogView.findViewById(R.id.cancel).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                dialog.dismiss();
-            }
-        });
-
-        networks.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                switch (networkType) {
-                    case FTP:
-                        final FtpAPI.FtpAccount ftpAccount = (FtpAPI.FtpAccount) view.getTag();
-                        if (ftpAccount.getServer() == null) { // new
-                            startFtpAuthentication();
-                        } else {
-                            showProgressDialog(R.string.connecting_to_ftp);
-                            runAsync(new Runnable() {
-                                @Override
-                                public void run() {
-                                    try {
-                                        App.sInstance.getFtpApi().connect(ftpAccount);
-                                        dismissProgressDialog();
-                                        openNetworkPanel(NetworkEnum.FTP);
-                                    } catch (final InAppAuthException e) {
-                                        handleInAppAuthError(e);
-                                    } catch (final Exception e) {
-                                        handleNetworkAuthError(e);
-                                    }
-                                }
-                            });
-                        }
-
-                        break;
-                    case SFTP:
-                        final SftpAPI.SftpAccount sftpAccount = (SftpAPI.SftpAccount) view.getTag();
-                        if (sftpAccount.getServer() == null) { // new
-                            startSftpAuthentication();
-                        } else {
-                            showProgressDialog(R.string.connecting_to_sftp);
-                            runAsync(new Runnable() {
-                                @Override
-                                public void run() {
-                                    try {
-                                        App.sInstance.getSftpApi().connect(sftpAccount);
-                                        dismissProgressDialog();
-                                        openNetworkPanel(NetworkEnum.SFTP);
-                                    } catch (final InAppAuthException e) {
-                                        handleInAppAuthError(e);
-                                    } catch (final Exception e) {
-                                        handleNetworkAuthError(e);
-                                    }
-                                }
-                            });
-                        }
-
-                        break;
-                    case SMB:
-                        final SmbAPI.SmbAccount smbAccount = (SmbAPI.SmbAccount) view.getTag();
-                        if (smbAccount.getDomain() == null) { // new
-                            startSmbAuthentication();
-                        } else {
-                            showProgressDialog(R.string.connecting_to_smb);
-                            runAsync(new Runnable() {
-                                @Override
-                                public void run() {
-                                    try {
-                                        App.sInstance.getSmbAPI().connect(smbAccount);
-                                        dismissProgressDialog();
-                                        openNetworkPanel(NetworkEnum.SMB);
-                                    } catch (final InAppAuthException e) {
-                                        handleInAppAuthError(e);
-                                    } catch (final Exception e) {
-                                        handleNetworkAuthError(e);
-                                    }
-                                }
-                            });
-                        }
-                        break;
-                    case Dropbox:
-                        DropboxAPI.DropboxAccount dropboxAccount = (DropboxAPI.DropboxAccount) view.getTag();
-                        if (dropboxAccount.getKey() == null && dropboxAccount.getSecret() == null) { // new
-                            startDropboxAuthentication();
-                        } else {
-                            App.sInstance.getDropboxApi().setAuthTokensToSession(dropboxAccount);
-                            openNetworkPanel(NetworkEnum.Dropbox);
-                        }
-                        break;
-                    case SkyDrive:
-                        SkyDriveAPI.SkyDriveAccount skyDriveAccount = (SkyDriveAPI.SkyDriveAccount) view.getTag();
-                        if (skyDriveAccount.getToken() == null) { // new
-                            startSkyDriveAuthentication();
-                        } else {
-                            showProgressDialog(R.string.restoring_skydrive_session);
-                            App.sInstance.getSkyDriveApi().setAuthTokensToSession(skyDriveAccount, mOnSkyDriveLoginListener);
-                        }
-                        break;
-                    case YandexDisk:
-                        YandexDiskApi.YandexDiskAccount yandexDiskAccount = (YandexDiskApi.YandexDiskAccount) view.getTag();
-                        if (yandexDiskAccount.getToken() == null) { // new
-                            startYandexDiskAuthentication();
-                        } else {
-                            try {
-                                App.sInstance.getYandexDiskApi().setupToken(yandexDiskAccount);
-                            } catch (InitYandexDiskException e) {
-                                e.printStackTrace();
-                                showErrorDialog(App.sInstance.getResources().getString(R.string.error_init_yandex_sdk));
-                                if (dialog.isShowing()) {
-                                    dialog.dismiss();
-                                }
-                                return;
-                            }
-
-                            openNetworkPanel(NetworkEnum.YandexDisk);
-                        }
-                        break;
-                    case GoogleDrive:
-                        final GoogleDriveApi.GoogleDriveAccount driveAccount = (GoogleDriveApi.GoogleDriveAccount) view.getTag();
-                        if (driveAccount.getToken() == null) { // new
-                            startGoogleDriveAuthentication();
-                        } else {
-                            App.sInstance.getGoogleDriveApi().setup(driveAccount);
-                            openNetworkPanel(NetworkEnum.GoogleDrive);
-                        }
-                        break;
-                    case MediaFire:
-                        final MediaFireApi.MediaFireAccount account = (MediaFireApi.MediaFireAccount) view.getTag();
-                        if (account.getPassword() == null) { // new
-                            startMediaFireAuthentication();
-                        } else {
-                            showProgressDialog(R.string.loading);
-                            Subscription subscription = Observable.create(new Observable.OnSubscribe<Void>() {
-                                @Override
-                                public void call(Subscriber<? super Void> subscriber) {
-                                    try {
-                                        App.sInstance.getMediaFireApi().startSession(account);
-                                        subscriber.onCompleted();
-                                    } catch (Exception e) {
-                                        subscriber.onError(e);
-                                    }
-                                }
-                            }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(new Observer<Void>() {
-                                @Override
-                                public void onCompleted() {
-                                    dismissProgressDialog();
-                                    openNetworkPanel(NetworkEnum.MediaFire);
-                                }
-
-                                @Override
-                                public void onError(Throwable e) {
-                                    dismissProgressDialog();
-                                    ToastNotification.makeText(App.sInstance.getApplicationContext(),
-                                            App.sInstance.getString(R.string.mediafire_connection_error), Toast.LENGTH_LONG).show();
-                                }
-
-                                @Override
-                                public void onNext(Void aVoid) {
-                                }
-                            });
-                            mSubscription.add(subscription);
-                        }
-
-                        break;
-                }
-
-                if (dialog.isShowing()) {
-                    dialog.dismiss();
-                }
-            }
-        });
-
-        dialog.setContentView(dialogView);
-        dialog.show();
-
-        adjustDialogSize(dialog);
-    }
-
-    private void handleNetworkAuthError(Exception e) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                ToastNotification.makeText(App.sInstance.getApplicationContext(),
-                        App.sInstance.getString(R.string.error_unknown_unexpected_error), Toast.LENGTH_LONG).show();
-            }
-        });
-        dismissProgressDialog();
-        e.printStackTrace();
-    }
-
-    private void handleInAppAuthError(final InAppAuthException e) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                ToastNotification.makeText(App.sInstance.getApplicationContext(), e.getErrorMessage(), Toast.LENGTH_LONG).show();
-            }
-        });
-        dismissProgressDialog();
-    }
-
     public void showSelectEncodingDialog(NetworkEnum network) {
         Dialog mCharsetSelectDialog = new SelectEncodingDialog(getActivePanel().getActivity(), mPanelHandler, network, false);
         mCharsetSelectDialog.setCancelable(true);
@@ -1510,114 +1186,6 @@ public class FileSystemController {
         }
     }
 
-    public void openSmb() {
-        SmbAPI api = App.sInstance.getSmbAPI();
-        if (api.getAuthorizedAccountsCount() == 0) {
-            startSmbAuthentication();
-        } else {
-            showSelectAccountDialog(NetworkEnum.SMB);
-        }
-    }
-
-    public void openMediaFire() {
-        MediaFireApi api = App.sInstance.getMediaFireApi();
-        if (api.getAuthorizedAccountsCount() == 0) {
-            startMediaFireAuthentication();
-        } else {
-            showSelectAccountDialog(NetworkEnum.MediaFire);
-        }
-    }
-
-    public void openFTP() {
-        FtpAPI api = App.sInstance.getFtpApi();
-        if (api.getAuthorizedAccountsCount() == 0) {
-            startFtpAuthentication();
-        } else {
-            showSelectAccountDialog(NetworkEnum.FTP);
-        }
-    }
-
-    public void openSFTP() {
-        SftpAPI api = App.sInstance.getSftpApi();
-        if (api.getAuthorizedAccountsCount() == 0) {
-            startSftpAuthentication();
-        } else {
-            showSelectAccountDialog(NetworkEnum.SFTP);
-        }
-    }
-
-    public void openDropbox() {
-        DropboxAPI api = App.sInstance.getDropboxApi();
-        if (api.getAuthorizedAccountsCount() == 0) {
-            startDropboxAuthentication();
-        } else {
-            resetNetworkAuth();
-            showSelectAccountDialog(NetworkEnum.Dropbox);
-        }
-    }
-
-    private void startFtpAuthentication() {
-        final Dialog dialog = new FtpAuthDialog(getActivePanel().getActivity(), mInAppAuthHandler);
-        dialog.show();
-        adjustDialogSize(dialog);
-    }
-
-    private void startSftpAuthentication() {
-        final Dialog dialog = new SftpAuthDialog(getActivePanel().getActivity(), mInAppAuthHandler);
-        dialog.show();
-        adjustDialogSize(dialog);
-    }
-
-    private void startSmbAuthentication() {
-        startSmbAuthentication(null);
-    }
-
-    private void startSmbAuthentication(String selectedIp) {
-        final Dialog dialog = new SmbAuthDialog(getActivePanel().getActivity(), mInAppAuthHandler, selectedIp);
-        dialog.show();
-        adjustDialogSize(dialog);
-    }
-
-    private void startMediaFireAuthentication() {
-        final Dialog dialog = new MediaFireAuthDialog(getActivePanel().getActivity(), mInAppAuthHandler);
-        dialog.show();
-        adjustDialogSize(dialog);
-    }
-
-    private void startDropboxAuthentication() {
-        App.sInstance.getDropboxApi().getSession().startAuthentication(getActivePanel().getActivity());
-        mNetworkAuthRequested = true;
-    }
-
-    public void openSkyDrive() {
-        SkyDriveAPI api = App.sInstance.getSkyDriveApi();
-        if (api.getAuthorizedAccountsCount() == 0) {
-            // no authorized accounts
-            startSkyDriveAuthentication();
-        } else {
-            showSelectAccountDialog(NetworkEnum.SkyDrive);
-        }
-    }
-
-    public void openYandexDisk() {
-        YandexDiskApi api = App.sInstance.getYandexDiskApi();
-        if (api.getAuthorizedAccountsCount() == 0) {
-            // no authorized accounts
-            startYandexDiskAuthentication();
-        } else {
-            showSelectAccountDialog(NetworkEnum.YandexDisk);
-        }
-    }
-
-    public void openGoogleDrive() {
-        GoogleDriveApi api = App.sInstance.getGoogleDriveApi();
-        if (api.getAuthorizedAccountsCount() == 0) {
-            startGoogleDriveAuthentication();
-        } else {
-            showSelectAccountDialog(NetworkEnum.GoogleDrive);
-        }
-    }
-
     public void openAppLaucnher() {
         MainPanel activePanel = getActivePanel();
 
@@ -1644,26 +1212,6 @@ public class FileSystemController {
         }
         panel.gainFocus();
         fragmentManager.beginTransaction().remove(activePanel).add(getContainerId(isLeftPanel), panel).commit();
-    }
-
-    private void startGoogleDriveAuthentication() {
-        GoogleDriveAuthWindow popupWindow = new GoogleDriveAuthWindow(getActivePanel().getActivity(), mInAppAuthHandler);
-        popupWindow.show();
-    }
-
-    private void startSkyDriveAuthentication() {
-        App.sInstance.getSkyDriveApi().startAuthentication(getActivePanel().getActivity(), mOnSkyDriveLoginListener);
-    }
-
-    private void startYandexDiskAuthentication() {
-        App.sInstance.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(YandexDiskApi.AUTH_URL)).
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
-    }
-
-    public void yandexDiskTokenReceived(Activity activity, String token) {
-        final Dialog dialog = new YandexDiskNameRequestDialog(activity, mInAppAuthHandler, token);
-        dialog.show();
-        adjustDialogSize(dialog);
     }
 
     public void showProgressDialog(int messageId) {
@@ -1706,7 +1254,7 @@ public class FileSystemController {
                 return true;
             case KeyEvent.KEYCODE_F1:
                 if (event.isAltPressed()) {
-                    showNetworksDialog();
+                    App.sInstance.getNetworkConnectionManager().openAvailableCloudsList();
                 }
                 return true;
             case KeyEvent.KEYCODE_F2:
@@ -1788,91 +1336,6 @@ public class FileSystemController {
 
         }
         return false;
-    }
-
-    private SkyDriveAPI.OnLoginListener mOnSkyDriveLoginListener = new SkyDriveAPI.OnLoginListener() {
-        @Override
-        public void onGetUserInfo() {
-            showProgressDialog(R.string.loading);
-        }
-
-        @Override
-        public void onComplete() {
-            dismissProgressDialog();
-            openNetworkPanel(NetworkEnum.SkyDrive);
-        }
-
-        @Override
-        public void onError(int errorCode) {
-            dismissProgressDialog();
-            ToastNotification.makeText(App.sInstance.getApplicationContext(), App.sInstance.getString(errorCode), Toast.LENGTH_LONG).show();
-        }
-    };
-
-    private Handler mInAppAuthHandler = new Handler() {
-
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-
-            if (msg.what == FTP_CONNECTED) {
-                openNetworkPanel(NetworkEnum.FTP);
-            } else if (msg.what == SFTP_CONNECTED) {
-                openNetworkPanel(NetworkEnum.SFTP);
-            } else if (msg.what == SMB_CONNECTED) {
-                openNetworkPanel(NetworkEnum.SMB);
-            } else if (msg.what == YANDEX_DISK_USERNAME_RECEIVED) {
-                YandexDiskApi api = App.sInstance.getYandexDiskApi();
-                Credentials credentials = (Credentials) msg.obj;
-                try {
-                    api.setupToken(api.saveAccount(credentials));
-                } catch (InitYandexDiskException e) {
-                    e.printStackTrace();
-                    showErrorDialog(App.sInstance.getResources().getString(R.string.error_init_yandex_sdk));
-                    return;
-                }
-
-                openNetworkPanel(NetworkEnum.YandexDisk);
-            } else if (msg.what == SMB_SCAN_NETWORK_REQUESTED) {
-                final Dialog dialog = new NetworkScanDialog(getActivePanel().getActivity(), mInAppAuthHandler);
-                dialog.show();
-                adjustDialogSize(dialog);
-            } else if (msg.what == SMB_SCAN_CANCELED) {
-                startSmbAuthentication();
-            } else if (msg.what == SMB_IP_SELECTED) {
-                startSmbAuthentication((String) msg.obj);
-            } else if (msg.what == GoogleDriveAuthWindow.MSG_HIDE_LOADING_DIALOG) {
-                GoogleDriveApi.GoogleDriveAccount account = null;
-                if (msg.arg1 == GoogleDriveAuthWindow.MSG_ARG_SUCCESS) {
-                    GoogleDriveApi api = App.sInstance.getGoogleDriveApi();
-                    Pair<About, Token> data = (Pair<About, Token>) msg.obj;
-                    account = (GoogleDriveApi.GoogleDriveAccount) api.saveAccount(data.first, data.second);
-                } else {
-                    ToastNotification.makeText(App.sInstance.getApplicationContext(),
-                            App.sInstance.getString(R.string.google_drive_get_token_error), Toast.LENGTH_LONG).show();
-                }
-
-                dismissProgressDialog();
-
-                if (account != null) {
-                    App.sInstance.getGoogleDriveApi().setup(account);
-                    openNetworkPanel(NetworkEnum.GoogleDrive);
-                }
-            } else if (msg.what == GoogleDriveAuthWindow.MSG_SHOW_LOADING_DIALOG) {
-                showProgressDialog(R.string.loading);
-            } else if (msg.what == MEDIA_FIRE_CONNECTED) {
-                openNetworkPanel(NetworkEnum.MediaFire);
-            }
-        }
-    };
-
-    private void showErrorDialog(String message) {
-        try {
-            ErrorDialog.newInstance(message).
-                    show(getActivePanel().getActivity().getSupportFragmentManager(), "errorDialog");
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
     }
 
     private Runnable mDismissProgressRunnable = new Runnable() {

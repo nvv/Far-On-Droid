@@ -27,11 +27,11 @@ public enum  NetworkEnum {
     }
 
     public static NetworkEnum fromOrdinal(int ordinal) {
-        if (ordinal == -1) {
+        try {
+            return NetworkEnum.values()[ordinal];
+        } catch (Exception e) {
             return null;
         }
-
-        return NetworkEnum.values()[ordinal];
     }
 
     public static NetworkEnum[] valuesList() {

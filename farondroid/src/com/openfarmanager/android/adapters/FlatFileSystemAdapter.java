@@ -139,7 +139,8 @@ public class FlatFileSystemAdapter extends BaseAdapter {
                     value = formatSize(item.getSize());
                     break;
                 case 1:
-                    value = sDateFormat.format(new Date(item.lastModifiedDate()));
+                    long lastModified = item.lastModifiedDate();
+                    value = lastModified == 0 ? "" : sDateFormat.format(new Date(lastModified));
                     break;
                 case 2:
                     File file = (File) item;

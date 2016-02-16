@@ -20,15 +20,9 @@ public class GoogleDriveFile implements FileProxy {
 
     public GoogleDriveFile(File file, String parentPath) {
         mFile = file;
-
-        String cachedValue = App.sInstance.getGoogleDriveApi().getFoldersAliases().get(parentPath);
-        if (!isNullOrEmpty(cachedValue)) {
-            parentPath = cachedValue;
-            if (!parentPath.endsWith("/")) {
-                parentPath += "/";
-            }
+        if (!parentPath.endsWith("/")) {
+            parentPath += "/";
         }
-
         mFullPath = parentPath + getName();
     }
 
@@ -64,7 +58,6 @@ public class GoogleDriveFile implements FileProxy {
 
     @Override
     public String getFullPath() {
-        App.sInstance.getGoogleDriveApi().getFoldersAliases().put(getId(), mFullPath);
         return mFile.getId();
     }
 

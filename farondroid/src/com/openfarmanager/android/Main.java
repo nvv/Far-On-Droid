@@ -19,6 +19,7 @@ import com.dropbox.client2.exception.DropboxException;
 import com.openfarmanager.android.controllers.FileSystemController;
 import com.openfarmanager.android.controllers.FileSystemControllerSmartphone;
 import com.openfarmanager.android.core.Settings;
+import com.openfarmanager.android.core.network.NetworkConnectionManager;
 import com.openfarmanager.android.core.network.dropbox.DropboxAPI;
 import com.openfarmanager.android.fragments.MainToolbarPanel;
 import com.openfarmanager.android.model.NetworkEnum;
@@ -82,11 +83,12 @@ public class Main extends BaseActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mSubscription = new CompositeSubscription();
+        App.sInstance.getNetworkConnectionManager().setRxSubscription(mSubscription);
         setContentView(App.sInstance.getSettings().isMultiPanelMode() ? R.layout.main_two_panels : R.layout.main_one_panel);
         if (findViewById(R.id.view_pager) == null) {
-            mFileSystemController = new FileSystemController(getSupportFragmentManager(), findViewById(R.id.root_view), mSubscription);
+            mFileSystemController = new FileSystemController(getSupportFragmentManager(), findViewById(R.id.root_view));
         } else {
-            mFileSystemController = new FileSystemControllerSmartphone(getSupportFragmentManager(), findViewById(R.id.root_view), mSubscription);
+            mFileSystemController = new FileSystemControllerSmartphone(getSupportFragmentManager(), findViewById(R.id.root_view));
         }
         App.sInstance.setFileSystemController(mFileSystemController);
 
@@ -123,7 +125,7 @@ public class Main extends BaseActivity {
         if (matcher.find()) {
             final String token = matcher.group(1);
             if (!TextUtils.isEmpty(token)) {
-                mFileSystemController.yandexDiskTokenReceived(this, token);
+                App.sInstance.getNetworkConnectionManager().yandexDiskTokenReceived(this, token, mFileSystemController.getActivePanel());
             } else {
                 Log.w(TAG, "YandexDisk onRegistrationSuccess: empty token");
             }
@@ -150,9 +152,10 @@ public class Main extends BaseActivity {
         if (dropboxAPI == null) {
             return;
         }
-        if (dropboxAPI.getSession().authenticationSuccessful() && mFileSystemController.isNetworkAuthRequested()) {
+        NetworkConnectionManager manager = App.sInstance.getNetworkConnectionManager();
+        if (dropboxAPI.getSession().authenticationSuccessful() && manager.isNetworkAuthRequested()) {
             dropboxAPI.getSession().finishAuthentication();
-            mFileSystemController.resetNetworkAuth();
+            manager.resetNetworkAuth();
 
             mFileSystemController.showProgressDialog(R.string.loading);
             Subscription subscription = Observable.create(new Observable.OnSubscribe<Void>() {

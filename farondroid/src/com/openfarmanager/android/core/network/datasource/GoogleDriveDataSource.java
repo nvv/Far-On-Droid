@@ -34,8 +34,8 @@ public class GoogleDriveDataSource implements DataSource {
     }
 
     @Override
-    public List<FileProxy> openDirectory(String path) throws RuntimeException {
-        return App.sInstance.getGoogleDriveApi().getDirectoryFiles(path);
+    public List<FileProxy> openDirectory(FileProxy directory) throws RuntimeException {
+        return App.sInstance.getGoogleDriveApi().getDirectoryFiles(directory.getId(), directory.getFullPathRaw());
     }
 
     @Override

@@ -8,7 +8,9 @@ import com.openfarmanager.android.core.Settings;
 import com.openfarmanager.android.core.ThreadPool;
 import com.openfarmanager.android.core.appmanager.AppManager;
 import com.openfarmanager.android.core.bookmark.BookmarkManager;
+import com.openfarmanager.android.core.network.NetworkAccountManager;
 import com.openfarmanager.android.core.network.NetworkApi;
+import com.openfarmanager.android.core.network.NetworkConnectionManager;
 import com.openfarmanager.android.core.network.dropbox.DropboxAPI;
 import com.openfarmanager.android.core.network.ftp.FtpAPI;
 import com.openfarmanager.android.core.network.ftp.SftpAPI;
@@ -31,6 +33,8 @@ public class App extends Application {
     private Settings mSettings;
 
     private FileSystemController mFileSystemController;
+    private NetworkConnectionManager mConnectionManager;
+    private NetworkAccountManager mNetworkAccountManager;
 
     private ThreadPool mThreadPool;
 
@@ -52,6 +56,8 @@ public class App extends Application {
         mAppManager = new AppManager();
         mBookmarkManager = new BookmarkManager();
         mSettings = new Settings();
+        mConnectionManager = new NetworkConnectionManager();
+        mNetworkAccountManager = new NetworkAccountManager();
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 
         mDropboxApi = new DropboxAPI(DropboxAPI.createSession());
@@ -105,12 +111,21 @@ public class App extends Application {
         return mBookmarkManager;
     }
 
+    public NetworkConnectionManager getNetworkConnectionManager() {
+        return mConnectionManager;
+    }
+
+    public NetworkAccountManager getNetworkAccountManager() {
+        return mNetworkAccountManager;
+    }
+
     public Settings getSettings() {
         return mSettings;
     }
 
     public void setFileSystemController(FileSystemController fileSystemController) {
         mFileSystemController = fileSystemController;
+        mConnectionManager.setFileSystemController(fileSystemController);
     }
 
     public FileSystemController getFileSystemController() {

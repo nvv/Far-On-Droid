@@ -17,13 +17,14 @@ public class BookmarkDBAdapter {
         public static final String ID = "id";
         public static final String LABEL = "label";
         public static final String PATH = "path";
+        public static final String NETWORK_ACCOUNT_ID = "network_account_id";
     }
 
     public static final String CREATE_TABLE = "CREATE TABLE " + TABLE_NAME + " ("
             + ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
             + LABEL + " TEXT not null UNIQUE,"
-            + PATH + " TEXT not null"
-            + ");";
+            + PATH + " TEXT not null,"
+            + NETWORK_ACCOUNT_ID + " INTEGER DEFAULT -1);";
 
     public static Cursor getBookmarks() {
         SQLiteDatabase db = DataStorageHelper.getDatabase();
@@ -42,6 +43,7 @@ public class BookmarkDBAdapter {
         ContentValues values = new ContentValues();
         values.put(Columns.LABEL, bookmark.getBookmarkLabel());
         values.put(Columns.PATH, bookmark.getBookmarkPath());
+        values.put(Columns.NETWORK_ACCOUNT_ID, bookmark.getNetworkAccount() != null ? bookmark.getNetworkAccount().getId() : -1);
 
         SQLiteDatabase db = DataStorageHelper.getDatabase();
         if(db == null) return defaultValue;
@@ -56,11 +58,6 @@ public class BookmarkDBAdapter {
         }
     }
 
-    public static void deleteAll() {
-        delete(null);
-    }
-
-
     public static void delete(Bookmark bookmark) {
         SQLiteDatabase db = DataStorageHelper.getDatabase();
         if(db == null || bookmark == null) return;
@@ -74,20 +71,4 @@ public class BookmarkDBAdapter {
         }
     }
 
-    public static boolean update(Bookmark bookmark) {
-        ContentValues values = new ContentValues();
-        values.put(Columns.LABEL, bookmark.getBookmarkLabel());
-        values.put(Columns.PATH, bookmark.getBookmarkPath());
-
-        SQLiteDatabase db = DataStorageHelper.getDatabase();
-        if(db == null) return false;
-        try {
-            return db.update(TABLE_NAME, values, "ROWID = " + bookmark.getBookmarkId(), null) != -1;
-        } catch(Exception e) {
-            e.printStackTrace();
-            return false;
-        } finally {
-            DataStorageHelper.closeDatabase();
-        }
-    }
 }

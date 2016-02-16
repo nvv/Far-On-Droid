@@ -4,18 +4,10 @@ import android.os.Handler;
 
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.filesystem.FileProxy;
-import com.openfarmanager.android.filesystem.FileSystemScanner;
-import com.openfarmanager.android.filesystem.FtpFile;
 import com.openfarmanager.android.model.NetworkEnum;
 import com.openfarmanager.android.model.exeptions.NetworkException;
 
-import java.io.IOException;
-import java.net.SocketTimeoutException;
-import java.util.ArrayList;
 import java.util.List;
-
-import it.sauronsoftware.ftp4j.FTPClient;
-import it.sauronsoftware.ftp4j.FTPFile;
 
 /**
  * @author Vlad Namashko
@@ -39,8 +31,8 @@ public class FtpDataSource implements DataSource {
     }
 
     @Override
-    public List<FileProxy> openDirectory(String path) throws NetworkException {
-        return App.sInstance.getFtpApi().getDirectoryFiles(path);
+    public List<FileProxy> openDirectory(FileProxy directory) throws NetworkException {
+        return App.sInstance.getFtpApi().getDirectoryFiles(directory.getFullPath());
     }
 
     @Override

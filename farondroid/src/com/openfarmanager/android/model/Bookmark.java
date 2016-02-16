@@ -5,10 +5,12 @@ public class Bookmark {
     private long mBookmarkId;
     private String mBookmarkPath;
     private String mBookmarkLabel;
+    private NetworkAccount mNetworkAccount;
 
-    public Bookmark(String bookmarkPath, String bookmarkLabel) {
+    public Bookmark(String bookmarkPath, String bookmarkLabel, NetworkAccount account) {
         mBookmarkPath = bookmarkPath;
         mBookmarkLabel = bookmarkLabel;
+        mNetworkAccount = account;
     }
 
     public Bookmark(String bookmarkPath) {
@@ -39,5 +41,13 @@ public class Bookmark {
 
     public void setBookmarkId(long bookmarkId) {
         mBookmarkId = bookmarkId;
+    }
+
+    public NetworkAccount getNetworkAccount() {
+        return mNetworkAccount;
+    }
+
+    public boolean isNetworkLink() {
+        return mNetworkAccount != null;
     }
 }

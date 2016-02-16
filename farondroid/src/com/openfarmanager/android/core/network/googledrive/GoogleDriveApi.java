@@ -185,20 +185,24 @@ public class GoogleDriveApi implements NetworkApi {
     }
 
     public List<FileProxy> getDirectoryFiles(String path) {
+        return getDirectoryFiles(path, null);
+    }
+
+    public List<FileProxy> getDirectoryFiles(String path, String parentPath) {
         List<FileProxy> list = new ArrayList<FileProxy>();
 
         try {
             List<File> files = mDriveApi.listFiles(path);
 
             for (File file : files) {
-                list.add(new GoogleDriveFile(file, path));
+                list.add(new GoogleDriveFile(file, parentPath != null ? parentPath : path));
             }
 
             if (files.size() > 0 && path.equals("/")) {
                 mFoldersAliases.put(files.get(0).getParentPath(), "/");
             }
 
-            if (path.equals("/") || mFoldersAliases.get(path).equals("/")) {
+            if (path.equals("/") || (mFoldersAliases.get(path) != null && mFoldersAliases.get(path).equals("/"))) {
                 list.add(new GoogleDriveFile(File.createSharedFolder(), path));
             }
 
@@ -278,6 +282,11 @@ public class GoogleDriveApi implements NetworkApi {
         private Token mToken;
         private String mPermissionId;
 
+
+        public GoogleDriveAccount(long id, String userName, JSONObject data) throws JSONException {
+            this(id, userName, Token.fromLocalData(data.getString(ACCESS_TOKEN), data.getString(REFRESH_TOKEN)), data.getString(PERMISSION_ID));
+        }
+
         public GoogleDriveAccount(long id, String userName, Token token, String permissionId) {
             mId = id;
             mUserName = userName;
@@ -293,5 +302,9 @@ public class GoogleDriveApi implements NetworkApi {
             return mPermissionId;
         }
 
+        @Override
+        public NetworkEnum getNetworkType() {
+            return NetworkEnum.GoogleDrive;
+        }
     }
 }

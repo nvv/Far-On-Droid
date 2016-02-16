@@ -66,7 +66,7 @@ public class FileUtilsExt extends FileUtils {
             return false;
         }
 
-        return destination.getAbsolutePath().startsWith(items.get(0).getParentFile().getAbsolutePath());
+        return destination.getAbsolutePath().equals(items.get(0).getParentFile().getAbsolutePath());
     }
 
     /**
@@ -136,6 +136,10 @@ public class FileUtilsExt extends FileUtils {
             directoryScanResult.files++;
             directoryScanResult.filesSize += source.length();
         }
+    }
+
+    public static String getParentPath(String path) {
+        return path.substring(0, path.lastIndexOf("/") + 1);
     }
 
     public static class DirectoryScanResult {

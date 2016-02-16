@@ -261,6 +261,12 @@ public class SftpAPI implements NetworkApi {
         private boolean mIsLoginByPrivateKey;
         private byte[] mPrivateKey;
 
+        public SftpAccount(long id, String userName, JSONObject data) throws JSONException {
+            this(id, userName, data.getString(SFTP_SERVER), tryParse(data.getString(SFTP_PORT), 22),
+                    data.getString(SFTP_USER), data.getString(SFTP_PASSWORD),
+                    data.getBoolean(SFTP_LOGIN_BY_PRIVATE_KEY), null);
+        }
+
         public SftpAccount(long id, String userName, String server, int port, String user,
                            String password, boolean isLoginByPrivateKey, byte[] privateKey ) {
             mId = id;
@@ -295,6 +301,11 @@ public class SftpAPI implements NetworkApi {
 
         public byte[] getPrivateKey() {
             return mPrivateKey;
+        }
+
+        @Override
+        public NetworkEnum getNetworkType() {
+            return NetworkEnum.SFTP;
         }
     }
 }

@@ -35,8 +35,8 @@ public class SkyDriveDataSource implements DataSource {
     }
 
     @Override
-    public List<FileProxy> openDirectory(String path) {
-        return App.sInstance.getSkyDriveApi().getDirectoryFiles(path);
+    public List<FileProxy> openDirectory(FileProxy directory) {
+        return App.sInstance.getSkyDriveApi().getDirectoryFiles(directory.getId());
     }
 
     @Override

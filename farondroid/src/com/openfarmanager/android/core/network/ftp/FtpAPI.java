@@ -229,6 +229,11 @@ public class FtpAPI implements NetworkApi {
         private String mUser;
         private String mPassword;
 
+        public FtpAccount(long id, String userName, JSONObject data) throws JSONException {
+            this(id, userName, data.getString(FTP_SERVER), tryParse(data.getString(FTP_PORT), 21),
+                    tryParse(data.getString(FTP_MODE), false), data.getString(FTP_USER), data.getString(FTP_PASSWORD));
+        }
+
         public FtpAccount(long id, String userName, String server, int port, boolean mode, String user, String password) {
             mId = id;
             mUserName = userName;
@@ -259,6 +264,10 @@ public class FtpAPI implements NetworkApi {
             return mPassword;
         }
 
+        @Override
+        public NetworkEnum getNetworkType() {
+            return NetworkEnum.FTP;
+        }
     }
 
 }

@@ -26,6 +26,7 @@ import com.openfarmanager.android.filesystem.actions.multi.network.CopyToNetwork
 import com.openfarmanager.android.filesystem.actions.multi.network.MoveFromNetworkMultiTask;
 import com.openfarmanager.android.filesystem.actions.multi.network.MoveToNetworkMultiTask;
 import com.openfarmanager.android.filesystem.actions.network.*;
+import com.openfarmanager.android.model.NetworkAccount;
 import com.openfarmanager.android.model.NetworkEnum;
 import com.openfarmanager.android.model.SelectParams;
 import com.openfarmanager.android.model.TaskStatusEnum;
@@ -467,7 +468,8 @@ public abstract class BaseFileSystemPanel extends BasePanel {
     protected AbstractCommand mCreateBookmarkCommand = new AbstractCommand() {
         @Override
         public void execute(final Object... args) {
-            TaskStatusEnum status = App.sInstance.getBookmarkManager().createBookmark((String) args[1], (String) args[3]);
+            TaskStatusEnum status = App.sInstance.getBookmarkManager().createBookmark((String) args[1],
+                    (String) args[3], (NetworkAccount) args[4]);
 
             if (status != TaskStatusEnum.OK) {
                 try {
