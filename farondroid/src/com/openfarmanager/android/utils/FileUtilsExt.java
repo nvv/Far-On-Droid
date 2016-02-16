@@ -66,7 +66,7 @@ public class FileUtilsExt extends FileUtils {
             return false;
         }
 
-        return destination.getAbsolutePath().startsWith(items.get(0).getParentFile().getAbsolutePath());
+        return destination.getAbsolutePath().equals(items.get(0).getParentFile().getAbsolutePath());
     }
 
     /**
