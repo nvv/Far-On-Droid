@@ -383,4 +383,7 @@ More network stuff will appear in future versions.
     <string name="support_multithread_tasks_summary">Enable multithreading for networks actions to improve performance</string>
 
     <string name="processing_files">Processing files: %s</string>
+
+    <string name="sdcard_access">SD Card access</string>
+    <string name="sdcard_access_summary">Grant access to modify external SD card</string>
 </resources>

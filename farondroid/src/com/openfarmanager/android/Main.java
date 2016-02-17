@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
@@ -20,6 +21,7 @@ import com.openfarmanager.android.controllers.FileSystemController;
 import com.openfarmanager.android.controllers.FileSystemControllerSmartphone;
 import com.openfarmanager.android.core.Settings;
 import com.openfarmanager.android.core.network.dropbox.DropboxAPI;
+import com.openfarmanager.android.fragments.BaseFileSystemPanel;
 import com.openfarmanager.android.fragments.MainToolbarPanel;
 import com.openfarmanager.android.model.NetworkEnum;
 import com.openfarmanager.android.tips.MainTips;
@@ -50,6 +52,7 @@ public class Main extends BaseActivity {
     public static String RESULT_CODE_PANELS_MODE_CHANGED = "RESULT_CODE_PANELS_MODE_CHANGED";
     public static String RESULT_BOTTOM_PANEL_INVALIDATE = "RESULT_BOTTOM_PANEL_INVALIDATE";
     public static String RESULT_SHOW_HINT = "RESULT_SHOW_HINT";
+    public static String RESULT_REQUEST_SDCARD_ACCEESS = "RESULT_REQUEST_SDCARD_ACCEESS";
 
     private FileSystemController mFileSystemController;
     protected CompositeSubscription mSubscription;
@@ -73,6 +76,16 @@ public class Main extends BaseActivity {
 
         if (data != null && data.getBooleanExtra(RESULT_SHOW_HINT, false)) {
             showTips();
+        }
+
+        if (data != null && data.getBooleanExtra(RESULT_REQUEST_SDCARD_ACCEESS, false)) {
+            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+            startActivityForResult(intent, BaseFileSystemPanel.REQUEST_CODE_REQUEST_PERMISSION);
+        }
+
+        if (requestCode == BaseFileSystemPanel.REQUEST_CODE_REQUEST_PERMISSION && Build.VERSION.SDK_INT >= 21 && data != null) {
+            getContentResolver().takePersistableUriPermission(data.getData(),
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
         }
 
         setupToolbarVisibility();

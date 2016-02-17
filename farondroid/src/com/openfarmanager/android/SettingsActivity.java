@@ -11,6 +11,8 @@ import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
+import android.preference.PreferenceCategory;
+import android.preference.PreferenceScreen;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.WindowManager;
@@ -23,6 +25,7 @@ import com.openfarmanager.android.core.FontManager;
 import com.openfarmanager.android.core.Settings;
 import com.openfarmanager.android.filesystem.FileSystemScanner;
 import com.openfarmanager.android.filesystem.actions.RootTask;
+import com.openfarmanager.android.utils.StorageUtils;
 import com.openfarmanager.android.utils.SystemUtils;
 import com.openfarmanager.android.dialogs.FontSetupDialog;
 import com.openfarmanager.android.dialogs.MarginSetupDialog;
@@ -45,6 +48,20 @@ public class SettingsActivity extends PreferenceActivity {
         setResult(Main.RESULT_SETTINGS_CHANGED, mResultData);
 
         addPreferencesFromResource(R.xml.preferences);
+
+        Preference sdcardAccess = findPreference("sdcard_access");
+        if (!StorageUtils.checkVersion()) {
+            ((PreferenceCategory) findPreference("pref_key_file_system")).removePreference(findPreference("sdcard_access"));
+        } else {
+            sdcardAccess.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    mResultData.putExtra(Main.RESULT_REQUEST_SDCARD_ACCEESS, true);
+                    finish();
+                    return true;
+                }
+            });
+        }
 
         findPreference("file_system_sort").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override

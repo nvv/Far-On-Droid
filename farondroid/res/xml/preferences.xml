@@ -12,6 +12,11 @@
                 android:widgetLayout="@layout/check_box_preference"
                 android:defaultValue="false"/>
 
+        <Preference
+                android:key="sdcard_access"
+                android:title="@string/sdcard_access"
+                android:summary="@string/sdcard_access_summary" />
+
         <CheckBoxPreference
                 android:key="hide_system_files"
                 android:title="@string/hide_system_files"

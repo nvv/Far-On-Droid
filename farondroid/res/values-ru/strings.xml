@@ -374,4 +374,7 @@
     <string name="support_multithread_tasks_summary">Разрешить многопоточность для сетевых задач для улучшения производительности</string>
 
     <string name="processing_files">Обрабатываемые файлы: %s</string>
+
+    <string name="sdcard_access">Доступ к SD карте</string>
+    <string name="sdcard_access_summary">Предоставить доступ для модификации внешней SD карты</string>
 </resources>

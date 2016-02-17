@@ -76,7 +76,7 @@ public class SystemUtils {
     public static String getExternalStorage(final String fullPath) {
 
         Observable<String> sdCardNames = Observable.from(Arrays.asList("ext_card", "external_sd",
-                "ext_sd", "external", "extSdCard", "externalSdCard"));
+                "ext_sd", "external", "extSdCard", "externalSdCard", "sdcard1", "9C33-6BBD")); //TODO
 
         Observable<File> mnt = sdCardNames.map(new Func1<String, File>() {
             @Override
