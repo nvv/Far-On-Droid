@@ -511,18 +511,14 @@ public class NetworkPanel extends MainPanel {
         @Override
         public void call(Subscriber<? super DirectoryUiInfo> subscriber) {
             try {
-                List<FileProxy> files = mDataSource.openDirectory(directoryInfo.directory);
+                DirectoryScanInfo scanInfo = mDataSource.openDirectory(directoryInfo.directory);
 
                 // due to files object are changed we need to refresh them.
-                syncSelectedFiles(mSelectedFiles, files);
-                syncSelectedFiles(mPreSelectedFiles, files);
+                syncSelectedFiles(mSelectedFiles, scanInfo.files);
+                syncSelectedFiles(mPreSelectedFiles, scanInfo.files);
 
-                System.out.println(":::::   " + directoryInfo.directory.getId() + "  " + directoryInfo.directory.getParentPath() );
-                directoryInfo.files = files;
-
-                FileProxy file = directoryInfo.directory;
-                directoryInfo.parentPath = !file.getParentPath().equals(file.getId()) ?
-                        file.getParentPath() : files.size() > 0 ? files.get(0).getParentPath() : "/";
+                directoryInfo.files = scanInfo.files;
+                directoryInfo.parentPath = scanInfo.parentPath;
 
                 subscriber.onNext(directoryInfo);
             } catch (NetworkException e) {
@@ -592,21 +588,23 @@ public class NetworkPanel extends MainPanel {
         public void onNext(DirectoryUiInfo directoryInfo) {
             setIsLoading(false);
 
+            System.out.println(":::::::    " + directoryInfo.directory.getFullPathRaw() + "  " + directoryInfo.parentPath);
+
+
             FileProxy file = directoryInfo.directory;
             String path = file.getFullPathRaw();
 
             setCurrentPath(path);
-            String parentPath = FileUtilsExt.getParentPath(path);
-            boolean isEmpty = Extensions.isNullOrEmpty(parentPath);
+            boolean isEmpty = Extensions.isNullOrEmpty(directoryInfo.parentPath);
             ListAdapter adapter = mFileSystemList.getAdapter();
-            FakeFile upNavigator = new FakeFile(directoryInfo.parentPath, "..", directoryInfo.parentPath, directoryInfo.directory.getFullPathRaw(), isEmpty);
+            FakeFile upNavigator = new FakeFile(file.getParentPath(), "..", directoryInfo.parentPath, FileUtilsExt.getParentPath(file.getFullPathRaw()), isEmpty);
             if (adapter != null && adapter instanceof NetworkEntryAdapter) {
                 ((NetworkEntryAdapter) adapter).setItems(directoryInfo.files, upNavigator);
                 ((NetworkEntryAdapter) adapter).setSelectedFiles(mSelectedFiles);
             } else {
                 mFileSystemList.setAdapter(new NetworkEntryAdapter(directoryInfo.files, upNavigator));
             }
-            mCurrentPath = new FakeFile(directoryInfo.parentPath, isEmpty ? "/" : path, directoryInfo.parentPath, directoryInfo.directory.getFullPathRaw(), isEmpty);
+            mCurrentPath = new FakeFile(file.getParentPath(), isEmpty ? "/" : path, directoryInfo.parentPath, FileUtilsExt.getParentPath(file.getFullPathRaw()), isEmpty);
 
             if (directoryInfo.restorePosition) {
                 Integer selection = mDirectorySelection.get(isEmpty ? "/" : path);
@@ -741,6 +739,17 @@ public class NetworkPanel extends MainPanel {
         public List<FileProxy> files;
         public String parentPath;
 
+    }
+
+    public static class DirectoryScanInfo {
+        public List<FileProxy> files;
+        public String parentPath;
+
+        public DirectoryScanInfo set(List<FileProxy> files, String parentPath) {
+            this.files = files;
+            this.parentPath = parentPath;
+            return this;
+        }
     }
 
 }

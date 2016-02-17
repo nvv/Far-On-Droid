@@ -2,11 +2,9 @@ package com.openfarmanager.android.core.network.datasource;
 
 import android.os.Handler;
 
-import com.openfarmanager.android.App;
 import com.openfarmanager.android.filesystem.FileProxy;
+import com.openfarmanager.android.fragments.NetworkPanel;
 import com.openfarmanager.android.model.NetworkEnum;
-
-import java.util.List;
 
 /**
  * @author Vlad Namashko
@@ -30,8 +28,9 @@ public class SmbDataSource implements DataSource {
     }
 
     @Override
-    public List<FileProxy> openDirectory(FileProxy directory) throws RuntimeException {
-        return App.sInstance.getSmbAPI().getDirectoryFiles(directory.getFullPath());
+    public NetworkPanel.DirectoryScanInfo openDirectory(FileProxy directory) throws RuntimeException {
+        //return App.sInstance.getSmbAPI().getDirectoryFiles(directory.getFullPath());
+        return null;
     }
 
     @Override

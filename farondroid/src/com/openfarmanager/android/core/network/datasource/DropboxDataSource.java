@@ -8,6 +8,7 @@ import com.openfarmanager.android.App;
 import com.openfarmanager.android.filesystem.DropboxFile;
 import com.openfarmanager.android.filesystem.FileProxy;
 import com.openfarmanager.android.filesystem.FileSystemScanner;
+import com.openfarmanager.android.fragments.NetworkPanel;
 import com.openfarmanager.android.model.NetworkEnum;
 import com.openfarmanager.android.model.exeptions.NetworkException;
 import com.openfarmanager.android.utils.Extensions;
@@ -39,7 +40,7 @@ public class DropboxDataSource implements DataSource {
         return NetworkEnum.Dropbox;
     }
 
-    public List<FileProxy> openDirectory(FileProxy directory) {
+    public NetworkPanel.DirectoryScanInfo openDirectory(FileProxy directory) {
         List<FileProxy> files = new ArrayList<FileProxy>();
         DropboxAPI.Entry currentNode;
         try {
@@ -52,7 +53,8 @@ public class DropboxDataSource implements DataSource {
             throw NetworkException.handleNetworkException(e);
         }
 
-        return files;
+//        return files;
+        return null;
     }
 
     public void onUnlinkedAccount() {

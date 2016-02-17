@@ -20,7 +20,7 @@ public class FakeFile implements FileProxy {
         mId = id;
         mName = name;
         mParentPath = parentPath;
-        mFullPath = parentPath + name;
+        mFullPath = parentPath;
         mFullPathRaw = fullPathRaw;
         mIsRoot = isRoot;
     }

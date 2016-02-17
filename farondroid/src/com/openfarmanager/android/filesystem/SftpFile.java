@@ -3,6 +3,7 @@ package com.openfarmanager.android.filesystem;
 import com.jcraft.jsch.ChannelSftp;
 import com.openfarmanager.android.model.Bookmark;
 import com.openfarmanager.android.utils.Extensions;
+import com.openfarmanager.android.utils.FileUtilsExt;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,13 +22,10 @@ public class SftpFile implements FileProxy {
 
     public SftpFile(String currentPath, ChannelSftp.LsEntry entry) {
         mEntry = entry;
-
         mFullPath = currentPath + (currentPath.endsWith("/") ? "" : "/") + mEntry.getFilename();
-        mParentPath = mFullPath.substring(0, mFullPath.lastIndexOf("/") + 1);
 
-        if (mParentPath.endsWith("/") && mParentPath.length() > 1) {
-            mParentPath = mParentPath.substring(0, mParentPath.length() - 1);
-        }
+        mParentPath = currentPath.endsWith("/") && currentPath.length() > 1 ?
+                currentPath.substring(0, currentPath.length() - 1) : currentPath;
     }
 
     @Override

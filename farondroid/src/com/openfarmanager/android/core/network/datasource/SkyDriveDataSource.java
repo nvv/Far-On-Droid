@@ -6,9 +6,8 @@ import android.util.Pair;
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.filesystem.FileProxy;
 import com.openfarmanager.android.filesystem.SkyDriveFile;
+import com.openfarmanager.android.fragments.NetworkPanel;
 import com.openfarmanager.android.model.NetworkEnum;
-
-import java.util.List;
 
 import static com.openfarmanager.android.fragments.NetworkPanel.MSG_NETWORK_OPEN;
 import static com.openfarmanager.android.utils.Extensions.isNullOrEmpty;
@@ -35,8 +34,9 @@ public class SkyDriveDataSource implements DataSource {
     }
 
     @Override
-    public List<FileProxy> openDirectory(FileProxy directory) {
-        return App.sInstance.getSkyDriveApi().getDirectoryFiles(directory.getId());
+    public NetworkPanel.DirectoryScanInfo openDirectory(FileProxy directory) {
+        //return App.sInstance.getSkyDriveApi().getDirectoryFiles(directory.getId());
+        return null;
     }
 
     @Override

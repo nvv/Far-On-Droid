@@ -5,10 +5,9 @@ import android.util.Pair;
 
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.filesystem.FileProxy;
+import com.openfarmanager.android.fragments.NetworkPanel;
 import com.openfarmanager.android.model.NetworkEnum;
 import com.openfarmanager.android.utils.Extensions;
-
-import java.util.List;
 
 import static com.openfarmanager.android.fragments.NetworkPanel.MSG_NETWORK_OPEN;
 
@@ -34,8 +33,9 @@ public class GoogleDriveDataSource implements DataSource {
     }
 
     @Override
-    public List<FileProxy> openDirectory(FileProxy directory) throws RuntimeException {
-        return App.sInstance.getGoogleDriveApi().getDirectoryFiles(directory.getId(), directory.getFullPathRaw());
+    public NetworkPanel.DirectoryScanInfo openDirectory(FileProxy directory) throws RuntimeException {
+//        return App.sInstance.getGoogleDriveApi().getDirectoryFiles(directory.getId(), directory.getFullPathRaw());
+        return null;
     }
 
     @Override

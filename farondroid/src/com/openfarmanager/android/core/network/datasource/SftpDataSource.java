@@ -4,9 +4,8 @@ import android.os.Handler;
 
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.filesystem.FileProxy;
+import com.openfarmanager.android.fragments.NetworkPanel;
 import com.openfarmanager.android.model.NetworkEnum;
-
-import java.util.List;
 
 /**
  * @author Vlad Namashko
@@ -14,6 +13,8 @@ import java.util.List;
 public class SftpDataSource implements DataSource {
 
     public Handler mHandler;
+
+    private NetworkPanel.DirectoryScanInfo mDirectoryScanInfo = new NetworkPanel.DirectoryScanInfo();
 
     public SftpDataSource(Handler handler) {
         mHandler = handler;
@@ -30,8 +31,9 @@ public class SftpDataSource implements DataSource {
     }
 
     @Override
-    public List<FileProxy> openDirectory(FileProxy directory) throws RuntimeException {
-        return App.sInstance.getSftpApi().getDirectoryFiles(directory.getFullPath());
+    public NetworkPanel.DirectoryScanInfo openDirectory(FileProxy directory) throws RuntimeException {
+        System.out.println("::::  Open Direcotry : " + directory.getFullPath() + "  " + directory.getParentPath());
+        return mDirectoryScanInfo.set(App.sInstance.getSftpApi().getDirectoryFiles(directory.getFullPath()), getParentPath(directory.getParentPath()));
     }
 
     @Override
