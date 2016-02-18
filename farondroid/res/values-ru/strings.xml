@@ -9,6 +9,7 @@
     <string name="btn_ok">Ok</string>
     <string name="btn_yes">Да</string>
     <string name="btn_no">Нет</string>
+    <string name="btn_skip">Пропустить</string>
     <string name="btn_save">Сохранить</string>
     <string name="btn_select">Выбрать</string>
     <string name="btn_replace">Заменить</string>
