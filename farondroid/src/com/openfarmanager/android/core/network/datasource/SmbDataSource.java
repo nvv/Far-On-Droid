@@ -3,6 +3,7 @@ package com.openfarmanager.android.core.network.datasource;
 import android.os.Handler;
 
 import com.openfarmanager.android.filesystem.FileProxy;
+import com.openfarmanager.android.filesystem.SmbFile;
 import com.openfarmanager.android.fragments.NetworkPanel;
 import com.openfarmanager.android.model.NetworkEnum;
 
@@ -36,16 +37,6 @@ public class SmbDataSource extends RawPathDataSource {
 
     }
 
-//    @Override
-//    public String getPath(String path) {
-//        return path;
-//    }
-//
-//    @Override
-//    public String getParentPath(String path) {
-//        return path;
-//    }
-
     @Override
     public void exitFromNetwork() {
 
@@ -64,5 +55,10 @@ public class SmbDataSource extends RawPathDataSource {
     @Override
     public void open(FileProxy file) {
 
+    }
+
+    @Override
+    public FileProxy createFakeDirectory(String path) {
+        return new SmbFile(path);
     }
 }

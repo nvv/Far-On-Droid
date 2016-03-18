@@ -30,7 +30,5 @@ public abstract class DataSource {
 
     public abstract void open(FileProxy file);
 
-    public FileProxy createFakeDirectory(String path) {
-        return null;
-    }
+    public abstract FileProxy createFakeDirectory(String path);
 }
