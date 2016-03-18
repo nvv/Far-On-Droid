@@ -2,6 +2,7 @@ package com.openfarmanager.android.filesystem;
 
 import com.openfarmanager.android.model.Bookmark;
 import com.openfarmanager.android.utils.Extensions;
+import com.openfarmanager.android.utils.FileUtilsExt;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,44 +16,57 @@ import it.sauronsoftware.ftp4j.FTPFile;
  */
 public class FtpFile implements FileProxy {
 
-    private FTPFile mFtpFile;
+    private String mFileName;
+    private boolean mIsDir;
+    private long mSize;
+    private long mModDate;
+
     private String mFullPath;
     private String mParentPath;
 
     public FtpFile(String currentPath, FTPFile source) {
-        mFtpFile = source;
+        mFileName = source.getName();
+        mIsDir = source.getType() == FTPFile.TYPE_DIRECTORY;
+        mSize = source.getSize();
+        mModDate = source.getModifiedDate().getTime();
 
         mFullPath = currentPath + (currentPath.endsWith("/") ? "" : "/") + source.getName();
-        mParentPath = mFullPath.substring(0, mFullPath.lastIndexOf("/") + 1);
+        mParentPath = FileUtilsExt.removeLastSeparator(FileUtilsExt.getParentPath(mFullPath));
+    }
 
-        if (mParentPath.endsWith("/") && mParentPath.length() > 1) {
-            mParentPath = mParentPath.substring(0, mParentPath.length() - 1);
-        }
+    public FtpFile(String path) {
+        path = FileUtilsExt.removeLastSeparator(path);
+        mFileName = FileUtilsExt.getFileName(path);
+        mIsDir = true;
+        mSize = 0;
+        mModDate = System.currentTimeMillis();
+        mFullPath = path;
+        mParentPath = FileUtilsExt.getParentPath(path);
     }
 
     @Override
     public String getId() {
-        return "";
+        return getFullPath();
     }
 
     @Override
     public String getName() {
-        return mFtpFile.getName();
+        return mFileName;
     }
 
     @Override
     public boolean isDirectory() {
-        return mFtpFile.getType() == FTPFile.TYPE_DIRECTORY;
+        return mIsDir;
     }
 
     @Override
     public long getSize() {
-        return mFtpFile.getSize();
+        return mSize;
     }
 
     @Override
     public long lastModifiedDate() {
-        return mFtpFile.getModifiedDate().getTime();
+        return mModDate;
     }
 
     @Override

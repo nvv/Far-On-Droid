@@ -4,9 +4,8 @@ import android.support.v4.app.FragmentManager;
 import com.dropbox.client2.exception.DropboxException;
 import com.microsoft.live.LiveOperationException;
 import com.openfarmanager.android.core.network.NetworkApi;
-import com.openfarmanager.android.filesystem.actions.FileActionTask;
 import com.openfarmanager.android.filesystem.actions.OnActionListener;
-import com.openfarmanager.android.model.NetworkEnum;
+import com.openfarmanager.android.fragments.BaseFileSystemPanel;
 import com.openfarmanager.android.model.TaskStatusEnum;
 import com.openfarmanager.android.model.exeptions.NetworkException;
 import com.yandex.disk.client.exceptions.WebdavException;
@@ -21,17 +20,20 @@ import static com.openfarmanager.android.model.TaskStatusEnum.*;
  */
 public class CreateNewAtNetworkTask extends NetworkActionTask {
 
-    protected String mDestination;
+    protected String mDestinationFolder;
+    protected String mName;
 
-    public CreateNewAtNetworkTask(NetworkEnum networkType, FragmentManager fragmentManager, OnActionListener listener,
-                                 String destination) {
+    public CreateNewAtNetworkTask(BaseFileSystemPanel panel, FragmentManager fragmentManager, OnActionListener listener,
+                                 String destinationForlder, String name) {
         // TODO: temporary
-        super.mItems = new ArrayList<File>();
+        super.mItems = new ArrayList<>();
 
-        mNetworkType = networkType;
-        mDestination = destination;
+        mDestinationFolder = destinationForlder;
+        mName = name;
         mFragmentManager = fragmentManager;
         mListener = listener;
+
+        initNetworkPanelInfo(panel);
     }
 
     @Override
@@ -39,7 +41,7 @@ public class CreateNewAtNetworkTask extends NetworkActionTask {
         NetworkApi api = getApi();
 
         try {
-            return api.createDirectory(mDestination) ? OK : ERROR_CREATE_DIRECTORY;
+            return api.createDirectory(mDestinationFolder, mName) != null ? OK : ERROR_CREATE_DIRECTORY;
         } catch (DropboxException e) {
             return createNetworkError(NetworkException.handleNetworkException(e));
         } catch (WebdavException e) {

@@ -4,6 +4,7 @@ import android.support.v4.app.FragmentManager;
 
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.filesystem.actions.OnActionListener;
+import com.openfarmanager.android.fragments.BaseFileSystemPanel;
 import com.openfarmanager.android.model.TaskStatusEnum;
 
 import java.io.File;
@@ -19,8 +20,8 @@ public class ExportAsTask extends NetworkActionTask {
     protected String mDestination;
     protected String mDownloadLink;
 
-    public ExportAsTask(FragmentManager fragmentManager, OnActionListener listener, String downloadLink, String destination) {
-        super(fragmentManager, listener, new ArrayList<File>());
+    public ExportAsTask(BaseFileSystemPanel panel, OnActionListener listener, String downloadLink, String destination) {
+        super(panel.getFragmentManager(), panel, listener, new ArrayList<File>());
         mDestination = destination;
         mNoProgress = true;
         mDownloadLink = downloadLink;

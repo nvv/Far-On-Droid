@@ -6,6 +6,7 @@ import com.dropbox.client2.exception.DropboxException;
 import com.openfarmanager.android.core.network.NetworkApi;
 import com.openfarmanager.android.filesystem.FileProxy;
 import com.openfarmanager.android.filesystem.actions.OnActionListener;
+import com.openfarmanager.android.fragments.BaseFileSystemPanel;
 import com.openfarmanager.android.model.NetworkEnum;
 import com.openfarmanager.android.model.TaskStatusEnum;
 import com.openfarmanager.android.model.exeptions.NetworkException;
@@ -29,9 +30,8 @@ public class DeleteFromNetworkTask extends NetworkActionMultiTask {
 
     protected List<FileProxy> mItems;
 
-    public DeleteFromNetworkTask(Context context, NetworkEnum networkType, OnActionListener listener,
-                                 List<FileProxy> items) {
-        super(context, listener, null, networkType);
+    public DeleteFromNetworkTask(BaseFileSystemPanel panel, OnActionListener listener, List<FileProxy> items) {
+        super(panel, listener, null);
         mItems = items;
     }
 

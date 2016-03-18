@@ -179,9 +179,10 @@ public class YandexDiskApi implements NetworkApi {
     }
 
     @Override
-    public boolean createDirectory(String path) throws Exception {
+    public String createDirectory(String baseDirectory, String newDirectoryName) throws Exception {
+        String path = baseDirectory + "/" + newDirectoryName;
         mTransportClient.makeFolder(path);
-        return true;
+        return path;
     }
 
     @Override

@@ -4,8 +4,11 @@ import android.content.Context;
 
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.core.network.NetworkApi;
+import com.openfarmanager.android.core.network.datasource.DataSource;
 import com.openfarmanager.android.filesystem.actions.OnActionListener;
 import com.openfarmanager.android.filesystem.actions.multi.MultiActionTask;
+import com.openfarmanager.android.fragments.BaseFileSystemPanel;
+import com.openfarmanager.android.fragments.NetworkPanel;
 import com.openfarmanager.android.model.NetworkEnum;
 
 import java.io.File;
@@ -17,10 +20,13 @@ import java.util.List;
 public abstract class NetworkActionMultiTask extends MultiActionTask {
 
     protected NetworkEnum mNetworkType;
+    protected DataSource mDataSource;
 
-    public NetworkActionMultiTask(Context context, OnActionListener listener, List<File> items, NetworkEnum networkType) {
-        super(context, listener, items);
-        mNetworkType = networkType;
+    public NetworkActionMultiTask(BaseFileSystemPanel panel, OnActionListener listener, List<File> items) {
+        super(panel.getActivity(), listener, items);
+        NetworkPanel networkPanel = (NetworkPanel) panel;
+        mNetworkType = networkPanel.getNetworkType();
+        mDataSource = networkPanel.getDataSource();
     }
 
     protected NetworkActionMultiTask() {

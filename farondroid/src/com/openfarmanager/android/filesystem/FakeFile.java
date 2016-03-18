@@ -20,17 +20,18 @@ public class FakeFile implements FileProxy {
         mId = id;
         mName = name;
         mParentPath = parentPath;
-        mFullPath = parentPath;
+        mFullPath = id;
         mFullPathRaw = fullPathRaw;
         mIsRoot = isRoot;
     }
 
-    public FakeFile(String id, String name) {
+    public FakeFile(String id, String name, boolean isRoot) {
         mId = id;
         mName = name;
         mFullPath = id;
         mFullPathRaw = name;
-        mParentPath = name;
+        mParentPath = "";
+        mIsRoot = isRoot;
     }
 
     @Override

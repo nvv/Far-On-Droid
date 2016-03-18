@@ -2,17 +2,18 @@ package com.openfarmanager.android.core.network.datasource;
 
 import android.os.Handler;
 
+import com.openfarmanager.android.App;
 import com.openfarmanager.android.filesystem.FileProxy;
+import com.openfarmanager.android.filesystem.FtpFile;
 import com.openfarmanager.android.fragments.NetworkPanel;
 import com.openfarmanager.android.model.NetworkEnum;
 import com.openfarmanager.android.model.exeptions.NetworkException;
+import com.openfarmanager.android.utils.FileUtilsExt;
 
 /**
  * @author Vlad Namashko
  */
-public class FtpDataSource implements DataSource {
-
-    public Handler mHandler;
+public class FtpDataSource extends RawPathDataSource {
 
     public FtpDataSource(Handler handler) {
         mHandler = handler;
@@ -30,23 +31,12 @@ public class FtpDataSource implements DataSource {
 
     @Override
     public NetworkPanel.DirectoryScanInfo openDirectory(FileProxy directory) throws NetworkException {
-        //return App.sInstance.getFtpApi().getDirectoryFiles(directory.getFullPath());
-        return null;
+        return mDirectoryScanInfo.set(App.sInstance.getFtpApi().getDirectoryFiles(directory.getFullPath()),
+                FileUtilsExt.getParentPath(directory.getParentPath()));
     }
 
     @Override
     public void onUnlinkedAccount() {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Override
-    public String getPath(String path) {
-        return path;
-    }
-
-    @Override
-    public String getParentPath(String path) {
-        return path;
     }
 
     @Override
@@ -66,5 +56,10 @@ public class FtpDataSource implements DataSource {
     @Override
     public void open(FileProxy file) {
 
+    }
+
+    @Override
+    public FileProxy createFakeDirectory(String path) {
+        return new FtpFile(path);
     }
 }

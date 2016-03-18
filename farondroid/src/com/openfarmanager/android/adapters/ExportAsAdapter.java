@@ -49,7 +49,8 @@ public class ExportAsAdapter extends BaseAdapter {
         Map.Entry<String, String> item = (Map.Entry<String, String>) mExportLinks.entrySet().toArray()[i];
 
         convertView.setTag(item.getValue());
-        ((TextView) convertView.findViewById(android.R.id.text1)).setText(File.getExportLinkAlias(item.getKey()));
+        String name = File.getExportLinkAlias(item.getKey());
+        ((TextView) convertView.findViewById(android.R.id.text1)).setText(name == null ? item.getKey() : name);
 
         return convertView;
     }

@@ -49,7 +49,6 @@ public class File {
     protected boolean mIsVirtual;
     protected long mSize;
     protected long mLastModifiedDate;
-    protected String mFullPath;
     protected String mParentPath;
     protected String mDownloadUr;
     protected String mOpenWithLink;
@@ -74,7 +73,7 @@ public class File {
         try {
             mParentPath = ((JSONObject) json.getJSONArray("parents").get(0)).getString("id");
         } catch (Exception e) {
-            // ignore
+            mParentPath = "";
         }
 
         if (!isDirectory()) {
@@ -122,10 +121,6 @@ public class File {
 
     public long getLastModifiedDate() {
         return mLastModifiedDate;
-    }
-
-    public String getFullPath() {
-        return mFullPath;
     }
 
     public String getParentPath() {

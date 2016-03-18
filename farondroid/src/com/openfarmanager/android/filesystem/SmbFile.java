@@ -41,7 +41,7 @@ public class SmbFile implements FileProxy {
 
     @Override
     public String getId() {
-        return "";
+        return getFullPath();
     }
 
     @Override

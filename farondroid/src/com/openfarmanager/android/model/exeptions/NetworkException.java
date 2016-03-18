@@ -39,6 +39,7 @@ public class NetworkException extends RuntimeException {
     }
 
     public static NetworkException handleNetworkException(Exception e) {
+        e.printStackTrace();
         NetworkException exception = new NetworkException();
 
         if (e instanceof DropboxUnlinkedException) {

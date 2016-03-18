@@ -12,11 +12,9 @@ import com.mediafire.sdk.api.responses.FileUpdateResponse;
 import com.mediafire.sdk.api.responses.FolderCreateResponse;
 import com.mediafire.sdk.api.responses.FolderDeleteResponse;
 import com.mediafire.sdk.api.responses.FolderGetContentsResponse;
-import com.mediafire.sdk.api.responses.FolderSearchResponse;
 import com.mediafire.sdk.api.responses.FolderUpdateResponse;
 import com.mediafire.sdk.api.responses.data_models.File;
 import com.mediafire.sdk.api.responses.data_models.Folder;
-import com.mediafire.sdk.api.responses.data_models.SearchResult;
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.R;
 import com.openfarmanager.android.core.DataStorageHelper;
@@ -186,18 +184,18 @@ public class MediaFireApi implements NetworkApi {
     }
 
     @Override
-    public boolean createDirectory(String path) throws Exception {
-        String name = path.substring(path.lastIndexOf("/") + 1, path.length());
-        String currentDir = path.substring(0, path.lastIndexOf("/"));
+    public String createDirectory(String baseDirectory, String newDirectoryName) throws Exception {
+        String name = baseDirectory.substring(baseDirectory.lastIndexOf("/") + 1, baseDirectory.length());
+        String currentDir = baseDirectory.substring(0, baseDirectory.lastIndexOf("/"));
 
         LinkedHashMap<String, Object> query = new LinkedHashMap<>();
         query.put("foldername", name);
         query.put("parent_path", currentDir);
         FolderCreateResponse response = FolderApi.create(mMediaFire, query, VERSION, FolderCreateResponse.class);
 
-        mFoldersAliases.put(response.getFolderKey(), path);
+//        mFoldersAliases.put(response.getFolderKey(), baseDirectory);
 
-        return true;
+        return response.getFolderKey();
     }
 
     @Override

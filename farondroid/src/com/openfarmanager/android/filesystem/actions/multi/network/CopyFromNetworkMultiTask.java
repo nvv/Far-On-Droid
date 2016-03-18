@@ -24,6 +24,7 @@ import com.openfarmanager.android.core.network.yandexdisk.YandexDiskApi;
 import com.openfarmanager.android.filesystem.DropboxFile;
 import com.openfarmanager.android.filesystem.FileProxy;
 import com.openfarmanager.android.filesystem.actions.OnActionListener;
+import com.openfarmanager.android.fragments.BaseFileSystemPanel;
 import com.openfarmanager.android.model.NetworkEnum;
 import com.openfarmanager.android.model.TaskStatusEnum;
 import com.openfarmanager.android.model.exeptions.NetworkException;
@@ -75,8 +76,8 @@ public class CopyFromNetworkMultiTask extends NetworkActionMultiTask {
     protected String mDestination;
     protected List<FileProxy> mItems;
 
-    public CopyFromNetworkMultiTask(Context context, NetworkEnum networkType, OnActionListener listener, List<FileProxy> items, String destination) {
-        super(context, listener, null, networkType);
+    public CopyFromNetworkMultiTask(BaseFileSystemPanel panel, OnActionListener listener, List<FileProxy> items, String destination) {
+        super(panel, listener, null);
         mDestination = destination;
         mItems = items;
     }

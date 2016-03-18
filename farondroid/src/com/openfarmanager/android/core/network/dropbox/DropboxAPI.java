@@ -106,8 +106,9 @@ public class DropboxAPI extends com.dropbox.client2.DropboxAPI<AndroidAuthSessio
     }
 
     @Override
-    public boolean createDirectory(String path) throws Exception {
-        return createFolder(path) != null;
+    public String createDirectory(String baseDirectory, String newDirectoryName) throws Exception {
+        Entry folder = createFolder(baseDirectory + "/" + newDirectoryName);
+        return folder.path;
     }
 
     @Override

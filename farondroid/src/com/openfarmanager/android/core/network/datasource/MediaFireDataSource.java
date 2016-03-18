@@ -7,14 +7,14 @@ import com.openfarmanager.android.filesystem.FileProxy;
 import com.openfarmanager.android.fragments.NetworkPanel;
 import com.openfarmanager.android.model.NetworkEnum;
 
+import java.util.List;
+
 import static com.openfarmanager.android.utils.Extensions.isNullOrEmpty;
 
 /**
  * author: Vlad Namashko
  */
-public class MediaFireDataSource implements DataSource {
-
-    private Handler mHandler;
+public class MediaFireDataSource extends IdPathDataSource {
 
     public MediaFireDataSource(Handler handler) {
         mHandler = handler;
@@ -37,20 +37,30 @@ public class MediaFireDataSource implements DataSource {
     }
 
     @Override
+    protected List<FileProxy> getDirectoryFiles(FileProxy directory) {
+        return null;
+    }
+
+    @Override
+    protected FileProxy requestFileInfo(String id) {
+        return null;
+    }
+
+    @Override
     public void onUnlinkedAccount() {
 
     }
 
-    @Override
-    public String getPath(String path) {
-        String pathAlias = App.sInstance.getMediaFireApi().getFoldersAliases().get(path);
-        return !isNullOrEmpty(pathAlias) ? pathAlias : path;
-    }
-
-    @Override
-    public String getParentPath(String path) {
-        return App.sInstance.getMediaFireApi().findPathId(path);
-    }
+//    @Override
+//    public String getPath(String path) {
+//        String pathAlias = App.sInstance.getMediaFireApi().getFoldersAliases().get(path);
+//        return !isNullOrEmpty(pathAlias) ? pathAlias : path;
+//    }
+//
+//    @Override
+//    public String getParentPath(String path) {
+//        return App.sInstance.getMediaFireApi().findPathId(path);
+//    }
 
     @Override
     public void exitFromNetwork() {

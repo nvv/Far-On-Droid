@@ -12,6 +12,7 @@ import com.openfarmanager.android.fragments.NetworkPanel;
 import com.openfarmanager.android.model.NetworkEnum;
 import com.openfarmanager.android.model.exeptions.NetworkException;
 import com.openfarmanager.android.utils.Extensions;
+import com.openfarmanager.android.utils.FileUtilsExt;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,9 +24,7 @@ import static com.openfarmanager.android.fragments.NetworkPanel.MSG_NETWORK_SHOW
 /**
  * @author Vlad Namashko
  */
-public class DropboxDataSource implements DataSource {
-
-    public Handler mHandler;
+public class DropboxDataSource extends RawPathDataSource {
 
     public DropboxDataSource(Handler handler) {
         mHandler = handler;
@@ -53,22 +52,11 @@ public class DropboxDataSource implements DataSource {
             throw NetworkException.handleNetworkException(e);
         }
 
-//        return files;
-        return null;
+        return mDirectoryScanInfo.set(files, FileUtilsExt.getParentPath(directory.getParentPath()));
     }
 
     public void onUnlinkedAccount() {
         App.sInstance.getDropboxApi().deleteCurrentAccount();
-    }
-
-    @Override
-    public String getPath(String path) {
-        return path;
-    }
-
-    @Override
-    public String getParentPath(String path) {
-        return path;
     }
 
     @Override
@@ -100,5 +88,9 @@ public class DropboxDataSource implements DataSource {
                 }
             }
         });
+    }
+
+    public FileProxy createFakeDirectory(String path) {
+        return new DropboxFile(path);
     }
 }

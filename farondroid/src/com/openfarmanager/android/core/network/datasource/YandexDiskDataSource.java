@@ -9,15 +9,14 @@ import com.openfarmanager.android.filesystem.YandexDiskFile;
 import com.openfarmanager.android.fragments.NetworkPanel;
 import com.openfarmanager.android.model.NetworkEnum;
 import com.openfarmanager.android.utils.Extensions;
+import com.openfarmanager.android.utils.FileUtilsExt;
 
 import static com.openfarmanager.android.fragments.NetworkPanel.MSG_NETWORK_OPEN;
 
 /**
  * @author Vlad Namashko
  */
-public class YandexDiskDataSource implements DataSource {
-
-    public Handler mHandler;
+public class YandexDiskDataSource extends RawPathDataSource {
 
     public YandexDiskDataSource(Handler handler) {
         mHandler = handler;
@@ -35,23 +34,13 @@ public class YandexDiskDataSource implements DataSource {
 
     @Override
     public NetworkPanel.DirectoryScanInfo openDirectory(FileProxy directory) throws RuntimeException {
-//        return App.sInstance.getYandexDiskApi().getDirectoryFiles(directory.getFullPath());
-        return null;
+        return mDirectoryScanInfo.set(App.sInstance.getYandexDiskApi().getDirectoryFiles(directory.getFullPath()),
+                FileUtilsExt.getParentPath(directory.getParentPath()));
     }
 
     @Override
     public void onUnlinkedAccount() {
         App.sInstance.getDropboxApi().deleteCurrentAccount();
-    }
-
-    @Override
-    public String getPath(String path) {
-        return path;
-    }
-
-    @Override
-    public String getParentPath(String path) {
-        return path;
     }
 
     @Override
@@ -69,13 +58,17 @@ public class YandexDiskDataSource implements DataSource {
         return false;
     }
 
+    public FileProxy createFakeDirectory(String path) {
+        return new YandexDiskFile(path);
+    }
+
     @Override
     public void open(FileProxy file) {
 
         YandexDiskFile diskFile = (YandexDiskFile) file;
 
         if (!Extensions.isNullOrEmpty(diskFile.getPublicUrl())) {
-            mHandler.sendMessage(mHandler.obtainMessage(MSG_NETWORK_OPEN, new Pair<FileProxy, String>(file, diskFile.getPublicUrl())));
+            mHandler.sendMessage(mHandler.obtainMessage(MSG_NETWORK_OPEN, new Pair<>(file, diskFile.getPublicUrl())));
         }
     }
 }

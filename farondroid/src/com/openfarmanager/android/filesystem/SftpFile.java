@@ -16,41 +16,57 @@ import java.util.List;
  */
 public class SftpFile implements FileProxy {
 
-    private ChannelSftp.LsEntry mEntry;
+    private String mFileName;
+    private boolean mIsDir;
+    private long mSize;
+    private long mModDate;
     private String mFullPath;
     private String mParentPath;
 
     public SftpFile(String currentPath, ChannelSftp.LsEntry entry) {
-        mEntry = entry;
-        mFullPath = currentPath + (currentPath.endsWith("/") ? "" : "/") + mEntry.getFilename();
+        mFileName = entry.getFilename();
+        mIsDir = entry.getAttrs().isDir();
+        mSize = entry.getAttrs().getSize();
+        mModDate = entry.getAttrs().getATime() * 1000L;
+        mFullPath = currentPath + (currentPath.endsWith("/") ? "" : "/") + mFileName;
 
-        mParentPath = currentPath.endsWith("/") && currentPath.length() > 1 ?
-                currentPath.substring(0, currentPath.length() - 1) : currentPath;
+        // if path ends with file separator - remove it
+        mParentPath = FileUtilsExt.removeLastSeparator(currentPath);
+    }
+
+    public SftpFile(String path) {
+        path = FileUtilsExt.removeLastSeparator(path);
+        mFileName = FileUtilsExt.getFileName(path);
+        mIsDir = true;
+        mSize = 0;
+        mModDate = System.currentTimeMillis();
+        mFullPath = path;
+        mParentPath = FileUtilsExt.getParentPath(path);
     }
 
     @Override
     public String getId() {
-        return "";
+        return mFullPath;
     }
 
     @Override
     public String getName() {
-        return mEntry.getFilename();
+        return mFileName;
     }
 
     @Override
     public boolean isDirectory() {
-        return mEntry.getAttrs().isDir();
+        return mIsDir;
     }
 
     @Override
     public long getSize() {
-        return mEntry.getAttrs().getSize();
+        return mSize;
     }
 
     @Override
     public long lastModifiedDate() {
-        return mEntry.getAttrs().getATime() * 1000L;
+        return mModDate;
     }
 
     @Override

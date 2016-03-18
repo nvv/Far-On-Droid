@@ -202,9 +202,10 @@ public class FtpAPI implements NetworkApi {
     }
 
     @Override
-    public boolean createDirectory(String path) throws Exception {
+    public String createDirectory(String baseDirectory, String newDirectoryName) throws Exception {
+        String path = baseDirectory + "/" + newDirectoryName;
         mFtpClient.createDirectory(path);
-        return true;
+        return path;
     }
 
     @Override

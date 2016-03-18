@@ -3,12 +3,14 @@ package com.openfarmanager.android.filesystem;
 import com.dropbox.client2.DropboxAPI;
 import com.openfarmanager.android.model.Bookmark;
 import com.openfarmanager.android.utils.CustomFormatter;
+import com.openfarmanager.android.utils.FileUtilsExt;
 
 import static com.openfarmanager.android.utils.Extensions.*;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -25,8 +27,7 @@ public class DropboxFile implements FileProxy<DropboxAPI.Entry> {
     private long mSize;
     private long mModified;
 
-    private static final SimpleDateFormat sSimpleDateFormat =
-            new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss");
+    private static final SimpleDateFormat sSimpleDateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss");
 
     public DropboxFile(DropboxAPI.Entry entry) {
         mEntry = entry;
@@ -44,9 +45,20 @@ public class DropboxFile implements FileProxy<DropboxAPI.Entry> {
         mParentPath = entry.path.substring(0, entry.path.lastIndexOf("/") + 1);
     }
 
+    public DropboxFile(String path) {
+        mEntry = new DropboxAPI.Entry();
+        path = FileUtilsExt.removeLastSeparator(path);
+        mName = FileUtilsExt.getFileName(path);
+        mEntry.path = path;
+        mSize = 0;
+        mEntry.isDir = true;
+        mModified = System.currentTimeMillis();
+        mParentPath = path.substring(0, path.lastIndexOf("/") + 1);
+    }
+
     @Override
     public String getId() {
-        return "";
+        return getFullPath();
     }
 
     @Override

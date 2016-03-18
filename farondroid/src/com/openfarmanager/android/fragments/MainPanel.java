@@ -672,10 +672,10 @@ public class MainPanel extends BaseFileSystemPanel {
         showDialog(new CopyMoveFileDialog(getActivity(), mFileActionHandler, inactivePanel));
     }
 
-    public void export(final MainPanel inactivePanel, String downloadLink, String destination) {
+    public void export(final MainPanel activePanel, String downloadLink, String destination) {
         FileActionTask task = null;
         try {
-            task = new ExportAsTask(fragmentManager(),
+            task = new ExportAsTask(activePanel,
                     new OnActionListener() {
                         @Override
                         public void onActionFinish(TaskStatusEnum status) {
@@ -691,7 +691,7 @@ public class MainPanel extends BaseFileSystemPanel {
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
-                            invalidatePanels(inactivePanel);
+                            invalidatePanels(activePanel);
                         }
                     }, downloadLink, destination);
         } catch (Exception e) {
@@ -1257,11 +1257,7 @@ public class MainPanel extends BaseFileSystemPanel {
                             @Override
                             public void onGotoFile(final FileProxy fileProxy) {
                                 if (MainPanel.this instanceof NetworkPanel) {
-                                    ((NetworkPanel) MainPanel.this).openDirectoryAndSelect(fileProxy,
-                                            new ArrayList<FileProxy>() {{
-                                                add(fileProxy);
-                                            }});
-
+                                    gotoSearchFile(fileProxy);
                                 } else {
                                     final File file = (FileSystemFile) fileProxy;
                                     openDirectory(file.isDirectory() ? file : file.getParentFile());
@@ -1306,6 +1302,9 @@ public class MainPanel extends BaseFileSystemPanel {
         } catch (SdcardPermissionException e) {
             requestSdcardPermission();
         }
+    }
+
+    protected void gotoSearchFile(FileProxy file) {
     }
 
     protected boolean isDataLoading() {

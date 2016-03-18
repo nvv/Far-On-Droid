@@ -3,9 +3,7 @@ package com.openfarmanager.android.filesystem.commands;
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.core.AbstractCommand;
 import com.openfarmanager.android.filesystem.FileProxy;
-import com.openfarmanager.android.filesystem.actions.FileActionTask;
 import com.openfarmanager.android.filesystem.actions.OnActionListener;
-import com.openfarmanager.android.filesystem.actions.multi.MultiActionTask;
 import com.openfarmanager.android.filesystem.actions.network.DeleteFromNetworkTask;
 import com.openfarmanager.android.fragments.MainPanel;
 import com.openfarmanager.android.fragments.NetworkPanel;
@@ -32,9 +30,9 @@ public class DeleteAtNetworkCommand implements AbstractCommand {
             List<FileProxy> files = mNetworkPanel.getSelectedFileProxies();
             if (App.sInstance.getSettings().isMultiThreadTasksEnabled(type)) {
                 new com.openfarmanager.android.filesystem.actions.multi.network.DeleteFromNetworkTask(
-                        mNetworkPanel.getActivity(), type, createListener(args), files).execute();
+                        mNetworkPanel, createListener(args), files).execute();
             } else {
-                new DeleteFromNetworkTask(type, mNetworkPanel.getFragmentManager(), createListener(args), files).execute();
+                new DeleteFromNetworkTask(mNetworkPanel, createListener(args), files).execute();
             }
         } catch (Exception e) {
             e.printStackTrace();

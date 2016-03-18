@@ -26,12 +26,13 @@ import com.openfarmanager.android.core.network.datasource.DataSource;
 import com.openfarmanager.android.core.network.datasource.DropboxDataSource;
 import com.openfarmanager.android.core.network.datasource.FtpDataSource;
 import com.openfarmanager.android.core.network.datasource.GoogleDriveDataSource;
+import com.openfarmanager.android.core.network.datasource.IdPathDataSource;
 import com.openfarmanager.android.core.network.datasource.MediaFireDataSource;
+import com.openfarmanager.android.core.network.datasource.RawPathDataSource;
 import com.openfarmanager.android.core.network.datasource.SftpDataSource;
 import com.openfarmanager.android.core.network.datasource.SkyDriveDataSource;
 import com.openfarmanager.android.core.network.datasource.SmbDataSource;
 import com.openfarmanager.android.core.network.datasource.YandexDiskDataSource;
-import com.openfarmanager.android.dialogs.CreateBookmarkDialog;
 import com.openfarmanager.android.filesystem.FakeFile;
 import com.openfarmanager.android.filesystem.FileProxy;
 import com.openfarmanager.android.model.FileActionEnum;
@@ -70,6 +71,7 @@ public class NetworkPanel extends MainPanel {
 
     private DataSource mDataSource;
     private FileProxy mCurrentPath;
+    private FileProxy mUpNavigator;
 
     protected FileProxy mLastSelectedFile;
     private NetworkAccount mCurrentNetworkAccount;
@@ -201,6 +203,10 @@ public class NetworkPanel extends MainPanel {
         }
     }
 
+    public DataSource getDataSource() {
+        return mDataSource;
+    }
+
     @Override
     public void onResume() {
         super.onResume();
@@ -238,9 +244,11 @@ public class NetworkPanel extends MainPanel {
 
     @Override
     public void createBookmark(final MainPanel inactivePanel) {
+        /*
         showDialog(new CreateBookmarkDialog(getActivity(), mFileActionHandler, inactivePanel,
                 mDataSource.getParentPath(Extensions.isNullOrEmpty(mCurrentPath.getName()) ? "/" : mCurrentPath.getName()),
                 mCurrentNetworkAccount));
+        */
     }
 
     @Override
@@ -282,8 +290,8 @@ public class NetworkPanel extends MainPanel {
     }
 
     public void navigateParent() {
-        if (mCurrentPath != null && !mCurrentPath.isRoot()) {
-            openDirectory(mCurrentPath);
+        if (mCurrentPath != null && !mCurrentPath.isRoot() && mUpNavigator != null) {
+            openDirectory(mUpNavigator);
         } else {
             exitFromNetwork();
         }
@@ -301,7 +309,7 @@ public class NetworkPanel extends MainPanel {
     }
 
     public void openDirectory() {
-        openDirectory(new FakeFile("/", "/"));
+        openDirectory(new FakeFile("/", "/", true));
 
     }
 
@@ -353,6 +361,31 @@ public class NetworkPanel extends MainPanel {
         showQuickActionPanel();
     }
 
+    @Override
+    protected void gotoSearchFile(final FileProxy file) {
+        final List<FileProxy> selectedFiles = new ArrayList<FileProxy>(1) {{
+            add(file);
+        }};
+
+        if (mDataSource instanceof RawPathDataSource) {
+            openDirectoryAndSelect(mDataSource.createFakeDirectory(file.getParentPath()), selectedFiles);
+        } else {
+            setIsLoading(true);
+            ((IdPathDataSource) mDataSource).createFakeDirectoryAsync(file,
+                    new IdPathDataSource.CreateFakeDirectoryCallback() {
+                        @Override
+                        public void onCreated(final FileProxy file) {
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    openDirectoryAndSelect(file, selectedFiles);
+                                }
+                            });
+                        }
+            });
+        }
+    }
+
     private void setCurrentPath(String path) {
         mCurrentPathView.setText(mDataSource.getNetworkType() + " : " + path);
     }
@@ -390,8 +423,13 @@ public class NetworkPanel extends MainPanel {
         return mCurrentPath.getName();
     }
 
+    public String getCurrentPathId() {
+        return mCurrentPath.getFullPath();
+    }
+
     protected void onNavigationItemSelected(int pos, List<String> items) {
-        //openDirectory(mDataSource.getParentPath(TextUtils.join("/", items.subList(0, pos + 1)).substring(1)));
+        String fullPath = TextUtils.join("/", items.subList(0, pos + 1));
+        openDirectory(mDataSource.createFakeDirectory(fullPath.substring(fullPath.length() == 1 ? 0 : 1)));
     }
 
     @Override
@@ -572,7 +610,7 @@ public class NetworkPanel extends MainPanel {
                     handleUnlinkedError(exception);
                     //exitFromNetwork();
                     break;
-                case IO_Error: case Common_Error: case Cancel_Error: case Server_error: case Socket_Timeout:
+                case IO_Error: case Common_Error: case Cancel_Error: case Server_error: case Socket_Timeout: default:
                     // error, propose to retry
                     handleErrorAndRetry(exception, new Runnable() {
                         @Override
@@ -588,26 +626,26 @@ public class NetworkPanel extends MainPanel {
         public void onNext(DirectoryUiInfo directoryInfo) {
             setIsLoading(false);
 
-            System.out.println(":::::::    " + directoryInfo.directory.getFullPathRaw() + "  " + directoryInfo.parentPath);
-
-
             FileProxy file = directoryInfo.directory;
             String path = file.getFullPathRaw();
 
             setCurrentPath(path);
-            boolean isEmpty = Extensions.isNullOrEmpty(directoryInfo.parentPath);
+            boolean isRoot = Extensions.isNullOrEmpty(file.getParentPath()) || file.getFullPath().equals("/");
             ListAdapter adapter = mFileSystemList.getAdapter();
-            FakeFile upNavigator = new FakeFile(file.getParentPath(), "..", directoryInfo.parentPath, FileUtilsExt.getParentPath(file.getFullPathRaw()), isEmpty);
+
+            System.out.println("::::::::::::  --->   " + directoryInfo.directory.getFullPathRaw() + "  " + directoryInfo.directory.getParentPath() + "  " + directoryInfo.parentPath);
+
+            mUpNavigator = new FakeFile(file.getParentPath(), "..", directoryInfo.parentPath, FileUtilsExt.getParentPath(file.getFullPathRaw()), isRoot);
             if (adapter != null && adapter instanceof NetworkEntryAdapter) {
-                ((NetworkEntryAdapter) adapter).setItems(directoryInfo.files, upNavigator);
+                ((NetworkEntryAdapter) adapter).setItems(directoryInfo.files, mUpNavigator);
                 ((NetworkEntryAdapter) adapter).setSelectedFiles(mSelectedFiles);
             } else {
-                mFileSystemList.setAdapter(new NetworkEntryAdapter(directoryInfo.files, upNavigator));
+                mFileSystemList.setAdapter(new NetworkEntryAdapter(directoryInfo.files, mUpNavigator));
             }
-            mCurrentPath = new FakeFile(file.getParentPath(), isEmpty ? "/" : path, directoryInfo.parentPath, FileUtilsExt.getParentPath(file.getFullPathRaw()), isEmpty);
+            mCurrentPath = new FakeFile(file.getId(), path, file.getParentPath(), file.getFullPathRaw(), isRoot);
 
             if (directoryInfo.restorePosition) {
-                Integer selection = mDirectorySelection.get(isEmpty ? "/" : path);
+                Integer selection = mDirectorySelection.get(isRoot ? "/" : path);
                 mFileSystemList.setSelection(selection != null ? selection : 0);
             }
 

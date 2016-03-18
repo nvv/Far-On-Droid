@@ -9,9 +9,7 @@ import com.openfarmanager.android.model.NetworkEnum;
 /**
  * @author Vlad Namashko
  */
-public class SmbDataSource implements DataSource {
-
-    public Handler mHandler;
+public class SmbDataSource extends RawPathDataSource {
 
     public SmbDataSource(Handler handler) {
         mHandler = handler;
@@ -38,15 +36,15 @@ public class SmbDataSource implements DataSource {
 
     }
 
-    @Override
-    public String getPath(String path) {
-        return path;
-    }
-
-    @Override
-    public String getParentPath(String path) {
-        return path;
-    }
+//    @Override
+//    public String getPath(String path) {
+//        return path;
+//    }
+//
+//    @Override
+//    public String getParentPath(String path) {
+//        return path;
+//    }
 
     @Override
     public void exitFromNetwork() {

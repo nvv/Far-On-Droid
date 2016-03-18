@@ -24,7 +24,6 @@ import com.openfarmanager.android.model.exeptions.NetworkException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -225,9 +224,10 @@ public class SftpAPI implements NetworkApi {
     }
 
     @Override
-    public boolean createDirectory(String path) throws Exception {
+    public String createDirectory(String baseDirectory, String newDirectoryName) throws Exception {
+        String path = baseDirectory + "/" + newDirectoryName;
         mSftpChannel.mkdir(path);
-        return true;
+        return path;
     }
 
     @Override
