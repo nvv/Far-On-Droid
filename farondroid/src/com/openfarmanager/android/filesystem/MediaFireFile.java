@@ -1,6 +1,7 @@
 package com.openfarmanager.android.filesystem;
 
 import com.mediafire.sdk.api.responses.data_models.File;
+import com.mediafire.sdk.api.responses.data_models.FileInfo;
 import com.mediafire.sdk.api.responses.data_models.Folder;
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.model.Bookmark;
@@ -24,16 +25,18 @@ public class MediaFireFile implements FileProxy {
     private String mMimeType;
     private String mFileType;
 
-    public MediaFireFile(Folder folder, String parentPath) {
+    public MediaFireFile(Folder folder, String parentPath, String parentPathRaw) {
         mIsDirectory = true;
         mId = folder.getFolderkey();
         mName = folder.getFolderName();
         mSize = folder.getSize();
         mParentPath = parentPath;
-        calculateFullPath(parentPath);
+        if (parentPathRaw != null) {
+            mFullPath = parentPathRaw.endsWith("/") ? parentPathRaw + getName() : parentPathRaw + "/" + getName();
+        }
     }
 
-    public MediaFireFile(File file, String parentPath) {
+    public MediaFireFile(File file, String parentPath, String parentPathRaw) {
         mIsDirectory = false;
         mId = file.getQuickKey();
         mName = file.getFilename();
@@ -41,19 +44,19 @@ public class MediaFireFile implements FileProxy {
         mParentPath = parentPath;
         mMimeType = file.getMimeType();
         mFileType = file.getFileType();
-        calculateFullPath(parentPath);
+        if (parentPathRaw != null) {
+            mFullPath = parentPathRaw.endsWith("/") ? parentPathRaw + getName() : parentPathRaw + "/" + getName();
+        }
     }
 
-    private void calculateFullPath(String parentPath) {
-        String cachedValue = App.sInstance.getMediaFireApi().getFoldersAliases().get(parentPath);
-        if (!isNullOrEmpty(cachedValue)) {
-            parentPath = cachedValue;
-            if (!parentPath.endsWith("/")) {
-                parentPath += "/";
-            }
-        }
-
-        mFullPath = parentPath + getName();
+    public MediaFireFile(FileInfo info) {
+        mIsDirectory = false;
+        mId = info.getQuickKey();
+        mName = info.getFileName();
+        mSize = info.getSize();
+        mParentPath = info.getParentFolderKey();
+        mMimeType = info.getMimeType();
+        mFileType = info.getFileType();
     }
 
     @Override
@@ -88,7 +91,6 @@ public class MediaFireFile implements FileProxy {
 
     @Override
     public String getFullPath() {
-        App.sInstance.getMediaFireApi().getFoldersAliases().put(getId(), mFullPath);
         return getId();
     }
 

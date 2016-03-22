@@ -219,10 +219,10 @@
     <string name="error_ftp_io">Неопределенная ошибка. Пожалуйста, попробуйте еще раз.</string>
 
     <string name="domain">Домен</string>
-    <string name="smb_server">SMB Сервер</string>
-    <string name="connecting_to_smb">Подключение к SMB…</string>
+    <string name="smb_server">Хост</string>
+    <string name="connecting_to_smb">Подключение к хосту…</string>
     <string name="error_empty_domain">"Домен" не должен быть пустым</string>
-    <string name="error_wrong_smb_host">Ошибка при подключении к SMB серверу</string>
+    <string name="error_wrong_smb_host">Ошибка при подключении к хосту</string>
     <string name="error_smb_wrong_credentials">Ошибка подключения: неверное имя пользователя или пароль.</string>
     <string name="error_access_denied">Доступ запрещен.</string>
 

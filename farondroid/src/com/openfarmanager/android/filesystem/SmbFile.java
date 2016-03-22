@@ -38,6 +38,10 @@ public class SmbFile implements FileProxy {
         }
 
         mParentPath = smbFile.getParent();
+
+        if (mParentPath.startsWith(prefix)) {
+            mParentPath = mParentPath.substring(prefix.length());
+        }
     }
 
     public SmbFile(String path) {

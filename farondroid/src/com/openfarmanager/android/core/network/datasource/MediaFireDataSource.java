@@ -31,19 +31,13 @@ public class MediaFireDataSource extends IdPathDataSource {
     }
 
     @Override
-    public NetworkPanel.DirectoryScanInfo openDirectory(FileProxy directory) throws RuntimeException {
-        //return App.sInstance.getMediaFireApi().openDirectory(directory.getId());
-        return null;
-    }
-
-    @Override
     protected List<FileProxy> getDirectoryFiles(FileProxy directory) {
-        return null;
+        return App.sInstance.getMediaFireApi().openDirectory(directory.getId(), directory.getFullPathRaw());
     }
 
     @Override
     protected FileProxy requestFileInfo(String id) {
-        return null;
+        return App.sInstance.getMediaFireApi().getFileInfo(id);
     }
 
     @Override
@@ -51,21 +45,9 @@ public class MediaFireDataSource extends IdPathDataSource {
 
     }
 
-//    @Override
-//    public String getPath(String path) {
-//        String pathAlias = App.sInstance.getMediaFireApi().getFoldersAliases().get(path);
-//        return !isNullOrEmpty(pathAlias) ? pathAlias : path;
-//    }
-//
-//    @Override
-//    public String getParentPath(String path) {
-//        return App.sInstance.getMediaFireApi().findPathId(path);
-//    }
-
     @Override
     public void exitFromNetwork() {
         App.sInstance.getMediaFireApi().endSession();
-        App.sInstance.getMediaFireApi().getFoldersAliases().clear();
     }
 
     @Override

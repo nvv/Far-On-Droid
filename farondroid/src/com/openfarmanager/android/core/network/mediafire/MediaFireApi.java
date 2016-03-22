@@ -8,6 +8,7 @@ import com.mediafire.sdk.MediaFire;
 import com.mediafire.sdk.api.FileApi;
 import com.mediafire.sdk.api.FolderApi;
 import com.mediafire.sdk.api.responses.FileDeleteResponse;
+import com.mediafire.sdk.api.responses.FileGetInfoResponse;
 import com.mediafire.sdk.api.responses.FileUpdateResponse;
 import com.mediafire.sdk.api.responses.FolderCreateResponse;
 import com.mediafire.sdk.api.responses.FolderDeleteResponse;
@@ -15,6 +16,7 @@ import com.mediafire.sdk.api.responses.FolderGetContentsResponse;
 import com.mediafire.sdk.api.responses.FolderUpdateResponse;
 import com.mediafire.sdk.api.responses.data_models.File;
 import com.mediafire.sdk.api.responses.data_models.Folder;
+import com.microsoft.live.LiveOperation;
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.R;
 import com.openfarmanager.android.core.DataStorageHelper;
@@ -22,8 +24,12 @@ import com.openfarmanager.android.core.dbadapters.NetworkAccountDbAdapter;
 import com.openfarmanager.android.core.network.NetworkApi;
 import com.openfarmanager.android.filesystem.FileProxy;
 import com.openfarmanager.android.filesystem.MediaFireFile;
+import com.openfarmanager.android.filesystem.SkyDriveFile;
 import com.openfarmanager.android.model.NetworkAccount;
 import com.openfarmanager.android.model.NetworkEnum;
+import com.openfarmanager.android.model.exeptions.NetworkException;
+
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -46,38 +52,8 @@ public class MediaFireApi implements NetworkApi {
     private MediaFire mMediaFire;
     private MediaFireAccount mCurrentAccount;
 
-    private HashMap<String, String> mFoldersAliases = new HashMap<String, String>();
-
     public MediaFireApi() {
         mMediaFire = new MediaFire(MediaFireApi.APP_ID, MediaFireApi.APP_KEY);
-    }
-
-    public HashMap<String, String> getFoldersAliases() {
-        return mFoldersAliases;
-    }
-
-    public String findPathId(String path) {
-        if (isNullOrEmpty(path)) {
-            path = "/";
-        }
-
-        if (path.endsWith("/") && !path.equals("/")) {
-            path = path.substring(0, path.length() - 1);
-        }
-
-        String findResult = findInPathAliases(path);
-
-        return findResult == null ? path : findResult;
-    }
-
-    public String findInPathAliases(String path) {
-        for (Map.Entry<String, String> fileAlias : mFoldersAliases.entrySet()) {
-            if (fileAlias.getValue().equals(path)) {
-                return fileAlias.getKey();
-            }
-        }
-
-        return null;
     }
 
     public void startNewSession(String userName, String password) throws MFApiException, MFException {
@@ -128,6 +104,10 @@ public class MediaFireApi implements NetworkApi {
     }
 
     public List<FileProxy> openDirectory(String path) {
+        return openDirectory(path, null);
+    }
+
+    public List<FileProxy> openDirectory(String path, String parentPath) {
         List<FileProxy> files = new ArrayList<>();
 
         LinkedHashMap<String, Object> query = new LinkedHashMap<>();
@@ -141,18 +121,14 @@ public class MediaFireApi implements NetworkApi {
             FolderGetContentsResponse response = FolderApi.getContent(mMediaFire, query, VERSION, FolderGetContentsResponse.class);
 
             for (Folder folder : response.getFolderContents().folders) {
-                files.add(new MediaFireFile(folder, path));
+                files.add(new MediaFireFile(folder, path, parentPath));
             }
             query.put("content_type", "files");
 
-            response = FolderApi.getContent(mMediaFire, query, "1.4", FolderGetContentsResponse.class);
+            response = FolderApi.getContent(mMediaFire, query, VERSION, FolderGetContentsResponse.class);
 
             for (File file : response.getFolderContents().files) {
-                files.add(new MediaFireFile(file, path));
-            }
-
-            if (files.size() > 0 && path.equals("/")) {
-                mFoldersAliases.put(files.get(0).getParentPath(), path);
+                files.add(new MediaFireFile(file, path, parentPath));
             }
 
         } catch (Exception ignore) {
@@ -185,15 +161,11 @@ public class MediaFireApi implements NetworkApi {
 
     @Override
     public String createDirectory(String baseDirectory, String newDirectoryName) throws Exception {
-        String name = baseDirectory.substring(baseDirectory.lastIndexOf("/") + 1, baseDirectory.length());
-        String currentDir = baseDirectory.substring(0, baseDirectory.lastIndexOf("/"));
 
         LinkedHashMap<String, Object> query = new LinkedHashMap<>();
-        query.put("foldername", name);
-        query.put("parent_path", currentDir);
+        query.put("foldername", newDirectoryName);
+        query.put("parent_key", baseDirectory);
         FolderCreateResponse response = FolderApi.create(mMediaFire, query, VERSION, FolderCreateResponse.class);
-
-//        mFoldersAliases.put(response.getFolderKey(), baseDirectory);
 
         return response.getFolderKey();
     }
@@ -220,6 +192,19 @@ public class MediaFireApi implements NetworkApi {
             FileApi.update(mMediaFire, query, VERSION, FileUpdateResponse.class);
         }
         return true;
+    }
+
+    public FileProxy getFileInfo(String id) {
+
+        LinkedHashMap<String, Object> query = new LinkedHashMap<>();
+        query.put("quick_key", id);
+
+        try {
+            FileGetInfoResponse response = FileApi.getInfo(mMediaFire, query, VERSION, FileGetInfoResponse.class);
+            return new MediaFireFile(response.getFileInfo());
+        } catch (Exception e) {
+            throw NetworkException.handleNetworkException(e);
+        }
     }
 
     public long saveAccount(String userName, String password) {

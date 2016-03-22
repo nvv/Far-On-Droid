@@ -257,10 +257,10 @@
     <string name="error_ftp_io">Unexpected IO error. Please, try again.</string>
 
     <string name="domain">Domain</string>
-    <string name="smb_server">SMB Server</string>
-    <string name="connecting_to_smb">Connecting to the SMB…</string>
+    <string name="smb_server">Host</string>
+    <string name="connecting_to_smb">Connecting to the host…</string>
     <string name="error_empty_domain">Domain must not be empty</string>
-    <string name="error_wrong_smb_host">Unable to connect to the SMB server</string>
+    <string name="error_wrong_smb_host">Unable to connect to the host</string>
     <string name="error_smb_wrong_credentials">Logon failure: unknown user name or bad password.</string>
     <string name="error_access_denied">Access is denied.</string>
 
