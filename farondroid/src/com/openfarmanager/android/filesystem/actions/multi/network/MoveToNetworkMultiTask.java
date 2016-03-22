@@ -3,6 +3,8 @@ package com.openfarmanager.android.filesystem.actions.multi.network;
 import android.content.Context;
 
 import com.openfarmanager.android.filesystem.actions.OnActionListener;
+import com.openfarmanager.android.fragments.BaseFileSystemPanel;
+import com.openfarmanager.android.fragments.NetworkPanel;
 import com.openfarmanager.android.model.NetworkEnum;
 import com.openfarmanager.android.model.TaskStatusEnum;
 
@@ -20,8 +22,8 @@ import static com.openfarmanager.android.model.TaskStatusEnum.ERROR_FILE_NOT_EXI
  */
 public class MoveToNetworkMultiTask extends CopyToNetworkMultiTask {
 
-    public MoveToNetworkMultiTask(Context context, NetworkEnum networkType, OnActionListener listener, List<File> items, String destination) {
-        super(context, networkType, listener, items, destination);
+    public MoveToNetworkMultiTask(NetworkPanel panel, OnActionListener listener, List<File> items, String destination) {
+        super(panel, listener, items, destination);
     }
 
     @Override

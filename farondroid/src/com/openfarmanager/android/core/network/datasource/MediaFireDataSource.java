@@ -2,17 +2,11 @@ package com.openfarmanager.android.core.network.datasource;
 
 import android.os.Handler;
 
-import com.mediafire.sdk.MediaFire;
-import com.mediafire.sdk.api.FolderApi;
-import com.mediafire.sdk.api.responses.FolderGetContentsResponse;
-import com.mediafire.sdk.api.responses.data_models.Folder;
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.filesystem.FileProxy;
-import com.openfarmanager.android.filesystem.MediaFireFile;
+import com.openfarmanager.android.fragments.NetworkPanel;
 import com.openfarmanager.android.model.NetworkEnum;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 
 import static com.openfarmanager.android.utils.Extensions.isNullOrEmpty;
@@ -20,9 +14,7 @@ import static com.openfarmanager.android.utils.Extensions.isNullOrEmpty;
 /**
  * author: Vlad Namashko
  */
-public class MediaFireDataSource implements DataSource {
-
-    private Handler mHandler;
+public class MediaFireDataSource extends IdPathDataSource {
 
     public MediaFireDataSource(Handler handler) {
         mHandler = handler;
@@ -39,24 +31,18 @@ public class MediaFireDataSource implements DataSource {
     }
 
     @Override
-    public List<FileProxy> openDirectory(String path) throws RuntimeException {
-        return App.sInstance.getMediaFireApi().openDirectory(path);
+    protected List<FileProxy> getDirectoryFiles(FileProxy directory) {
+        return App.sInstance.getMediaFireApi().openDirectory(directory.getId(), directory.getFullPathRaw());
+    }
+
+    @Override
+    protected FileProxy requestFileInfo(String id) {
+        return App.sInstance.getMediaFireApi().getFileInfo(id);
     }
 
     @Override
     public void onUnlinkedAccount() {
 
-    }
-
-    @Override
-    public String getPath(String path) {
-        String pathAlias = App.sInstance.getMediaFireApi().getFoldersAliases().get(path);
-        return !isNullOrEmpty(pathAlias) ? pathAlias : path;
-    }
-
-    @Override
-    public String getParentPath(String path) {
-        return App.sInstance.getMediaFireApi().findPathId(path);
     }
 
     @Override

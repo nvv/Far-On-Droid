@@ -8,9 +8,11 @@ import com.openfarmanager.android.App;
 import com.openfarmanager.android.filesystem.DropboxFile;
 import com.openfarmanager.android.filesystem.FileProxy;
 import com.openfarmanager.android.filesystem.FileSystemScanner;
+import com.openfarmanager.android.fragments.NetworkPanel;
 import com.openfarmanager.android.model.NetworkEnum;
 import com.openfarmanager.android.model.exeptions.NetworkException;
 import com.openfarmanager.android.utils.Extensions;
+import com.openfarmanager.android.utils.FileUtilsExt;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,9 +24,7 @@ import static com.openfarmanager.android.fragments.NetworkPanel.MSG_NETWORK_SHOW
 /**
  * @author Vlad Namashko
  */
-public class DropboxDataSource implements DataSource {
-
-    public Handler mHandler;
+public class DropboxDataSource extends RawPathDataSource {
 
     public DropboxDataSource(Handler handler) {
         mHandler = handler;
@@ -39,11 +39,11 @@ public class DropboxDataSource implements DataSource {
         return NetworkEnum.Dropbox;
     }
 
-    public List<FileProxy> openDirectory(String path) {
+    public NetworkPanel.DirectoryScanInfo openDirectory(FileProxy directory) {
         List<FileProxy> files = new ArrayList<FileProxy>();
         DropboxAPI.Entry currentNode;
         try {
-            currentNode = App.sInstance.getDropboxApi().metadata(path, -1, null, true, null);
+            currentNode = App.sInstance.getDropboxApi().metadata(directory.getFullPath(), -1, null, true, null);
             for (DropboxAPI.Entry entry : currentNode.contents) {
                 files.add(new DropboxFile(entry));
             }
@@ -52,21 +52,11 @@ public class DropboxDataSource implements DataSource {
             throw NetworkException.handleNetworkException(e);
         }
 
-        return files;
+        return mDirectoryScanInfo.set(files, FileUtilsExt.getParentPath(directory.getParentPath()));
     }
 
     public void onUnlinkedAccount() {
         App.sInstance.getDropboxApi().deleteCurrentAccount();
-    }
-
-    @Override
-    public String getPath(String path) {
-        return path;
-    }
-
-    @Override
-    public String getParentPath(String path) {
-        return path;
     }
 
     @Override
@@ -98,5 +88,9 @@ public class DropboxDataSource implements DataSource {
                 }
             }
         });
+    }
+
+    public FileProxy createFakeDirectory(String path) {
+        return new DropboxFile(path);
     }
 }

@@ -9,19 +9,34 @@ import java.util.List;
  */
 public class FakeFile implements FileProxy {
 
+    private String mId;
     private String mName;
     private String mParentPath;
+    private String mFullPath;
+    private String mFullPathRaw;
     private boolean mIsRoot;
 
-    public FakeFile(String name, String parentPath, boolean isRoot) {
+    public FakeFile(String id, String name, String parentPath, String fullPathRaw, boolean isRoot) {
+        mId = id;
         mName = name;
         mParentPath = parentPath;
+        mFullPath = id;
+        mFullPathRaw = fullPathRaw;
+        mIsRoot = isRoot;
+    }
+
+    public FakeFile(String id, String name, boolean isRoot) {
+        mId = id;
+        mName = name;
+        mFullPath = id;
+        mFullPathRaw = name;
+        mParentPath = "";
         mIsRoot = isRoot;
     }
 
     @Override
     public String getId() {
-        return "";
+        return mId;
     }
 
     @Override
@@ -51,12 +66,12 @@ public class FakeFile implements FileProxy {
 
     @Override
     public String getFullPath() {
-        return null;
+        return mFullPath;
     }
 
     @Override
     public String getFullPathRaw() {
-        return null;
+        return mFullPathRaw;
     }
 
     @Override

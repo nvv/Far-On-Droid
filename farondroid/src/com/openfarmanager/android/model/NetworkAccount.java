@@ -1,8 +1,5 @@
 package com.openfarmanager.android.model;
 
-import com.openfarmanager.android.App;
-import com.openfarmanager.android.R;
-
 /**
  * @author Vlad Namashko
  */
@@ -19,4 +16,5 @@ public abstract class NetworkAccount {
         return mUserName;
     }
 
+    public abstract NetworkEnum getNetworkType();
 }

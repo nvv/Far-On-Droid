@@ -1,6 +1,7 @@
 package com.openfarmanager.android.filesystem;
 
 import com.openfarmanager.android.model.Bookmark;
+import com.openfarmanager.android.utils.FileUtilsExt;
 import com.yandex.disk.client.ListItem;
 
 import java.util.List;
@@ -12,41 +13,58 @@ import java.util.List;
  */
 public class YandexDiskFile implements FileProxy {
 
-    private ListItem mItem;
+    private String mFileName;
+    private boolean mIsDir;
+    private long mSize;
+    private long mModDate;
     private String mFullPath;
     private String mParentPath;
 
+    private String mPublicUrl;
+
     public YandexDiskFile(ListItem item) {
-        mItem = item;
+        mFileName = item.getDisplayName();
+        mIsDir = item.isCollection();
+        mSize = item.getContentLength();
+        mModDate = item.getLastUpdated();
+        mPublicUrl = item.getPublicUrl();
+        mFullPath = item.getFullPath();
+        mParentPath = FileUtilsExt.getParentPath(mFullPath);
+    }
 
-        mFullPath = mItem.getFullPath();
-
-        mParentPath = mFullPath.substring(0, mFullPath.lastIndexOf("/") + 1);
+    public YandexDiskFile(String path) {
+        path = FileUtilsExt.removeLastSeparator(path);
+        mFileName = FileUtilsExt.getFileName(path);
+        mIsDir = true;
+        mSize = 0;
+        mModDate = System.currentTimeMillis();
+        mFullPath = path;
+        mParentPath = FileUtilsExt.getParentPath(path);
     }
 
     @Override
     public String getId() {
-        return "";
+        return getFullPath();
     }
 
     @Override
     public String getName() {
-        return mItem.getDisplayName();
+        return mFileName;
     }
 
     @Override
     public boolean isDirectory() {
-        return mItem.isCollection();
+        return mIsDir;
     }
 
     @Override
     public long getSize() {
-        return mItem.getContentLength();
+        return mSize;
     }
 
     @Override
     public long lastModifiedDate() {
-        return mItem.getLastUpdated();
+        return mModDate;
     }
 
     @Override
@@ -100,6 +118,6 @@ public class YandexDiskFile implements FileProxy {
     }
 
     public String getPublicUrl() {
-        return mItem.getPublicUrl();
+        return mPublicUrl;
     }
 }

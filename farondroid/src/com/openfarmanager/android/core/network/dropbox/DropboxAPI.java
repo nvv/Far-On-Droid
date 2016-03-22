@@ -106,8 +106,9 @@ public class DropboxAPI extends com.dropbox.client2.DropboxAPI<AndroidAuthSessio
     }
 
     @Override
-    public boolean createDirectory(String path) throws Exception {
-        return createFolder(path) != null;
+    public String createDirectory(String baseDirectory, String newDirectoryName) throws Exception {
+        Entry folder = createFolder(baseDirectory + "/" + newDirectoryName);
+        return folder.path;
     }
 
     @Override
@@ -174,6 +175,10 @@ public class DropboxAPI extends com.dropbox.client2.DropboxAPI<AndroidAuthSessio
         private String mKey;
         private String mSecret;
 
+        public DropboxAccount(long id, String userName, JSONObject data) throws JSONException {
+            this(id, userName, data.getString(DROPBOX_KEY), data.getString(DROPBOX_SECRET));
+        }
+
         public DropboxAccount(long id, String userName, String key, String secret) {
             mId = id;
             mUserName = userName;
@@ -187,6 +192,11 @@ public class DropboxAPI extends com.dropbox.client2.DropboxAPI<AndroidAuthSessio
 
         public String getSecret() {
             return mSecret;
+        }
+
+        @Override
+        public NetworkEnum getNetworkType() {
+            return NetworkEnum.Dropbox;
         }
     }
 }

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 
+import com.mediafire.sdk.api.responses.data_models.FileInfo;
 import com.microsoft.live.*;
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.R;
@@ -43,11 +44,12 @@ public class SkyDriveAPI implements LiveAuthListener, NetworkApi {
 
     private Activity mAuthActivity;
     private SkyDriveAccount mCurrentSkyDriveAccount;
-    private HashMap<String, String> mFoldersAliases = new HashMap<String, String>();
 
     private final static byte[] BUFFER = new byte[256 * 1024];
 
     public OnLoginListener mOnLoginListener;
+
+    private String mDriveDefaultPath;
 
     public static final String[] SCOPES = {
             "wl.signin",
@@ -58,34 +60,6 @@ public class SkyDriveAPI implements LiveAuthListener, NetworkApi {
 
     public SkyDriveAPI() {
         mSkyDriveAuthClient = new LiveAuthClient(App.sInstance, SkyDriveAPI.APP_CLIENT_ID);
-    }
-
-    public HashMap<String, String> getFoldersAliases() {
-        return mFoldersAliases;
-    }
-
-    public String findPathId(String path) {
-        if (isNullOrEmpty(path)) {
-            path = "/";
-        }
-
-        if (path.endsWith("/") && !path.equals("/")) {
-            path = path.substring(0, path.length() - 1);
-        }
-
-        String findResult = findInPathAliases(path);
-
-        return findResult == null ? path : findResult;
-    }
-
-    public String findInPathAliases(String path) {
-        for (Map.Entry<String, String> fileAlias : mFoldersAliases.entrySet()) {
-            if (fileAlias.getValue().equals(path)) {
-                return fileAlias.getKey();
-            }
-        }
-
-        return null;
     }
 
     public int getAuthorizedAccountsCount() {
@@ -128,7 +102,7 @@ public class SkyDriveAPI implements LiveAuthListener, NetworkApi {
 
     @Override
     public NetworkAccount newAccount() {
-        return new SkyDriveAccount(-1, App.sInstance.getResources().getString(com.openfarmanager.android.R.string.btn_new), null);
+        return new SkyDriveAccount(-1, App.sInstance.getResources().getString(com.openfarmanager.android.R.string.btn_new), (String) null);
     }
 
     @Override
@@ -142,33 +116,34 @@ public class SkyDriveAPI implements LiveAuthListener, NetworkApi {
     }
 
     @Override
-    public boolean createDirectory(String path) throws Exception {
+    public String createDirectory(String baseDirectory, String newDirectoryName) throws Exception {
         JSONObject postData = new JSONObject();
-        String currentDir = path.substring(0, path.lastIndexOf("/"));
-        String name = path.substring(path.lastIndexOf("/") + 1, path.length());
         try {
-            postData.put("name", name);
+            postData.put("name", newDirectoryName);
         } catch (JSONException e) {
             e.printStackTrace();
-            return false;
+            return null;
         }
 
-        LiveOperation operation = mSkyDriveConnectClient.post(findPathId(currentDir), postData);
-        boolean result = !operation.getResult().has(JsonKeys.ERROR);
+        LiveOperation operation = mSkyDriveConnectClient.post(baseDirectory, postData);
 
-        if (result) {
-            mFoldersAliases.put(operation.getResult().getString(JsonKeys.ID), path);
+        if (!operation.getResult().has(JsonKeys.ERROR)) {
+            return operation.getResult().getString(JsonKeys.ID);
         }
 
-        return result;
+        return null;
     }
 
     public void deleteCurrentAccount() {
         NetworkAccountDbAdapter.delete(mCurrentSkyDriveAccount.getId());
     }
 
-    public List<FileProxy> getDirectoryFiles (String path) {
-        List<FileProxy> files = new ArrayList<FileProxy>();
+    public List<FileProxy> getDirectoryFiles(String path) {
+        return getDirectoryFiles(path, null);
+    }
+
+    public List<FileProxy> getDirectoryFiles(String path, String parentPath) {
+        List<FileProxy> files = new ArrayList<>();
 
         try {
             LiveOperation operation = mSkyDriveConnectClient.get(isNullOrEmpty(path) || path.equals("/") ? "me/skydrive/files" : path + "/files");
@@ -178,19 +153,27 @@ public class SkyDriveAPI implements LiveAuthListener, NetworkApi {
                 JSONArray items = (JSONArray) result.get(JsonKeys.DATA);
                 for (int i = 0; i < items.length(); i++) {
                     JSONObject data = (JSONObject) items.get(i);
-                    files.add(new SkyDriveFile(data, path));
+                    files.add(new SkyDriveFile(data, parentPath != null ? parentPath : path));
                 }
                 FileSystemScanner.sInstance.sort(files);
 
-                if (files.size() > 0 && path.equals("/")) {
-                    mFoldersAliases.put(files.get(0).getParentPath(), path);
-                }
             }
         } catch (Exception e) {
             throw NetworkException.handleNetworkException(e);
         }
 
         return files;
+    }
+
+    public FileProxy getFileInfo(String id) {
+
+        try {
+            LiveOperation operation = mSkyDriveConnectClient.get(id);
+            JSONObject result = operation.getResult();
+            return new SkyDriveFile(result, "");
+        } catch (Exception e) {
+            throw NetworkException.handleNetworkException(e);
+        }
     }
 
     @Override
@@ -248,7 +231,7 @@ public class SkyDriveAPI implements LiveAuthListener, NetworkApi {
         outputStream.close();
     }
 
-    public void setAuthTokensToSession(SkyDriveAccount account, OnLoginListener onLoginListener) {
+    public void setAuthTokensToSession(SkyDriveAccount account, OnLoginListener onLoginListener, String defaultPath) {
         mCurrentSkyDriveAccount = account;
 
         SharedPreferences settings =
@@ -257,6 +240,7 @@ public class SkyDriveAPI implements LiveAuthListener, NetworkApi {
         editor.putString(PreferencesConstants.REFRESH_TOKEN_KEY, account.getToken()).commit();
 
         mOnLoginListener = onLoginListener;
+        mDriveDefaultPath = defaultPath;
         mSkyDriveAuthClient.initialize(this);
     }
 
@@ -301,7 +285,7 @@ public class SkyDriveAPI implements LiveAuthListener, NetworkApi {
                                         result.optString("name") + "(" + result.optString("id") + ")",
                                         NetworkEnum.SkyDrive.ordinal(), authData.toString());
 
-                                mOnLoginListener.onComplete();
+                                mOnLoginListener.onComplete(mDriveDefaultPath);
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
@@ -309,7 +293,7 @@ public class SkyDriveAPI implements LiveAuthListener, NetworkApi {
                     }
                 });
             } else {
-                mOnLoginListener.onComplete();
+                mOnLoginListener.onComplete(mDriveDefaultPath);
             }
 
         } else {
@@ -336,6 +320,10 @@ public class SkyDriveAPI implements LiveAuthListener, NetworkApi {
 
         private String mToken;
 
+        public SkyDriveAccount(long id, String userName, JSONObject data) throws JSONException {
+            this(id, userName, data.getString(SKYDRIVE_REFRESH_TOKEN));
+        }
+
         public SkyDriveAccount(long id, String userName, String token) {
             mId = id;
             mUserName = userName;
@@ -346,12 +334,16 @@ public class SkyDriveAPI implements LiveAuthListener, NetworkApi {
             return mToken;
         }
 
+        @Override
+        public NetworkEnum getNetworkType() {
+            return NetworkEnum.SkyDrive;
+        }
     }
 
     public static interface OnLoginListener {
         public void onGetUserInfo();
 
-        public void onComplete();
+        public void onComplete(String defaultPath);
 
         public void onError(int errorCode);
     }

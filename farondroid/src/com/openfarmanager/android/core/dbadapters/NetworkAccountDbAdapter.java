@@ -4,8 +4,17 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
+
+import com.openfarmanager.android.App;
 import com.openfarmanager.android.core.DataStorageHelper;
 import com.openfarmanager.android.model.Bookmark;
+import com.openfarmanager.android.model.NetworkAccount;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.openfarmanager.android.core.dbadapters.NetworkAccountDbAdapter.Columns.*;
 
@@ -21,13 +30,15 @@ public class NetworkAccountDbAdapter {
         public static final String USER_NAME = "user_name";
         public static final String NETWORK_TYPE = "newtork_type";
         public static final String AUTH_DATA = "auth_data";
+        public static final String HOME_PATH = "home_path";
     }
 
     public static final String CREATE_TABLE = "CREATE TABLE " + TABLE_NAME + " ("
             + ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
             + USER_NAME + " TEXT not null,"
             + NETWORK_TYPE + " INTEGER not null,"
-            + AUTH_DATA + " TEXT not null"
+            + AUTH_DATA + " TEXT not null,"
+            + HOME_PATH + " TEXT"
             + ");";
 
     public static Cursor getAccountById(long id) {
@@ -104,6 +115,38 @@ public class NetworkAccountDbAdapter {
         } finally {
             DataStorageHelper.closeDatabase();
         }
+    }
+
+    public static NetworkAccount loadAccountById(long id) {
+        Cursor cursor = getAccountById(id);
+        if (cursor == null) {
+            return null;
+        }
+
+        try {
+            int idxId = cursor.getColumnIndex(Columns.ID);
+            int idxUserName = cursor.getColumnIndex(Columns.USER_NAME);
+            int idxAuthData = cursor.getColumnIndex(Columns.AUTH_DATA);
+            int idxNetworkType = cursor.getColumnIndex(Columns.NETWORK_TYPE);
+
+            while (cursor.moveToNext()) {
+                long accountId = cursor.getLong(idxId);
+                String user = cursor.getString(idxUserName);
+                String authData = cursor.getString(idxAuthData);
+                int networkType = cursor.getInt(idxNetworkType);
+                try {
+                    return App.sInstance.getNetworkAccountManager().createNetworkAccount(accountId, user, authData, networkType);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+
+        } finally {
+            cursor.close();
+            DataStorageHelper.closeDatabase();
+        }
+
+        return null;
     }
 
 }

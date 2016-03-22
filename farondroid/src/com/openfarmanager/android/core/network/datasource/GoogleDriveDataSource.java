@@ -4,10 +4,15 @@ import android.os.Handler;
 import android.util.Pair;
 
 import com.openfarmanager.android.App;
+import com.openfarmanager.android.filesystem.FakeFile;
 import com.openfarmanager.android.filesystem.FileProxy;
+import com.openfarmanager.android.fragments.NetworkPanel;
+import com.openfarmanager.android.googledrive.model.File;
 import com.openfarmanager.android.model.NetworkEnum;
 import com.openfarmanager.android.utils.Extensions;
 
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 
 import static com.openfarmanager.android.fragments.NetworkPanel.MSG_NETWORK_OPEN;
@@ -15,9 +20,7 @@ import static com.openfarmanager.android.fragments.NetworkPanel.MSG_NETWORK_OPEN
 /**
  * author: Vlad Namashko
  */
-public class GoogleDriveDataSource implements DataSource {
-
-    public Handler mHandler;
+public class GoogleDriveDataSource extends IdPathDataSource {
 
     public GoogleDriveDataSource(Handler handler) {
         mHandler = handler;
@@ -34,8 +37,13 @@ public class GoogleDriveDataSource implements DataSource {
     }
 
     @Override
-    public List<FileProxy> openDirectory(String path) throws RuntimeException {
-        return App.sInstance.getGoogleDriveApi().getDirectoryFiles(path);
+    protected List<FileProxy> getDirectoryFiles(FileProxy directory) {
+        return App.sInstance.getGoogleDriveApi().getDirectoryFiles(directory.getId(), directory.getFullPathRaw());
+    }
+
+    @Override
+    protected FileProxy requestFileInfo(String id) {
+        return App.sInstance.getGoogleDriveApi().getFileInfo(id);
     }
 
     @Override
@@ -44,19 +52,8 @@ public class GoogleDriveDataSource implements DataSource {
     }
 
     @Override
-    public String getPath(String path) {
-        String pathAlias = App.sInstance.getGoogleDriveApi().getFoldersAliases().get(path);
-        return !Extensions.isNullOrEmpty(pathAlias) ? pathAlias : path;
-    }
-
-    @Override
-    public String getParentPath(String path) {
-        return App.sInstance.getGoogleDriveApi().findPathId(path);
-    }
-
-    @Override
     public void exitFromNetwork() {
-        App.sInstance.getGoogleDriveApi().getFoldersAliases().clear();
+
     }
 
     @Override
@@ -71,7 +68,8 @@ public class GoogleDriveDataSource implements DataSource {
 
     @Override
     public void open(FileProxy file) {
-        mHandler.sendMessage(mHandler.obtainMessage(MSG_NETWORK_OPEN, new Pair<FileProxy, String>(file,
+        mHandler.sendMessage(mHandler.obtainMessage(MSG_NETWORK_OPEN, new Pair<>(file,
                 App.sInstance.getGoogleDriveApi().getDownloadLink(file))));
     }
+
 }

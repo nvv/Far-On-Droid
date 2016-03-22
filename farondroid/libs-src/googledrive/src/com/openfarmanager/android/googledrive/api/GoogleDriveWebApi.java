@@ -1,6 +1,8 @@
 package com.openfarmanager.android.googledrive.api;
 
+import com.openfarmanager.android.googledrive.model.About;
 import com.openfarmanager.android.googledrive.model.File;
+import com.openfarmanager.android.googledrive.model.Token;
 import com.openfarmanager.android.googledrive.model.exceptions.CreateFolderException;
 
 import org.json.JSONArray;
@@ -207,6 +209,23 @@ public class GoogleDriveWebApi extends Api {
                 list(files, pageToken, query);
             }
         }
+    }
+
+    public File getFile(String fileId) throws Exception {
+        HttpURLConnection connection = (HttpURLConnection) new URL(LIST_URL + "/" + fileId + "?" + getAuth()).openConnection();
+        connection.setRequestProperty("Cache-Control", "no-cache");
+        int responseCode = connection.getResponseCode();
+        if (isTokenExpired(responseCode, connection.getResponseMessage())) {
+            setupToken(refreshToken(mToken));
+            return getFile(fileId);
+        }
+
+        if (responseCode == 201 || responseCode == 200) {
+            return new File(streamToString(connection.getInputStream()));
+        }
+
+        return null;
+
     }
 
     private HttpURLConnection createConnection(URL url) throws IOException {

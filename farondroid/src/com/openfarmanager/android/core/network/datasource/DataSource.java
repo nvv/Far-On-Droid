@@ -1,32 +1,34 @@
 package com.openfarmanager.android.core.network.datasource;
 
-import com.openfarmanager.android.filesystem.FileProxy;
-import com.openfarmanager.android.model.NetworkEnum;
+import android.os.Handler;
 
-import java.util.List;
+import com.openfarmanager.android.filesystem.FileProxy;
+import com.openfarmanager.android.fragments.NetworkPanel;
+import com.openfarmanager.android.model.NetworkEnum;
 
 /**
  * @author Vlad Namashko
  */
-public interface DataSource {
+public abstract class DataSource {
 
-    String getNetworkType();
+    protected Handler mHandler;
+    protected NetworkPanel.DirectoryScanInfo mDirectoryScanInfo = new NetworkPanel.DirectoryScanInfo();
 
-    NetworkEnum getNetworkTypeEnum();
+    public abstract String getNetworkType();
 
-    List<FileProxy> openDirectory(String path) throws RuntimeException;
+    public abstract NetworkEnum getNetworkTypeEnum();
 
-    void onUnlinkedAccount();
+    public abstract NetworkPanel.DirectoryScanInfo openDirectory(FileProxy directory) throws RuntimeException;
 
-    String getPath(String path);
+    public abstract void onUnlinkedAccount();
 
-    String getParentPath(String path);
+    public abstract void exitFromNetwork();
 
-    void exitFromNetwork();
+    public abstract boolean isSearchSupported();
 
-    boolean isSearchSupported();
+    public abstract boolean isChangeEncodingSupported();
 
-    boolean isChangeEncodingSupported();
+    public abstract void open(FileProxy file);
 
-    void open(FileProxy file);
+    public abstract FileProxy createFakeDirectory(String path);
 }

@@ -1,14 +1,12 @@
 package com.openfarmanager.android.filesystem.actions.multi.network;
 
-import android.content.Context;
-
 import com.dropbox.client2.exception.DropboxException;
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.R;
 import com.openfarmanager.android.core.network.NetworkApi;
 import com.openfarmanager.android.filesystem.FileProxy;
 import com.openfarmanager.android.filesystem.actions.OnActionListener;
-import com.openfarmanager.android.model.NetworkEnum;
+import com.openfarmanager.android.fragments.BaseFileSystemPanel;
 import com.openfarmanager.android.model.TaskStatusEnum;
 import com.openfarmanager.android.model.exeptions.NetworkException;
 import com.yandex.disk.client.exceptions.WebdavException;
@@ -27,8 +25,8 @@ import static com.openfarmanager.android.model.TaskStatusEnum.createNetworkError
  */
 public class MoveFromNetworkMultiTask extends CopyFromNetworkMultiTask {
 
-    public MoveFromNetworkMultiTask(Context context, NetworkEnum networkType, OnActionListener listener, List<FileProxy> items, String destination) {
-        super(context, networkType, listener, items, destination);
+    public MoveFromNetworkMultiTask(BaseFileSystemPanel panel, OnActionListener listener, List<FileProxy> items, String destination) {
+        super(panel, listener, items, destination);
     }
 
     @Override

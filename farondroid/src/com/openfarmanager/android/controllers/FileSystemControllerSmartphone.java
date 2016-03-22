@@ -29,9 +29,8 @@ public class FileSystemControllerSmartphone extends FileSystemController {
     private View mLeftPanelSelector;
     private View mRightPanelSelector;
 
-    public FileSystemControllerSmartphone(FragmentManager manager, View rootView, CompositeSubscription subscription) {
+    public FileSystemControllerSmartphone(FragmentManager manager, View rootView) {
         mMainView = rootView;
-        mSubscription = subscription;
         mViewPager = (ViewPager) rootView.findViewById(R.id.view_pager);
         mLeftPanelSelector = rootView.findViewById(R.id.left_panel_selector);
         mRightPanelSelector = rootView.findViewById(R.id.right_panel_selector);

@@ -3,6 +3,7 @@ package com.openfarmanager.android.filesystem;
 import com.jcraft.jsch.ChannelSftp;
 import com.openfarmanager.android.model.Bookmark;
 import com.openfarmanager.android.utils.Extensions;
+import com.openfarmanager.android.utils.FileUtilsExt;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,44 +16,57 @@ import java.util.List;
  */
 public class SftpFile implements FileProxy {
 
-    private ChannelSftp.LsEntry mEntry;
+    private String mFileName;
+    private boolean mIsDir;
+    private long mSize;
+    private long mModDate;
     private String mFullPath;
     private String mParentPath;
 
     public SftpFile(String currentPath, ChannelSftp.LsEntry entry) {
-        mEntry = entry;
+        mFileName = entry.getFilename();
+        mIsDir = entry.getAttrs().isDir();
+        mSize = entry.getAttrs().getSize();
+        mModDate = entry.getAttrs().getATime() * 1000L;
+        mFullPath = currentPath + (currentPath.endsWith("/") ? "" : "/") + mFileName;
 
-        mFullPath = currentPath + (currentPath.endsWith("/") ? "" : "/") + mEntry.getFilename();
-        mParentPath = mFullPath.substring(0, mFullPath.lastIndexOf("/") + 1);
+        // if path ends with file separator - remove it
+        mParentPath = FileUtilsExt.removeLastSeparator(currentPath);
+    }
 
-        if (mParentPath.endsWith("/") && mParentPath.length() > 1) {
-            mParentPath = mParentPath.substring(0, mParentPath.length() - 1);
-        }
+    public SftpFile(String path) {
+        path = FileUtilsExt.removeLastSeparator(path);
+        mFileName = FileUtilsExt.getFileName(path);
+        mIsDir = true;
+        mSize = 0;
+        mModDate = System.currentTimeMillis();
+        mFullPath = path;
+        mParentPath = FileUtilsExt.getParentPath(path);
     }
 
     @Override
     public String getId() {
-        return "";
+        return mFullPath;
     }
 
     @Override
     public String getName() {
-        return mEntry.getFilename();
+        return mFileName;
     }
 
     @Override
     public boolean isDirectory() {
-        return mEntry.getAttrs().isDir();
+        return mIsDir;
     }
 
     @Override
     public long getSize() {
-        return mEntry.getAttrs().getSize();
+        return mSize;
     }
 
     @Override
     public long lastModifiedDate() {
-        return mEntry.getAttrs().getATime() * 1000L;
+        return mModDate;
     }
 
     @Override

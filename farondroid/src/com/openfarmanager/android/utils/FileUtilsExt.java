@@ -138,6 +138,42 @@ public class FileUtilsExt extends FileUtils {
         }
     }
 
+    /**
+     * Extract parent path from the full path. <br>
+     * Remove last path separator.
+     *
+     * @param path full path
+     * @return parent path
+     */
+    public static String getParentPath(String path) {
+        path = removeLastSeparator(path);
+        path = path.equals("") ? path : path.substring(0, path.lastIndexOf("/"));
+        return path.equals("") ? "/" : path;
+    }
+
+    /**
+     * Extract file name from full path. <br>
+     * Remove last path separator.
+     *
+     * @param path full path
+     * @return file name
+     */
+    public static String getFileName(String path) {
+        if (path.equals("/")) {
+            return path;
+        }
+
+        path = path.substring(path.lastIndexOf("/") + 1, path.length());
+        return removeLastSeparator(path);
+    }
+
+    /**
+     * Remove last path separator.
+     */
+    public static String removeLastSeparator(String path) {
+        return path.endsWith("/") && path.length() > 1 ? path.substring(0, path.length() - 1) : path;
+    }
+
     public static class DirectoryScanResult {
         public long files = 0;
         public long directories = 0;

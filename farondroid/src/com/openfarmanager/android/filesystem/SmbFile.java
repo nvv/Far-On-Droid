@@ -3,6 +3,7 @@ package com.openfarmanager.android.filesystem;
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.model.Bookmark;
 import com.openfarmanager.android.utils.Extensions;
+import com.openfarmanager.android.utils.FileUtilsExt;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,11 +38,25 @@ public class SmbFile implements FileProxy {
         }
 
         mParentPath = smbFile.getParent();
+
+        if (mParentPath.startsWith(prefix)) {
+            mParentPath = mParentPath.substring(prefix.length());
+        }
+    }
+
+    public SmbFile(String path) {
+        path = FileUtilsExt.removeLastSeparator(path);
+        mName = FileUtilsExt.getFileName(path);
+        mIsDirectory = true;
+        mSize = 0;
+        mLastModified = System.currentTimeMillis();
+        mFullPath = path;
+        mParentPath = FileUtilsExt.getParentPath(path);
     }
 
     @Override
     public String getId() {
-        return "";
+        return getFullPath();
     }
 
     @Override

@@ -5,6 +5,7 @@ import com.dropbox.client2.exception.DropboxException;
 import com.openfarmanager.android.filesystem.FileProxy;
 import com.openfarmanager.android.filesystem.actions.FileActionTask;
 import com.openfarmanager.android.filesystem.actions.OnActionListener;
+import com.openfarmanager.android.fragments.BaseFileSystemPanel;
 import com.openfarmanager.android.model.NetworkEnum;
 import com.openfarmanager.android.model.TaskStatusEnum;
 import com.openfarmanager.android.model.exeptions.NetworkException;
@@ -19,15 +20,14 @@ public class RenameOnNetworkTask extends NetworkActionTask {
 private String mDestinationFileName;
     private FileProxy mSrcFile;
 
-    public RenameOnNetworkTask(NetworkEnum networkType, FragmentManager fragmentManager, OnActionListener listener,
+    public RenameOnNetworkTask(BaseFileSystemPanel panel, OnActionListener listener,
                                FileProxy file, String destinationName) {
-        mFragmentManager = fragmentManager;
+        mFragmentManager = panel.getFragmentManager();
         mListener = listener;
-        mItems = new ArrayList<File>();
-
+        mItems = new ArrayList<>();
         mSrcFile = file;
         mDestinationFileName = destinationName;
-        mNetworkType = networkType;
+        initNetworkPanelInfo(panel);
     }
 
     @Override

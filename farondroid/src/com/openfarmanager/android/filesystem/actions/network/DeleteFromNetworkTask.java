@@ -7,6 +7,7 @@ import com.openfarmanager.android.core.network.NetworkApi;
 import com.openfarmanager.android.filesystem.FileProxy;
 import com.openfarmanager.android.filesystem.actions.FileActionTask;
 import com.openfarmanager.android.filesystem.actions.OnActionListener;
+import com.openfarmanager.android.fragments.BaseFileSystemPanel;
 import com.openfarmanager.android.model.NetworkEnum;
 import com.openfarmanager.android.model.TaskStatusEnum;
 import com.openfarmanager.android.model.exeptions.NetworkException;
@@ -27,19 +28,17 @@ public class DeleteFromNetworkTask extends NetworkActionTask {
 
     protected List<FileProxy> mItems;
 
-    public DeleteFromNetworkTask(NetworkEnum networkType, FragmentManager fragmentManager, OnActionListener listener,
+    public DeleteFromNetworkTask(BaseFileSystemPanel panel, OnActionListener listener,
                                  List<FileProxy> items) {
         // TODO: temporary
         super.mItems = new ArrayList<File>();
 
-        mNetworkType = networkType;
         mItems = items;
-        mFragmentManager = fragmentManager;
+        mFragmentManager = panel.getFragmentManager();
         mListener = listener;
-        t = System.currentTimeMillis();
-    }
 
-    long t;
+        initNetworkPanelInfo(panel);
+    }
 
     @Override
     protected TaskStatusEnum doInBackground(Void... voids) {
@@ -69,7 +68,6 @@ public class DeleteFromNetworkTask extends NetworkActionTask {
             }
         }
 
-        System.out.println("::::::::::  " + (System.currentTimeMillis() - t));
         return OK;
     }
 

@@ -26,6 +26,7 @@ import com.openfarmanager.android.filesystem.actions.multi.network.CopyToNetwork
 import com.openfarmanager.android.filesystem.actions.multi.network.MoveFromNetworkMultiTask;
 import com.openfarmanager.android.filesystem.actions.multi.network.MoveToNetworkMultiTask;
 import com.openfarmanager.android.filesystem.actions.network.*;
+import com.openfarmanager.android.model.NetworkAccount;
 import com.openfarmanager.android.model.NetworkEnum;
 import com.openfarmanager.android.model.SelectParams;
 import com.openfarmanager.android.model.TaskStatusEnum;
@@ -231,7 +232,7 @@ public abstract class BaseFileSystemPanel extends BasePanel {
         if (networkPanel) {
             RenameOnNetworkTask task = null;
             try {
-                task = new RenameOnNetworkTask(((NetworkPanel) this).getNetworkType(), fragmentManager(),
+                task = new RenameOnNetworkTask(BaseFileSystemPanel.this,
                         new OnActionListener() {
                             @Override
                             public void onActionFinish(TaskStatusEnum status) {
@@ -309,10 +310,10 @@ public abstract class BaseFileSystemPanel extends BasePanel {
                 NetworkEnum type = networkPanel.getNetworkType();
                 List<File> files = getSelectedFiles();
                 if (App.sInstance.getSettings().isMultiThreadTasksEnabled(type)) {
-                    new CopyToNetworkMultiTask(getActivity(), type,
+                    new CopyToNetworkMultiTask(networkPanel,
                             createListener(args), files, (String) args[1]).execute();
                 } else {
-                    new CopyToNetworkTask(type, fragmentManager(),
+                    new CopyToNetworkTask(networkPanel,
                             createListener(args), files, (String) args[1]).execute();
                 }
 
@@ -332,10 +333,10 @@ public abstract class BaseFileSystemPanel extends BasePanel {
             String destination = (String) args[1];
             try {
                 if (App.sInstance.getSettings().isMultiThreadTasksEnabled(type)) {
-                    new CopyFromNetworkMultiTask(getActivity(), type, createListener(args),
+                    new CopyFromNetworkMultiTask(panel, createListener(args),
                             panel.getFiles(), destination).execute();
                 } else {
-                    new CopyFromNetworkTask(type, fragmentManager(), createListener(args),
+                    new CopyFromNetworkTask(panel, createListener(args),
                             panel.getFiles(), destination).execute();
                 }
             } catch (Exception e) {
@@ -427,10 +428,10 @@ public abstract class BaseFileSystemPanel extends BasePanel {
                     NetworkPanel panel = (NetworkPanel) args[0];
                     NetworkEnum type = panel.getNetworkType();
                     if (App.sInstance.getSettings().isMultiThreadTasksEnabled(type)) {
-                        new MoveToNetworkMultiTask(getActivity(), type, createListener(args),
+                        new MoveToNetworkMultiTask(panel, createListener(args),
                                 getSelectedFiles(), panel.getCurrentPath()).execute();
                     } else {
-                        new MoveToNetworkTask(type, fragmentManager(), createListener(args),
+                        new MoveToNetworkTask(panel, createListener(args),
                                 getSelectedFiles(), panel.getCurrentPath()).execute();
                     }
                 } catch (Exception e) {
@@ -450,10 +451,10 @@ public abstract class BaseFileSystemPanel extends BasePanel {
                     NetworkEnum type = ((NetworkPanel) BaseFileSystemPanel.this).getNetworkType();
                     String destination = ((MainPanel) args[0]).getCurrentPath();
                     if (App.sInstance.getSettings().isMultiThreadTasksEnabled(type)) {
-                        new MoveFromNetworkMultiTask(getActivity(), type, createListener(args),
+                        new MoveFromNetworkMultiTask(BaseFileSystemPanel.this, createListener(args),
                                 getSelectedFileProxies(), destination).execute();
                     } else {
-                        new MoveFromNetworkTask(type, fragmentManager(), createListener(args),
+                        new MoveFromNetworkTask(BaseFileSystemPanel.this, createListener(args),
                                 getSelectedFileProxies(), destination).execute();
                     }
                 } catch (Exception e) {
@@ -467,7 +468,8 @@ public abstract class BaseFileSystemPanel extends BasePanel {
     protected AbstractCommand mCreateBookmarkCommand = new AbstractCommand() {
         @Override
         public void execute(final Object... args) {
-            TaskStatusEnum status = App.sInstance.getBookmarkManager().createBookmark((String) args[1], (String) args[3]);
+            TaskStatusEnum status = App.sInstance.getBookmarkManager().createBookmark((String) args[1],
+                    (String) args[3], (NetworkAccount) args[4]);
 
             if (status != TaskStatusEnum.OK) {
                 try {

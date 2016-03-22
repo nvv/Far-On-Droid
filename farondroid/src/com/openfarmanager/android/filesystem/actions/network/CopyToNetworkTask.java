@@ -1,7 +1,5 @@
 package com.openfarmanager.android.filesystem.actions.network;
 
-import android.support.v4.app.FragmentManager;
-
 import com.dropbox.client2.ProgressListener;
 import com.dropbox.client2.exception.DropboxException;
 import com.mediafire.sdk.MFApiException;
@@ -11,6 +9,7 @@ import com.mediafire.sdk.uploader.MediaFireUpload;
 import com.mediafire.sdk.uploader.MediaFireUploadHandler;
 import com.microsoft.live.OverwriteOption;
 import com.openfarmanager.android.App;
+import com.openfarmanager.android.core.network.datasource.IdPathDataSource;
 import com.openfarmanager.android.core.network.dropbox.DropboxAPI;
 import com.openfarmanager.android.core.network.ftp.FtpAPI;
 import com.openfarmanager.android.core.network.ftp.SftpAPI;
@@ -20,8 +19,8 @@ import com.openfarmanager.android.core.network.skydrive.SkyDriveAPI;
 import com.openfarmanager.android.core.network.smb.SmbAPI;
 import com.openfarmanager.android.core.network.yandexdisk.YandexDiskApi;
 import com.openfarmanager.android.filesystem.actions.OnActionListener;
+import com.openfarmanager.android.fragments.BaseFileSystemPanel;
 import com.openfarmanager.android.googledrive.api.GoogleDriveWebApi;
-import com.openfarmanager.android.model.NetworkEnum;
 import com.openfarmanager.android.model.TaskStatusEnum;
 import com.openfarmanager.android.model.exeptions.NetworkException;
 
@@ -31,6 +30,7 @@ import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.io.OutputStream;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import it.sauronsoftware.ftp4j.FTPDataTransferException;
 import it.sauronsoftware.ftp4j.FTPDataTransferListener;
@@ -51,13 +51,12 @@ public class CopyToNetworkTask extends NetworkActionTask {
 
     protected String mDestination;
 
-    public CopyToNetworkTask(NetworkEnum networkType, FragmentManager fragmentManager, OnActionListener listener, List<File> items, String destination) {
+    public CopyToNetworkTask(BaseFileSystemPanel panel, OnActionListener listener, List<File> items, String destination) {
         mItems = items;
-        mFragmentManager = fragmentManager;
+        mFragmentManager = panel.getFragmentManager();
         mListener = listener;
-
-        mNetworkType = networkType;
         mDestination = destination;
+        initNetworkPanelInfo(panel);
     }
 
     @Override
@@ -150,50 +149,58 @@ public class CopyToNetworkTask extends NetworkActionTask {
             throw new InterruptedIOException();
         }
 
-        if (api.findInPathAliases(destination) == null) {
-            api.createDirectory(destination);
-        }
+        IdPathDataSource dataSource = ((IdPathDataSource) mDataSource);
+
+        final String destinationId = dataSource.getDirectoryId(destination);
 
         if (source.isDirectory()) {
+            String newDirectoryPath = destination + "/" + source.getName();
+            String newDirectory = api.createDirectory(destinationId, source.getName());
+            if (newDirectory != null) {
+                dataSource.putDirectoryId(newDirectory, newDirectoryPath);
+            }
             String[] files = source.list();
             for (String file : files) {
-                copyToGoogleDrive(new File(source, file), destination + "/" + source.getName());
+                copyToGoogleDrive(new File(source, file), newDirectoryPath);
             }
         } else {
             mCurrentFile = source.getName();
             updateProgress();
 
-            api.upload(api.findPathId(destination), source.getName(), source, new GoogleDriveWebApi.UploadListener() {
+            api.upload(destinationId, source.getName(), source, new GoogleDriveWebApi.UploadListener() {
                 @Override
                 public void onProgress(int uploaded, int transferedPortion, int total) {
                     doneSize += transferedPortion;
                     updateProgress();
                 }
             });
-
-//            doneSize += source.length();
         }
     }
 
-    private void copyToSkyDrive(File source, String destination) throws Exception {
-        SkyDriveAPI api = App.sInstance.getSkyDriveApi();
+    private void copyToSkyDrive(final File source, final String destination) throws Exception {
+        final SkyDriveAPI api = App.sInstance.getSkyDriveApi();
         if (isCancelled()) {
             throw new InterruptedIOException();
         }
 
-        if (api.findInPathAliases(destination) == null) {
-            api.createDirectory(destination);
-        }
+        IdPathDataSource dataSource = ((IdPathDataSource) mDataSource);
+
+        final String destinationId = dataSource.getDirectoryId(destination);
 
         if (source.isDirectory()) {
+            String newDirectoryPath = destination + "/" + source.getName();
+            String newDirectory = api.createDirectory(destinationId, source.getName());
+            if (newDirectory != null) {
+                dataSource.putDirectoryId(newDirectory, newDirectoryPath);
+            }
             String[] files = source.list();
             for (String file : files) {
-                copyToSkyDrive(new File(source, file), destination + "/" + source.getName());
+                copyToSkyDrive(new File(source, file), newDirectoryPath);
             }
         } else {
             mCurrentFile = source.getName();
             updateProgress();
-            api.getConnectClient().upload(api.findPathId(destination), source.getName(), source, OverwriteOption.Overwrite);
+            api.getConnectClient().upload(destinationId, source.getName(), source, OverwriteOption.Overwrite);
             doneSize += source.length();
             updateProgress();
         }
@@ -207,7 +214,7 @@ public class CopyToNetworkTask extends NetworkActionTask {
         }
 
         if (source.isDirectory()) {
-            api.createDirectory(destination + "/" + source.getName());
+            api.createDirectory(destination, source.getName());
 
             String[] files = source.list();
             for (String file : files) {
@@ -251,7 +258,7 @@ public class CopyToNetworkTask extends NetworkActionTask {
 
         api.changeDirectory(destination);
         if (source.isDirectory()) {
-            api.createDirectory(destination + "/" + source.getName());
+            api.createDirectory(destination, source.getName());
 
             String[] files = source.list();
             for (String file : files) {
@@ -271,7 +278,7 @@ public class CopyToNetworkTask extends NetworkActionTask {
         }
 
         if (source.isDirectory()) {
-            api.createDirectory(destination + "/" + source.getName());
+            api.createDirectory(destination, source.getName());
 
             String[] files = source.list();
             for (String file : files) {
@@ -290,7 +297,7 @@ public class CopyToNetworkTask extends NetworkActionTask {
             throw new InterruptedIOException();
         }
         if (source.isDirectory()) {
-            api.createDirectory(destination + "/" + source.getName());
+            api.createDirectory(destination, source.getName());
 
             String[] files = source.list();
             for (String file : files) {
@@ -326,7 +333,7 @@ public class CopyToNetworkTask extends NetworkActionTask {
         }
 
         if (source.isDirectory()) {
-            api.createDirectory(destination + "/" + source.getName());
+            api.createDirectory(destination, source.getName());
 
             String[] files = source.list();
             for (String file : files) {

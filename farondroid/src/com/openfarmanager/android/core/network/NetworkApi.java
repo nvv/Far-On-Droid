@@ -17,7 +17,7 @@ public interface NetworkApi {
 
     void delete(FileProxy file) throws Exception;
 
-    boolean createDirectory(String path) throws Exception;
+    String createDirectory(String baseDirectory, String newDirectoryName) throws Exception;
 
     List<FileProxy> search(String path, String query);
 

@@ -4,17 +4,15 @@ import android.os.Handler;
 
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.filesystem.FileProxy;
+import com.openfarmanager.android.filesystem.SftpFile;
+import com.openfarmanager.android.fragments.NetworkPanel;
 import com.openfarmanager.android.model.NetworkEnum;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.openfarmanager.android.utils.FileUtilsExt;
 
 /**
  * @author Vlad Namashko
  */
-public class SftpDataSource implements DataSource {
-
-    public Handler mHandler;
+public class SftpDataSource extends RawPathDataSource {
 
     public SftpDataSource(Handler handler) {
         mHandler = handler;
@@ -31,23 +29,14 @@ public class SftpDataSource implements DataSource {
     }
 
     @Override
-    public List<FileProxy> openDirectory(String path) throws RuntimeException {
-        return App.sInstance.getSftpApi().getDirectoryFiles(path);
+    public NetworkPanel.DirectoryScanInfo openDirectory(FileProxy directory) throws RuntimeException {
+        return mDirectoryScanInfo.set(App.sInstance.getSftpApi().getDirectoryFiles(directory.getFullPath()),
+                FileUtilsExt.getParentPath(directory.getParentPath()));
     }
 
     @Override
     public void onUnlinkedAccount() {
 
-    }
-
-    @Override
-    public String getPath(String path) {
-        return path;
-    }
-
-    @Override
-    public String getParentPath(String path) {
-        return path;
     }
 
     @Override
@@ -68,5 +57,10 @@ public class SftpDataSource implements DataSource {
     @Override
     public void open(FileProxy file) {
 
+    }
+
+    @Override
+    public FileProxy createFakeDirectory(String path) {
+        return new SftpFile(path);
     }
 }

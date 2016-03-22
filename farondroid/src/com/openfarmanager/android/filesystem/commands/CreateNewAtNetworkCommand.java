@@ -21,17 +21,16 @@ public class CreateNewAtNetworkCommand implements AbstractCommand {
 
     @Override
     public void execute(final Object... args) {
-        String currentPath = mNetworkPanel.getCurrentPath();
-        String destination = currentPath + (currentPath.endsWith("/") ? "" : "/") + args[1];
+        String currentPath = ((NetworkPanel) mNetworkPanel).getCurrentPathId();
         try {
-            new CreateNewAtNetworkTask(((NetworkPanel) mNetworkPanel).getNetworkType(),
+            new CreateNewAtNetworkTask(mNetworkPanel,
                     mNetworkPanel.fragmentManager(),
                     new OnActionListener() {
                         @Override
                         public void onActionFinish(TaskStatusEnum status) {
                             mNetworkPanel.handleNetworkActionResult(status, args);
                         }
-                    }, destination).execute();
+                    }, currentPath, (String) args[1]).execute();
         } catch (Exception e) {
             e.printStackTrace();
         }

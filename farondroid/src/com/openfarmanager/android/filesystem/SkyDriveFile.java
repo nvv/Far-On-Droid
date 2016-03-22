@@ -10,6 +10,7 @@ import org.json.JSONObject;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import static com.openfarmanager.android.utils.Extensions.isNullOrEmpty;
 
@@ -25,20 +26,14 @@ public class SkyDriveFile implements FileProxy {
     private long mModified;
     private String mFullPath;
 
-    private static final SimpleDateFormat sSimpleDateFormat =
-            new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssz");
+    private static final SimpleDateFormat sSimpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssz", Locale.US);
 
     public SkyDriveFile(JSONObject jsonData, String parentPath) {
         mJsonData = jsonData;
 
-        String cachedValue = App.sInstance.getSkyDriveApi().getFoldersAliases().get(parentPath);
-        if (!isNullOrEmpty(cachedValue)) {
-            parentPath = cachedValue;
-            if (!parentPath.endsWith("/")) {
-                parentPath += "/";
-            }
+        if (!parentPath.endsWith("/")) {
+            parentPath += "/";
         }
-
         mFullPath = parentPath + getName();
 
         if (!isDirectory()) {
@@ -83,7 +78,6 @@ public class SkyDriveFile implements FileProxy {
 
     @Override
     public String getFullPath() {
-        App.sInstance.getSkyDriveApi().getFoldersAliases().put(getId(), mFullPath);
         return getId();
     }
 
@@ -126,12 +120,13 @@ public class SkyDriveFile implements FileProxy {
     public String getMimeType() {
         String type = tryGet(JsonKeys.TYPE, "");
 
-        if (type.equals("photo")) {
-            return MimeTypes.MIME_IMAGE;
-        } else if (type.equals("video")) {
-            return MimeTypes.MIME_VIDEO;
-        } else if (type.equals("audio")) {
-            return MimeTypes.MIME_AUDIO;
+        switch (type) {
+            case "photo":
+                return MimeTypes.MIME_IMAGE;
+            case "video":
+                return MimeTypes.MIME_VIDEO;
+            case "audio":
+                return MimeTypes.MIME_AUDIO;
         }
 
         return type;

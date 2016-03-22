@@ -4,6 +4,7 @@ import android.support.v4.app.FragmentManager;
 
 import com.openfarmanager.android.filesystem.actions.OnActionListener;
 import com.openfarmanager.android.filesystem.actions.network.CopyToNetworkTask;
+import com.openfarmanager.android.fragments.BaseFileSystemPanel;
 import com.openfarmanager.android.model.NetworkEnum;
 import com.openfarmanager.android.model.TaskStatusEnum;
 import org.apache.commons.io.FileDeleteStrategy;
@@ -19,10 +20,10 @@ import static com.openfarmanager.android.model.TaskStatusEnum.*;
  */
 public class MoveToNetworkTask extends CopyToNetworkTask {
 
-    public MoveToNetworkTask(NetworkEnum networkType, FragmentManager fragmentManager, OnActionListener listener, List<File> items,
+    public MoveToNetworkTask(BaseFileSystemPanel panel, OnActionListener listener, List<File> items,
                              String destination) {
 
-        super(networkType, fragmentManager, listener, items, destination);
+        super(panel, listener, items, destination);
     }
 
     @Override

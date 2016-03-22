@@ -3,16 +3,19 @@ package com.openfarmanager.android.core;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.os.Build;
 import android.util.Log;
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.core.dbadapters.BookmarkDBAdapter;
 import com.openfarmanager.android.core.dbadapters.NetworkAccountDbAdapter;
 import com.openfarmanager.android.core.dbadapters.VendorDbAdapter;
 
+import static com.openfarmanager.android.core.dbadapters.BookmarkDBAdapter.Columns.NETWORK_ACCOUNT_ID;
+
 public class DataStorageHelper {
 
     private static final String DB_NAME = "far_on_droid_database";
-    private static final int DB_VERSION = 3;
+    private static final int DB_VERSION = 4;
 
     public static DatabaseHelper sHelper;
 
@@ -55,13 +58,16 @@ public class DataStorageHelper {
             switch (oldVersion) {
                 case 1:
                     db.execSQL(NetworkAccountDbAdapter.CREATE_TABLE);
-                    Log.d("DataStorageHelper", "Update database from version " + oldVersion + " to " + newVersion);
                     break;
                 case 2:
                     VendorDbAdapter.createTable(db);
-                    Log.d("DataStorageHelper", "Update database from version " + oldVersion + " to " + newVersion);
+                    break;
+                case 3:
+                    db.execSQL("ALTER TABLE " + NetworkAccountDbAdapter.TABLE_NAME + " ADD COLUMN " + NetworkAccountDbAdapter.Columns.HOME_PATH + " TEXT");
+                    db.execSQL("ALTER TABLE " + BookmarkDBAdapter.TABLE_NAME + " ADD COLUMN " + BookmarkDBAdapter.Columns.NETWORK_ACCOUNT_ID + " INTEGER DEFAULT -1");
                     break;
             }
+            Log.d("DataStorageHelper", "Update database from version " + oldVersion + " to " + newVersion);
         }
 
         @Override
