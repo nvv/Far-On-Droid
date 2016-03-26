@@ -11,6 +11,7 @@
     <string name="btn_ok">Ok</string>
     <string name="btn_yes">Yes</string>
     <string name="btn_no">No</string>
+    <string name="btn_skip">Skip</string>
     <string name="btn_save">Save</string>
     <string name="btn_select">Select</string>
     <string name="btn_replace">Replace</string>

@@ -23,6 +23,7 @@
         <attr name="sv_buttonBackgroundColor" format="color|reference" />
         <attr name="sv_buttonForegroundColor" format="color|reference" />
         <attr name="sv_buttonText" format="string|reference" />
+        <attr name="sv_secondaryButtonText" format="string|reference" />
         <attr name="sv_detailTextAppearance" format="reference" />
         <attr name="sv_titleTextAppearance" format="reference" />
         <attr name="sv_showcaseColor" format="color|reference" />

@@ -47,6 +47,7 @@
         <item name="sv_backgroundColor">#b40015ff</item>
         <item name="sv_showcaseColor">#ffdbdbdb</item>
         <item name="sv_buttonText">@string/btn_next</item>
+        <item name="sv_secondaryButtonText">@string/btn_skip</item>
         <item name="sv_tintButtonColor">false</item>
         <item name="sv_titleTextAppearance">@style/SvTitle</item>
         <item name="sv_detailTextAppearance">@style/SvDetails</item>

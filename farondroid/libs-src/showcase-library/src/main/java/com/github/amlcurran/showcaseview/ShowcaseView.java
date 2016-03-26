@@ -48,6 +48,7 @@ public class ShowcaseView extends RelativeLayout
     private static final int HOLO_BLUE = Color.parseColor("#33B5E5");
 
     private final Button mEndButton;
+    private final Button mSecondaryButton;
     private final TextDrawer textDrawer;
     private final ShowcaseDrawer showcaseDrawer;
     private final ShowcaseAreaCalculator showcaseAreaCalculator;
@@ -101,6 +102,7 @@ public class ShowcaseView extends RelativeLayout
         fadeOutMillis = getResources().getInteger(android.R.integer.config_mediumAnimTime);
 
         mEndButton = (Button) LayoutInflater.from(context).inflate(R.layout.showcase_button, null);
+        mSecondaryButton = (Button) LayoutInflater.from(context).inflate(R.layout.showcase_secondary_button, null);
         if (newStyle) {
             showcaseDrawer = new NewShowcaseDrawer(getResources());
         } else {
@@ -129,6 +131,18 @@ public class ShowcaseView extends RelativeLayout
                 mEndButton.setOnClickListener(hideOnClickListener);
             }
             addView(mEndButton);
+        }
+
+        if (mSecondaryButton.getParent() == null) {
+            int margin = (int) getResources().getDimension(R.dimen.button_margin);
+            RelativeLayout.LayoutParams lps = (LayoutParams) generateDefaultLayoutParams();
+            lps.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+            lps.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+            lps.setMargins(margin, margin, margin, margin);
+            mSecondaryButton.setLayoutParams(lps);
+            mSecondaryButton.setText(android.R.string.cancel);
+            mSecondaryButton.setOnClickListener(hideOnClickListener);
+            addView(mSecondaryButton);
         }
 
     }
@@ -187,8 +201,8 @@ public class ShowcaseView extends RelativeLayout
 
     private void updateBitmap() {
         if (bitmapBuffer == null || haveBoundsChanged()) {
-            if(bitmapBuffer != null)
-        		bitmapBuffer.recycle();
+            if (bitmapBuffer != null)
+                bitmapBuffer.recycle();
             bitmapBuffer = Bitmap.createBitmap(getMeasuredWidth(), getMeasuredHeight(), Bitmap.Config.ARGB_8888);
 
         }
@@ -582,6 +596,10 @@ public class ShowcaseView extends RelativeLayout
         if (TextUtils.isEmpty(buttonText)) {
             buttonText = getResources().getString(android.R.string.ok);
         }
+        String secondaryButtonText = styled.getString(R.styleable.ShowcaseView_sv_secondaryButtonText);
+        if (TextUtils.isEmpty(secondaryButtonText)) {
+            secondaryButtonText = getResources().getString(android.R.string.cancel);
+        }
         boolean tintButton = styled.getBoolean(R.styleable.ShowcaseView_sv_tintButtonColor, true);
 
         int titleTextAppearance = styled.getResourceId(R.styleable.ShowcaseView_sv_titleTextAppearance,
@@ -595,6 +613,7 @@ public class ShowcaseView extends RelativeLayout
         showcaseDrawer.setBackgroundColour(backgroundColor);
         tintButton(showcaseColor, tintButton);
         mEndButton.setText(buttonText);
+        mSecondaryButton.setText(secondaryButtonText);
         textDrawer.setTitleStyling(titleTextAppearance);
         textDrawer.setDetailStyling(detailTextAppearance);
         hasAlteredText = true;
