@@ -40,7 +40,7 @@ public class SkyDriveDataSource extends IdPathDataSource {
     }
 
     @Override
-    protected FileProxy requestFileInfo(String id) {
+    public FileProxy requestFileInfo(String id) {
         return App.sInstance.getSkyDriveApi().getFileInfo(id);
     }
 

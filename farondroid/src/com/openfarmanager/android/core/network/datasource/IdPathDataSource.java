@@ -5,6 +5,7 @@ import com.openfarmanager.android.filesystem.FakeFile;
 import com.openfarmanager.android.filesystem.FileProxy;
 import com.openfarmanager.android.fragments.NetworkPanel;
 import com.openfarmanager.android.googledrive.model.File;
+import com.openfarmanager.android.model.exeptions.RestoreStoragePathException;
 import com.openfarmanager.android.utils.Extensions;
 
 import java.util.HashMap;
@@ -53,7 +54,7 @@ public abstract class IdPathDataSource extends DataSource {
 
         List<FileProxy> directoryFiles = getDirectoryFiles(directory);
 
-        if (directory.isRoot() && mRootPathId == null && directoryFiles.size() > 0) {
+        if ((directory.isRoot() || "/".equals(directory.getFullPathRaw())) && mRootPathId == null && directoryFiles.size() > 0) {
             mRootPathId = directoryFiles.get(0).getParentPath();
         }
 
@@ -61,9 +62,14 @@ public abstract class IdPathDataSource extends DataSource {
     }
 
     @Override
-    public FileProxy createFakeDirectory(String path) {
+    public FileProxy createFakeDirectory(String path) throws RestoreStoragePathException {
         String id = mFilePathMapping.get(path);
         String parentId = mParentMapping.get(id);
+
+        if (id == null || parentId == null || !mFileNameMapping.containsKey(id) || mRootPathId == null) {
+            throw new RestoreStoragePathException();
+        }
+
         return new FakeFile(id, mFileNameMapping.get(id), parentId, path, mRootPathId.equals(parentId));
     }
 
@@ -111,5 +117,5 @@ public abstract class IdPathDataSource extends DataSource {
 
     protected abstract List<FileProxy> getDirectoryFiles(FileProxy directory);
 
-    protected abstract FileProxy requestFileInfo(String id);
+    public abstract FileProxy requestFileInfo(String id);
 }

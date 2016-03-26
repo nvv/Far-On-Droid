@@ -36,7 +36,7 @@ public class MediaFireDataSource extends IdPathDataSource {
     }
 
     @Override
-    protected FileProxy requestFileInfo(String id) {
+    public FileProxy requestFileInfo(String id) {
         return App.sInstance.getMediaFireApi().getFileInfo(id);
     }
 

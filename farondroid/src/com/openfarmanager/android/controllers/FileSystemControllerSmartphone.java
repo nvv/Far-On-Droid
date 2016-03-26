@@ -132,7 +132,13 @@ public class FileSystemControllerSmartphone extends FileSystemController {
         setupPanelsVisibility(isLeftPanel, activePanel);
     }
 
+    @Override
     public void openNetworkPanel(NetworkEnum networkType) {
+        openNetworkPanel(networkType, null);
+    }
+
+    @Override
+    public void openNetworkPanel(NetworkEnum networkType, String path) {
         MainPanel activePanel = getActivePanel();
         boolean isLeftPanel = activePanel.getPanelLocation() == MainPanel.LEFT_PANEL;
 
@@ -141,7 +147,7 @@ public class FileSystemControllerSmartphone extends FileSystemController {
         networkPanel.setNetworkType(networkType);
         networkPanel.gainFocus();
         setupPanelsVisibility(isLeftPanel, networkPanel);
-        networkPanel.openDirectory();
+        networkPanel.openBookmark(path);
     }
 
     protected void exitFromNetworkStorage(NetworkPanel networkPanel) {

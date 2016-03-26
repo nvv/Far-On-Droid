@@ -105,8 +105,6 @@ public class MainPanel extends BaseFileSystemPanel {
 
     protected QuickPopupDialog mQuickActionPopup;
 
-    protected String mBookmarkPath;
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         setupHandler();

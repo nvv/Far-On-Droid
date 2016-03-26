@@ -42,7 +42,7 @@ public class GoogleDriveDataSource extends IdPathDataSource {
     }
 
     @Override
-    protected FileProxy requestFileInfo(String id) {
+    public FileProxy requestFileInfo(String id) {
         return App.sInstance.getGoogleDriveApi().getFileInfo(id);
     }
 

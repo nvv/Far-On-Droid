@@ -687,7 +687,7 @@ public class FileSystemController {
         networkPanel.setNetworkType(networkType);
         networkPanel.gainFocus();
         fragmentManager.beginTransaction().remove(activePanel).add(getContainerId(isLeftPanel), networkPanel).commit();
-        networkPanel.openDirectory();
+        networkPanel.openBookmark(path);
     }
 
     protected void forceExitFromNetwork(NetworkEnum networkType, MainPanel activePanel) {

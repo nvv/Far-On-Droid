@@ -377,4 +377,6 @@
 
     <string name="sdcard_access">Доступ к SD карте</string>
     <string name="sdcard_access_summary">Предоставить доступ для модификации внешней SD карты</string>
+
+    <string name="error_restore_storage_path">Не получается открыть указанную директорию. Это связано с ограничения навигации в данном облачном хранилище. Пожалуйста, перейдите в директорию пошагово.</string>
 </resources>

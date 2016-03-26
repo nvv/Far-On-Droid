@@ -2,6 +2,9 @@ package com.openfarmanager.android.model;
 
 public class Bookmark {
 
+    public static final String ID = "id";
+    public static final String PATH = "full_path";
+
     private long mBookmarkId;
     private String mBookmarkPath;
     private String mBookmarkLabel;

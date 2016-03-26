@@ -33,18 +33,22 @@ import com.openfarmanager.android.core.network.datasource.SftpDataSource;
 import com.openfarmanager.android.core.network.datasource.SkyDriveDataSource;
 import com.openfarmanager.android.core.network.datasource.SmbDataSource;
 import com.openfarmanager.android.core.network.datasource.YandexDiskDataSource;
+import com.openfarmanager.android.dialogs.CreateBookmarkDialog;
 import com.openfarmanager.android.filesystem.FakeFile;
 import com.openfarmanager.android.filesystem.FileProxy;
+import com.openfarmanager.android.model.Bookmark;
 import com.openfarmanager.android.model.FileActionEnum;
 import com.openfarmanager.android.model.NetworkAccount;
 import com.openfarmanager.android.model.NetworkEnum;
 import com.openfarmanager.android.model.SelectParams;
 import com.openfarmanager.android.model.exeptions.NetworkException;
+import com.openfarmanager.android.model.exeptions.RestoreStoragePathException;
 import com.openfarmanager.android.utils.Extensions;
 import com.openfarmanager.android.utils.FileUtilsExt;
 import com.openfarmanager.android.view.ToastNotification;
 
 import org.apache.commons.io.FilenameUtils;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -244,11 +248,8 @@ public class NetworkPanel extends MainPanel {
 
     @Override
     public void createBookmark(final MainPanel inactivePanel) {
-        /*
         showDialog(new CreateBookmarkDialog(getActivity(), mFileActionHandler, inactivePanel,
-                mDataSource.getParentPath(Extensions.isNullOrEmpty(mCurrentPath.getName()) ? "/" : mCurrentPath.getName()),
-                mCurrentNetworkAccount));
-        */
+                getCurrentPath(), getCurrentPathId(), mCurrentNetworkAccount));
     }
 
     @Override
@@ -318,13 +319,47 @@ public class NetworkPanel extends MainPanel {
         openDirectory(file);
     }
 
-//    public void openBookmark(final String path) {
-//        if (path == null) {
-//            openDirectory();
-//        } else {
-//            openDirectory(path, true);
-//        }
-//    }
+    public void openBookmark(final String directoryInfo) {
+        if (!mIsInitialized) {
+            addToPendingList(new Runnable() {
+                @Override
+                public void run() {
+                    openBookmark(directoryInfo);
+                }
+            });
+            return;
+        }
+
+        if (directoryInfo == null) {
+            openDirectory();
+        } else {
+            try {
+                JSONObject data = new JSONObject(directoryInfo);
+                final String id = data.getString(Bookmark.ID);
+                final String path = data.getString(Bookmark.PATH);
+
+                if (mDataSource instanceof IdPathDataSource) {
+                    setIsLoading(true);
+                    Extensions.runAsync(new Runnable() {
+                        @Override
+                        public void run() {
+                            FakeFile proxy = new FakeFile(((IdPathDataSource) mDataSource).requestFileInfo(id));
+                            proxy.setFullPath(path);
+                            openDirectory(proxy);
+
+                        }
+                    });
+                } else {
+                    String parentPath = FileUtilsExt.getParentPath(path);
+                    openDirectory(new FakeFile(id, FileUtilsExt.getFileName(path), parentPath, path,
+                            Extensions.isNullOrEmpty(parentPath) || path.equals("/")));
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                exitFromNetwork();
+            }
+        }
+    }
 
     public void openDirectory(FileProxy file) {
         openDirectory(file, true);
@@ -428,8 +463,13 @@ public class NetworkPanel extends MainPanel {
     }
 
     protected void onNavigationItemSelected(int pos, List<String> items) {
-        String fullPath = TextUtils.join("/", items.subList(0, pos + 1));
-        openDirectory(mDataSource.createFakeDirectory(fullPath.substring(fullPath.length() == 1 ? 0 : 1)));
+        try {
+            String fullPath = TextUtils.join("/", items.subList(0, pos + 1));
+            openDirectory(mDataSource.createFakeDirectory(fullPath.substring(fullPath.length() == 1 ? 0 : 1)));
+        } catch (RestoreStoragePathException e) {
+            ToastNotification.makeText(App.sInstance.getApplicationContext(),
+                    getSafeString(R.string.error_restore_storage_path), Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override
@@ -630,12 +670,13 @@ public class NetworkPanel extends MainPanel {
             String path = file.getFullPathRaw();
 
             setCurrentPath(path);
-            boolean isRoot = Extensions.isNullOrEmpty(file.getParentPath()) || file.getFullPath().equals("/");
+            boolean isRoot = Extensions.isNullOrEmpty(file.getParentPath()) || file.getFullPathRaw().equals("/");
             ListAdapter adapter = mFileSystemList.getAdapter();
 
             System.out.println("::::::::::::  --->   " + directoryInfo.directory.getFullPathRaw() + "  " + directoryInfo.directory.getParentPath() + "  " + directoryInfo.parentPath);
 
-            mUpNavigator = new FakeFile(file.getParentPath(), "..", directoryInfo.parentPath, FileUtilsExt.getParentPath(file.getFullPathRaw()), isRoot);
+            mUpNavigator = new FakeFile(file.getParentPath(), "..", directoryInfo.parentPath,
+                    FileUtilsExt.getParentPath(file.getFullPathRaw()), isRoot);
             if (adapter != null && adapter instanceof NetworkEntryAdapter) {
                 ((NetworkEntryAdapter) adapter).setItems(directoryInfo.files, mUpNavigator);
                 ((NetworkEntryAdapter) adapter).setSelectedFiles(mSelectedFiles);

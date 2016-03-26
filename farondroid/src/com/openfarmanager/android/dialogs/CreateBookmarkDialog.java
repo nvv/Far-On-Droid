@@ -9,7 +9,10 @@ import android.widget.TextView;
 
 import com.openfarmanager.android.R;
 import com.openfarmanager.android.fragments.MainPanel;
+import com.openfarmanager.android.model.Bookmark;
 import com.openfarmanager.android.model.NetworkAccount;
+
+import org.json.JSONObject;
 
 /**
  * author: Vlad Namashko
@@ -17,15 +20,17 @@ import com.openfarmanager.android.model.NetworkAccount;
 public class CreateBookmarkDialog extends BaseFileDialog {
 
     private String mDestinationText;
+    private String mDestinationId;
     private NetworkAccount mNetworkAccount;
 
     public CreateBookmarkDialog(Context context, Handler handler, MainPanel inactivePanel, String destination) {
-        this(context, handler, inactivePanel, destination, null);
+        this(context, handler, inactivePanel, destination, null, null);
     }
 
-    public CreateBookmarkDialog(Context context, Handler handler, MainPanel inactivePanel, String destination, NetworkAccount account) {
+    public CreateBookmarkDialog(Context context, Handler handler, MainPanel inactivePanel, String destination, String destinationId, NetworkAccount account) {
         super(context, handler, inactivePanel);
         mDestinationText = destination;
+        mDestinationId = destinationId;
         mNetworkAccount = account;
     }
 
@@ -61,10 +66,24 @@ public class CreateBookmarkDialog extends BaseFileDialog {
 
     @Override
     protected void execute() {
+        String destination = mDestination.getText().toString().trim();
+        if (mNetworkAccount != null) {
+            try {
+                JSONObject data = new JSONObject();
+                data.put(Bookmark.ID, mDestinationId);
+                data.put(Bookmark.PATH, mDestinationText);
+
+                destination = data.toString();
+            } catch (Exception e) {
+                e.printStackTrace();
+                return;
+            }
+        }
+
         mHandler.sendMessage(mHandler.obtainMessage(MainPanel.FILE_CREATE_BOOKMARK,
                 new CreateBookmarkResult(mInactivePanel,
                         ((EditText) mDialogView.findViewById(R.id.bookmark_label)).getText().toString().trim(),
-                        mDestination.getText().toString().trim(), mNetworkAccount)));
+                        destination, mNetworkAccount)));
     }
 
     public class CreateBookmarkResult {
