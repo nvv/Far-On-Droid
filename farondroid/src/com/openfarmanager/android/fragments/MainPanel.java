@@ -173,7 +173,7 @@ public class MainPanel extends BaseFileSystemPanel {
                     } else {
                         openFile(item);
                     }
-                } else if (!item.exists()) {
+                } else if (!isFileExists(item)) {
                     ToastNotification.makeText(App.sInstance.getApplicationContext(),
                             getSafeString(R.string.error_non_existsed_directory), Toast.LENGTH_SHORT).show();
                     openHomeFolder();
@@ -359,7 +359,7 @@ public class MainPanel extends BaseFileSystemPanel {
 
     protected void onNavigationItemSelected(int pos, List<String> items) {
         File f = new File(TextUtils.join("/", items.subList(0, pos + 1)));
-        if (f.exists() && f.canRead()) {
+        if (isFileExists(f) && f.canRead()) {
             openDirectory(f);
         }
     }
@@ -529,7 +529,7 @@ public class MainPanel extends BaseFileSystemPanel {
                 ToastNotification.makeText(App.sInstance.getApplicationContext(),
                         getSafeString(R.string.error_archive_operation_not_supported), Toast.LENGTH_SHORT).show();
                 return;
-            } else if (!(inactivePanel instanceof NetworkPanel) && !inactivePanel.getCurrentDir().exists()) {
+            } else if (!(inactivePanel instanceof NetworkPanel) && !isFileExists(inactivePanel.getCurrentDir())) {
                 ToastNotification.makeText(App.sInstance.getApplicationContext(),
                         getSafeString(R.string.error_virtual_directories_not_permitted), Toast.LENGTH_SHORT).show();
                 return;
@@ -600,6 +600,10 @@ public class MainPanel extends BaseFileSystemPanel {
                 }
                 break;
         }
+    }
+
+    private boolean isFileExists(File file) {
+        return file != null && file.exists();
     }
 
     private void info() {
