@@ -272,6 +272,11 @@ public class Viewer extends Fragment {
                         Layout layout = textView.getLayout();
                         calculateRowHeight(textView, layout);
                         int firstVisibleRow = calculateFirstVisibleRow(textView);
+
+                        if (layout.getLineCount() < firstVisibleRow) {
+                            continue;
+                        }
+
                         int firstSearchIndex = layout.getLineEnd(firstVisibleRow - 1);
 
                         int prevPosition = wordsOnLine.get(pos)[0];
@@ -279,6 +284,10 @@ public class Viewer extends Fragment {
                             if (wordPosition > firstSearchIndex) {
                                 for (int j = firstVisibleRow; j >= 0; j--) {
                                     if (isSearchWordOnLine(layout, prevPosition, j)) {
+                                        // no need to scroll to the same line - let's find next occurrence
+                                        if (firstVisibleRow == j) {
+                                            break;
+                                        }
                                         scrollToLine(textView, firstVisibleRow, j);
                                         return;
                                     }
@@ -312,6 +321,11 @@ public class Viewer extends Fragment {
                             if (wordPosition > firstSearchIndex) {
                                 for (int j = firstVisibleRow + 1; j < layout.getLineCount(); j++) {
                                     if (isSearchWordOnLine(layout, wordPosition, j)) {
+                                        // no need to scroll to the same line - let's find next occurrence
+                                        if (firstVisibleRow == j) {
+                                            break;
+                                        }
+
                                         scrollToLine(textView, firstVisibleRow, j);
                                         return;
                                     }
