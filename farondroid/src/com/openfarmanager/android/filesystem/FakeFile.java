@@ -34,6 +34,15 @@ public class FakeFile implements FileProxy {
         mIsRoot = isRoot;
     }
 
+    public FakeFile(FileProxy proxy) {
+        mId = proxy.getId();
+        mName = proxy.getName();
+        mParentPath = proxy.getParentPath();
+        mFullPath = proxy.getFullPath();
+        mFullPathRaw = proxy.getFullPathRaw();
+        mIsRoot = proxy.isRoot();
+    }
+
     @Override
     public String getId() {
         return mId;
@@ -72,6 +81,10 @@ public class FakeFile implements FileProxy {
     @Override
     public String getFullPathRaw() {
         return mFullPathRaw;
+    }
+
+    public void setFullPath(String fullPathRaw) {
+        mFullPathRaw = fullPathRaw;
     }
 
     @Override

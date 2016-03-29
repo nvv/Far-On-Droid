@@ -4,12 +4,9 @@ import android.os.Handler;
 
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.filesystem.FileProxy;
-import com.openfarmanager.android.fragments.NetworkPanel;
 import com.openfarmanager.android.model.NetworkEnum;
 
 import java.util.List;
-
-import static com.openfarmanager.android.utils.Extensions.isNullOrEmpty;
 
 /**
  * author: Vlad Namashko
