@@ -1,12 +1,14 @@
 package com.openfarmanager.android;
 
 import android.Manifest;
+import android.annotation.TargetApi;
 import android.content.Intent;
-import android.content.pm.PackageManager;
+import android.content.UriPermission;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.text.TextUtils;
 import android.util.Log;
@@ -24,20 +26,22 @@ import com.openfarmanager.android.core.network.NetworkConnectionManager;
 import com.openfarmanager.android.core.network.dropbox.DropboxAPI;
 import com.openfarmanager.android.fragments.BaseFileSystemPanel;
 import com.openfarmanager.android.fragments.MainToolbarPanel;
+import com.openfarmanager.android.fragments.RequestPermissionFragment;
+import com.openfarmanager.android.fragments.YesNoDialog;
 import com.openfarmanager.android.model.NetworkEnum;
 import com.openfarmanager.android.tips.MainTips;
 import com.openfarmanager.android.toolbar.MenuBuilder;
 import com.openfarmanager.android.toolbar.MenuItemImpl;
-import com.openfarmanager.android.utils.Extensions;
 import com.openfarmanager.android.view.ToastNotification;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import rx.Observable;
-import rx.Scheduler;
 import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
@@ -107,8 +111,13 @@ public class Main extends BaseActivity {
 
         mFileSystemController.restorePanelState();
 
-        if (askPermission(new String[] { Manifest.permission.WRITE_EXTERNAL_STORAGE })) {
-            showTips();
+        if (askPermission(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE})) {
+            detectExternalStorages(new Runnable() {
+                @Override
+                public void run() {
+                    showTips();
+                }
+            });
         }
 
         if (getIntent() != null && getIntent().getData() != null) {
@@ -122,6 +131,45 @@ public class Main extends BaseActivity {
         setupToolbarVisibility();
     }
 
+    @TargetApi(21)
+    private void detectExternalStorages(final Runnable callback) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            callback.run();
+            return;
+        }
+        try {
+            File[] dirs = getExternalFilesDirs(null);
+            for (File dir : dirs) {
+                dir = dir.getParentFile().getParentFile().getParentFile().getParentFile();
+                if (Environment.isExternalStorageRemovable(dir) && !App.sInstance.getSettings().isSDCardPermissionAsked()) {
+                    List<UriPermission> persistedUriPermissions = App.sInstance.getContentResolver().getPersistedUriPermissions();
+                    if (persistedUriPermissions.size() == 0 || !persistedUriPermissions.get(0).isWritePermission()) {
+                        try {
+                            RequestPermissionFragment.newInstance(getString(R.string.sd_card_detected), new YesNoDialog.YesNoDialogListener() {
+                                @Override
+                                public void yes() {
+                                    Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+                                    startActivityForResult(intent, BaseFileSystemPanel.REQUEST_CODE_REQUEST_PERMISSION);
+                                }
+
+                                @Override
+                                public void no() {
+                                    App.sInstance.getSettings().setSDCardPermissionAsked(true);
+                                    callback.run();
+                                }
+                            }).show(getSupportFragmentManager(), "errorDialog");
+                            return;
+                        } catch (Exception ignore) {
+                        }
+                    }
+                }
+            }
+            callback.run();
+        } catch (Exception ignored) {
+            callback.run();
+        }
+    }
+
     protected void onPermissionsResult(Map<String, Integer> permissions) {
         showTips();
     }
@@ -130,7 +178,7 @@ public class Main extends BaseActivity {
         return (getResources().getConfiguration().keyboard != Configuration.KEYBOARD_NOKEYS);
     }
 
-    private void onLogin () {
+    private void onLogin() {
         Uri data = getIntent().getData();
         setIntent(null);
         Pattern pattern = Pattern.compile("access_token=(.*?)(&|$)");
@@ -213,7 +261,7 @@ public class Main extends BaseActivity {
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if(mFileSystemController.onKeyDown(keyCode, event))
+        if (mFileSystemController.onKeyDown(keyCode, event))
             return true;
         return super.onKeyDown(keyCode, event);
     }

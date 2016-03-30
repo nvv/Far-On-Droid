@@ -5,6 +5,7 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Environment;
 import android.preference.PreferenceManager;
+
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.R;
 import com.openfarmanager.android.filesystem.FileSystemScanner;
@@ -12,7 +13,6 @@ import com.openfarmanager.android.model.NetworkEnum;
 import com.openfarmanager.android.utils.SystemUtils;
 
 import java.io.File;
-import java.util.zip.ZipEntry;
 
 public class Settings {
 
@@ -59,6 +59,7 @@ public class Settings {
     public static final String REPLACE_DELIMETERS = "replace_delimeters";
     public static final String MULTI_THREAD_TASKS = "support_multithread_tasks";
     public static final String MULTI_ACTION_LABEL_TYPE = "multi_action_label_type";
+    public static final String SDCARD_PERMISSION_ASKED = "sdcard_permission_asked";
 
     public static final int MULTI_ACTION_LABEL_TYPE_FILES_NUM = 0;
     public static final int MULTI_ACTION_LABEL_TYPE_LIST_FILES = 1;
@@ -162,10 +163,10 @@ public class Settings {
 
     /**
      * Get file info requested type.
-     *
-     *  0 - File Size
-     *  1 - Modification Date
-     *  2 - Permissions
+     * <p/>
+     * 0 - File Size
+     * 1 - Modification Date
+     * 2 - Permissions
      *
      * @return file type info string index.
      */
@@ -279,7 +280,7 @@ public class Settings {
         return getSharedPreferences().getString(VIEWER_DEFAULT_CHARSET_NAME, "UTF-8");
     }
 
-    public boolean getRootEnabled(){
+    public boolean getRootEnabled() {
         return getSharedPreferences().getBoolean(ROOT_ENABLED, false);
     }
 
@@ -529,5 +530,13 @@ public class Settings {
 
     public boolean isHoldAltOnTouch() {
         return getSharedPreferences().getBoolean(HOLD_ALT_BY_CLICK, false);
+    }
+
+    public void setSDCardPermissionAsked(boolean value) {
+        getSharedPreferences().edit().putBoolean(SDCARD_PERMISSION_ASKED, value).apply();
+    }
+
+    public boolean isSDCardPermissionAsked() {
+        return getSharedPreferences().getBoolean(SDCARD_PERMISSION_ASKED, false);
     }
 }
