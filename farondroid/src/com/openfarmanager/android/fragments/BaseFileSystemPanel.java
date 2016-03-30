@@ -550,8 +550,13 @@ public abstract class BaseFileSystemPanel extends BasePanel {
                 RequestPermissionFragment.newInstance(getString(R.string.sd_card_access_request), new YesNoDialog.YesNoDialogListener() {
                     @Override
                     public void yes() {
-                        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
-                        startActivityForResult(intent, REQUEST_CODE_REQUEST_PERMISSION);
+                        try {
+                            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+                            startActivityForResult(intent, REQUEST_CODE_REQUEST_PERMISSION);
+                        } catch (Exception e) {
+                            // unexpected case, just ignore it
+                            e.printStackTrace();
+                        }
                     }
 
                     @Override
