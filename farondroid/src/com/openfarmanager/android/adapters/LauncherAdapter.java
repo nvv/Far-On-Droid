@@ -141,7 +141,9 @@ public class LauncherAdapter extends FlatFileSystemAdapter {
                                             throws RemoteException {
                                         ((ComponentProxy) final_param).mSize = pStats.codeSize + pStats.dataSize;
                                         codeSizeSemaphore.release();
-                                        subscriber.onNext(null);
+                                        if (!subscriber.isUnsubscribed()) {
+                                            subscriber.onNext(null);
+                                        }
                                     }
                                 });
                     }
@@ -151,9 +153,19 @@ public class LauncherAdapter extends FlatFileSystemAdapter {
                     e.printStackTrace(System.err);
                 }
             }
-        }).subscribeOn(Schedulers.computation()).observeOn(AndroidSchedulers.mainThread()).subscribe(new Action1<Void>() {
+        }).subscribeOn(Schedulers.computation()).observeOn(AndroidSchedulers.mainThread()).subscribe(new Subscriber<Void>() {
             @Override
-            public void call(Void aVoid) {
+            public void onCompleted() {
+
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                e.printStackTrace();
+            }
+
+            @Override
+            public void onNext(Void aVoid) {
                 notifyDataSetChanged();
             }
         });
