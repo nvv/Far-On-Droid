@@ -1,5 +1,4 @@
 apply plugin: 'com.android.application'
-
 android {
 
     useLibrary 'org.apache.http.legacy'
@@ -13,8 +12,8 @@ android {
 
     defaultConfig {
         minSdkVersion 8
-        versionCode 192
-        versionName "0.8.4.1"
+        versionCode 201
+        versionName "0.8.4.2"
     }
 
     sourceSets {

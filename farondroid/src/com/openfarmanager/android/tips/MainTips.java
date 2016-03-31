@@ -174,7 +174,12 @@ public class MainTips {
     private View.OnClickListener mClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            nextStep();
+            try {
+                nextStep();
+            } catch (Exception e) {
+                // handle unexpected showcase crash
+                mShowCaseView.hide();
+            }
         }
     };
 }
