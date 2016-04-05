@@ -1,7 +1,6 @@
 package com.openfarmanager.android.filesystem.actions.network;
 
 import android.net.Uri;
-import android.support.v4.app.FragmentManager;
 
 import com.dropbox.client2.exception.DropboxException;
 import com.jcraft.jsch.SftpException;
@@ -25,7 +24,6 @@ import com.openfarmanager.android.filesystem.DropboxFile;
 import com.openfarmanager.android.filesystem.FileProxy;
 import com.openfarmanager.android.filesystem.actions.OnActionListener;
 import com.openfarmanager.android.fragments.BaseFileSystemPanel;
-import com.openfarmanager.android.model.NetworkEnum;
 import com.openfarmanager.android.model.TaskStatusEnum;
 import com.openfarmanager.android.model.exeptions.NetworkException;
 import com.openfarmanager.android.model.exeptions.SdcardPermissionException;
@@ -45,10 +43,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Random;
 
-import it.sauronsoftware.ftp4j.FTPAbortedException;
-import it.sauronsoftware.ftp4j.FTPDataTransferException;
-import it.sauronsoftware.ftp4j.FTPException;
-import it.sauronsoftware.ftp4j.FTPIllegalReplyException;
 import jcifs.smb.SmbFileInputStream;
 
 import static com.openfarmanager.android.model.TaskStatusEnum.*;
@@ -237,8 +231,7 @@ public class CopyFromNetworkTask extends NetworkActionTask {
         }
     }
 
-    private void copyFromFTP(FileProxy source, String destination) throws IOException, FTPAbortedException,
-            FTPDataTransferException, FTPException, FTPIllegalReplyException {
+    private void copyFromFTP(FileProxy source, String destination) throws IOException {
         FtpAPI api = App.sInstance.getFtpApi();
 
         if (isCancelled()) {
@@ -267,7 +260,7 @@ public class CopyFromNetworkTask extends NetworkActionTask {
             File destinationFile = createFileIfNotExists(fullSourceFilePath);
 
             setCurrentFile(source);
-            api.client().download(source.getFullPath(), getOutputStream(mSdCardPath, mUseStorageApi, mBaseUri, destinationFile), 0, null);
+            api.client().retrieveFile(source.getFullPath(), getOutputStream(mSdCardPath, mUseStorageApi, mBaseUri, destinationFile));
         }
     }
 

@@ -1,6 +1,5 @@
 package com.openfarmanager.android.filesystem.actions.multi.network;
 
-import android.content.Context;
 import android.net.Uri;
 
 import com.dropbox.client2.exception.DropboxException;
@@ -25,7 +24,6 @@ import com.openfarmanager.android.filesystem.DropboxFile;
 import com.openfarmanager.android.filesystem.FileProxy;
 import com.openfarmanager.android.filesystem.actions.OnActionListener;
 import com.openfarmanager.android.fragments.BaseFileSystemPanel;
-import com.openfarmanager.android.model.NetworkEnum;
 import com.openfarmanager.android.model.TaskStatusEnum;
 import com.openfarmanager.android.model.exeptions.NetworkException;
 import com.openfarmanager.android.model.exeptions.SdcardPermissionException;
@@ -53,10 +51,6 @@ import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
-import it.sauronsoftware.ftp4j.FTPAbortedException;
-import it.sauronsoftware.ftp4j.FTPDataTransferException;
-import it.sauronsoftware.ftp4j.FTPException;
-import it.sauronsoftware.ftp4j.FTPIllegalReplyException;
 import jcifs.smb.SmbFileInputStream;
 
 import static com.openfarmanager.android.model.TaskStatusEnum.CANCELED;
@@ -176,7 +170,7 @@ public class CopyFromNetworkMultiTask extends NetworkActionMultiTask {
             return ERROR_FILE_NOT_EXISTS;
         } else if (e instanceof InterruptedIOException) {
             return CANCELED;
-        } else if (e instanceof IllegalArgumentException || e instanceof FTPDataTransferException) {
+        } else if (e instanceof IllegalArgumentException) {
             return ERROR_COPY;
         } else {
             e.printStackTrace();
@@ -286,8 +280,7 @@ public class CopyFromNetworkMultiTask extends NetworkActionMultiTask {
         }
     }
 
-    private void copyFromFTP(final FileProxy source, final String destination) throws IOException, FTPAbortedException,
-            FTPDataTransferException, FTPException, FTPIllegalReplyException {
+    private void copyFromFTP(final FileProxy source, final String destination) throws IOException {
         final FtpAPI api = App.sInstance.getFtpApi();
 
         if (isCancelled()) {
@@ -316,7 +309,7 @@ public class CopyFromNetworkMultiTask extends NetworkActionMultiTask {
                 public Object call() throws Exception {
                     createDirectoryIfNotExists(destination);
                     File destinationFile = createFileIfNotExists(fullSourceFilePath);
-                    api.client().download(source.getFullPath(), getOutputStream(mSdCardPath, mUseStorageApi, mBaseUri, destinationFile), 0, null);
+                    api.client().retrieveFile(source.getFullPath(), getOutputStream(mSdCardPath, mUseStorageApi, mBaseUri, destinationFile));
                     return null;
                 }
             }, source);

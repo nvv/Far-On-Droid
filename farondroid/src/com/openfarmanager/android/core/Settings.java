@@ -427,7 +427,7 @@ public class Settings {
     }
 
     public boolean isMultiThreadTasksEnabled(NetworkEnum networkType) {
-        if (networkType == NetworkEnum.SFTP) {
+        if (networkType == NetworkEnum.SFTP || networkType == NetworkEnum.FTP) {
             return false;
         }
         return getSharedPreferences().getBoolean(MULTI_THREAD_TASKS, true);

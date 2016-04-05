@@ -4,10 +4,11 @@ import com.openfarmanager.android.model.Bookmark;
 import com.openfarmanager.android.utils.Extensions;
 import com.openfarmanager.android.utils.FileUtilsExt;
 
+import org.apache.commons.net.ftp.FTPFile;
+
 import java.util.ArrayList;
 import java.util.List;
 
-import it.sauronsoftware.ftp4j.FTPFile;
 
 /**
  * Represents FTP file.
@@ -26,9 +27,9 @@ public class FtpFile implements FileProxy {
 
     public FtpFile(String currentPath, FTPFile source) {
         mFileName = source.getName();
-        mIsDir = source.getType() == FTPFile.TYPE_DIRECTORY;
+        mIsDir = source.isDirectory();
         mSize = source.getSize();
-        mModDate = source.getModifiedDate().getTime();
+        mModDate = source.getTimestamp().getTime().getTime();
 
         mFullPath = currentPath + (currentPath.endsWith("/") ? "" : "/") + source.getName();
         mParentPath = FileUtilsExt.removeLastSeparator(FileUtilsExt.getParentPath(mFullPath));

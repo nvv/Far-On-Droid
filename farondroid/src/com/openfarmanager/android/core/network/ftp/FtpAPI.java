@@ -16,6 +16,10 @@ import com.openfarmanager.android.model.exeptions.NetworkException;
 
 import static com.openfarmanager.android.utils.Extensions.tryParse;
 
+import org.apache.commons.net.ftp.FTP;
+import org.apache.commons.net.ftp.FTPClient;
+import org.apache.commons.net.ftp.FTPFile;
+import org.apache.commons.net.ftp.FTPReply;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -24,10 +28,6 @@ import java.net.SocketTimeoutException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
-
-import it.sauronsoftware.ftp4j.FTPClient;
-import it.sauronsoftware.ftp4j.FTPException;
-import it.sauronsoftware.ftp4j.FTPFile;
 
 /**
  * @author Vlad Namashko
@@ -89,30 +89,38 @@ public class FtpAPI implements NetworkApi {
         }
 
         try {
+            if (!activeMode) {
+                mFtpClient.enterRemotePassiveMode();
+            }
             mFtpClient.login(user, password);
-        } catch (FTPException e) {
-            throw new InAppAuthException(App.sInstance.getString(R.string.error_wrong_credentials));
+            //mFtpClient.setFileType(FTP.BINARY_FILE_TYPE);
         } catch (Exception e) {
             e.printStackTrace();
             throw new InAppAuthException(App.sInstance.getString(R.string.error_ftp_io));
         }
 
-        String charset = App.sInstance.getSettings().getCharset(server);
-        if (charset != null) {
-            mFtpClient.setCharset(charset);
+        if (!FTPReply.isPositiveCompletion(mFtpClient.getReplyCode())) {
+            try {
+                mFtpClient.disconnect();
+            } catch (Exception ignore) {}
+            throw new InAppAuthException(App.sInstance.getString(R.string.error_wrong_credentials));
         }
 
-        //mFtpClient.setType(FTPClient.TYPE_BINARY);
-        mFtpClient.setPassive(!activeMode);
+        String charset = App.sInstance.getSettings().getCharset(server);
+        if (charset != null) {
+            mFtpClient.setControlEncoding(charset);
+        }
+
     }
 
     public List<FileProxy> getDirectoryFiles(String path) throws NetworkException {
         List<FileProxy> files = new ArrayList<FileProxy>();
         try {
-            if (!path.equals(mFtpClient.currentDirectory())) {
-                mFtpClient.changeDirectory(path);
+            if (!path.equals(mFtpClient.printWorkingDirectory())) {
+                mFtpClient.changeWorkingDirectory(path);
             }
-            FTPFile[] ftpFiles = mFtpClient.list();
+
+            FTPFile[] ftpFiles = mFtpClient.listFiles();
             for (FTPFile ftpFile : ftpFiles) {
                 files.add(new FtpFile(path, ftpFile));
             }
@@ -132,8 +140,8 @@ public class FtpAPI implements NetworkApi {
     }
 
     public void setCharset(Charset charset) {
-        mFtpClient.setCharset(charset.name());
-        App.sInstance.getSettings().saveCharset(mFtpClient.getHost(), charset.name());
+        mFtpClient.setControlEncoding(charset.name());
+        App.sInstance.getSettings().saveCharset(mCurrentAccount.getServer(), charset.name());
     }
 
     public int getAuthorizedAccountsCount() {
@@ -195,7 +203,7 @@ public class FtpAPI implements NetworkApi {
     @Override
     public void delete(FileProxy file) throws Exception {
         if (file.isDirectory()) {
-            mFtpClient.deleteDirectory(file.getFullPath());
+            mFtpClient.removeDirectory(file.getFullPath());
         } else {
             mFtpClient.deleteFile(file.getFullPath());
         }
@@ -204,7 +212,7 @@ public class FtpAPI implements NetworkApi {
     @Override
     public String createDirectory(String baseDirectory, String newDirectoryName) throws Exception {
         String path = baseDirectory + "/" + newDirectoryName;
-        mFtpClient.createDirectory(path);
+        mFtpClient.makeDirectory(path);
         return path;
     }
 
@@ -217,7 +225,7 @@ public class FtpAPI implements NetworkApi {
     public boolean rename(FileProxy srcFile, String s) throws Exception {
         String fullPath = srcFile.getFullPath();
         String workingDir = fullPath.substring(0, fullPath.lastIndexOf('/') + 1);
-        mFtpClient.changeDirectory(workingDir);
+        mFtpClient.changeWorkingDirectory(workingDir);
         mFtpClient.rename(fullPath.substring(fullPath.lastIndexOf('/') + 1), s.substring(s.lastIndexOf('/') + 1));
         return true;
     }

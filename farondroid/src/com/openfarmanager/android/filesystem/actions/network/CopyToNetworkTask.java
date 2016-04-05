@@ -30,10 +30,7 @@ import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.io.OutputStream;
 import java.util.List;
-import java.util.concurrent.Callable;
 
-import it.sauronsoftware.ftp4j.FTPDataTransferException;
-import it.sauronsoftware.ftp4j.FTPDataTransferListener;
 import jcifs.smb.SmbFile;
 import jcifs.smb.SmbFileOutputStream;
 
@@ -106,8 +103,6 @@ public class CopyToNetworkTask extends NetworkActionTask {
                 return ERROR_COPY;
             } catch (DropboxException e) {
                 return createNetworkError(NetworkException.handleNetworkException(e));
-            } catch (FTPDataTransferException e) {
-                return ERROR_COPY;
             } catch (Exception e) {
                 e.printStackTrace();
                 return ERROR_COPY;
@@ -222,30 +217,11 @@ public class CopyToNetworkTask extends NetworkActionTask {
             }
         } else {
             mCurrentFile = source.getName();
-            api.client().changeDirectory(destination);
-            api.client().upload(source, new FTPDataTransferListener() {
-                @Override
-                public void started() {
-                }
-
-                @Override
-                public void transferred(int i) {
-                    doneSize += i;
-                    updateProgress();
-                }
-
-                @Override
-                public void completed() {
-                }
-
-                @Override
-                public void aborted() {
-                }
-
-                @Override
-                public void failed() {
-                }
-            });
+            api.client().changeWorkingDirectory(destination);
+            copyStreamRoutine(source, api.client().appendFileStream(destination + "/" + source.getName()));
+            if (!api.client().completePendingCommand()) {
+                throw new IOException("Can't complete copy command");
+            }
         }
     }
 

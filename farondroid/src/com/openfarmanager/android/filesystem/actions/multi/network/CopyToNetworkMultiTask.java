@@ -9,7 +9,6 @@ import com.mediafire.sdk.uploader.MediaFireUpload;
 import com.mediafire.sdk.uploader.MediaFireUploadHandler;
 import com.microsoft.live.OverwriteOption;
 import com.openfarmanager.android.App;
-import com.openfarmanager.android.core.network.NetworkApi;
 import com.openfarmanager.android.core.network.datasource.IdPathDataSource;
 import com.openfarmanager.android.core.network.dropbox.DropboxAPI;
 import com.openfarmanager.android.core.network.ftp.FtpAPI;
@@ -20,7 +19,6 @@ import com.openfarmanager.android.core.network.skydrive.SkyDriveAPI;
 import com.openfarmanager.android.core.network.smb.SmbAPI;
 import com.openfarmanager.android.core.network.yandexdisk.YandexDiskApi;
 import com.openfarmanager.android.filesystem.actions.OnActionListener;
-import com.openfarmanager.android.fragments.BaseFileSystemPanel;
 import com.openfarmanager.android.fragments.NetworkPanel;
 import com.openfarmanager.android.googledrive.api.GoogleDriveWebApi;
 import com.openfarmanager.android.model.TaskStatusEnum;
@@ -35,8 +33,6 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
-import it.sauronsoftware.ftp4j.FTPDataTransferException;
-import it.sauronsoftware.ftp4j.FTPDataTransferListener;
 import jcifs.smb.SmbFile;
 import jcifs.smb.SmbFileOutputStream;
 
@@ -102,8 +98,6 @@ public class CopyToNetworkMultiTask extends NetworkActionMultiTask {
                 return ERROR_COPY;
             } catch (DropboxException e) {
                 return createNetworkError(NetworkException.handleNetworkException(e));
-            } catch (FTPDataTransferException e) {
-                return ERROR_COPY;
             } catch (Exception e) {
                 e.printStackTrace();
                 return ERROR_COPY;
@@ -122,7 +116,7 @@ public class CopyToNetworkMultiTask extends NetworkActionMultiTask {
             return ERROR_FILE_NOT_EXISTS;
         } else if (e instanceof InterruptedIOException) {
             return CANCELED;
-        } else if (e instanceof IllegalArgumentException || e instanceof FTPDataTransferException) {
+        } else if (e instanceof IllegalArgumentException) {
             return ERROR_COPY;
         } else {
             e.printStackTrace();
@@ -257,30 +251,11 @@ public class CopyToNetworkMultiTask extends NetworkActionMultiTask {
             runSubTaskAsynk(new Callable() {
                 @Override
                 public Object call() throws Exception {
-                    api.client().changeDirectory(destination);
-                    api.client().upload(source, new FTPDataTransferListener() {
-                        @Override
-                        public void started() {
-                        }
-
-                        @Override
-                        public void transferred(int i) {
-                            mDoneSize += i;
-                            updateProgress();
-                        }
-
-                        @Override
-                        public void completed() {
-                        }
-
-                        @Override
-                        public void aborted() {
-                        }
-
-                        @Override
-                        public void failed() {
-                        }
-                    });
+                    api.client().changeWorkingDirectory(destination);
+                    copyStreamRoutine(source, api.client().storeFileStream(destination + "/" + source.getName()));
+                    if (!api.client().completePendingCommand()) {
+                        throw new IOException("Can't finish copy command");
+                    }
                     return null;
                 }
             }, source);
