@@ -7,6 +7,7 @@ import com.openfarmanager.android.core.network.googledrive.GoogleDriveApi;
 import com.openfarmanager.android.core.network.mediafire.MediaFireApi;
 import com.openfarmanager.android.core.network.skydrive.SkyDriveAPI;
 import com.openfarmanager.android.core.network.smb.SmbAPI;
+import com.openfarmanager.android.core.network.webdav.WebDavApi;
 import com.openfarmanager.android.core.network.yandexdisk.YandexDiskApi;
 import com.openfarmanager.android.model.NetworkAccount;
 import com.openfarmanager.android.model.NetworkEnum;
@@ -38,6 +39,8 @@ public class NetworkAccountManager {
                 return new MediaFireApi.MediaFireAccount(accountId, user, authData);
             case SFTP:
                 return new SftpAPI.SftpAccount(accountId, user, new JSONObject(authData));
+            case WebDav:
+                return new WebDavApi.WebDavAccount(accountId, user, new JSONObject(authData));
         }
 
         return null;

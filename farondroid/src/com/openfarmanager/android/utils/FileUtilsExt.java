@@ -174,6 +174,10 @@ public class FileUtilsExt extends FileUtils {
         return path.endsWith("/") && path.length() > 1 ? path.substring(0, path.length() - 1) : path;
     }
 
+    public static String removeFirstSeparator(String path) {
+        return path.startsWith("/") && path.length() > 1 ? path.substring(1) : path;
+    }
+
     public static class DirectoryScanResult {
         public long files = 0;
         public long directories = 0;

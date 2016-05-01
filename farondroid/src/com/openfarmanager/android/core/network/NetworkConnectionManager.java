@@ -30,12 +30,14 @@ import com.openfarmanager.android.core.network.googledrive.GoogleDriveApi;
 import com.openfarmanager.android.core.network.mediafire.MediaFireApi;
 import com.openfarmanager.android.core.network.skydrive.SkyDriveAPI;
 import com.openfarmanager.android.core.network.smb.SmbAPI;
+import com.openfarmanager.android.core.network.webdav.WebDavApi;
 import com.openfarmanager.android.core.network.yandexdisk.YandexDiskApi;
 import com.openfarmanager.android.dialogs.FtpAuthDialog;
 import com.openfarmanager.android.dialogs.MediaFireAuthDialog;
 import com.openfarmanager.android.dialogs.NetworkScanDialog;
 import com.openfarmanager.android.dialogs.SftpAuthDialog;
 import com.openfarmanager.android.dialogs.SmbAuthDialog;
+import com.openfarmanager.android.dialogs.WebDavAuthDialog;
 import com.openfarmanager.android.dialogs.YandexDiskNameRequestDialog;
 import com.openfarmanager.android.fragments.ErrorDialog;
 import com.openfarmanager.android.fragments.MainPanel;
@@ -163,6 +165,9 @@ public class NetworkConnectionManager {
                     case MediaFire:
                         openMediaFire(panel);
                         break;
+                    case WebDav:
+                        openWebDav(panel);
+                        break;
                 }
 
                 if (dialog.isShowing()) {
@@ -252,6 +257,15 @@ public class NetworkConnectionManager {
         }
     }
 
+    private void openWebDav(MainPanel panel) {
+        WebDavApi api = App.sInstance.getWebDavApi();
+        if (api.getAuthorizedAccountsCount() == 0) {
+            startWebDavAuthentication(panel);
+        } else {
+            showSelectAccountDialog(NetworkEnum.WebDav, panel);
+        }
+    }
+
     private void startFtpAuthentication(MainPanel panel) {
         final Dialog dialog = new FtpAuthDialog(panel.getActivity(), mInAppAuthHandler);
         dialog.show();
@@ -288,6 +302,12 @@ public class NetworkConnectionManager {
     private void startGoogleDriveAuthentication(MainPanel panel) {
         GoogleDriveAuthWindow popupWindow = new GoogleDriveAuthWindow(panel.getActivity(), mInAppAuthHandler);
         popupWindow.show();
+    }
+
+    private void startWebDavAuthentication(MainPanel panel) {
+        final Dialog dialog = new WebDavAuthDialog(panel.getActivity(), mInAppAuthHandler);
+        dialog.show();
+        adjustDialogSize(dialog, panel);
     }
 
     private void startSkyDriveAuthentication(MainPanel panel) {
@@ -520,6 +540,28 @@ public class NetworkConnectionManager {
                 }
 
                 break;
+            case WebDav:
+                final WebDavApi.WebDavAccount webDavAccount = (WebDavApi.WebDavAccount) networkAccount;
+                if (webDavAccount.getServer() == null) { // new
+                    startWebDavAuthentication(panel);
+                } else {
+                    showProgressDialog(R.string.connecting_to_webdav);
+                    runAsync(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                App.sInstance.getWebDavApi().connect(webDavAccount);
+                                dismissProgressDialog();
+                                openNetworkPanel(NetworkEnum.WebDav, path);
+                            } catch (final InAppAuthException e) {
+                                handleInAppAuthError(e);
+                            } catch (final Exception e) {
+                                handleNetworkAuthError(e);
+                            }
+                        }
+                    });
+                }
+                break;
         }
     }
 
@@ -649,6 +691,8 @@ public class NetworkConnectionManager {
                 showProgressDialog(R.string.loading);
             } else if (msg.what == MEDIA_FIRE_CONNECTED) {
                 mFileSystemController.openNetworkPanel(NetworkEnum.MediaFire);
+            } else if (msg.what == WEBDAV_CONNECTED) {
+                mFileSystemController.openNetworkPanel(NetworkEnum.WebDav);
             }
         }
     };

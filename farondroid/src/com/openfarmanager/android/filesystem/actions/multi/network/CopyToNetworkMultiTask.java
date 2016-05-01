@@ -17,6 +17,8 @@ import com.openfarmanager.android.core.network.googledrive.GoogleDriveApi;
 import com.openfarmanager.android.core.network.mediafire.MediaFireApi;
 import com.openfarmanager.android.core.network.skydrive.SkyDriveAPI;
 import com.openfarmanager.android.core.network.smb.SmbAPI;
+import com.openfarmanager.android.core.network.webdav.InputStreamRequestEntity;
+import com.openfarmanager.android.core.network.webdav.WebDavApi;
 import com.openfarmanager.android.core.network.yandexdisk.YandexDiskApi;
 import com.openfarmanager.android.filesystem.actions.OnActionListener;
 import com.openfarmanager.android.fragments.NetworkPanel;
@@ -84,6 +86,9 @@ public class CopyToNetworkMultiTask extends NetworkActionMultiTask {
                         break;
                     case MediaFire:
                         copyToMediaFire(file, mDestination);
+                        break;
+                    case WebDav:
+                        copyToWebDab(file, mDestination);
                         break;
                 }
             } catch (NullPointerException e) {
@@ -410,6 +415,42 @@ public class CopyToNetworkMultiTask extends NetworkActionMultiTask {
                                 }
                             }, 1);
                     upload.run();
+                    return null;
+                }
+            }, source);
+        }
+    }
+
+    private void copyToWebDab(final File source, final String destination) throws Exception {
+        final WebDavApi api = App.sInstance.getWebDavApi();
+        if (isCancelled()) {
+            throw new InterruptedIOException();
+        }
+        if (source.isDirectory()) {
+            api.createDirectory(destination, source.getName());
+
+            String[] files = source.list();
+            for (String file : files) {
+                copyToWebDab(new File(source, file), destination + "/" + source.getName());
+            }
+        } else {
+            runSubTaskAsynk(new Callable() {
+                @Override
+                public Object call() throws Exception {
+
+                    api.copyToWebDav(source, new InputStreamRequestEntity.OutputStreamListener() {
+
+                        long mTotalFileSize;
+
+                        @Override
+                        public void onProgress(long bytes) {
+                            if (mTotalFileSize < source.length()) {
+                                mDoneSize += bytes;
+                                mTotalFileSize += bytes;
+                                updateProgress();
+                            }
+                        }
+                    }, destination + (destination.endsWith("/") ? "" : "/"), source.getName());
                     return null;
                 }
             }, source);

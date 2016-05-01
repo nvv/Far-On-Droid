@@ -32,6 +32,7 @@ import com.openfarmanager.android.core.network.datasource.RawPathDataSource;
 import com.openfarmanager.android.core.network.datasource.SftpDataSource;
 import com.openfarmanager.android.core.network.datasource.SkyDriveDataSource;
 import com.openfarmanager.android.core.network.datasource.SmbDataSource;
+import com.openfarmanager.android.core.network.datasource.WebDavDataSource;
 import com.openfarmanager.android.core.network.datasource.YandexDiskDataSource;
 import com.openfarmanager.android.dialogs.CreateBookmarkDialog;
 import com.openfarmanager.android.filesystem.FakeFile;
@@ -203,6 +204,9 @@ public class NetworkPanel extends MainPanel {
                 break;
             case SFTP:
                 mDataSource = new SftpDataSource(mHandler);
+                break;
+            case WebDav:
+                mDataSource = new WebDavDataSource(mHandler);
                 break;
         }
     }

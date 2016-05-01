@@ -23,12 +23,14 @@ import static com.openfarmanager.android.utils.Extensions.isNullOrEmpty;
  */
 public class SmbAuthDialog extends Dialog {
 
-    private Handler mHandler;
-    private View mDialogView;
-    private TextView mError;
-    private EditText mDomain;
-    private EditText mUserName;
-    private EditText mPassword;
+    protected Handler mHandler;
+    protected View mDialogView;
+    protected TextView mError;
+    protected EditText mDomain;
+    protected EditText mUserName;
+    protected EditText mPassword;
+    protected View mScanNetwork;
+
     private String mSelectedIp;
 
     public SmbAuthDialog(Context context, Handler handler, String selectedIp) {
@@ -67,7 +69,9 @@ public class SmbAuthDialog extends Dialog {
             }
         });
 
-        mDialogView.findViewById(R.id.smb_scan_network).setOnClickListener(new View.OnClickListener() {
+        mScanNetwork = mDialogView.findViewById(R.id.smb_scan_network);
+
+        mScanNetwork.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View view) {
@@ -86,22 +90,26 @@ public class SmbAuthDialog extends Dialog {
     private boolean validate() {
 
         if (isNullOrEmpty(mDomain.getText().toString())) {
-            setErrorMessage(App.sInstance.getString(R.string.error_empty_domain));
+            setErrorMessage(App.sInstance.getString(getEmptyServerError()));
             return false;
         }
 
         return true;
     }
 
-    private void clearError() {
+    protected int getEmptyServerError() {
+        return R.string.error_empty_domain;
+    }
+
+    protected void clearError() {
         updateErrorState("", View.GONE);
     }
 
-    private void setErrorMessage(final String errorMessage) {
+    protected void setErrorMessage(final String errorMessage) {
         updateErrorState(errorMessage, View.VISIBLE);
     }
 
-    private void setLoading(final boolean isLoading) {
+    protected void setLoading(final boolean isLoading) {
         Message.obtain(mHandler, new Runnable() {
             @Override
             public void run() {
@@ -112,7 +120,7 @@ public class SmbAuthDialog extends Dialog {
 
     }
 
-    private void updateErrorState(final String errorMessage, final int visibility) {
+    protected void updateErrorState(final String errorMessage, final int visibility) {
         Message.obtain(mHandler, new Runnable() {
             @Override
             public void run() {
@@ -122,9 +130,13 @@ public class SmbAuthDialog extends Dialog {
         }).sendToTarget();
     }
 
-    private void connect() {
+    protected void connect() {
         setLoading(true);
-        Extensions.runAsync(mConnectRunnable);
+        Extensions.runAsync(getConnectRunnable());
+    }
+
+    protected Runnable getConnectRunnable() {
+        return mConnectRunnable;
     }
 
     Runnable mConnectRunnable = new Runnable() {

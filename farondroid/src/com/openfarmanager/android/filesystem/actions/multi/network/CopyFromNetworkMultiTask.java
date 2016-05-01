@@ -19,6 +19,7 @@ import com.openfarmanager.android.core.network.googledrive.GoogleDriveApi;
 import com.openfarmanager.android.core.network.mediafire.MediaFireApi;
 import com.openfarmanager.android.core.network.skydrive.SkyDriveAPI;
 import com.openfarmanager.android.core.network.smb.SmbAPI;
+import com.openfarmanager.android.core.network.webdav.WebDavApi;
 import com.openfarmanager.android.core.network.yandexdisk.YandexDiskApi;
 import com.openfarmanager.android.filesystem.DropboxFile;
 import com.openfarmanager.android.filesystem.FileProxy;
@@ -139,6 +140,9 @@ public class CopyFromNetworkMultiTask extends NetworkActionMultiTask {
                         break;
                     case MediaFire:
                         copyFromMediafire(file, mDestination);
+                        break;
+                    case WebDav:
+                        copyFromWebDav(file, mDestination);
                         break;
                 }
             } catch (NullPointerException e) {
@@ -388,6 +392,53 @@ public class CopyFromNetworkMultiTask extends NetworkActionMultiTask {
                     byte[] buf = new byte[512 * 1024];
                     while ((len = in.read(buf)) > 0) {
                         out.write(buf, 0, len);
+                    }
+
+                    out.close();
+                    in.close();
+                    return null;
+                }
+            }, source);
+        }
+    }
+
+    private void copyFromWebDav(final FileProxy source, final String destination) throws Exception {
+        final WebDavApi api = App.sInstance.getWebDavApi();
+
+        if (isCancelled()) {
+            throw new InterruptedIOException();
+        }
+
+        final String fullSourceFilePath = destination + "/" + source.getName();
+        if (source.isDirectory()) {
+            try {
+                createDirectoryIfNotExists(destination);
+                List<FileProxy> files = api.getDirectoryFiles(source.getFullPath());
+
+                if (files.size() == 0) {
+                    createDirectoryIfNotExists(fullSourceFilePath);
+                } else {
+                    for (FileProxy file : files) {
+                        copyFromWebDav(file, fullSourceFilePath);
+                    }
+                }
+            } catch (Exception e) {
+                throw NetworkException.handleNetworkException(e);
+            }
+        } else {
+            runSubTaskAsynk(new Callable() {
+                @Override
+                public Object call() throws Exception {
+                    createDirectoryIfNotExists(destination);
+
+                    File destinationFile = createFileIfNotExists(fullSourceFilePath);
+
+                    InputStream in = api.getFromWebDav(source.getFullPath());
+                    OutputStream out = getOutputStream(mSdCardPath, mUseStorageApi, mBaseUri, destinationFile);
+
+                    int len;
+                    while ((len = in.read(BUFFER)) > 0) {
+                        out.write(BUFFER, 0, len);
                     }
 
                     out.close();

@@ -18,6 +18,7 @@ import com.openfarmanager.android.core.network.googledrive.GoogleDriveApi;
 import com.openfarmanager.android.core.network.mediafire.MediaFireApi;
 import com.openfarmanager.android.core.network.skydrive.SkyDriveAPI;
 import com.openfarmanager.android.core.network.smb.SmbAPI;
+import com.openfarmanager.android.core.network.webdav.WebDavApi;
 import com.openfarmanager.android.core.network.yandexdisk.YandexDiskApi;
 import com.openfarmanager.android.model.NetworkEnum;
 import com.openfarmanager.android.utils.SystemUtils;
@@ -46,6 +47,7 @@ public class App extends Application {
     protected YandexDiskApi mYandexDiskApi;
     protected GoogleDriveApi mGoogleDriveApi;
     protected MediaFireApi mMediaFireApi;
+    protected WebDavApi mWebDavApi;
 
     @Override
     public void onCreate() {
@@ -68,6 +70,7 @@ public class App extends Application {
         mYandexDiskApi = new YandexDiskApi();
         mGoogleDriveApi = new GoogleDriveApi();
         mMediaFireApi = new MediaFireApi();
+        mWebDavApi = new WebDavApi();
 
         setLocale();
     }
@@ -164,6 +167,10 @@ public class App extends Application {
         return mMediaFireApi;
     }
 
+    public WebDavApi getWebDavApi() {
+        return mWebDavApi;
+    }
+
     public NetworkApi getNetworkApi(NetworkEnum networkType) {
         switch (networkType) {
             case FTP:
@@ -182,6 +189,8 @@ public class App extends Application {
                 return mGoogleDriveApi;
             case MediaFire:
                 return mMediaFireApi;
+            case WebDav:
+                return mWebDavApi;
         }
     }
 }

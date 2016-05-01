@@ -134,6 +134,7 @@ public class FileSystemController {
     public static final int OPEN_ENCODING_DIALOG = 126;
     public static final int MEDIA_FIRE_CONNECTED = 127;
     public static final int SFTP_CONNECTED = 128;
+    public static final int WEBDAV_CONNECTED = 129;
 
     public static final int ARG_FORCE_OPEN_FILE_IN_EDITOR = 1000;
     public static final int ARG_EXPAND_LEFT_PANEL = 1001;
