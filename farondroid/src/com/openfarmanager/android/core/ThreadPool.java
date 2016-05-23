@@ -13,7 +13,6 @@ import java.util.concurrent.TimeUnit;
 public class ThreadPool {
     protected static final int CPU_COUNT = Runtime.getRuntime().availableProcessors();
     protected static final int KEEP_ALIVE = CPU_COUNT;
-    protected static final int MAXIMUM_QUEUE_SIZE = 128;
 
     protected ThreadPoolExecutor mExecutor;
     protected final Handler mHandler = new Handler(Looper.getMainLooper());
@@ -33,7 +32,7 @@ public class ThreadPool {
     }
 
     protected LinkedBlockingQueue<Runnable> getDefaultQueue() {
-        return new LinkedBlockingQueue<>(MAXIMUM_QUEUE_SIZE);
+        return new LinkedBlockingQueue<>();
     }
 
     protected ThreadFactory getDefaultThreadFactory() {
