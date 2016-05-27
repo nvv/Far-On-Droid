@@ -16,6 +16,7 @@ public class MultipartUtility {
 
     private static final int CONNECT_TIMEOUT = 15000;
     private static final int READ_TIMEOUT = 10000;
+    public static final int CHUNK_LENGTH = 524288; // 512 * 1024
 
     private final HttpURLConnection mConnection;
     private final OutputStream mOutputStream;
@@ -36,6 +37,7 @@ public class MultipartUtility {
         mConnection.setUseCaches(false);
         mConnection.setDoInput(true);
         mConnection.setDoOutput(true);
+        mConnection.setChunkedStreamingMode(CHUNK_LENGTH);
 
         mOutputStream = mConnection.getOutputStream();
         mWriter = new PrintWriter(new OutputStreamWriter(mOutputStream, CHARSET), true);
@@ -66,7 +68,7 @@ public class MultipartUtility {
         FileInputStream inputStream = new FileInputStream(uploadFile);
 
         try {
-            final byte[] buffer = new byte[512 * 1024];
+            final byte[] buffer = new byte[CHUNK_LENGTH];
             int bytesRead;
             while ((bytesRead = inputStream.read(buffer)) != -1) {
                 mOutputStream.write(buffer, 0, bytesRead);
