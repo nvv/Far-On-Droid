@@ -119,11 +119,6 @@ public class Main extends BaseActivity {
                 }
             });
         }
-
-        if (getIntent() != null && getIntent().getData() != null) {
-            onLogin();
-        }
-
         if (isHardwareKeyboardAvailable()) {
             ToastNotification.makeText(App.sInstance.getApplicationContext(), getString(R.string.hardware_keyboard), Toast.LENGTH_LONG).show();
         }
@@ -176,23 +171,6 @@ public class Main extends BaseActivity {
 
     private boolean isHardwareKeyboardAvailable() {
         return (getResources().getConfiguration().keyboard != Configuration.KEYBOARD_NOKEYS);
-    }
-
-    private void onLogin() {
-        Uri data = getIntent().getData();
-        setIntent(null);
-        Pattern pattern = Pattern.compile("access_token=(.*?)(&|$)");
-        Matcher matcher = pattern.matcher(data.toString());
-        if (matcher.find()) {
-            final String token = matcher.group(1);
-            if (!TextUtils.isEmpty(token)) {
-                App.sInstance.getNetworkConnectionManager().yandexDiskTokenReceived(this, token, mFileSystemController.getActivePanel());
-            } else {
-                Log.w(TAG, "YandexDisk onRegistrationSuccess: empty token");
-            }
-        } else {
-            Log.w(TAG, "YandexDisk onRegistrationSuccess: token not found in return url");
-        }
     }
 
     private void showTips() {

@@ -384,4 +384,10 @@
 
     <string name="webdav_server">WebDav Сервер</string>
     <string name="connecting_to_webdav">Подключение к WebDav серверу…</string>
+    <string name="yandex_disk">Yandex Disk</string>
+    <string name="connecting_to_yandexdisk">Подключение к Yandex Disk…</string>
+
+    <string name="error_user_empty">"Имя пользователя" не может быть пустым</string>
+    <string name="error_password_empty">"Пароль" не может быть пустым</string>
+    <string name="error_save_as_empty">"Сохранить аккаунт как" не может быть пустым</string>
 </resources>

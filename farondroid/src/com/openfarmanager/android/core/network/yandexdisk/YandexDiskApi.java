@@ -1,6 +1,7 @@
 package com.openfarmanager.android.core.network.yandexdisk;
 
 import android.database.Cursor;
+import android.util.Base64;
 
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.R;
@@ -11,6 +12,7 @@ import com.openfarmanager.android.filesystem.FileProxy;
 import com.openfarmanager.android.filesystem.YandexDiskFile;
 import com.openfarmanager.android.model.NetworkAccount;
 import com.openfarmanager.android.model.NetworkEnum;
+import com.openfarmanager.android.model.exeptions.InAppAuthException;
 import com.openfarmanager.android.model.exeptions.InitYandexDiskException;
 import com.openfarmanager.android.model.exeptions.NetworkException;
 import com.yandex.disk.client.Credentials;
@@ -18,10 +20,13 @@ import com.yandex.disk.client.ListItem;
 import com.yandex.disk.client.ListParsingHandler;
 import com.yandex.disk.client.TransportClient;
 import com.yandex.disk.client.exceptions.WebdavClientInitException;
+import com.yandex.disk.client.exceptions.WebdavException;
+import com.yandex.disk.client.exceptions.WebdavNotAuthorizedException;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,6 +39,8 @@ public class YandexDiskApi implements NetworkApi {
     public static final String CLIENT_SECRET = " c2b0f694984248178f3ab50cc020889e";
 
     private static String YANDEX_TOKEN = "yandex_disk_token";
+    private static String YANDEX_AUTH_NAME = "yandex_auth_name";
+    private static String YANDEX_AUTH_PASSWORD = "yandex_auth_password";
 
     public static final String ACCOUNT_TYPE = "com.yandex";
     public static final String AUTH_URL = "https://oauth.yandex.ru/authorize?response_type=token&client_id=" + CLIENT_ID;
@@ -46,7 +53,8 @@ public class YandexDiskApi implements NetworkApi {
     public NetworkAccount saveAccount(Credentials credentials) {
         JSONObject authData = new JSONObject();
         try {
-            authData.put(YANDEX_TOKEN, credentials.getToken());
+            authData.put(YANDEX_AUTH_NAME, credentials.getName());
+            authData.put(YANDEX_AUTH_PASSWORD, credentials.getPassword());
             long id = NetworkAccountDbAdapter.insert(credentials.getUser(), NetworkEnum.YandexDisk.ordinal(), authData.toString());
 
             Cursor cursor = NetworkAccountDbAdapter.getAccountById(id);
@@ -58,7 +66,8 @@ public class YandexDiskApi implements NetworkApi {
                 cursor.moveToNext();
                 String authDataString = cursor.getString(idxAuthData);
                 JSONObject data = new JSONObject(authDataString);
-                return new YandexDiskAccount(cursor.getLong(idxId), cursor.getString(idxUserName), data.getString(YANDEX_TOKEN));
+                return new YandexDiskAccount(cursor.getLong(idxId), cursor.getString(idxUserName),
+                        data.getString(YANDEX_AUTH_NAME), data.getString(YANDEX_AUTH_PASSWORD));
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -70,8 +79,9 @@ public class YandexDiskApi implements NetworkApi {
     public void setupToken(NetworkAccount networkAccount) throws InitYandexDiskException{
         mCurrentAccount = networkAccount;
         try {
+            YandexDiskAccount account = (YandexDiskAccount) networkAccount;
             mTransportClient = TransportClient.getInstance(App.sInstance.getApplicationContext(),
-                    new Credentials(networkAccount.getUserName(), ((YandexDiskAccount) networkAccount).getToken()));
+                    new Credentials(networkAccount.getUserName(), account.getToken(), account.getUser(), account.getPassword()));
         } catch (WebdavClientInitException e) {
             e.printStackTrace();
             throw new InitYandexDiskException();
@@ -147,8 +157,15 @@ public class YandexDiskApi implements NetworkApi {
                 String authData = cursor.getString(idxAuthData);
                 try {
                     JSONObject data = new JSONObject(authData);
-                    YandexDiskAccount account = new YandexDiskAccount(cursor.getLong(idxId), cursor.getString(idxUserName),
-                            data.getString(YANDEX_TOKEN));
+                    YandexDiskAccount account;
+
+                    if (data.has(YANDEX_TOKEN)) {
+                        account = new YandexDiskAccount(cursor.getLong(idxId), cursor.getString(idxUserName),
+                                data.getString(YANDEX_TOKEN));
+                    } else {
+                        account = new YandexDiskAccount(cursor.getLong(idxId), cursor.getString(idxUserName),
+                                data.getString(YANDEX_AUTH_NAME), data.getString(YANDEX_AUTH_PASSWORD));
+                    }
                     accounts.add(account);
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -196,12 +213,40 @@ public class YandexDiskApi implements NetworkApi {
         return true;
     }
 
+    public void connectAndSave(String userName, String password, String saveAs) throws InAppAuthException {
+        try {
+            mTransportClient = TransportClient.getInstance(App.sInstance.getApplicationContext(),
+                    new Credentials(saveAs, null, userName, password));
+
+            mTransportClient.getList("/", new ListParsingHandler() {
+                @Override
+                public boolean handleItem(ListItem item) {
+                    return false;
+                }
+            });
+            mCurrentAccount = saveAccount(new Credentials(saveAs, null, userName, password));
+        } catch (Exception e) {
+            throw new InitYandexDiskException();
+        }
+    }
+
     public static class YandexDiskAccount extends NetworkAccount {
 
         private String mToken;
+        private String mUser;
+        private String mPassword;
 
         public YandexDiskAccount(long id, String userName, JSONObject data) throws JSONException {
-            this(id, userName, data.getString(YANDEX_TOKEN));
+            if (data.has(YANDEX_TOKEN)) {
+                mId = id;
+                mUserName = userName;
+                mToken = data.getString(YANDEX_TOKEN);
+            } else {
+                mId = id;
+                mUserName = userName;
+                mUser = data.getString(YANDEX_AUTH_NAME);
+                mPassword = data.getString(YANDEX_AUTH_PASSWORD);
+            }
         }
 
         public YandexDiskAccount(long id, String userName, String token) {
@@ -210,8 +255,23 @@ public class YandexDiskApi implements NetworkApi {
             mToken = token;
         }
 
+        public YandexDiskAccount(long id, String userName, String user, String password) {
+            mId = id;
+            mUserName = userName;
+            mUser = user;
+            mPassword = password;
+        }
+
         public String getToken() {
             return mToken;
+        }
+
+        public String getUser() {
+            return mUser;
+        }
+
+        public String getPassword() {
+            return mPassword;
         }
 
         @Override

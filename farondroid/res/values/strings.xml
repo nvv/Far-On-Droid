@@ -393,4 +393,10 @@ More network stuff will appear in future versions.
     <string name="sdcard_access_summary">Grant access to modify external SD card</string>
 
     <string name="error_restore_storage_path">Can\'t open specified directory due to cloud storage limitations. Please, navigate to this directory manually.</string>
+    <string name="yandex_disk">Yandex Disk</string>
+    <string name="connecting_to_yandexdisk">Connecting to the Yandex Disk…</string>
+
+    <string name="error_user_empty">"User name" must not be empty</string>
+    <string name="error_password_empty">"Password" must not be empty</string>
+    <string name="error_save_as_empty">"Save account as" must not be empty</string>
 </resources>

@@ -38,7 +38,7 @@ import com.openfarmanager.android.dialogs.NetworkScanDialog;
 import com.openfarmanager.android.dialogs.SftpAuthDialog;
 import com.openfarmanager.android.dialogs.SmbAuthDialog;
 import com.openfarmanager.android.dialogs.WebDavAuthDialog;
-import com.openfarmanager.android.dialogs.YandexDiskNameRequestDialog;
+import com.openfarmanager.android.dialogs.YandexDiskAuthDialog;
 import com.openfarmanager.android.fragments.ErrorDialog;
 import com.openfarmanager.android.fragments.MainPanel;
 import com.openfarmanager.android.googledrive.GoogleDriveAuthWindow;
@@ -315,12 +315,7 @@ public class NetworkConnectionManager {
     }
 
     private void startYandexDiskAuthentication(MainPanel panel) {
-        App.sInstance.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(YandexDiskApi.AUTH_URL)).
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
-    }
-
-    public void yandexDiskTokenReceived(Activity activity, String token, MainPanel panel) {
-        final Dialog dialog = new YandexDiskNameRequestDialog(activity, mInAppAuthHandler, token);
+        final Dialog dialog = new YandexDiskAuthDialog(panel.getActivity(), mInAppAuthHandler);
         dialog.show();
         adjustDialogSize(dialog, panel);
     }
@@ -479,7 +474,7 @@ public class NetworkConnectionManager {
                 break;
             case YandexDisk:
                 YandexDiskApi.YandexDiskAccount yandexDiskAccount = (YandexDiskApi.YandexDiskAccount) networkAccount;
-                if (yandexDiskAccount.getToken() == null) { // new
+                if (yandexDiskAccount.getToken() == null && yandexDiskAccount.getUser() == null) { // new
                     startYandexDiskAuthentication(panel);
                 } else {
                     try {
@@ -650,17 +645,7 @@ public class NetworkConnectionManager {
                 mFileSystemController.openNetworkPanel(NetworkEnum.SFTP);
             } else if (msg.what == SMB_CONNECTED) {
                 mFileSystemController.openNetworkPanel(NetworkEnum.SMB);
-            } else if (msg.what == YANDEX_DISK_USERNAME_RECEIVED) {
-                YandexDiskApi api = App.sInstance.getYandexDiskApi();
-                Credentials credentials = (Credentials) msg.obj;
-                try {
-                    api.setupToken(api.saveAccount(credentials));
-                } catch (InitYandexDiskException e) {
-                    e.printStackTrace();
-                    showErrorDialog(App.sInstance.getResources().getString(R.string.error_init_yandex_sdk));
-                    return;
-                }
-
+            } else if (msg.what == YANDEX_DISK_CONNECTED) {
                 mFileSystemController.openNetworkPanel(NetworkEnum.YandexDisk);
             } else if (msg.what == SMB_SCAN_NETWORK_REQUESTED) {
                 final Dialog dialog = new NetworkScanDialog(panel.getActivity(), mInAppAuthHandler);
