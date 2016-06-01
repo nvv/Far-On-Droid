@@ -19,6 +19,7 @@ import com.yandex.disk.client.Credentials;
 import com.yandex.disk.client.ListItem;
 import com.yandex.disk.client.ListParsingHandler;
 import com.yandex.disk.client.TransportClient;
+import com.yandex.disk.client.exceptions.UnknownServerWebdavException;
 import com.yandex.disk.client.exceptions.WebdavClientInitException;
 import com.yandex.disk.client.exceptions.WebdavException;
 import com.yandex.disk.client.exceptions.WebdavNotAuthorizedException;
@@ -192,7 +193,15 @@ public class YandexDiskApi implements NetworkApi {
 
     @Override
     public void delete(FileProxy file) throws Exception {
-        mTransportClient.delete(file.getFullPath());
+        try {
+            mTransportClient.delete(file.getFullPath());
+        } catch (UnknownServerWebdavException e) {
+            if (e.statusCode >= 200 && e.statusCode <= 300) {
+                // ignore
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     @Override

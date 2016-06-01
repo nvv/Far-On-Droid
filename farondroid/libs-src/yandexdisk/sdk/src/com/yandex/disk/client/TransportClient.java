@@ -331,7 +331,9 @@ public class TransportClient {
                     throw new ServerWebdavException("Server error while "+details);
                 } else {
                     Log.d(TAG, "Unknown code "+statusCode);
-                    throw new UnknownServerWebdavException("Server error while "+details);
+                    UnknownServerWebdavException exception = new UnknownServerWebdavException("Server error while "+details);
+                    exception.statusCode = statusCode;
+                    throw exception;
                 }
         }
     }
