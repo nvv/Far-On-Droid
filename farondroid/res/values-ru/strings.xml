@@ -89,8 +89,8 @@
     <string name="action_delete">Удалить</string>
     <string name="action_move">Перенести</string>
     <string name="action_rename">Переименовать</string>
-    <string name="action_open_with">Открыть с помощью...</string>
-    <string name="action_open_as">Открыть как...</string>
+    <string name="action_open_with">Открыть с помощью…</string>
+    <string name="action_open_as">Открыть как…</string>
     <string name="action_select_network">Выберите Сеть</string>
     <string name="action_archive_extract">Извлечь Архив</string>
     <string name="action_create_archive">Создать Архив</string>
@@ -390,4 +390,7 @@
     <string name="error_user_empty">"Имя пользователя" не может быть пустым</string>
     <string name="error_password_empty">"Пароль" не может быть пустым</string>
     <string name="error_save_as_empty">"Сохранить аккаунт как" не может быть пустым</string>
+    <string name="add_star">Добавить в Starred</string>
+    <string name="remove_star">Убрать из Starred</string>
+    <string name="error_update_file_info">Ошибка при обновлениее информации о файле.</string>
 </resources>

@@ -126,4 +126,8 @@ public class GoogleDriveFile implements FileProxy {
     public String getOpenWithLink() {
         return mFile.getOpenWithLink();
     }
+
+    public boolean isStarred() {
+        return mFile.isStarred();
+    }
 }

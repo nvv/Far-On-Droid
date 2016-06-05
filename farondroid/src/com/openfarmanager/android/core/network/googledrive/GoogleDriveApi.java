@@ -125,6 +125,10 @@ public class GoogleDriveApi implements NetworkApi {
         download(source, outputStream, BUFFER);
     }
 
+    public void updateData(String fileId, String data) {
+        mDriveApi.updateData(fileId, data);
+    }
+
     public void download(FileProxy source, OutputStream outputStream, byte[] buffer) throws IOException {
         BufferedInputStream inputStream = new BufferedInputStream(
                 mDriveApi.download(((GoogleDriveFile) source).getDownloadLink()));
@@ -165,8 +169,9 @@ public class GoogleDriveApi implements NetworkApi {
                 list.add(new GoogleDriveFile(file, parentPath != null ? parentPath : path));
             }
 
-            if (parentPath != null && (parentPath.equals("/") || parentPath.equals(""))) {
+            if (isRootDirectory(parentPath)) {
                 list.add(new GoogleDriveFile(File.createSharedFolder(), "/"));
+                list.add(new GoogleDriveFile(File.createStarredFolder(), "/"));
             }
 
             FileSystemScanner.sInstance.sort(list);
@@ -175,6 +180,10 @@ public class GoogleDriveApi implements NetworkApi {
             e.printStackTrace();
         }
         return list;
+    }
+
+    private boolean isRootDirectory(String parentPath) {
+        return parentPath != null && (parentPath.equals("/") || parentPath.equals(""));
     }
 
     public FileProxy getFileInfo(String id) {

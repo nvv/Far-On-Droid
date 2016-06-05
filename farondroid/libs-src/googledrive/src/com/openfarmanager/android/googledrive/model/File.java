@@ -1,5 +1,7 @@
 package com.openfarmanager.android.googledrive.model;
 
+import android.util.SparseArray;
+
 import com.openfarmanager.android.googledrive.api.Fields;
 
 import org.json.JSONException;
@@ -16,7 +18,14 @@ import java.util.Map;
  */
 public class File {
 
+    public static final String STARRED = "starred"; // 0
+    public static final String HIDDEN = "hidden"; // 1
+    public static final String TRASHED = "trashed"; // 2
+    public static final String RESTRICTED = "restricted"; // 3
+    public static final String VIEWED = "viewed"; // 4
+
     public static final String SHARED_FOLDER_ID = "shared_folder_id";
+    public static final String STARRED_FOLDER_ID = "starred_folder_id";
 
     private static SimpleDateFormat sFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 
@@ -53,6 +62,7 @@ public class File {
     protected String mDownloadUr;
     protected String mOpenWithLink;
     protected HashMap<String, String> mExportLinks;
+    protected SparseArray<Boolean> mLabels;
 
     private File() {}
 
@@ -94,6 +104,15 @@ public class File {
             }
         }
 
+        if (json.has("labels")) {
+            mLabels = new SparseArray<>();
+            JSONObject labels = json.getJSONObject("labels");
+            mLabels.put(0, labels.getBoolean(STARRED));
+            mLabels.put(1, labels.getBoolean(HIDDEN));
+            mLabels.put(2, labels.getBoolean(TRASHED));
+            mLabels.put(3, labels.getBoolean(RESTRICTED));
+            mLabels.put(4, labels.getBoolean(VIEWED));
+        }
     }
 
     public static File createSharedFolder() {
@@ -107,6 +126,17 @@ public class File {
         return sharedFolder;
     }
 
+    public static File createStarredFolder() {
+        File sharedFolder = new File();
+        sharedFolder.mId = STARRED_FOLDER_ID;
+        sharedFolder.mName = "Starred";
+        sharedFolder.mIsDirectory = true;
+        sharedFolder.mIsVirtual = true;
+        sharedFolder.mParentPath = "root";
+
+        return sharedFolder;
+    }
+    
     public String getId() {
         return mId;
     }
@@ -163,4 +193,7 @@ public class File {
         return mIsVirtual;
     }
 
+    public boolean isStarred() {
+        return mLabels != null && mLabels.get(0);
+    }
 }

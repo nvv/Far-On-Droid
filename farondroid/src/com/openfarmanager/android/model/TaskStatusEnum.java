@@ -20,6 +20,7 @@ public enum TaskStatusEnum {
     ERROR_WRONG_DESTINATION_FILE_NAME,
     ERROR_COPY,
     ERROR_EXPORT_AS,
+    ERROR_UPDATE_INFO,
     ERROR_CAN_T_CREATE_DIRECTORY,
     ERROR_CREATING_ARCHIVE_FILES_TREE,
     ERROR_CREATE_BOOKMARK,
@@ -84,6 +85,8 @@ public enum TaskStatusEnum {
                 return res.getString(R.string.error_cannot_create_file, sub != null ? sub : "");
             case ERROR_EXPORT_AS:
                 return res.getString(R.string.error_export_as);
+            case ERROR_UPDATE_INFO:
+                return res.getString(R.string.error_update_file_info);
             default:
                 return "";
         }

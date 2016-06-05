@@ -31,17 +31,24 @@ import static com.openfarmanager.android.googledrive.api.Fields.TITLE;
  */
 public class GoogleDriveWebApi extends Api {
 
+    private String setupQuery(String path) {
+        switch (path) {
+            case File.SHARED_FOLDER_ID:
+                return "sharedWithMe";
+            case File.STARRED_FOLDER_ID:
+                return "starred=true";
+            default:
+                return String.format("'%s'+in+parents+and+trashed=false", path);
+        }
+    }
+
     public List<File> listFiles(String path) throws Exception {
         if (path == null || path.trim().equals("") || path.equals("/")) {
             path = "root";
         }
 
-        boolean sharedFiles = path.equals(File.SHARED_FOLDER_ID);
-
         List<File> files = new ArrayList<File>();
-        list(files, null, sharedFiles ?
-                "sharedWithMe" :
-                String.format("'%s'+in+parents+and+trashed=false", path));
+        list(files, null, setupQuery(path));
         return files;
     }
 
@@ -145,21 +152,29 @@ public class GoogleDriveWebApi extends Api {
 
     public boolean rename(String fileId, String newTitle) {
         try {
+            JSONObject obj = new JSONObject();
+            obj.put(TITLE, newTitle);
+            return updateData(fileId, obj.toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean updateData(String fileId, String data) {
+        try {
             HttpURLConnection connection = createConnection(new URL(LIST_URL + "/" + fileId + '?' + getAuth()));
             connection.setRequestMethod(METHOD_PUT);
 
-            JSONObject obj = new JSONObject();
-            obj.put(TITLE, newTitle);
-
             OutputStreamWriter out = new OutputStreamWriter(connection.getOutputStream());
-            out.write(obj.toString());
+            out.write(data);
             out.close();
 
             int statusCode = connection.getResponseCode();
 
             if (isTokenExpired(statusCode, connection.getResponseMessage())) {
                 setupToken(refreshToken(mToken));
-                return delete(fileId);
+                return updateData(fileId, data);
             }
 
             return statusCode == 200;

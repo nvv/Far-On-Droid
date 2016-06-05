@@ -399,4 +399,7 @@ More network stuff will appear in future versions.
     <string name="error_user_empty">"User name" must not be empty</string>
     <string name="error_password_empty">"Password" must not be empty</string>
     <string name="error_save_as_empty">"Save account as" must not be empty</string>
+    <string name="add_star">Add Star</string>
+    <string name="remove_star">Remove Star</string>
+    <string name="error_update_file_info">Error while updating file info.</string>
 </resources>

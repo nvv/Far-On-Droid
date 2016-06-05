@@ -115,6 +115,8 @@ public class FileSystemController {
     public static final int SFTP_CONNECTED = 128;
     public static final int WEBDAV_CONNECTED = 129;
     public static final int YANDEX_DISK_CONNECTED = 130;
+    public static final int ADD_STAR = 131;
+    public static final int REMOVE_STAR = 132;
 
     public static final int ARG_FORCE_OPEN_FILE_IN_EDITOR = 1000;
     public static final int ARG_EXPAND_LEFT_PANEL = 1001;
@@ -483,7 +485,19 @@ public class FileSystemController {
                     }
                     activePanel.invalidatePanels(inactivePanel);
                     break;
+                case ADD_STAR:
+                    GoogleDriveFile googleDriveFile = (GoogleDriveFile) msg.obj;
+                    inactivePanel.updateGoogleDriveData(activePanel, googleDriveFile.getId(), getStarredData(true));
+                    break;
+                case REMOVE_STAR:
+                    googleDriveFile = (GoogleDriveFile) msg.obj;
+                    inactivePanel.updateGoogleDriveData(activePanel, googleDriveFile.getId(), getStarredData(false));
+                    break;
             }
+        }
+
+        private String getStarredData(boolean star) {
+            return String.format("{\"labels\":{\"starred\":%s}}", star);
         }
     };
 

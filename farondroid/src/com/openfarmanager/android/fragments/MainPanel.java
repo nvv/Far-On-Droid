@@ -34,6 +34,7 @@ import com.openfarmanager.android.filesystem.FileSystemScanner;
 import com.openfarmanager.android.filesystem.actions.FileActionTask;
 import com.openfarmanager.android.filesystem.actions.OnActionListener;
 import com.openfarmanager.android.filesystem.actions.network.ExportAsTask;
+import com.openfarmanager.android.filesystem.actions.network.GoogleDriveUpdateTask;
 import com.openfarmanager.android.filesystem.commands.CommandsFactory;
 import com.openfarmanager.android.model.Bookmark;
 import com.openfarmanager.android.model.FileActionEnum;
@@ -53,6 +54,7 @@ import java.util.*;
 
 import static com.openfarmanager.android.controllers.FileSystemController.*;
 import static com.openfarmanager.android.model.FileActionEnum.*;
+import static com.openfarmanager.android.model.FileActionEnum.ADD_STAR;
 
 public class MainPanel extends BaseFileSystemPanel {
 
@@ -587,10 +589,10 @@ public class MainPanel extends BaseFileSystemPanel {
                 createArchive(inactivePanel);
                 break;
             case EXPORT_AS:
-                mHandler.sendMessage(mHandler.obtainMessage(FileSystemController.EXPORT_AS, mSelectedFiles.size() == 1 ? mSelectedFiles.get(0) : null));
+                mHandler.sendMessage(mHandler.obtainMessage(FileSystemController.EXPORT_AS, getSelectedFile()));
                 break;
             case OPEN_WEB:
-                mHandler.sendMessage(mHandler.obtainMessage(FileSystemController.OPEN_WEB, mSelectedFiles.size() == 1 ? mSelectedFiles.get(0) : null));
+                mHandler.sendMessage(mHandler.obtainMessage(FileSystemController.OPEN_WEB, getSelectedFile()));
                 break;
             case COPY_PATH:
                 if (mSelectedFiles.size() == 1) {
@@ -599,7 +601,18 @@ public class MainPanel extends BaseFileSystemPanel {
                     ToastNotification.makeText(App.sInstance.getApplicationContext(), getString(R.string.path_copied), Toast.LENGTH_SHORT).show();
                 }
                 break;
+            case ADD_STAR:
+                mHandler.sendMessage(mHandler.obtainMessage(FileSystemController.ADD_STAR, getSelectedFile()));
+                break;
+            case REMOVE_STAR:
+                mHandler.sendMessage(mHandler.obtainMessage(FileSystemController.REMOVE_STAR, getSelectedFile()));
+                break;
+
         }
+    }
+
+    private FileProxy getSelectedFile() {
+        return mSelectedFiles.size() == 1 ? mSelectedFiles.get(0) : null;
     }
 
     private boolean isFileExists(File file) {
@@ -696,6 +709,35 @@ public class MainPanel extends BaseFileSystemPanel {
                             invalidatePanels(activePanel);
                         }
                     }, downloadLink, destination);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        task.execute();
+    }
+
+    public void updateGoogleDriveData(final MainPanel inactivePanel, String fileId, String data) {
+        FileActionTask task = null;
+        try {
+            task = new GoogleDriveUpdateTask(inactivePanel,
+                    new OnActionListener() {
+                        @Override
+                        public void onActionFinish(TaskStatusEnum status) {
+                            try {
+                                if (status != TaskStatusEnum.OK) {
+                                    try {
+                                        String error = status.getNetworkErrorException().getLocalizedError();
+                                        ErrorDialog.newInstance(error).show(fragmentManager(), "errorDialog");
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                            inactivePanel.getSelectedFiles().clear();
+                            invalidatePanels(inactivePanel);
+                        }
+                    }, fileId, data);
         } catch (Exception e) {
             e.printStackTrace();
         }
