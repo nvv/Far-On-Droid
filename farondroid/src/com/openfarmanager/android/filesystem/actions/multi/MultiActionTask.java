@@ -43,7 +43,7 @@ public abstract class MultiActionTask {
     private static final int MSG_POST_RESULT = 1;
     private static final int MSG_SET_HEADER = 2;
 
-    protected final static byte[] BUFFER = new byte[512 * 1024];
+    protected final static byte[] BUFFER = new byte[16 * 1024];
 
     private static InternalHandler sHandler;
 

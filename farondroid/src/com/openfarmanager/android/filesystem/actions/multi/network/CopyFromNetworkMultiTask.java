@@ -209,7 +209,7 @@ public class CopyFromNetworkMultiTask extends NetworkActionMultiTask {
                 public Object call() throws Exception {
                     createDirectoryIfNotExists(destination);
                     File destinationFile = createFileIfNotExists(fullSourceFilePath);
-                    api.download(source, getOutputStream(mSdCardPath, mUseStorageApi, mBaseUri, destinationFile), new byte[512 * 1024]);
+                    api.download(source, getOutputStream(mSdCardPath, mUseStorageApi, mBaseUri, destinationFile), new byte[16 * 1024]);
                     return null;
                 }
             }, source);
@@ -389,7 +389,7 @@ public class CopyFromNetworkMultiTask extends NetworkActionMultiTask {
                     OutputStream out = getOutputStream(mSdCardPath, mUseStorageApi, mBaseUri, destinationFile);
 
                     int len;
-                    byte[] buf = new byte[512 * 1024];
+                    byte[] buf = new byte[16 * 1024];
                     while ((len = in.read(buf)) > 0) {
                         out.write(buf, 0, len);
                     }
@@ -437,8 +437,9 @@ public class CopyFromNetworkMultiTask extends NetworkActionMultiTask {
                     OutputStream out = getOutputStream(mSdCardPath, mUseStorageApi, mBaseUri, destinationFile);
 
                     int len;
-                    while ((len = in.read(BUFFER)) > 0) {
-                        out.write(BUFFER, 0, len);
+                    byte[] buf = new byte[16 * 1024];
+                    while ((len = in.read(buf)) > 0) {
+                        out.write(buf, 0, len);
                     }
 
                     out.close();
@@ -538,8 +539,9 @@ public class CopyFromNetworkMultiTask extends NetworkActionMultiTask {
                     InputStream in = httpResponse.getEntity().getContent();
                     OutputStream out = getOutputStream(mSdCardPath, mUseStorageApi, mBaseUri, destinationFile);
                     int len;
-                    while ((len = in.read(BUFFER)) > 0) {
-                        out.write(BUFFER, 0, len);
+                    byte[] buf = new byte[16 * 1024];
+                    while ((len = in.read(buf)) > 0) {
+                        out.write(buf, 0, len);
                     }
 
                     updateProgress();
