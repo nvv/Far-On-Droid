@@ -17,7 +17,7 @@ import java.util.List;
  */
 public abstract class FileActionTask extends AsyncTask<Void, Integer, TaskStatusEnum> {
 
-    protected final static byte[] BUFFER = new byte[512 * 1024];
+    protected final static byte[] BUFFER = new byte[2048 * 1024];
 
     protected List<File> mItems;
     protected FileActionProgressDialog mProgressDialog;
@@ -33,6 +33,11 @@ public abstract class FileActionTask extends AsyncTask<Void, Integer, TaskStatus
     protected String mSdCardPath;
     protected Uri mBaseUri;
     protected boolean mUseStorageApi;
+
+    /**
+     * Task start time in milliseconds. For debug purposes.
+     */
+    protected long mTaskStartTime;
 
     public FileActionTask(FragmentManager fragmentManager, OnActionListener listener, List<File> items) {
         mItems = items;

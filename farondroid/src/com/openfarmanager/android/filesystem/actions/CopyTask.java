@@ -1,13 +1,21 @@
 package com.openfarmanager.android.filesystem.actions;
 
 import android.support.v4.app.FragmentManager;
+import android.util.Log;
 
+import com.google.common.io.Files;
+import com.openfarmanager.android.BuildConfig;
 import com.openfarmanager.android.model.TaskStatusEnum;
 import com.openfarmanager.android.model.exeptions.SdcardPermissionException;
 import com.openfarmanager.android.utils.FileUtilsExt;
 import com.openfarmanager.android.utils.SystemUtils;
 
 import java.io.*;
+import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
+import java.nio.channels.FileChannel;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.channels.WritableByteChannel;
 import java.util.ConcurrentModificationException;
 import java.util.List;
 
@@ -28,6 +36,10 @@ public class CopyTask extends FileActionTask {
 
     @Override
     protected TaskStatusEnum doInBackground(Void... voids) {
+        if (BuildConfig.DEBUG) {
+            mTaskStartTime = System.currentTimeMillis();
+        }
+
         if (FileUtilsExt.isTheSameFolders(mItems, mDestinationFolder)) { // no need to copy.
             return ERROR_COPY_TO_THE_SAME_FOLDER;
         }
@@ -62,6 +74,11 @@ public class CopyTask extends FileActionTask {
                 return ERROR_COPY;
             }
         }
+
+        if (BuildConfig.DEBUG) {
+            Log.d("Copy Task", "execution time = " + (System.currentTimeMillis() - mTaskStartTime));
+        }
+
         return TaskStatusEnum.OK;
     }
 
