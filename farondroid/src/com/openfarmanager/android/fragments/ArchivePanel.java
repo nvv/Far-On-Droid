@@ -201,6 +201,10 @@ public class ArchivePanel extends MainPanel {
         }
     }
 
+    protected boolean isBookmarksSupported() {
+        return false;
+    }
+
     private void openArchiveFailed() {
         postIfAttached(mOpenArchiveFailed);
     }

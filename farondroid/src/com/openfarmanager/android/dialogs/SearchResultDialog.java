@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -112,6 +113,7 @@ public class SearchResultDialog extends Dialog {
                     return;
                 }
                 mListener.onViewFile(mSelected);
+                dismiss();
             }
         });
 
@@ -179,12 +181,14 @@ public class SearchResultDialog extends Dialog {
                 if (view == null) {
                     textView = new TextView(getContext());
                     textView.setTextColor(Color.BLACK);
+                    textView.setEllipsize(TextUtils.TruncateAt.MIDDLE);
+                    textView.setSingleLine();
                     textView.setTextSize(18);
                 } else {
                     textView = (TextView) view;
                 }
                 FileProxy f = (FileProxy) getItem(i);
-                textView.setText(f.getName());
+                textView.setText(f.getFullPathRaw());
                 textView.setTag(f);
                 textView.setBackgroundResource(mSelectedFilePosition == i ? R.color.selected_item : R.color.main_grey);
                 return textView;

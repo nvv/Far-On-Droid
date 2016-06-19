@@ -131,6 +131,10 @@ public class GenericPanel extends MainPanel {
         return false;
     }
 
+    protected boolean isBookmarksSupported() {
+        return false;
+    }
+
     private Handler mAdapterHandler = new Handler() {
 
         @Override

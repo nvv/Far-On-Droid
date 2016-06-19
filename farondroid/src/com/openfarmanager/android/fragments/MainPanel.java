@@ -941,8 +941,8 @@ public class MainPanel extends BaseFileSystemPanel {
         mChangePathToLeft.setVisibility(!forceHide && isCopyFolderSupported && mPanelLocation == LEFT_PANEL ? View.VISIBLE : View.GONE);
         mChangePathToRight.setVisibility(!forceHide && isCopyFolderSupported && mPanelLocation == RIGHT_PANEL ? View.VISIBLE : View.GONE);
 
-        mAddToBookmarksLeft.setVisibility(!forceHide && mPanelLocation == LEFT_PANEL ? View.VISIBLE : View.GONE);
-        mAddToBookmarksRight.setVisibility(!forceHide && mPanelLocation == RIGHT_PANEL ? View.VISIBLE : View.GONE);
+        mAddToBookmarksLeft.setVisibility(!forceHide && isBookmarksSupported() && mPanelLocation == LEFT_PANEL ? View.VISIBLE : View.GONE);
+        mAddToBookmarksRight.setVisibility(!forceHide && isBookmarksSupported() && mPanelLocation == RIGHT_PANEL ? View.VISIBLE : View.GONE);
 
         mNetworkLeft.setVisibility(!forceHide && isCopyFolderSupported && mPanelLocation == LEFT_PANEL ? View.VISIBLE : View.GONE);
         mNetworkRight.setVisibility(!forceHide && isCopyFolderSupported && mPanelLocation == RIGHT_PANEL ? View.VISIBLE : View.GONE);
@@ -969,6 +969,10 @@ public class MainPanel extends BaseFileSystemPanel {
      * @return <code>true</code>
      */
     protected boolean isCopyFolderSupported() {
+        return true;
+    }
+
+    protected boolean isBookmarksSupported() {
         return true;
     }
 
