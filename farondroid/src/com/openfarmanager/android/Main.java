@@ -5,13 +5,10 @@ import android.annotation.TargetApi;
 import android.content.Intent;
 import android.content.UriPermission;
 import android.content.res.Configuration;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.text.TextUtils;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -38,8 +35,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import rx.Observable;
 import rx.Subscriber;
@@ -65,6 +60,13 @@ public class Main extends BaseActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == BaseFileSystemPanel.REQUEST_CODE_REQUEST_PERMISSION && Build.VERSION.SDK_INT >= 21 && data != null) {
+            getContentResolver().takePersistableUriPermission(data.getData(),
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+            return;
+        }
+
         if (data != null && data.getBooleanExtra(RESULT_CODE_PANELS_MODE_CHANGED, false)) {
             Intent intent = getIntent();
             overridePendingTransition(0, 0);
@@ -88,10 +90,6 @@ public class Main extends BaseActivity {
             startActivityForResult(intent, BaseFileSystemPanel.REQUEST_CODE_REQUEST_PERMISSION);
         }
 
-        if (requestCode == BaseFileSystemPanel.REQUEST_CODE_REQUEST_PERMISSION && Build.VERSION.SDK_INT >= 21 && data != null) {
-            getContentResolver().takePersistableUriPermission(data.getData(),
-                    Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-        }
 
         setupToolbarVisibility();
     }
