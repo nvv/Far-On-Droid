@@ -1,5 +1,6 @@
 package com.openfarmanager.android.utils;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Build;
@@ -8,15 +9,9 @@ import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.WindowManager;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import com.openfarmanager.android.App;
 
-import rx.Observable;
-import rx.Subscription;
-import rx.functions.Action1;
-import rx.functions.Func1;
+import java.io.File;
 
 /**
  * System utilities methods.
@@ -73,43 +68,18 @@ public class SystemUtils {
         return sIsTablet;
     }
 
+    @TargetApi(21)
     public static String getExternalStorage(final String fullPath) {
-
-        Observable<String> sdCardNames = Observable.from(Arrays.asList("ext_card", "external_sd",
-                "ext_sd", "external", "extSdCard", "externalSdCard", "sdcard1", "9C33-6BBD")); //TODO
-
-        Observable<File> mnt = sdCardNames.map(new Func1<String, File>() {
-            @Override
-            public File call(String sdCard) {
-                return new File("/mnt/", sdCard);
-            }
-        });
-
-        Observable<File> storage = sdCardNames.map(new Func1<String, File>() {
-            @Override
-            public File call(String sdCard) {
-                return new File("/storage/", sdCard);
-            }
-        });
-
-        final SimpleWrapper<String> sdCard = new SimpleWrapper<>();
-        final Subscription subscription = Observable.merge(mnt, storage).filter(new Func1<File, Boolean>() {
-            @Override
-            public Boolean call(File file) {
-                return fullPath.toLowerCase().startsWith(file.getAbsolutePath().toLowerCase());
-            }
-        }).firstOrDefault(null).subscribe(new Action1<File>() {
-            @Override
-            public void call(File file) {
-                if (file != null) {
-                    sdCard.value = file.getAbsolutePath();
+        if (StorageUtils.checkVersion()) {
+            File[] dirs = App.sInstance.getExternalFilesDirs(null);
+            for (File dir : dirs) {
+                dir = dir.getParentFile().getParentFile().getParentFile().getParentFile();
+                if (fullPath.toLowerCase().startsWith(dir.getAbsolutePath().toLowerCase()) && Environment.isExternalStorageRemovable(dir)) {
+                    return dir.getAbsolutePath();
                 }
             }
-        });
-
-        subscription.unsubscribe();
-        return sdCard.value;
+        }
+        return null;
     }
-
 
 }
