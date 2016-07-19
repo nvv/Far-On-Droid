@@ -366,6 +366,10 @@ public class FileSystemController {
             if (activePanel != null) {
                 boolean isLeftPanelActive = activePanel.getPanelLocation() == LEFT_PANEL;
                 inactivePanel = isLeftPanelActive ? getRightVisiblePanel() : getLeftVisiblePanel();
+
+                if (inactivePanel == null) {
+                    inactivePanel = getInactivePanel();
+                }
             }
 
             switch (msg.what) {
