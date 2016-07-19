@@ -304,12 +304,11 @@ public class MainToolbarPanel extends Fragment {
     public static class SubMenuDialog extends BaseDialog {
 
         private MenuItem menu;
-        private ArrayList<MenuItemImpl> menuItems;
+        private ArrayList<MenuItemImpl> menuItems = new ArrayList<>();
         private OnActionSelectedListener listener;
 
         public static SubMenuDialog newInstance(ArrayList<MenuItemImpl> items, OnActionSelectedListener listener) {
             SubMenuDialog dialog = new SubMenuDialog();
-            dialog.menuItems = new ArrayList<>();
             for (MenuItemImpl item : items) {
                 if (item.getItemId() != R.id.action_alt) {
                     dialog.menuItems.add(item);
