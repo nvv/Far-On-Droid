@@ -209,7 +209,9 @@ public class FlatFileSystemAdapter extends BaseAdapter {
                 protected void onPostExecute(List<FileProxy> aVoid) {
                     mFiles = aVoid;
                     notifyDataSetChanged();
-                    mListener.onScanFinished(selection);
+                    if (mListener != null) {
+                        mListener.onScanFinished(selection);
+                    }
                 }
             }.execute();
 
