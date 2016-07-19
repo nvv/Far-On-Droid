@@ -140,6 +140,14 @@ public class FileSystemControllerSmartphone extends FileSystemController {
     @Override
     public void openNetworkPanel(NetworkEnum networkType, String path) {
         MainPanel activePanel = getActivePanel();
+
+        // hack: avoid NPE: request focus for non null panel.
+        if (activePanel == null) {
+            MainPanel leftPanel = getLeftVisiblePanel();
+            activePanel = leftPanel != null ? leftPanel : getRightVisiblePanel();
+            activePanel.gainFocus();
+        }
+
         boolean isLeftPanel = activePanel.getPanelLocation() == MainPanel.LEFT_PANEL;
 
         forceExitFromNetwork(networkType, activePanel);
