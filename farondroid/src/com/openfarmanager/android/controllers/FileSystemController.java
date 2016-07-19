@@ -834,6 +834,15 @@ public class FileSystemController {
         } else if (rightVisiblePanel != null && rightVisiblePanel.isActive()) {
             return rightVisiblePanel;
         } else {
+            // hack: avoid NPE: request focus for non null panel.
+            if (leftVisiblePanel != null) {
+                leftVisiblePanel.gainFocus();
+                return leftVisiblePanel;
+            } else if (rightVisiblePanel != null) {
+                rightVisiblePanel.gainFocus();
+                return rightVisiblePanel;
+            }
+
             return null;
         }
     }
