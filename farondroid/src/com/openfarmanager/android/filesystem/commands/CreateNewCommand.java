@@ -58,6 +58,11 @@ public class CreateNewCommand extends AbstractPermissionCommand {
     private boolean createFileRawApi(boolean createDirectory, File destination) throws IOException {
         boolean result;
         File parentFile = destination.getParentFile();
+
+        if (parentFile == null) {
+            return false;
+        }
+
         boolean isRootRequired = !parentFile.canRead() || !parentFile.canWrite();
         result = isRootRequired ? RootTask.create(destination, createDirectory) :
                 createDirectory ?
