@@ -30,6 +30,7 @@ public enum TaskStatusEnum {
     ERROR_EXTRACTING_ARCHIVE_FILES,
     ERROR_NETWORK,
     ERROR_ACCESS_DENIED,
+    ERROR_DROPBOX_SHARE,
     ERROR_STORAGE_PERMISSION_REQUIRED;
 
     private NetworkException mException;
@@ -87,6 +88,8 @@ public enum TaskStatusEnum {
                 return res.getString(R.string.error_export_as);
             case ERROR_UPDATE_INFO:
                 return res.getString(R.string.error_update_file_info);
+            case ERROR_DROPBOX_SHARE:
+                return res.getString(R.string.error_dropbox_share_error);
             default:
                 return "";
         }

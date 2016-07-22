@@ -393,4 +393,5 @@
     <string name="add_star">Добавить в Starred</string>
     <string name="remove_star">Убрать из Starred</string>
     <string name="error_update_file_info">Ошибка при обновлениее информации о файле.</string>
+    <string name="error_dropbox_share_error">Ошибка при попытке поделиться файлом</string>
 </resources>

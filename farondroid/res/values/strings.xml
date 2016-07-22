@@ -402,4 +402,5 @@ More network stuff will appear in future versions.
     <string name="add_star">Add Star</string>
     <string name="remove_star">Remove Star</string>
     <string name="error_update_file_info">Error while updating file info.</string>
+    <string name="error_dropbox_share_error">Can\'t share dropbox resource.</string>
 </resources>

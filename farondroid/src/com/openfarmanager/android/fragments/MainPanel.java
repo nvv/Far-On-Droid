@@ -28,11 +28,13 @@ import com.openfarmanager.android.core.archive.MimeTypes;
 import com.openfarmanager.android.dialogs.*;
 import com.openfarmanager.android.dialogs.CreateArchiveDialog;
 import com.openfarmanager.android.dialogs.SearchActionDialog;
+import com.openfarmanager.android.filesystem.DropboxFile;
 import com.openfarmanager.android.filesystem.FileProxy;
 import com.openfarmanager.android.filesystem.FileSystemFile;
 import com.openfarmanager.android.filesystem.FileSystemScanner;
 import com.openfarmanager.android.filesystem.actions.FileActionTask;
 import com.openfarmanager.android.filesystem.actions.OnActionListener;
+import com.openfarmanager.android.filesystem.actions.network.DropboxTask;
 import com.openfarmanager.android.filesystem.actions.network.ExportAsTask;
 import com.openfarmanager.android.filesystem.actions.network.GoogleDriveUpdateTask;
 import com.openfarmanager.android.filesystem.commands.CommandsFactory;
@@ -607,7 +609,9 @@ public class MainPanel extends BaseFileSystemPanel {
             case REMOVE_STAR:
                 mHandler.sendMessage(mHandler.obtainMessage(FileSystemController.REMOVE_STAR, getSelectedFile()));
                 break;
-
+            case SHARE:
+                mHandler.sendMessage(mHandler.obtainMessage(FileSystemController.SHARE, getSelectedFile()));
+                break;
         }
     }
 
@@ -738,6 +742,35 @@ public class MainPanel extends BaseFileSystemPanel {
                             invalidatePanels(inactivePanel);
                         }
                     }, fileId, data);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        task.execute();
+    }
+
+    public void doDropboxTask(final MainPanel inactivePanel, DropboxFile file, int dropboxTask) {
+        FileActionTask task = null;
+        try {
+            task = new DropboxTask(inactivePanel,
+                    new OnActionListener() {
+                        @Override
+                        public void onActionFinish(TaskStatusEnum status) {
+                            try {
+                                if (status != TaskStatusEnum.OK) {
+                                    try {
+                                        String error = status.getNetworkErrorException().getLocalizedError();
+                                        ErrorDialog.newInstance(error).show(fragmentManager(), "errorDialog");
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                            inactivePanel.getSelectedFiles().clear();
+                            invalidatePanels(inactivePanel);
+                        }
+                    }, file, dropboxTask);
         } catch (Exception e) {
             e.printStackTrace();
         }

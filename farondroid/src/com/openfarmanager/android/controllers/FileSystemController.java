@@ -33,9 +33,11 @@ import com.openfarmanager.android.core.Settings;
 import com.openfarmanager.android.core.network.NetworkConnectionManager;
 import com.openfarmanager.android.dialogs.BookmarksListDialog;
 import com.openfarmanager.android.dialogs.SelectEncodingDialog;
+import com.openfarmanager.android.filesystem.DropboxFile;
 import com.openfarmanager.android.filesystem.GoogleDriveFile;
 import com.openfarmanager.android.filesystem.actions.DiffDirectoriesTask;
 import com.openfarmanager.android.filesystem.actions.RootTask;
+import com.openfarmanager.android.filesystem.actions.network.DropboxTask;
 import com.openfarmanager.android.fragments.ArchivePanel;
 import com.openfarmanager.android.fragments.BasePanel;
 import com.openfarmanager.android.fragments.DirectoryDetailsView;
@@ -117,6 +119,7 @@ public class FileSystemController {
     public static final int YANDEX_DISK_CONNECTED = 130;
     public static final int ADD_STAR = 131;
     public static final int REMOVE_STAR = 132;
+    public static final int SHARE = 133;
 
     public static final int ARG_FORCE_OPEN_FILE_IN_EDITOR = 1000;
     public static final int ARG_EXPAND_LEFT_PANEL = 1001;
@@ -496,6 +499,9 @@ public class FileSystemController {
                 case REMOVE_STAR:
                     googleDriveFile = (GoogleDriveFile) msg.obj;
                     inactivePanel.updateGoogleDriveData(activePanel, googleDriveFile.getId(), getStarredData(false));
+                    break;
+                case SHARE:
+                    inactivePanel.doDropboxTask(activePanel, (DropboxFile) msg.obj, DropboxTask.TASK_SHARE);
                     break;
             }
         }

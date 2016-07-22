@@ -44,7 +44,8 @@ public enum FileActionEnum implements Parcelable, Serializable {
     }
 
     private static FileActionEnum[] selectActionsForNetwork(NetworkEnum networkType, List<FileProxy> selectedFiles) {
-        if (networkType == NetworkEnum.GoogleDrive && selectedFiles != null && selectedFiles.size() == 1) {
+        boolean isSingleFileSelected = selectedFiles != null && selectedFiles.size() == 1;
+        if (networkType == NetworkEnum.GoogleDrive && isSingleFileSelected) {
             GoogleDriveFile file = (GoogleDriveFile) selectedFiles.get(0);
 
             boolean provideExport = file.getExportLinks() != null && file.getExportLinks().size() > 0;
@@ -68,6 +69,11 @@ public enum FileActionEnum implements Parcelable, Serializable {
                 System.arraycopy(actions, 2, allActions, 3, actions.length - 2);
                 return allActions;
             }
+        } else if (networkType == NetworkEnum.Dropbox && isSingleFileSelected) {
+            FileActionEnum[] allActions = new FileActionEnum[sActionsForNetwork.length + 1];
+            allActions[0] = SHARE;
+            System.arraycopy(sActionsForNetwork, 0, allActions, 1, sActionsForNetwork.length);
+            return allActions;
         }
 
         return sActionsForNetwork;

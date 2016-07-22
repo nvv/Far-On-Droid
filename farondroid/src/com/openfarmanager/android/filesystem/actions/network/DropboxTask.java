@@ -1,0 +1,56 @@
+package com.openfarmanager.android.filesystem.actions.network;
+
+import android.content.Intent;
+import android.net.Uri;
+
+import com.dropbox.client2.DropboxAPI;
+import com.openfarmanager.android.App;
+import com.openfarmanager.android.filesystem.DropboxFile;
+import com.openfarmanager.android.filesystem.FileProxy;
+import com.openfarmanager.android.filesystem.actions.OnActionListener;
+import com.openfarmanager.android.fragments.BaseFileSystemPanel;
+import com.openfarmanager.android.model.TaskStatusEnum;
+
+import java.io.File;
+import java.util.ArrayList;
+
+/**
+ * @author Vlad Namashko
+ */
+public class DropboxTask extends NetworkActionTask {
+
+    public static final int TASK_SHARE = 1000;
+
+    protected DropboxFile mDropboxFile;
+    protected int mTask;
+
+    public DropboxTask(BaseFileSystemPanel panel, OnActionListener listener, DropboxFile file, int task) {
+        super(panel.getFragmentManager(), panel, listener, new ArrayList<File>());
+        mDropboxFile = file;
+        mNoProgress = true;
+        mTask = task;
+    }
+
+    @Override
+    protected TaskStatusEnum doInBackground(Void... params) {
+        // TODO: hack
+        totalSize = 1;
+
+        if (mTask == TASK_SHARE)
+
+            try {
+                final DropboxAPI.DropboxLink dropboxLink = App.sInstance.getDropboxApi().share(mDropboxFile.getFullPath());
+                Intent intent = new Intent(Intent.ACTION_SEND);
+                intent.setType("text/plain");
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.putExtra(Intent.EXTRA_TEXT, dropboxLink.url);
+                App.sInstance.startActivity(intent);
+
+            } catch (Exception e) {
+                return TaskStatusEnum.ERROR_EXPORT_AS;
+            }
+
+        return TaskStatusEnum.OK;
+    }
+
+}
