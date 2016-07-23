@@ -11,6 +11,7 @@ import com.openfarmanager.android.filesystem.FileSystemScanner;
 import com.openfarmanager.android.filesystem.FtpFile;
 import com.openfarmanager.android.model.NetworkAccount;
 import com.openfarmanager.android.model.NetworkEnum;
+import com.openfarmanager.android.model.exeptions.FtpDirectoryDeleteException;
 import com.openfarmanager.android.model.exeptions.InAppAuthException;
 import com.openfarmanager.android.model.exeptions.NetworkException;
 
@@ -201,9 +202,18 @@ public class FtpAPI implements NetworkApi {
     }
 
     @Override
-    public void delete(FileProxy file) throws Exception {
+    public void delete(final FileProxy file) throws Exception {
         if (file.isDirectory()) {
-            mFtpClient.removeDirectory(file.getFullPath());
+            if (!mFtpClient.removeDirectory(file.getFullPath())) {
+                if (App.sInstance.getSettings().isFtpAllowRecursiveDelete()) {
+                    for (FileProxy proxy : getDirectoryFiles(file.getFullPath())) {
+                        delete(proxy);
+                    }
+                    mFtpClient.removeDirectory(file.getFullPath());
+                } else {
+                    throw new FtpDirectoryDeleteException();
+                }
+            }
         } else {
             mFtpClient.deleteFile(file.getFullPath());
         }

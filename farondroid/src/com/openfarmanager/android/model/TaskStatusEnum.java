@@ -31,6 +31,7 @@ public enum TaskStatusEnum {
     ERROR_NETWORK,
     ERROR_ACCESS_DENIED,
     ERROR_DROPBOX_SHARE,
+    ERROR_FTP_DELETE_DIRECTORY,
     ERROR_STORAGE_PERMISSION_REQUIRED;
 
     private NetworkException mException;
@@ -58,7 +59,7 @@ public enum TaskStatusEnum {
                 return res.getString(R.string.error_cannot_copy_files, sub != null ? sub : "");
             case ERROR_COPY_TO_THE_SAME_FOLDER:
                 return res.getString(R.string.error_cannot_copy_files_to_the_same_folder);
-            case ERROR_DELETE_FILE:
+            case ERROR_DELETE_FILE: case ERROR_FTP_DELETE_DIRECTORY:
                 return res.getString(R.string.error_cannot_delete_files);
             case ERROR_MOVE_FILE:
                 return res.getString(R.string.error_cannot_move_files);

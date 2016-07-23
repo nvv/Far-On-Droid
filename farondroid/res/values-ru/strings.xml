@@ -9,6 +9,7 @@
     <string name="btn_ok">Ok</string>
     <string name="btn_yes">Да</string>
     <string name="btn_no">Нет</string>
+    <string name="btn_dont_ask">Больше не спрашивать</string>
     <string name="btn_skip">Пропустить</string>
     <string name="btn_save">Сохранить</string>
     <string name="btn_select">Выбрать</string>
@@ -394,4 +395,6 @@
     <string name="remove_star">Убрать из Starred</string>
     <string name="error_update_file_info">Ошибка при обновлениее информации о файле.</string>
     <string name="error_dropbox_share_error">Ошибка при попытке поделиться файлом</string>
+    <string name="recursive_delete_allowed">Рекурсивное удаление разрешено. Попробуйте еще раз.</string>
+    <string name="allow_recursive_delete">Разрешить рекурсивное удаление</string>
 </resources>

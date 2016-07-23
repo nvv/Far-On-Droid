@@ -10,6 +10,7 @@ import com.openfarmanager.android.filesystem.actions.OnActionListener;
 import com.openfarmanager.android.fragments.BaseFileSystemPanel;
 import com.openfarmanager.android.model.NetworkEnum;
 import com.openfarmanager.android.model.TaskStatusEnum;
+import com.openfarmanager.android.model.exeptions.FtpDirectoryDeleteException;
 import com.openfarmanager.android.model.exeptions.NetworkException;
 import com.yandex.disk.client.exceptions.WebdavException;
 
@@ -63,6 +64,8 @@ public class DeleteFromNetworkTask extends NetworkActionTask {
                 return createNetworkError(NetworkException.handleNetworkException(e));
             } catch (WebdavException e) {
                 return createNetworkError(NetworkException.handleNetworkException(e));
+            } catch (FtpDirectoryDeleteException e) { // special case
+                return ERROR_FTP_DELETE_DIRECTORY;
             } catch (Exception e) {
                 return ERROR_DELETE_FILE;
             }

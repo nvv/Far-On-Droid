@@ -2,13 +2,16 @@ package com.openfarmanager.android.fragments;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.FragmentManager;
+import android.util.DisplayMetrics;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListPopupWindow;
@@ -19,6 +22,7 @@ import com.openfarmanager.android.core.AbstractCommand;
 import com.openfarmanager.android.core.CancelableCommand;
 import com.openfarmanager.android.core.archive.ArchiveScanner;
 import com.openfarmanager.android.core.archive.ArchiveUtils;
+import com.openfarmanager.android.dialogs.YesNoDontAskAgainDialog;
 import com.openfarmanager.android.filesystem.FileProxy;
 import com.openfarmanager.android.filesystem.actions.*;
 import com.openfarmanager.android.filesystem.actions.multi.network.CopyFromNetworkMultiTask;
@@ -30,6 +34,7 @@ import com.openfarmanager.android.model.NetworkAccount;
 import com.openfarmanager.android.model.NetworkEnum;
 import com.openfarmanager.android.model.SelectParams;
 import com.openfarmanager.android.model.TaskStatusEnum;
+import com.openfarmanager.android.utils.SystemUtils;
 import com.openfarmanager.android.view.OnSwipeTouchListener;
 import com.openfarmanager.android.view.ToastNotification;
 
@@ -194,6 +199,14 @@ public abstract class BaseFileSystemPanel extends BasePanel {
     @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
     public void handleNetworkActionResult(TaskStatusEnum status, boolean forceInvalidate, Object[] args) {
         if (status != TaskStatusEnum.OK) {
+
+            if (status == TaskStatusEnum.ERROR_FTP_DELETE_DIRECTORY) { // special case for s/ftp
+                if (!App.sInstance.getSettings().isFtpAllowRecursiveDelete() && App.sInstance.getSettings().allowedToAskRecursiveDelete()) {
+                    new YesNoDontAskAgainDialog(getActivity()).show();
+                    return;
+                }
+            }
+
             String error;
             error = status == TaskStatusEnum.ERROR_CREATE_DIRECTORY ?
                     getSafeString(R.string.error_cannot_create_file, (String) args[1]) : TaskStatusEnum.getErrorString(status, (String) args[1]);
@@ -564,6 +577,29 @@ public abstract class BaseFileSystemPanel extends BasePanel {
                     }
                 }).show(fragmentManager(), "errorDialog");
             } catch (Exception ignore) {}
+        }
+    }
+
+    protected void adjustDialogSize(Dialog dialog) {
+        adjustDialogSize(dialog, 0.8f);
+    }
+
+    /**
+     * Adjust dialog size. Actuall for old android version only (due to absence of Holo themes).
+     *
+     * @param dialog dialog whose size should be adjusted.
+     */
+    protected void adjustDialogSize(Dialog dialog, float scaleFactor) {
+        if (!SystemUtils.isHoneycombOrNever()) {
+            DisplayMetrics metrics = new DisplayMetrics();
+            getActivity().getWindowManager().getDefaultDisplay().getMetrics(metrics);
+
+            WindowManager.LayoutParams params = new WindowManager.LayoutParams();
+            params.copyFrom(dialog.getWindow().getAttributes());
+            params.width = (int) (metrics.widthPixels * scaleFactor);
+            params.height = (int) (metrics.heightPixels * scaleFactor);
+
+            dialog.getWindow().setAttributes(params);
         }
     }
 

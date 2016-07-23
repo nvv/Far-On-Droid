@@ -61,6 +61,9 @@ public class Settings {
     public static final String MULTI_ACTION_LABEL_TYPE = "multi_action_label_type";
     public static final String SDCARD_PERMISSION_ASKED = "sdcard_permission_asked";
 
+    public static final String FTP_ALLOW_RECURSIVE_DELETE = "allow_recursive_delete";
+    public static final String FTP_ASK_FOR_PERMISSION = "ask_for_permision";
+
     public static final int MULTI_ACTION_LABEL_TYPE_FILES_NUM = 0;
     public static final int MULTI_ACTION_LABEL_TYPE_LIST_FILES = 1;
 
@@ -538,5 +541,21 @@ public class Settings {
 
     public boolean isSDCardPermissionAsked() {
         return getSharedPreferences().getBoolean(SDCARD_PERMISSION_ASKED, false);
+    }
+
+    public void setFtpAllowRecursiveDelete(boolean value) {
+        getSharedPreferences().edit().putBoolean(FTP_ALLOW_RECURSIVE_DELETE, value).apply();
+    }
+
+    public boolean isFtpAllowRecursiveDelete() {
+        return getSharedPreferences().getBoolean(FTP_ALLOW_RECURSIVE_DELETE, false);
+    }
+
+    public void setDontAskAboutFtpPermission() {
+        getSharedPreferences().edit().putBoolean(FTP_ASK_FOR_PERMISSION, false).apply();
+    }
+
+    public boolean allowedToAskRecursiveDelete() {
+        return getSharedPreferences().getBoolean(FTP_ASK_FOR_PERMISSION, true);
     }
 }

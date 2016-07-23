@@ -1253,29 +1253,6 @@ public class MainPanel extends BaseFileSystemPanel {
         mIsDataLoading = isLoading;
     }
 
-    private void adjustDialogSize(Dialog dialog) {
-        adjustDialogSize(dialog, 0.8f);
-    }
-
-    /**
-     * Adjust dialog size. Actuall for old android version only (due to absence of Holo themes).
-     *
-     * @param dialog dialog whose size should be adjusted.
-     */
-    private void adjustDialogSize(Dialog dialog, float scaleFactor) {
-        if (!SystemUtils.isHoneycombOrNever()) {
-            DisplayMetrics metrics = new DisplayMetrics();
-            getActivity().getWindowManager().getDefaultDisplay().getMetrics(metrics);
-
-            WindowManager.LayoutParams params = new WindowManager.LayoutParams();
-            params.copyFrom(dialog.getWindow().getAttributes());
-            params.width = (int) (metrics.widthPixels * scaleFactor);
-            params.height = (int) (metrics.heightPixels * scaleFactor);
-
-            dialog.getWindow().setAttributes(params);
-        }
-    }
-
     protected Handler mFileActionHandler = new Handler() {
 
         @Override

@@ -18,6 +18,7 @@ import com.openfarmanager.android.filesystem.FileSystemScanner;
 import com.openfarmanager.android.filesystem.SftpFile;
 import com.openfarmanager.android.model.NetworkAccount;
 import com.openfarmanager.android.model.NetworkEnum;
+import com.openfarmanager.android.model.exeptions.FtpDirectoryDeleteException;
 import com.openfarmanager.android.model.exeptions.InAppAuthException;
 import com.openfarmanager.android.model.exeptions.NetworkException;
 
@@ -204,7 +205,18 @@ public class SftpAPI implements NetworkApi {
     public void delete(FileProxy file) throws Exception {
         changeDirectory(file.getParentPath());
         if (file.isDirectory()) {
-            mSftpChannel.rmdir(file.getFullPath());
+            try {
+                mSftpChannel.rmdir(file.getFullPath());
+            } catch (SftpException e) {
+                if (App.sInstance.getSettings().isFtpAllowRecursiveDelete()) {
+                    for (FileProxy proxy : getDirectoryFiles(file.getFullPath())) {
+                        delete(proxy);
+                    }
+                    mSftpChannel.rmdir(file.getFullPath());
+                } else {
+                    throw new FtpDirectoryDeleteException();
+                }
+            }
         } else {
             mSftpChannel.rm(file.getFullPath());
         }
