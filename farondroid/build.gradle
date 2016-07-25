@@ -11,9 +11,9 @@ android {
     }
 
     defaultConfig {
-        minSdkVersion 8
-        versionCode 206
-        versionName "0.8.4.3"
+        minSdkVersion 14
+        versionCode 212
+        versionName "0.8.4.4"
     }
 
     sourceSets {
