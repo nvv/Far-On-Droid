@@ -1429,24 +1429,6 @@ public class LiveConnectClient {
      * Uploads a resource by performing a synchronous HTTP PUT on the Live Connect REST API that
      * returns the response as an {@link InputStream}.
      *
-     * If a file with the same name exists the upload will fail.
-     *
-     * @param path location to upload to.
-     * @param filename name of the new resource.
-     * @param file contents of the upload.
-     * @return a LiveOperation that contains the JSON result.
-     * @throws LiveOperationException if there is an error during the execution of the request.
-     */
-    public LiveOperation upload(String path,
-                                String filename,
-                                File file) throws LiveOperationException {
-        return this.upload(path, filename, file, OverwriteOption.DoNotOverwrite);
-    }
-
-    /**
-     * Uploads a resource by performing a synchronous HTTP PUT on the Live Connect REST API that
-     * returns the response as an {@link InputStream}.
-     *
      * @param path location to upload to.
      * @param filename name of the new resource.
      * @param file contents of the upload.
@@ -1457,7 +1439,8 @@ public class LiveConnectClient {
     public LiveOperation upload(String path,
                                 String filename,
                                 File file,
-                                OverwriteOption overwrite) throws LiveOperationException {
+                                OverwriteOption overwrite,
+                                EntityEnclosingApiRequest.UploadProgressListener listener) throws LiveOperationException {
         assertValidPath(path);
         LiveConnectUtils.assertNotNullOrEmpty(filename, ParamNames.FILENAME);
         LiveConnectUtils.assertNotNull(file, ParamNames.FILE);
@@ -1476,6 +1459,9 @@ public class LiveConnectClient {
                                           is,
                                           file.length(),
                                           overwrite);
+        if (listener != null) {
+            request.addListener(listener);
+        }
         return execute(request);
     }
 

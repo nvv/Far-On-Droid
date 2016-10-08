@@ -7,6 +7,7 @@ import com.mediafire.sdk.MFException;
 import com.mediafire.sdk.MFSessionNotStartedException;
 import com.mediafire.sdk.uploader.MediaFireUpload;
 import com.mediafire.sdk.uploader.MediaFireUploadHandler;
+import com.microsoft.live.EntityEnclosingApiRequest;
 import com.microsoft.live.OverwriteOption;
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.core.network.datasource.IdPathDataSource;
@@ -229,7 +230,17 @@ public class CopyToNetworkMultiTask extends NetworkActionMultiTask {
             runSubTaskAsynk(new Callable() {
                 @Override
                 public Object call() throws Exception {
-                    api.getConnectClient().upload(destinationId, source.getName(), source, OverwriteOption.Overwrite);
+                    api.getConnectClient().upload(destinationId, source.getName(), source, OverwriteOption.Overwrite, new EntityEnclosingApiRequest.UploadProgressListener() {
+
+                        long mPrevProgress = 0;
+
+                        @Override
+                        public void onProgress(long totalBytes, long numBytesWritten) {
+                            mDoneSize += (numBytesWritten - mPrevProgress);
+                            mPrevProgress = numBytesWritten;
+                            updateProgress();
+                        }
+                    });
                     mDoneSize += source.length();
                     updateProgress();
                     return null;

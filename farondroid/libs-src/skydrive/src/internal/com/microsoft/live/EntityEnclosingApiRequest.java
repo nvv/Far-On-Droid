@@ -21,7 +21,7 @@ import org.apache.http.entity.HttpEntityWrapper;
  * EntityEnclosingApiRequest is an ApiRequest with a body.
  * Upload progress can be monitored by adding an UploadProgressListener to this class.
  */
-abstract class EntityEnclosingApiRequest<ResponseType> extends ApiRequest<ResponseType> {
+public abstract class EntityEnclosingApiRequest<ResponseType> extends ApiRequest<ResponseType> {
 
     /**
      * UploadProgressListener is a listener that is called during upload progress.
