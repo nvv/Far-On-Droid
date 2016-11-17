@@ -63,8 +63,7 @@ public class EditViewController {
                     break;
                 case EDIT:
                     mViewer.changeMode();
-                    mViewerToolbar.changeEditText(App.sInstance.getString(mViewer.getMode() == LinesAdapter.MODE_VIEW ?
-                            R.string.action_edit : R.string.action_view));
+                    mViewerToolbar.changeEditTextMode(mViewer.getMode());
 
                     // hide virtual keyboard when viewer mode is changed.
                     mInputMethodManager.hideSoftInputFromWindow(mViewer.getView().getWindowToken(), 0);

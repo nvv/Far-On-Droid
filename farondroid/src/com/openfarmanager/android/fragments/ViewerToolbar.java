@@ -12,6 +12,7 @@ import android.widget.ViewFlipper;
 
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.R;
+import com.openfarmanager.android.adapters.LinesAdapter;
 
 import static com.openfarmanager.android.controllers.EditViewController.*;
 
@@ -30,6 +31,8 @@ public class ViewerToolbar extends Fragment {
         mDensity = getResources().getDisplayMetrics().density;
         mFontSize = App.sInstance.getSettings().getBottomPanelFontSize();
         mRootView = inflater.inflate(R.layout.viewer_toolbar, container, false);
+
+        mRootView.findViewById(R.id.save).setEnabled(false);
         return mRootView;
     }
 
@@ -74,8 +77,10 @@ public class ViewerToolbar extends Fragment {
         }
     }
 
-    public void changeEditText(final String text) {
-        ((TextView) mRootView.findViewById(R.id.edit)).setText(text);
+    public void changeEditTextMode(int mode) {
+        mRootView.findViewById(R.id.save).setEnabled(mode != LinesAdapter.MODE_VIEW);
+        ((TextView) mRootView.findViewById(R.id.edit)).setText(App.sInstance.getString(mode == LinesAdapter.MODE_VIEW ?
+                R.string.action_edit : R.string.action_view));
     }
 
     public void setBigFileMode(boolean visible) {
