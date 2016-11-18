@@ -406,4 +406,5 @@ More network stuff will appear in future versions.
     <string name="error_dropbox_share_error">Can\'t share dropbox resource.</string>
     <string name="recursive_delete_allowed">Recursive delete allowed. Try again.</string>
     <string name="allow_recursive_delete">Allow recursive delete</string>
+    <string name="cannot_open_directory">Can\'t open selected directory</string>
 </resources>

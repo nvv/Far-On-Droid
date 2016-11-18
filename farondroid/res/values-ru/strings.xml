@@ -397,4 +397,5 @@
     <string name="error_dropbox_share_error">Ошибка при попытке поделиться файлом</string>
     <string name="recursive_delete_allowed">Рекурсивное удаление разрешено. Попробуйте еще раз.</string>
     <string name="allow_recursive_delete">Разрешить рекурсивное удаление</string>
+    <string name="cannot_open_directory">Не удалось открыть директорию</string>
 </resources>

@@ -40,6 +40,7 @@ import com.openfarmanager.android.filesystem.actions.network.GoogleDriveUpdateTa
 import com.openfarmanager.android.filesystem.commands.CommandsFactory;
 import com.openfarmanager.android.model.Bookmark;
 import com.openfarmanager.android.model.FileActionEnum;
+import com.openfarmanager.android.model.OpenDirectoryActionListener;
 import com.openfarmanager.android.model.SelectParams;
 import com.openfarmanager.android.model.TaskStatusEnum;
 import com.openfarmanager.android.model.exeptions.SdcardPermissionException;
@@ -836,12 +837,14 @@ public class MainPanel extends BaseFileSystemPanel {
      * @param forceReloadFiles force panel to reload files.
      */
     public void invalidate(boolean forceReloadFiles) {
-        FlatFileSystemAdapter adapter = (FlatFileSystemAdapter) mFileSystemList.getAdapter();
-        adapter.setBaseDir(mBaseDir);
-        adapter.setSelectedFiles(mSelectedFiles);
-        adapter.notifyDataSetChanged();
-        setSelectedFilesSizeVisibility();
-        showQuickActionPanel();
+        if (mFileSystemList != null) {
+            FlatFileSystemAdapter adapter = (FlatFileSystemAdapter) mFileSystemList.getAdapter();
+            adapter.setBaseDir(mBaseDir);
+            adapter.setSelectedFiles(mSelectedFiles);
+            adapter.notifyDataSetChanged();
+            setSelectedFilesSizeVisibility();
+            showQuickActionPanel();
+        }
     }
 
     private void openFile(File item) {
@@ -1010,7 +1013,7 @@ public class MainPanel extends BaseFileSystemPanel {
     }
 
     public void openDirectory(final File directory) {
-        openDirectory(directory, -1);
+        openDirectory(directory, null);
     }
 
     /**
@@ -1034,20 +1037,20 @@ public class MainPanel extends BaseFileSystemPanel {
         setSelectedFilesSizeVisibility();
         showQuickActionPanel();
 
-        File oldDir = mBaseDir;
-        mBaseDir = directory.getAbsoluteFile();
-        mCurrentPathView.setText(mBaseDir.getAbsolutePath());
+//        File oldDir = mBaseDir;
+//        mBaseDir = directory.getAbsoluteFile();
+//        mCurrentPathView.setText(mBaseDir.getAbsolutePath());
         FlatFileSystemAdapter adapter = (FlatFileSystemAdapter) mFileSystemList.getAdapter();
         if (adapter == null) {
-            mFileSystemList.setAdapter(new FlatFileSystemAdapter(mBaseDir, mOnFolderScannedListener));
+            mFileSystemList.setAdapter(new FlatFileSystemAdapter(mBaseDir, mAction));
         } else {
             adapter.resetFilter();
-            adapter.setBaseDir(mBaseDir, selection);
-            sendEmptyMessage(DIRECTORY_CHANGED);
+            adapter.setBaseDir(directory.getAbsoluteFile(), selection);
+//            sendEmptyMessage(DIRECTORY_CHANGED);
         }
-        if(adapter != null && oldDir != null){
-            mFileSystemList.setSelection(adapter.getItemPosition(oldDir));
-        }
+//        if(adapter != null && oldDir != null){
+//            mFileSystemList.setSelection(adapter.getItemPosition(oldDir));
+//        }
     }
 
     protected void setSelectedFilesSizeVisibility() {
@@ -1055,14 +1058,14 @@ public class MainPanel extends BaseFileSystemPanel {
                 View.GONE : View.VISIBLE);
     }
 
-    FlatFileSystemAdapter.OnFolderScannedListener mOnFolderScannedListener = new FlatFileSystemAdapter.OnFolderScannedListener() {
-        @Override
-        public void onScanFinished(Integer selection) {
-            if (selection != null) {
-                mFileSystemList.setSelection(selection);
-            }
-        }
-    };
+//    FlatFileSystemAdapter.OnFolderScannedListener mOnFolderScannedListener = new FlatFileSystemAdapter.OnFolderScannedListener() {
+//        @Override
+//        public void onScanFinished(Integer selection) {
+//            if (selection != null) {
+//                mFileSystemList.setSelection(selection);
+//            }
+//        }
+//    };
 
     private void sendEmptyMessage(int message) {
         if (mHandler != null) {
@@ -1252,6 +1255,26 @@ public class MainPanel extends BaseFileSystemPanel {
 
         mIsDataLoading = isLoading;
     }
+
+    private OpenDirectoryActionListener mAction = new OpenDirectoryActionListener() {
+        @Override
+        public void onDirectoryOpened(File directory, Integer selection) {
+            mBaseDir = directory.getAbsoluteFile();
+            mCurrentPathView.setText(mBaseDir.getAbsolutePath());
+            sendEmptyMessage(DIRECTORY_CHANGED);
+
+            if (selection != null) {
+                mFileSystemList.setSelection(selection);
+            } else {
+                mFileSystemList.setSelectionAfterHeaderView();
+            }
+        }
+
+        @Override
+        public void onError() {
+            ToastNotification.makeText(App.sInstance.getApplicationContext(), App.sInstance.getString(R.string.cannot_open_directory), Toast.LENGTH_SHORT).show();
+        }
+    };
 
     protected Handler mFileActionHandler = new Handler() {
 

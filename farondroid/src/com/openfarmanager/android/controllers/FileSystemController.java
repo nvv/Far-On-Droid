@@ -223,6 +223,19 @@ public class FileSystemController {
         mRightGenericPanel.setPanelLocation(RIGHT_PANEL);
     }
 
+    public void invalidate() {
+        MainPanel leftPanel = getLeftVisiblePanel();
+        MainPanel rightPanel = getRightVisiblePanel();
+
+        if (leftPanel != null) {
+            leftPanel.invalidate();
+        }
+
+        if (rightPanel != null) {
+            rightPanel.invalidate();
+        }
+    }
+
     public Handler getToolbarHandler() {
         return mToolbarHandler;
     }

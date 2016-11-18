@@ -172,10 +172,12 @@ public class Main extends BaseActivity {
     }
 
     private void showTips() {
+        mFileSystemController.invalidate();
+
         Settings settings = App.sInstance.getSettings();
         if (settings.isShowTips()) {
             new MainTips(this, mFileSystemController, (MainToolbarPanel) getSupportFragmentManager().findFragmentById(R.id.toolbar));
-            settings.getSharedPreferences().edit().putBoolean(Settings.SHOW_TIPS, false).commit();
+            settings.getSharedPreferences().edit().putBoolean(Settings.SHOW_TIPS, false).apply();
         }
     }
 

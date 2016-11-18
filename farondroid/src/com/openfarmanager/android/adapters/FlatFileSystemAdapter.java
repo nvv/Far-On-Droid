@@ -11,6 +11,8 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.R;
 import com.openfarmanager.android.core.FontManager;
@@ -22,8 +24,10 @@ import com.openfarmanager.android.filesystem.FileProxy;
 import com.openfarmanager.android.filesystem.FileSystemFile;
 import com.openfarmanager.android.filesystem.FileSystemScanner;
 import com.openfarmanager.android.model.Bookmark;
+import com.openfarmanager.android.model.OpenDirectoryActionListener;
 import com.openfarmanager.android.utils.CustomFormatter;
 import com.openfarmanager.android.utils.Extensions;
+import com.openfarmanager.android.view.ToastNotification;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -45,11 +49,12 @@ public class FlatFileSystemAdapter extends BaseAdapter {
     protected List<FileProxy> mFiles = new ArrayList<FileProxy>();
     boolean mIsRoot;
     private String mFilter;
-    private OnFolderScannedListener mListener;
+
+    private OpenDirectoryActionListener mListener;
 
     public static SimpleDateFormat sDateFormat = new SimpleDateFormat("dd MM yyyy HH:mm");
 
-    public FlatFileSystemAdapter(File baseDir, OnFolderScannedListener listener) {
+    public FlatFileSystemAdapter(File baseDir, OpenDirectoryActionListener listener) {
         mListener = listener;
         setBaseDir(baseDir);
     }
@@ -173,7 +178,7 @@ public class FlatFileSystemAdapter extends BaseAdapter {
         setBaseDir(baseDir, -1);
     }
 
-    public void setBaseDir(File baseDir, final Integer selection) {
+    public void setBaseDir(final File baseDir, final Integer selection) {
         if (baseDir == null) {
             return;
         }
@@ -197,7 +202,7 @@ public class FlatFileSystemAdapter extends BaseAdapter {
                 @Override
                 protected List<FileProxy> doInBackground(Void... params) {
                     List<FileProxy> files = FileSystemScanner.sInstance.fallingDown(mBaseDir, mFilter);
-                    if (bookmarkManager.isBookmarksEnabled() && path.equals(bookmarkManager.getBookmarksPath())) {
+                    if (files != null && bookmarkManager.isBookmarksEnabled() && path.equals(bookmarkManager.getBookmarksPath())) {
                         files.add(new FileSystemFile(mBaseDir, BookmarkManager.BOOKMARKS_FOLDER, true));
                         FileSystemScanner.sInstance.sort(files);
                     }
@@ -206,11 +211,13 @@ public class FlatFileSystemAdapter extends BaseAdapter {
                 }
 
                 @Override
-                protected void onPostExecute(List<FileProxy> aVoid) {
-                    mFiles = aVoid;
-                    notifyDataSetChanged();
-                    if (mListener != null) {
-                        mListener.onScanFinished(selection);
+                protected void onPostExecute(List<FileProxy> files) {
+                    if (files != null) {
+                        mFiles = files;
+                        notifyDataSetChanged();
+                        mListener.onDirectoryOpened(baseDir, selection);
+                    } else {
+                        mListener.onError();
                     }
                 }
             }.execute();
@@ -234,21 +241,4 @@ public class FlatFileSystemAdapter extends BaseAdapter {
         mFilter = null;
     }
 
-    public int getItemPosition(File oldDir) {
-        if (mFiles == null) {
-            return 0;
-        }
-
-        String old = oldDir.getName();
-        for (int i = 0; i < mFiles.size(); i++) {
-            if (old.equals(mFiles.get(i).getName())) {
-                return i + (mIsRoot ? 0 : 1);
-            }
-        }
-        return 0;
-    }
-
-    public static interface OnFolderScannedListener {
-        void onScanFinished(Integer selection);
-    }
 }

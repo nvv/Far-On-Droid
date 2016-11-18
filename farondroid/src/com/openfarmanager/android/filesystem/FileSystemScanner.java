@@ -1,5 +1,6 @@
 package com.openfarmanager.android.filesystem;
 
+import android.os.Build;
 import android.text.TextUtils;
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.core.Settings;
@@ -101,7 +102,7 @@ public class FileSystemScanner {
             }
 
             if (files == null) {
-                return result;
+                return Build.VERSION.SDK_INT >= 24 ? null : result;
             } else {
                 for (String f : files) {
                     FileSystemFile file = new FileSystemFile(currentNode, f);
