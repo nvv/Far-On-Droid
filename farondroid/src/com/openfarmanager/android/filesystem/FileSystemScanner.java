@@ -8,6 +8,8 @@ import com.openfarmanager.android.filesystem.actions.RootTask;
 import com.openfarmanager.android.filesystem.filter.Filter;
 import com.openfarmanager.android.filesystem.filter.FilterFactory;
 import com.openfarmanager.android.model.exeptions.FileIsNotDirectoryException;
+import com.openfarmanager.android.utils.StorageUtils;
+
 import org.apache.commons.io.IOCase;
 import org.apache.commons.io.filefilter.PrefixFileFilter;
 
@@ -46,7 +48,7 @@ public class FileSystemScanner {
     }
 
     public void initFilters() {
-        ROOT = App.sInstance.getSettings().isSDCardRoot() ? Settings.sSdPath : "/";
+        ROOT = App.sInstance.getSettings().isSDCardRoot() ? StorageUtils.getSdPath() : "/";
 
         mFilters = new LinkedList<Filter>();
         if (App.sInstance.getSettings().isFoldersFirst()) {

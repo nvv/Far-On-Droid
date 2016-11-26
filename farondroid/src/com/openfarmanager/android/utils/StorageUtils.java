@@ -4,9 +4,11 @@ import android.annotation.TargetApi;
 import android.content.UriPermission;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Environment;
 import android.provider.DocumentsContract;
 
 import com.openfarmanager.android.App;
+import com.openfarmanager.android.filesystem.FileSystemScanner;
 import com.openfarmanager.android.model.exeptions.SdcardPermissionException;
 
 import java.io.File;
@@ -18,6 +20,22 @@ import java.util.List;
  * @author Vlad Namashko
  */
 public class StorageUtils {
+
+    private static File sSdCard;
+    private static String sSdPath;
+
+    static {
+        sSdCard = Environment.getExternalStorageDirectory();
+        sSdPath = sSdCard != null ? sSdCard.getPath() : FileSystemScanner.ROOT;
+    }
+
+    public static File getSdCard() {
+        return sSdCard;
+    }
+
+    public static String getSdPath() {
+        return sSdPath;
+    }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public static Uri checkForPermissionAndGetBaseUri() {

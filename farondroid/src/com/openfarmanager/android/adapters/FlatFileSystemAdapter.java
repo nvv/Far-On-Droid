@@ -3,6 +3,7 @@ package com.openfarmanager.android.adapters;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
+import android.os.Environment;
 import android.os.Handler;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -27,6 +28,8 @@ import com.openfarmanager.android.model.Bookmark;
 import com.openfarmanager.android.model.OpenDirectoryActionListener;
 import com.openfarmanager.android.utils.CustomFormatter;
 import com.openfarmanager.android.utils.Extensions;
+import com.openfarmanager.android.utils.StorageUtils;
+import com.openfarmanager.android.utils.SystemUtils;
 import com.openfarmanager.android.view.ToastNotification;
 
 import java.io.File;
@@ -56,7 +59,7 @@ public class FlatFileSystemAdapter extends BaseAdapter {
 
     public FlatFileSystemAdapter(File baseDir, OpenDirectoryActionListener listener) {
         mListener = listener;
-        setBaseDir(baseDir);
+        setBaseDir(baseDir, -1, true);
     }
 
     protected FlatFileSystemAdapter() {
@@ -179,6 +182,10 @@ public class FlatFileSystemAdapter extends BaseAdapter {
     }
 
     public void setBaseDir(final File baseDir, final Integer selection) {
+        setBaseDir(baseDir, selection, false);
+    }
+
+    private void setBaseDir(final File baseDir, final Integer selection, final boolean restoreDefaultPath) {
         if (baseDir == null) {
             return;
         }
@@ -217,7 +224,11 @@ public class FlatFileSystemAdapter extends BaseAdapter {
                         notifyDataSetChanged();
                         mListener.onDirectoryOpened(baseDir, selection);
                     } else {
-                        mListener.onError();
+                        if (restoreDefaultPath) {
+                            setBaseDir(StorageUtils.getSdCard());
+                        } else {
+                            mListener.onError();
+                        }
                     }
                 }
             }.execute();

@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.text.TextUtils;
@@ -45,7 +46,9 @@ import com.openfarmanager.android.model.SelectParams;
 import com.openfarmanager.android.model.TaskStatusEnum;
 import com.openfarmanager.android.model.exeptions.SdcardPermissionException;
 import com.openfarmanager.android.utils.CustomFormatter;
+import com.openfarmanager.android.utils.Extensions;
 import com.openfarmanager.android.utils.FileUtilsExt;
+import com.openfarmanager.android.utils.StorageUtils;
 import com.openfarmanager.android.utils.SystemUtils;
 import com.openfarmanager.android.view.ToastNotification;
 
@@ -364,7 +367,7 @@ public class MainPanel extends BaseFileSystemPanel {
 
     protected void onNavigationItemSelected(int pos, List<String> items) {
         File f = new File(TextUtils.join("/", items.subList(0, pos + 1)));
-        if (isFileExists(f) && f.canRead()) {
+        if (isFileExists(f)) {
             openDirectory(f);
         }
     }
@@ -993,7 +996,7 @@ public class MainPanel extends BaseFileSystemPanel {
 
     public boolean isRootDirectory() {
         if (App.sInstance.getSettings().isSDCardRoot()) {
-            return mBaseDir.getAbsolutePath().equals(Settings.sSdPath);
+            return mBaseDir.getAbsolutePath().equals(StorageUtils.getSdPath());
         }
         return mBaseDir.getAbsolutePath().equals("/");
     }

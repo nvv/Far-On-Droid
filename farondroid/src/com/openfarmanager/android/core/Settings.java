@@ -10,6 +10,7 @@ import com.openfarmanager.android.App;
 import com.openfarmanager.android.R;
 import com.openfarmanager.android.filesystem.FileSystemScanner;
 import com.openfarmanager.android.model.NetworkEnum;
+import com.openfarmanager.android.utils.StorageUtils;
 import com.openfarmanager.android.utils.SystemUtils;
 
 import java.io.File;
@@ -67,9 +68,6 @@ public class Settings {
     public static final int MULTI_ACTION_LABEL_TYPE_FILES_NUM = 0;
     public static final int MULTI_ACTION_LABEL_TYPE_LIST_FILES = 1;
 
-    private static File sSdCard;
-    public static String sSdPath;
-
     private int mMainPanelFontSize = 0;
     private int mBottomPanelFontSize = 0;
     private int mViewerFontSize = 0;
@@ -90,11 +88,6 @@ public class Settings {
     private int mInstallColor = 0;
     private int mSelectedColor = 0;
     private int mArchiveColor = 0;
-
-    static {
-        sSdCard = Environment.getExternalStorageDirectory();
-        sSdPath = sSdCard != null ? sSdCard.getPath() : FileSystemScanner.ROOT;
-    }
 
     public void savePanelsState(String leftPanelPath, String rightPanelPath, boolean isLeftPanelActive) {
         SharedPreferences.Editor edit = getPanelSettings().edit();
@@ -129,11 +122,11 @@ public class Settings {
     }
 
     public String getLeftPanelPath() {
-        return getPanelSettings().getString(LEFT_PANEL_PATH, sSdPath);
+        return getPanelSettings().getString(LEFT_PANEL_PATH, StorageUtils.getSdPath());
     }
 
     public String getRightPanelPath() {
-        return getPanelSettings().getString(RIGHT_PANEL_PATH, sSdPath);
+        return getPanelSettings().getString(RIGHT_PANEL_PATH, StorageUtils.getSdPath());
     }
 
     public boolean isLeftPanelActive() {
@@ -207,7 +200,7 @@ public class Settings {
     }
 
     public String getHomeFolder() {
-        return getSharedPreferences().getString(HOME_FOLDER, sSdPath);
+        return getSharedPreferences().getString(HOME_FOLDER, StorageUtils.getSdPath());
     }
 
     public void setHomeFolder(String path) {
