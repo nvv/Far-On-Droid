@@ -39,9 +39,10 @@ public class SelectEncodingAdapter extends BaseAdapter {
 
             if (charset.name().equals(mDefaultCharsetKey)) {
                 mDefaultItemPosition = i;
-                if (mDefaultItemPosition > 5) {
-                    mDefaultItemPosition -= 5;
-                }
+                //if (mDefaultItemPosition > 5) {
+                //    mDefaultItemPosition -= 5;
+                //}
+                break;
             }
             i++;
         }

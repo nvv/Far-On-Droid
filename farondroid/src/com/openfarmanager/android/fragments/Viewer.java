@@ -182,6 +182,7 @@ public class Viewer extends Fragment {
         String charset = App.sInstance.getSettings().getDefaultCharset();
 
         if (charset == null) {
+            setEncoding(Charset.defaultCharset());
             showSelectEncodingDialog();
         } else {
             setEncoding(Charset.forName(charset));
@@ -707,6 +708,7 @@ public class Viewer extends Fragment {
     public void showSelectEncodingDialog() {
         mCharsetSelectDialog = new SelectEncodingDialog(getActivity(), mHandler, mFile);
         mCharsetSelectDialog.show();
+        mCharsetSelectDialog.setCancelable(true);
         adjustDialogSize(mCharsetSelectDialog);
     }
 
