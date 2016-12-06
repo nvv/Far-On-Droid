@@ -17,6 +17,7 @@ import java.util.Set;
 import org.apache.http.client.HttpClient;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -120,10 +121,28 @@ class AuthorizationRequest implements ObservableOAuthRequest, OAuthRequestObserv
             }
 
             @Override
-            public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
+            public void onReceivedSslError(WebView view, final SslErrorHandler handler, SslError error) {
                 // TODO: Android does not like the SSL certificate we use, because it has '*' in
                 // it. Proceed with the errors.
-                handler.proceed();
+//                handler.proceed();
+
+                final AlertDialog.Builder builder = new AlertDialog.Builder(view.getContext());
+                builder.setMessage(com.microsoft.live.R.string.notification_error_ssl_cert_invalid);
+                builder.setPositiveButton("continue", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        handler.proceed();
+                    }
+                });
+                builder.setNegativeButton("cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        handler.cancel();
+                    }
+                });
+                final AlertDialog dialog = builder.create();
+                dialog.show();
+
             }
 
             private void saveCookiesInMemory(String cookie) {
