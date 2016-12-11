@@ -128,13 +128,13 @@ class AuthorizationRequest implements ObservableOAuthRequest, OAuthRequestObserv
 
                 final AlertDialog.Builder builder = new AlertDialog.Builder(view.getContext());
                 builder.setMessage(com.microsoft.live.R.string.notification_error_ssl_cert_invalid);
-                builder.setPositiveButton("continue", new DialogInterface.OnClickListener() {
+                builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         handler.proceed();
                     }
                 });
-                builder.setNegativeButton("cancel", new DialogInterface.OnClickListener() {
+                builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         handler.cancel();
