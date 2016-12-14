@@ -1,0 +1,67 @@
+<resources>
+    <style name="main_toolbar_button">
+        <item name="android:background">@drawable/toolbar_button_bg</item>
+        <item name="android:textColor">@color/black</item>
+        <item name="android:layout_marginLeft">10dp</item>
+        <item name="android:padding">3dp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:minWidth">80dp</item>
+    </style>
+
+    <style name="dialog_button">
+        <item name="android:background">@drawable/dialog_button_selector</item>
+        <item name="android:textColor">@color/black</item>
+        <item name="android:layout_marginLeft">10dp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:minHeight">40dp</item>
+    </style>
+
+    <style name="Action_Dialog" parent="android:Theme.Dialog">
+        <item name="android:windowBackground">@null</item>
+    </style>
+
+    <style name="Action_Dialog_Invert" parent="android:Theme.Dialog">
+        <item name="android:windowBackground">@null</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+
+    <style name="AppTheme" parent="android:Theme.NoTitleBar">
+        <item name="android:windowBackground">@null</item>
+    </style>
+
+    <style name="PreferencesTheme" parent="android:Theme.Light.NoTitleBar.Fullscreen">
+        <item name="android:background">@color/main_grey</item>
+    </style>
+
+    <style name="ProgressBar_Theme" parent="android:Widget.ProgressBar.Horizontal" />
+
+    <style name="QuickActionPopupAnimation" parent="android:Animation" mce_bogus="1">
+        <item name="android:windowEnterAnimation">@anim/quick_action_dialog_in</item>
+        <item name="android:windowExitAnimation">@anim/quick_action_dialog_out</item>
+    </style>
+
+
+    <style name="CustomShowcaseTheme" parent="ShowcaseView.Light">
+        <item name="sv_backgroundColor">#b40015ff</item>
+        <item name="sv_showcaseColor">#ffdbdbdb</item>
+        <item name="sv_buttonText">@string/btn_next</item>
+        <item name="sv_secondaryButtonText">@string/btn_skip</item>
+        <item name="sv_tintButtonColor">false</item>
+        <item name="sv_titleTextAppearance">@style/SvTitle</item>
+        <item name="sv_detailTextAppearance">@style/SvDetails</item>
+    </style>
+
+    <style name="SvTitle" parent="TextAppearance.ShowcaseView.Title">
+        <item name="android:textColor">#fffff073</item>
+        <item name="android:textSize">24sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="SvDetails" parent="TextAppearance.ShowcaseView.Detail">
+        <item name="android:textColor">#ffffffff</item>
+        <item name="android:textSize">17sp</item>
+    </style>
+
+</resources>
