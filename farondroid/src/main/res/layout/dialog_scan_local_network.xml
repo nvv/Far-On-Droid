@@ -38,8 +38,9 @@
                     android:columnWidth="135dp"
                     android:visibility="gone"
                     android:stretchMode="columnWidth"
+                    android:scrollbarAlwaysDrawVerticalTrack="true"
                     android:layout_width="fill_parent"
-                    android:layout_height="100dp"/>
+                    android:layout_height="120dp"/>
 
             <ProgressBar
                     android:id="@+id/progress"

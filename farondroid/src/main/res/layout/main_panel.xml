@@ -43,7 +43,7 @@
 
         <TextView
                 android:id="@+id/charset_left"
-                android:drawableRight="@drawable/charset"
+                android:drawableRight="@drawable/ic_charset"
                 android:paddingLeft="8dp"
                 android:paddingRight="8dp"
                 android:paddingTop="2dp"
@@ -54,7 +54,7 @@
 
         <TextView
                 android:id="@+id/exit_left"
-                android:drawableRight="@drawable/network_exit"
+                android:drawableRight="@drawable/ic_network_exit"
                 android:paddingLeft="8dp"
                 android:paddingRight="8dp"
                 android:paddingTop="2dp"
@@ -65,7 +65,7 @@
 
         <TextView
                 android:id="@+id/home_left"
-                android:drawableRight="@drawable/home"
+                android:drawableRight="@drawable/ic_home"
                 android:paddingLeft="8dp"
                 android:paddingRight="8dp"
                 android:paddingTop="2dp"
@@ -75,20 +75,18 @@
 
         <TextView
                 android:id="@+id/network_left"
-                android:drawableRight="@drawable/cloud"
+                android:drawableRight="@drawable/ic_cloud"
                 android:paddingLeft="8dp"
                 android:paddingRight="8dp"
-                android:paddingTop="2dp"
                 android:paddingBottom="5dp"
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"/>
 
         <TextView
                 android:id="@+id/add_to_bookmarks_left"
-                android:drawableLeft="@drawable/add_bookmark"
+                android:drawableLeft="@drawable/ic_star"
                 android:paddingLeft="8dp"
                 android:paddingRight="8dp"
-                android:paddingTop="2dp"
                 android:paddingBottom="5dp"
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"/>
@@ -131,27 +129,25 @@
 
         <TextView
                 android:id="@+id/add_to_bookmarks_right"
-                android:drawableRight="@drawable/add_bookmark"
+                android:drawableRight="@drawable/ic_star"
                 android:paddingLeft="8dp"
                 android:paddingRight="8dp"
-                android:paddingTop="2dp"
                 android:paddingBottom="5dp"
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"/>
 
         <TextView
                 android:id="@+id/network_right"
-                android:drawableRight="@drawable/cloud"
+                android:drawableRight="@drawable/ic_cloud"
                 android:paddingLeft="8dp"
                 android:paddingRight="8dp"
-                android:paddingTop="2dp"
                 android:paddingBottom="5dp"
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"/>
 
         <TextView
                 android:id="@+id/home_right"
-                android:drawableRight="@drawable/home"
+                android:drawableRight="@drawable/ic_home"
                 android:paddingLeft="8dp"
                 android:paddingRight="8dp"
                 android:paddingTop="2dp"
@@ -162,7 +158,7 @@
         <TextView
                 android:id="@+id/exit_right"
                 android:visibility="gone"
-                android:drawableRight="@drawable/network_exit"
+                android:drawableRight="@drawable/ic_network_exit"
                 android:paddingLeft="8dp"
                 android:paddingRight="8dp"
                 android:paddingTop="2dp"
@@ -173,7 +169,7 @@
         <TextView
                 android:id="@+id/charset_right"
                 android:visibility="gone"
-                android:drawableRight="@drawable/charset"
+                android:drawableRight="@drawable/ic_charset"
                 android:paddingLeft="8dp"
                 android:paddingRight="8dp"
                 android:paddingTop="2dp"

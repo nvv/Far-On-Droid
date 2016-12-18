@@ -53,7 +53,7 @@
 
                 <ImageView
                         android:id="@+id/smb_scan_network"
-                        android:src="@drawable/search"
+                        android:src="@drawable/discover_network"
                         android:layout_marginLeft="5dp"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"/>
