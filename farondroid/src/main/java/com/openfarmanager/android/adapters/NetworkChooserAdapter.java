@@ -5,6 +5,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 import com.openfarmanager.android.App;
+import com.openfarmanager.android.R;
 import com.openfarmanager.android.model.NetworkEnum;
 
 /**
@@ -30,13 +31,13 @@ public class NetworkChooserAdapter extends BaseAdapter {
     @Override
     public View getView(int i, View convertView, ViewGroup viewGroup) {
         if (convertView == null) {
-            convertView = View.inflate(App.sInstance.getApplicationContext(), android.R.layout.simple_list_item_2, null);
+            convertView = View.inflate(App.sInstance.getApplicationContext(), R.layout.network_type_item, null);
         }
 
         NetworkEnum networkEnum = NetworkEnum.valuesList()[i];
 
         convertView.setTag(networkEnum);
-        ((TextView) convertView.findViewById(android.R.id.text1)).setText(NetworkEnum.getNetworkLabel(networkEnum));
+        ((TextView) convertView.findViewById(R.id.text)).setText(NetworkEnum.getNetworkLabel(networkEnum));
 
         return convertView;
     }
