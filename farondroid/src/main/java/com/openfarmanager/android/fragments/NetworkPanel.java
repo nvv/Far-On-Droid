@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v7.widget.LinearLayoutManager;
 import android.text.TextUtils;
 import android.util.Pair;
 import android.view.LayoutInflater;
@@ -21,6 +22,7 @@ import android.widget.Toast;
 
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.R;
+import com.openfarmanager.android.adapters.FileSystemAdapter;
 import com.openfarmanager.android.adapters.NetworkEntryAdapter;
 import com.openfarmanager.android.core.network.datasource.DataSource;
 import com.openfarmanager.android.core.network.datasource.DropboxDataSource;
@@ -92,7 +94,7 @@ public class NetworkPanel extends MainPanel {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         setupHandler();
         View view = super.onCreateView(inflater, container, savedInstanceState);
-
+/*
         mFileSystemList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
@@ -129,6 +131,44 @@ public class NetworkPanel extends MainPanel {
             @Override
             public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
                 return onLongClick(adapterView, i);
+            }
+        });
+*/
+
+        mFileSystemList.setOnItemClickListener(new FileSystemAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(View view, int position) {
+                NetworkEntryAdapter adapter = (NetworkEntryAdapter) mFileSystemList.getAdapter();
+
+                final FileProxy file = (FileProxy) adapter.getItem(position);
+                if (mIsMultiSelectMode) {
+                    updateLongClickSelection(file, false);
+                    return;
+                }
+                mSelectedFiles.clear();
+
+                if (position == 0) {
+                    if (file.isRoot()) { // exit from network
+                        exitFromNetwork();
+                    } else {
+                        openDirectory(file);
+                    }
+                } else if (file.isDirectory()) {
+                    openDirectory(file);
+
+                    String pathKey = file.getParentPath();
+                    if (pathKey.endsWith("/") && !pathKey.equals("/")) {
+                        pathKey = pathKey.substring(0, pathKey.length() - 1);
+                    }
+                    mDirectorySelection.put(pathKey, ((LinearLayoutManager) mFileSystemList.getLayoutManager()).findFirstVisibleItemPosition() + 1);
+                } else {
+                    mDataSource.open(file);
+                }
+            }
+
+            @Override
+            public void onItemLongClick(View view, int position) {
+                onLongClick(position);
             }
         });
 
@@ -238,11 +278,12 @@ public class NetworkPanel extends MainPanel {
         }
     }
 
-    protected boolean onLongClick(AdapterView<?> adapterView, int i) {
-        FileProxy file = (FileProxy) adapterView.getItemAtPosition(i);
+    protected boolean onLongClick(int position) {
+
+        FileProxy file = (FileProxy) ((NetworkEntryAdapter) mFileSystemList.getAdapter()).getItem(position);
         if (!file.isUpNavigator() && !file.isVirtualDirectory()) {
             mLastSelectedFile = file;
-            updateLongClickSelection(adapterView, file, true);
+            updateLongClickSelection(file, true);
             if (!file.isVirtualDirectory()) {
                 openFileActionMenu();
             }
@@ -262,7 +303,7 @@ public class NetworkPanel extends MainPanel {
         mSelectedFiles.addAll(((NetworkEntryAdapter) mFileSystemList.getAdapter()).getFiles());
     }
 
-    protected void updateLongClickSelection(AdapterView<?> adapterView, FileProxy file, boolean longClick) {
+    protected void updateLongClickSelection(FileProxy file, boolean longClick) {
         if (file.isUpNavigator()) {
             return;
         }
@@ -276,7 +317,7 @@ public class NetworkPanel extends MainPanel {
             mSelectedFiles.add(0, file);
         }
 
-        NetworkEntryAdapter adapter = (NetworkEntryAdapter) adapterView.getAdapter();
+        NetworkEntryAdapter adapter = (NetworkEntryAdapter) mFileSystemList.getAdapter();
 
         adapter.setSelectedFiles(mSelectedFiles);
         adapter.notifyDataSetChanged();
@@ -388,13 +429,12 @@ public class NetworkPanel extends MainPanel {
 
     @Override
     public void invalidate(boolean forceReloadFiles) {
-        ListAdapter adapter = mFileSystemList.getAdapter();
+        NetworkEntryAdapter adapter = (NetworkEntryAdapter) mFileSystemList.getAdapter();
         if (forceReloadFiles) {
             openDirectory(mCurrentPath, false);
-        } else if (adapter != null && adapter instanceof NetworkEntryAdapter) {
-            NetworkEntryAdapter listAdapter = (NetworkEntryAdapter) adapter;
-            listAdapter.setSelectedFiles(mSelectedFiles);
-            listAdapter.notifyDataSetChanged();
+        } else if (adapter != null) {
+            adapter.setSelectedFiles(mSelectedFiles);
+            adapter.notifyDataSetChanged();
         }
         setSelectedFilesSizeVisibility();
         showQuickActionPanel();
@@ -478,7 +518,6 @@ public class NetworkPanel extends MainPanel {
 
     @Override
     public int select(SelectParams selectParams) {
-
         NetworkEntryAdapter adapter = (NetworkEntryAdapter) mFileSystemList.getAdapter();
         List<FileProxy> allFiles = adapter.getFiles();
 
@@ -486,7 +525,7 @@ public class NetworkPanel extends MainPanel {
 
             String pattern = selectParams.getSelectionString();
 
-            App.sInstance.getSharedPreferences("action_dialog", 0).edit(). putString("select_pattern", pattern).commit();
+            App.sInstance.getSharedPreferences("action_dialog", 0).edit(). putString("select_pattern", pattern).apply();
 
             boolean inverseSelection = selectParams.isInverseSelection();
             List<FileProxy> contents = new ArrayList<FileProxy>();
@@ -675,23 +714,24 @@ public class NetworkPanel extends MainPanel {
 
             setCurrentPath(path);
             boolean isRoot = Extensions.isNullOrEmpty(file.getParentPath()) || file.getFullPathRaw().equals("/");
-            ListAdapter adapter = mFileSystemList.getAdapter();
+            NetworkEntryAdapter adapter = (NetworkEntryAdapter) mFileSystemList.getAdapter();
 
             System.out.println("::::::::::::  --->   " + directoryInfo.directory.getFullPathRaw() + "  " + directoryInfo.directory.getParentPath() + "  " + directoryInfo.parentPath);
 
             mUpNavigator = new FakeFile(file.getParentPath(), "..", directoryInfo.parentPath,
                     FileUtilsExt.getParentPath(file.getFullPathRaw()), isRoot);
-            if (adapter != null && adapter instanceof NetworkEntryAdapter) {
-                ((NetworkEntryAdapter) adapter).setItems(directoryInfo.files, mUpNavigator);
-                ((NetworkEntryAdapter) adapter).setSelectedFiles(mSelectedFiles);
+            if (adapter != null) {
+                adapter.setItems(directoryInfo.files, mUpNavigator);
+                adapter.setSelectedFiles(mSelectedFiles);
             } else {
-                mFileSystemList.setAdapter(new NetworkEntryAdapter(directoryInfo.files, mUpNavigator));
+                mFileSystemList.initAdapter(new NetworkEntryAdapter(directoryInfo.files, mUpNavigator));
             }
             mCurrentPath = new FakeFile(file.getId(), path, file.getParentPath(), file.getFullPathRaw(), isRoot);
 
             if (directoryInfo.restorePosition) {
                 Integer selection = mDirectorySelection.get(isRoot ? "/" : path);
-                mFileSystemList.setSelection(selection != null ? selection : 0);
+                ((LinearLayoutManager) mFileSystemList.getLayoutManager()).scrollToPositionWithOffset(selection != null ? selection : 0, 0);
+
             }
 
 

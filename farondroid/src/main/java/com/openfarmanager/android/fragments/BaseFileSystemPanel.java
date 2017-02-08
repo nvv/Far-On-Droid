@@ -9,7 +9,9 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.FragmentManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.DisplayMetrics;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
@@ -63,8 +65,10 @@ public abstract class BaseFileSystemPanel extends BasePanel {
 
     protected HashMap<String, Integer> mDirectorySelection = new HashMap<String, Integer>();
 
-    public void setupGestures(View view) {
-        view.setOnTouchListener(new OnSwipeTouchListener() {
+    public void setupGestures(RecyclerView view) {
+
+        view.addOnItemTouchListener(new OnSwipeTouchListener(view.getContext()) {
+
             public void onTouch() {
                 gainFocus();
             }
@@ -81,6 +85,7 @@ public abstract class BaseFileSystemPanel extends BasePanel {
                 }
             }
         });
+
     }
 
     protected boolean openNavigationPathPopup(View view) {

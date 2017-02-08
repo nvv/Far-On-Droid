@@ -5,13 +5,13 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.Toast;
 
 import com.github.junrar.Archive;
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.R;
-import com.openfarmanager.android.adapters.ArchiveEntryAdapter;
+import com.openfarmanager.android.adapters.ArchiveAdapter;
+import com.openfarmanager.android.adapters.FileSystemAdapter;
 import com.openfarmanager.android.core.CancelableCommand;
 import com.openfarmanager.android.core.archive.ArchiveScanner;
 import com.openfarmanager.android.core.archive.ArchiveUtils;
@@ -29,7 +29,6 @@ import org.apache.commons.compress.archivers.sevenz.SevenZFile;
 import org.apache.commons.compress.archivers.zip.UnsupportedZipFeatureException;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
-import org.apache.commons.compress.compressors.CompressorException;
 import org.apache.commons.compress.compressors.CompressorStreamFactory;
 
 import java.io.*;
@@ -52,7 +51,7 @@ public class ArchivePanel extends MainPanel {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         setupHandler();
         View view = super.onCreateView(inflater, container, savedInstanceState);
-
+/*
         mFileSystemList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
@@ -77,6 +76,39 @@ public class ArchivePanel extends MainPanel {
                 }
             }
         });
+*/
+
+        mFileSystemList.setOnItemClickListener(new FileSystemAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(View view, int position) {
+                FileSystemAdapter adapterView = (FileSystemAdapter) mFileSystemList.getAdapter();
+                ArchiveScanner.File item = (ArchiveScanner.File) adapterView.getItem(position);
+
+                if (item.isUpNavigator()) {
+                    item = item.getParent();
+                    if (item.isRoot()) { // exit from archive
+                        exitFromArchive();
+                        return;
+                    } else {
+                        item = item.getParent();
+                        openArchiveDirectory(item);
+                        return;
+                    }
+                } else if (!item.isDirectory()) {
+                    onLongClick(position);
+                }
+
+                if (item.isDirectory()) {
+                    openArchiveDirectory(item);
+                }
+            }
+
+            @Override
+            public void onItemLongClick(View view, int position) {
+                onLongClick(position);
+            }
+        });
+
 
         // archive panel always starts from 'loading...' state
         setIsLoading(true);
@@ -93,8 +125,8 @@ public class ArchivePanel extends MainPanel {
         mHandler.sendEmptyMessage(EXIT_FROM_ARCHIVE);
     }
 
-    protected boolean onLongClick(AdapterView<?> adapterView, int i) {
-        ArchiveFile file = (ArchiveFile) adapterView.getItemAtPosition(i);
+    protected boolean onLongClick(int position) {
+        ArchiveFile file = (ArchiveFile) getAdapter().getItem(position);
         if (!file.isUpNavigator()) {
             mCurrentArchiveItem = file;
             mHandler.sendMessage(mHandler.obtainMessage(EXTRACT_ARCHIVE));
@@ -129,10 +161,6 @@ public class ArchivePanel extends MainPanel {
                     new BufferedInputStream(new FileInputStream(item))));
             setCurrentPath(null);
             mIsArchiveCompressed = true;
-        } catch (IOException e) {
-            openArchiveFailed();
-        } catch (CompressorException e) {
-            openArchiveFailed();
         } catch (Exception e) {
             openArchiveFailed();
         }
@@ -152,8 +180,6 @@ public class ArchivePanel extends MainPanel {
         try {
             mLastSelectedFile = item;
             openArchive(item, new FileInputStream(item));
-        } catch (IOException e) {
-            openArchiveFailed();
         } catch (Exception e) {
             openArchiveFailed();
         }
@@ -168,7 +194,7 @@ public class ArchivePanel extends MainPanel {
     private void openArchiveDirectory(ArchiveScanner.File selectedDirectory) {
         mCurrentArchiveItem = selectedDirectory;
         setCurrentPath(selectedDirectory);
-        ((ArchiveEntryAdapter) mFileSystemList.getAdapter()).setItems(selectedDirectory);
+        ((ArchiveAdapter) mFileSystemList.getAdapter()).setItems(selectedDirectory);
     }
 
     private void setCurrentPath(ArchiveScanner.File file) {
@@ -255,7 +281,7 @@ public class ArchivePanel extends MainPanel {
 
         private void setupArchiveView() {
             if (ArchiveScanner.sInstance.root().getSortedChildren() != null) {
-                mFileSystemList.setAdapter(new ArchiveEntryAdapter(ArchiveScanner.sInstance.root()));
+                mFileSystemList.initAdapter(new ArchiveAdapter(ArchiveScanner.sInstance.root()));
             }
             setIsLoading(false);
             setCurrentPath(null);

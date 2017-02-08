@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 
 import com.openfarmanager.android.R;
+import com.openfarmanager.android.adapters.FileSystemAdapter;
 import com.openfarmanager.android.adapters.LauncherAdapter;
 import com.openfarmanager.android.controllers.FileSystemController;
 import com.openfarmanager.android.filesystem.FileProxy;
@@ -34,35 +35,31 @@ public class GenericPanel extends MainPanel {
         View view = super.onCreateView(inflater, container, savedInstanceState);
 
         mSubscription = new CompositeSubscription();
-        mFileSystemList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
 
-                LauncherAdapter adapter = (LauncherAdapter) adapterView.getAdapter();
+        mFileSystemList.setOnItemClickListener(new FileSystemAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(View view, int position) {
+                LauncherAdapter adapter = (LauncherAdapter) mFileSystemList.getAdapter();
 
                 if (mIsMultiSelectMode) {
-                    updateLongClick(i, adapter, false);
+                    updateLongClick(position, adapter, false);
                 } else {
-                    adapter.onItemClick(i);
+                    adapter.onItemClick(position);
                 }
             }
-        });
 
-
-        mFileSystemList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
-            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
-                LauncherAdapter adapter = (LauncherAdapter) adapterView.getAdapter();
-                updateLongClick(i, adapter, true);
+            public void onItemLongClick(View view, int position) {
+                LauncherAdapter adapter = (LauncherAdapter) mFileSystemList.getAdapter();
+                updateLongClick(position, adapter, true);
                 openFileActionMenu();
-                return true;
             }
         });
 
         mCurrentPathView.setText(getString(R.string.applications));
         mCurrentPathView.setOnLongClickListener(null);
 
-        mFileSystemList.setAdapter(new LauncherAdapter(mAdapterHandler, mSubscription));
+        mFileSystemList.initAdapter(new LauncherAdapter(mAdapterHandler, mSubscription));
         return view;
     }
 
@@ -70,7 +67,7 @@ public class GenericPanel extends MainPanel {
 
         FileProxy fileProxy = adapter.getItem(i);
 
-        if (mSelectedFiles.contains(fileProxy)) {
+        if (mSelectedFiles.contains(fileProxy) && !longClick) {
             mSelectedFiles.remove(fileProxy);
         } else {
             if (mSelectedFiles.contains(fileProxy)) {

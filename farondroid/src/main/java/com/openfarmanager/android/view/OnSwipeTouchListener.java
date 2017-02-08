@@ -1,5 +1,7 @@
 package com.openfarmanager.android.view;
 
+import android.content.Context;
+import android.support.v7.widget.RecyclerView;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.MotionEvent;
@@ -9,12 +11,32 @@ import android.view.View.OnTouchListener;
 /**
  * author: Vlad Namashko
  */
-public class OnSwipeTouchListener implements OnTouchListener {
+public class OnSwipeTouchListener implements RecyclerView.OnItemTouchListener {
 
-    private final GestureDetector gestureDetector = new GestureDetector(new GestureListener());
+    private GestureDetector mGestureDetector;
 
-    public boolean onTouch(final View view, final MotionEvent motionEvent) {
-        return gestureDetector.onTouchEvent(motionEvent);
+    public OnSwipeTouchListener(Context context) {
+        mGestureDetector = new GestureDetector(context, new GestureListener());
+    }
+
+//    public boolean onTouch(final View view, final MotionEvent motionEvent) {
+//        System.out.println("::::::   " + motionEvent.toString());
+//        return mGestureDetector.onTouchEvent(motionEvent);
+//    }
+
+    @Override
+    public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
+        return mGestureDetector.onTouchEvent(e);
+    }
+
+    @Override
+    public void onTouchEvent(RecyclerView rv, MotionEvent e) {
+
+    }
+
+    @Override
+    public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
+
     }
 
     private final class GestureListener extends SimpleOnGestureListener {

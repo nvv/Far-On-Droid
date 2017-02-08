@@ -216,7 +216,6 @@
     <string name="error_wrong_port">"Порт" должен быть числом между 0 и 65535</string>
     <string name="error_wrong_ftp_host">Ошибка при подключении к FTP серверу</string>
     <string name="error_sftp_connection_error">Ошибка при подключении к SFTP серверу: неправильный сервер или неверные данные</string>
-    <string name="error_wrong_sftp_host">Ошибка при подключении к SFTP серверу</string>
     <string name="error_wrong_credentials">Ошибка при входе в FTP сервер: неверное имя пользователя или пароль</string>
     <string name="error_ftp_io">Неопределенная ошибка. Пожалуйста, попробуйте еще раз.</string>
 

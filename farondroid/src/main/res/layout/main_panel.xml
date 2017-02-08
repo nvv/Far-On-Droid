@@ -3,6 +3,7 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="fill_parent"
               android:layout_height="fill_parent">
+    <!--
     <ListView
             android:background="@drawable/file_system_frame"
             android:layout_gravity="top"
@@ -15,6 +16,18 @@
             android:cacheColorHint="@color/transparent"
             android:listSelector="@drawable/file_system_item_selector"
             android:id="@android:id/list"/>
+    -->
+
+    <com.openfarmanager.android.view.FileSystemListView
+        android:background="@drawable/file_system_frame"
+        android:layout_gravity="top"
+        android:layout_marginTop="10dp"
+        android:paddingTop="18dp"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        android:overScrollMode="never"
+        android:fadingEdge="none"
+        android:id="@android:id/list"/>
 
     <TextView
             android:id="@+id/selected_files_size"

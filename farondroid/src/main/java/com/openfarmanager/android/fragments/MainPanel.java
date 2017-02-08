@@ -7,23 +7,22 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
-import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.webkit.MimeTypeMap;
 import android.widget.*;
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.R;
-import com.openfarmanager.android.adapters.FlatFileSystemAdapter;
+//import com.openfarmanager.android.adapters.FlatFileSystemAdapter;
+import com.openfarmanager.android.adapters.FileSystemAdapter;
 import com.openfarmanager.android.controllers.FileSystemController;
-import com.openfarmanager.android.core.Settings;
 import com.openfarmanager.android.core.archive.ArchiveUtils;
 import com.openfarmanager.android.core.archive.MimeTypes;
 import com.openfarmanager.android.dialogs.*;
@@ -46,11 +45,11 @@ import com.openfarmanager.android.model.SelectParams;
 import com.openfarmanager.android.model.TaskStatusEnum;
 import com.openfarmanager.android.model.exeptions.SdcardPermissionException;
 import com.openfarmanager.android.utils.CustomFormatter;
-import com.openfarmanager.android.utils.Extensions;
 import com.openfarmanager.android.utils.FileUtilsExt;
 import com.openfarmanager.android.utils.StorageUtils;
-import com.openfarmanager.android.utils.SystemUtils;
+import com.openfarmanager.android.view.FileSystemListView;
 import com.openfarmanager.android.view.ToastNotification;
+import com.openfarmanager.android.view.decoration.HorizontalDividerItemDecoration;
 
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 
@@ -60,7 +59,6 @@ import java.util.*;
 
 import static com.openfarmanager.android.controllers.FileSystemController.*;
 import static com.openfarmanager.android.model.FileActionEnum.*;
-import static com.openfarmanager.android.model.FileActionEnum.ADD_STAR;
 
 public class MainPanel extends BaseFileSystemPanel {
 
@@ -79,7 +77,8 @@ public class MainPanel extends BaseFileSystemPanel {
 
     private File mBaseDir;
     protected TextView mCurrentPathView;
-    protected ListView mFileSystemList;
+//    protected ListView mFileSystemList;
+    protected FileSystemListView mFileSystemList;
     protected ProgressBar mProgress;
     protected boolean mIsMultiSelectMode = false;
     protected boolean mIsDataLoading;
@@ -117,18 +116,31 @@ public class MainPanel extends BaseFileSystemPanel {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         setupHandler();
         View view = inflater.inflate(R.layout.main_panel, container, false);
-        mFileSystemList = (ListView) view.findViewById(android.R.id.list);
+        mFileSystemList = (FileSystemListView) view.findViewById(android.R.id.list);
         mProgress = (ProgressBar) view.findViewById(R.id.loading);
         mSelectedFilesSize = (TextView) view.findViewById(R.id.selected_files_size);
 
-        mFileSystemList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        // use this setting to improve performance if you know that changes
+        // in content do not change the layout size of the RecyclerView
+
+        // specify an adapter (see also next example)
+        //mAdapter = new MyAdapter(myDataset);
+        //mRecyclerView.setAdapter(mAdapter);
+
+
+        mFileSystemList.setOnItemClickListener(new FileSystemAdapter.OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+            public void onItemClick(View view, int i) {
+
+                FileSystemAdapter adapterView = getAdapter();
+                LinearLayoutManager layoutManager = (LinearLayoutManager) mFileSystemList.getLayoutManager();
+
                 if (mIsMultiSelectMode) {
-                    File file = (File) adapterView.getItemAtPosition(i);
+                    File file = (File) adapterView.getItem(i);
                     updateLongClickSelection(adapterView, file, false);
                     return;
                 }
+
                 mSelectedFiles.clear();
                 File item = null;
                 FileSystemFile file = null;
@@ -142,7 +154,8 @@ public class MainPanel extends BaseFileSystemPanel {
                     }
                 }
                 if (item == null) {
-                    item = (FileSystemFile) adapterView.getItemAtPosition(i);
+//                    item = (FileSystemFile) adapterView.getItemAtPosition(i);
+                    item = (FileSystemFile) adapterView.getItem(i);
                 }
 
                 if (item instanceof FileSystemFile) {
@@ -162,19 +175,19 @@ public class MainPanel extends BaseFileSystemPanel {
                 if (item.isDirectory()) {
                     openDirectory(item, previousState);
                     if (previousState == null) {
-                        mDirectorySelection.put(item.getParent(), mFileSystemList.getFirstVisiblePosition());
+                        mDirectorySelection.put(item.getParent(), layoutManager.findFirstVisibleItemPosition());
                     }
                 } else if (item.isFile()) {
                     String mime = ArchiveUtils.getMimeType(item);
                     if (ArchiveUtils.isArchiveSupported(mime)) {
                         mHandler.sendMessage(mHandler.obtainMessage(OPEN_ARCHIVE, item));
-                        FlatFileSystemAdapter adapter = (FlatFileSystemAdapter) mFileSystemList.getAdapter();
+                        FileSystemAdapter adapter = getAdapter();
                         if (adapter != null) {
                             adapter.clearSelectedFiles();
                         }
                     } else if (ArchiveUtils.isCompressionSupported(mime)) {
                         mHandler.sendMessage(mHandler.obtainMessage(OPEN_COMPRESSED_ARCHIVE, item));
-                        FlatFileSystemAdapter adapter = (FlatFileSystemAdapter) mFileSystemList.getAdapter();
+                        FileSystemAdapter adapter = getAdapter();
                         if (adapter != null) {
                             adapter.clearSelectedFiles();
                         }
@@ -188,17 +201,22 @@ public class MainPanel extends BaseFileSystemPanel {
                 }
 
             }
+
+            @Override
+            public void onItemLongClick(View view, int position) {
+                onLongClick(view, position);
+            }
         });
 
         setupGestures(mFileSystemList);
-
+/*
         mFileSystemList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
                 return onLongClick(adapterView, i);
             }
         });
-
+*/
         mQuickActionPopup = new QuickPopupDialog(getActivity(), view, R.layout.quick_action_popup);
         mQuickActionPopup.setPosition((mPanelLocation == LEFT_PANEL ? Gravity.LEFT : Gravity.RIGHT) | Gravity.TOP,
                 (int) (50 * getResources().getDisplayMetrics().density));
@@ -235,7 +253,7 @@ public class MainPanel extends BaseFileSystemPanel {
             }
         });
 
-        mFileSystemList.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
+//        mFileSystemList.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
 
         mCurrentPathView = (TextView) view.findViewById(R.id.current_path);
         mCurrentPathView.setOnLongClickListener(new View.OnLongClickListener() {
@@ -377,11 +395,12 @@ public class MainPanel extends BaseFileSystemPanel {
         super.onHiddenChanged(hidden);
     }
 
-    protected boolean onLongClick(AdapterView<?> adapterView, int i) {
-        FileSystemFile file = (FileSystemFile) adapterView.getItemAtPosition(i);
+    protected boolean onLongClick(View view, int i) {
+        FileSystemAdapter adapter = getAdapter();
+        FileSystemFile file = (FileSystemFile) adapter.getItem(i);
         if (!file.isUpNavigator()) {
             mLastSelectedFile = file;
-            updateLongClickSelection(adapterView, file, true);
+            updateLongClickSelection(adapter, file, true);
             if (!file.isVirtualDirectory()) {
                 openFileActionMenu();
             }
@@ -389,22 +408,31 @@ public class MainPanel extends BaseFileSystemPanel {
         return true;
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-        if (isFileSystemPanel()) {
-            openDirectory(mBaseDir != null ? mBaseDir : FileSystemScanner.sInstance.getRoot());
-        }
-        mFileSystemList.setSelection(mLastListPosition);
+
+    protected FileSystemAdapter getAdapter() {
+        return (FileSystemAdapter) mFileSystemList.getAdapter();
     }
+
+//    @Override
+//    public void onStart() {
+//        super.onStart();
+//        if (isFileSystemPanel()) {
+//            openDirectory(mBaseDir != null ? mBaseDir : FileSystemScanner.sInstance.getRoot());
+//        }
+//
+//        mFileSystemList.setSelection(mLastListPosition);
+//    }
 
     public void onResume() {
         super.onResume();
         // selected files need to be updated after application resumes
-        FlatFileSystemAdapter adapter = (FlatFileSystemAdapter) mFileSystemList.getAdapter();
-        if (adapter != null && mSelectedFiles.size() > 0) {
+//        FlatFileSystemAdapter adapter = (FlatFileSystemAdapter) mFileSystemList.getAdapter();
+        FileSystemAdapter adapter = getAdapter();
+        if (adapter != null) {
             adapter.setSelectedFiles(mSelectedFiles);
             adapter.notifyDataSetChanged();
+            setSelectedFilesSizeVisibility();
+            showQuickActionPanel();
         }
 
         setIsActivePanel(mIsActivePanel);
@@ -428,12 +456,12 @@ public class MainPanel extends BaseFileSystemPanel {
         mSelectedFilesSize.setTextColor(App.sInstance.getSettings().getSelectedColor());
     }
 
-    @Override
-    public void onStop() {
-        super.onStop();
-        // Save ListView state
-        mLastListPosition = mFileSystemList.getFirstVisiblePosition();
-    }
+//    @Override
+//    public void onStop() {
+//        super.onStop();
+//        // Save ListView state
+////        mLastListPosition = mFileSystemList.getFirstVisiblePosition();
+//    }
 
     @Override
     public void onDetach () {
@@ -453,7 +481,7 @@ public class MainPanel extends BaseFileSystemPanel {
         }
     }
 
-    protected void updateLongClickSelection(AdapterView<?> adapterView, File file, boolean longClick) {
+    protected void updateLongClickSelection(FileSystemAdapter adapter, File file, boolean longClick) {
         FileSystemFile systemFile = (FileSystemFile) file;
 
         if (systemFile.isVirtualDirectory()) {
@@ -473,8 +501,8 @@ public class MainPanel extends BaseFileSystemPanel {
             }
             mSelectedFiles.add(0, systemFile);
         }
-        ((FlatFileSystemAdapter) adapterView.getAdapter()).setSelectedFiles(mSelectedFiles);
-        ((BaseAdapter) adapterView.getAdapter()).notifyDataSetChanged();
+        adapter.setSelectedFiles(mSelectedFiles);
+        adapter.notifyDataSetChanged();
 
         setSelectedFilesSizeVisibility();
         calculateSelectedFilesSize();
@@ -841,7 +869,7 @@ public class MainPanel extends BaseFileSystemPanel {
      */
     public void invalidate(boolean forceReloadFiles) {
         if (mFileSystemList != null) {
-            FlatFileSystemAdapter adapter = (FlatFileSystemAdapter) mFileSystemList.getAdapter();
+            FileSystemAdapter adapter = getAdapter();
             adapter.setBaseDir(mBaseDir);
             adapter.setSelectedFiles(mSelectedFiles);
             adapter.notifyDataSetChanged();
@@ -890,9 +918,9 @@ public class MainPanel extends BaseFileSystemPanel {
 
     public List<File> getSelectedFiles() {
         try {
-            if (mSelectedFiles.size() == 0 && mFileSystemList != null && mFileSystemList.getSelectedItem() instanceof FileSystemFile) {
-                mSelectedFiles.add((FileSystemFile) mFileSystemList.getSelectedItem());
-            }
+//            if (mSelectedFiles.size() == 0 && mFileSystemList != null && mFileSystemList.getSelectedItem() instanceof FileSystemFile) {
+//                mSelectedFiles.add((FileSystemFile) mFileSystemList.getSelectedItem());
+//            }
         } catch (Exception ignore) {}
 
         //noinspection unchecked
@@ -1043,9 +1071,9 @@ public class MainPanel extends BaseFileSystemPanel {
 //        File oldDir = mBaseDir;
 //        mBaseDir = directory.getAbsoluteFile();
 //        mCurrentPathView.setText(mBaseDir.getAbsolutePath());
-        FlatFileSystemAdapter adapter = (FlatFileSystemAdapter) mFileSystemList.getAdapter();
+        FileSystemAdapter adapter = getAdapter();
         if (adapter == null) {
-            mFileSystemList.setAdapter(new FlatFileSystemAdapter(mBaseDir, mAction));
+            mFileSystemList.initAdapter(new FileSystemAdapter(mBaseDir, mAction));
         } else {
             adapter.resetFilter();
             adapter.setBaseDir(directory.getAbsoluteFile(), selection);
@@ -1135,7 +1163,7 @@ public class MainPanel extends BaseFileSystemPanel {
 
         }
 
-        FlatFileSystemAdapter adapter = (FlatFileSystemAdapter) mFileSystemList.getAdapter();
+        FileSystemAdapter adapter = getAdapter();
         adapter.setSelectedFiles(mSelectedFiles);
         adapter.notifyDataSetChanged();
         setSelectedFilesSizeVisibility();
@@ -1169,7 +1197,7 @@ public class MainPanel extends BaseFileSystemPanel {
             }
         }
 
-        final FlatFileSystemAdapter adapter = (FlatFileSystemAdapter) mFileSystemList.getAdapter();
+        final FileSystemAdapter adapter = getAdapter();
         adapter.setSelectedFiles(mSelectedFiles);
         getActivity().runOnUiThread(new Runnable() {
             @Override
@@ -1210,19 +1238,13 @@ public class MainPanel extends BaseFileSystemPanel {
         //}
     }
 
-    public void navigateRoot() {
-        if (!isRootDirectory()) {
-            openDirectory(new File(FileSystemScanner.ROOT));
-        }
-    }
-
     public void filter(String obj) {
-        ((FlatFileSystemAdapter) mFileSystemList.getAdapter()).filter(obj);
+        (getAdapter()).filter(obj);
     }
 
     public void selectCurrentFile(int direction) {
-        int position = mFileSystemList.getSelectedItemPosition();
-        FlatFileSystemAdapter adapter = (FlatFileSystemAdapter) mFileSystemList.getAdapter();
+        int position = ((LinearLayoutManager) mFileSystemList.getLayoutManager()).findFirstVisibleItemPosition();
+        FileSystemAdapter adapter = getAdapter();
         FileProxy currentFile;
 
         try {
@@ -1243,8 +1265,16 @@ public class MainPanel extends BaseFileSystemPanel {
             adapter.notifyDataSetChanged();
         }
 
-        mFileSystemList.setSelectionFromTop(position + direction, mFileSystemList.getSelectedView() != null ?
-                (int) mFileSystemList.getSelectedView().getY() : 0);
+//        mFileSystemList.setSelectionFromTop(position + direction, mFileSystemList.getSelectedView() != null ?
+//                (int) mFileSystemList.getSelectedView().getY() : 0);
+
+//        mFileSystemList.scrollToPosition(position + direction);
+
+        ((LinearLayoutManager) mFileSystemList.getLayoutManager()).scrollToPositionWithOffset(position + direction, 0);
+
+//        mFileSystemList.setSelectionFromTop(position + direction, mFileSystemList.getSelectedView() != null ?
+//                (int) mFileSystemList.getSelectedView().getY() : 0);
+
     }
 
     protected void setIsLoading(boolean isLoading) {
@@ -1267,10 +1297,11 @@ public class MainPanel extends BaseFileSystemPanel {
             sendEmptyMessage(DIRECTORY_CHANGED);
 
             if (selection != null) {
-                mFileSystemList.setSelection(selection);
-            } else {
-                mFileSystemList.setSelectionAfterHeaderView();
+                ((LinearLayoutManager) mFileSystemList.getLayoutManager()).scrollToPositionWithOffset(selection, 0);
             }
+//            else {
+//                mFileSystemList.setSelectionAfterHeaderView();
+//            }
         }
 
         @Override

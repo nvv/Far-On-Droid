@@ -3,21 +3,18 @@ package com.openfarmanager.android.fragments;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.MimeTypeMap;
-import android.widget.EditText;
 import android.widget.TextView;
+
 import com.openfarmanager.android.R;
-import com.openfarmanager.android.adapters.FlatFileSystemAdapter;
-import com.openfarmanager.android.core.CancelableCommand;
+import com.openfarmanager.android.adapters.FileSystemAdapter;
 import com.openfarmanager.android.core.archive.MimeTypes;
 import com.openfarmanager.android.utils.CustomFormatter;
 import com.openfarmanager.android.utils.FileUtilsExt;
-import com.openfarmanager.android.utils.ParcelableWrapper;
 
 import java.io.File;
 import java.util.Date;
@@ -125,7 +122,7 @@ public class InfoDialog extends BaseDialog {
                 setSafeValue(R.id.folders, Long.toString(result.directories));
                 setSafeValue(R.id.files, Long.toString(result.files));
                 setSafeValue(R.id.size, CustomFormatter.formatBytes(result.filesSize));
-                setSafeValue(R.id.last_modified, FlatFileSystemAdapter.sDateFormat.format(new Date(mCurrentFile.lastModified())));
+                setSafeValue(R.id.last_modified, FileSystemAdapter.sDateFormat.format(new Date(mCurrentFile.lastModified())));
                 setSafeValue(R.id.permissions, permissions);
                 setSafeValue(R.id.mime_type, MimeTypes.getMimeType(MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(mCurrentFile).toString())));
 

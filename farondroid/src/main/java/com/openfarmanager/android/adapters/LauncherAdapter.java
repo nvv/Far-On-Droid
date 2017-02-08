@@ -52,7 +52,7 @@ import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 
-public class LauncherAdapter extends FlatFileSystemAdapter {
+public class LauncherAdapter extends FileSystemAdapter {
 
     private Handler mHandler;
 
@@ -183,7 +183,7 @@ public class LauncherAdapter extends FlatFileSystemAdapter {
     }
 
     @Override
-    public int getCount() {
+    public int getItemCount() {
         return mFiles.size();
     }
 
@@ -198,39 +198,23 @@ public class LauncherAdapter extends FlatFileSystemAdapter {
     }
 
     @Override
-    public View getView(int i, View view, ViewGroup viewGroup) {
-        if (view == null) {
-            view = LayoutInflater.from(App.sInstance.getApplicationContext()).inflate(R.layout.panel_item, null);
-        }
+    protected void bindView(ViewHolder holder, final int position) {
 
-        FileProxy info = getItem(i);
+        FileProxy info = getItem(position);
 
-        TextView name = (TextView) view.findViewById(R.id.item_name);
-        TextView infoItem = (TextView) view.findViewById(R.id.item_info);
+        holder.name.setText(info.getName());
+        holder.info.setText(info.getSize() > 0 ? FileUtilsExt.byteCountToDisplaySize(info.getSize()) : null);
 
-        name.setText(info.getName());
-        if (info.getSize() > 0) {
-            infoItem.setText(FileUtilsExt.byteCountToDisplaySize(info.getSize()));
-        } else {
-            infoItem.setText(null);
-        }
+        holder.name.setTextColor(mSelectedPackages.contains(info.getId()) ?
+                App.sInstance.getSettings().getSelectedColor() : App.sInstance.getSettings().getInstallColor());
 
-        if (mSelectedPackages.contains(info.getId())) {
-            name.setTextColor(App.sInstance.getSettings().getSelectedColor());
-        } else {
-            name.setTextColor(App.sInstance.getSettings().getInstallColor());
-        }
-
-
-        int size = App.sInstance.getSettings().getMainPanelFontSize();
-        name.setTextSize(TypedValue.COMPLEX_UNIT_SP, size);
-        infoItem.setTextSize(TypedValue.COMPLEX_UNIT_SP, size); // to adjust item size
-
-        Typeface typeface = App.sInstance.getSettings().getMainPanelFontType();
-        name.setTypeface(typeface);
-        infoItem.setTypeface(typeface);
-
-        return view;
+//        int size = App.sInstance.getSettings().getMainPanelFontSize();
+//        holder.name.setTextSize(TypedValue.COMPLEX_UNIT_SP, size);
+//        holder.info.setTextSize(TypedValue.COMPLEX_UNIT_SP, size); // to adjust item size
+//
+//        Typeface typeface = App.sInstance.getSettings().getMainPanelFontType();
+//        holder.name.setTypeface(typeface);
+//        holder.info.setTypeface(typeface);
     }
 
     public void onItemClick(int i) {

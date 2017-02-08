@@ -21,7 +21,7 @@ import java.util.List;
 /**
  * @author Vlad Namashko
  */
-public class NetworkEntryAdapter extends FlatFileSystemAdapter {
+public class NetworkEntryAdapter extends FileSystemAdapter {
 
     private List<FileProxy> mEntries;
     //private String mParentPath;
@@ -43,7 +43,7 @@ public class NetworkEntryAdapter extends FlatFileSystemAdapter {
     }
 
     @Override
-    public int getCount() {
+    public int getItemCount() {
         return mEntries.size() + 1;
     }
 
@@ -61,37 +61,31 @@ public class NetworkEntryAdapter extends FlatFileSystemAdapter {
     }
 
     @Override
-    public View getView(int i, View view, ViewGroup viewGroup) {
-        if (view == null) {
-            view = LayoutInflater.from(App.sInstance.getApplicationContext()).inflate(R.layout.panel_item, null);
-        }
+    protected void bindView(ViewHolder holder, final int position) {
 
-        FileProxy item = (FileProxy) getItem(i);
+        FileProxy item = (FileProxy) getItem(position);
 
-        TextView name = (TextView) view.findViewById(R.id.item_name);
-        name.setText(item.getName());
-        TextView size = (TextView) view.findViewById(R.id.item_info);
+        holder.name.setText(item.getName());
 
         Settings settings = App.sInstance.getSettings();
 
-        int fontSize = settings.getMainPanelFontSize();
-        name.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize);
-        size.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize);
-
-        Typeface typeface = settings.getMainPanelFontType();
-        name.setTypeface(typeface);
-        size.setTypeface(typeface);
+//        int fontSize = settings.getMainPanelFontSize();
+//        holder.name.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize);
+//        holder.info.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize);
+//
+//        Typeface typeface = settings.getMainPanelFontType();
+//        holder.name.setTypeface(typeface);
+//        holder.info.setTypeface(typeface);
 
         if (mSelectedFiles.contains(item)) {
-            name.setTextColor(settings.getSelectedColor());
-            size.setTextColor(settings.getSelectedColor());
+            holder.name.setTextColor(settings.getSelectedColor());
+            holder.info.setTextColor(settings.getSelectedColor());
         } else if (item.isDirectory()) {
-            name.setTextColor(settings.getFolderColor());
-            size.setTextColor(settings.getFolderColor());
+            holder.name.setTextColor(settings.getFolderColor());
+            holder.info.setTextColor(settings.getFolderColor());
         } else {
-            name.setTextColor(settings.getTextColor());
-            size.setTextColor(settings.getTextColor()
-            );
+            holder.name.setTextColor(settings.getTextColor());
+            holder.info.setTextColor(settings.getTextColor());
         }
 
         FakeFile fakeFile = null;
@@ -100,13 +94,13 @@ public class NetworkEntryAdapter extends FlatFileSystemAdapter {
         }
 
         if (item.isRoot() || (fakeFile != null && fakeFile.isRoot())) {
-            size.setText(R.string.folder_root);
+            holder.info.setText(R.string.folder_root);
         } else if (item.isUpNavigator() || (fakeFile != null && fakeFile.isUpNavigator())) {
-            size.setText(R.string.folder_up);
+            holder.info.setText(R.string.folder_up);
         } else if (item.isVirtualDirectory()) {
-            size.setText(R.string.virtual_folder);
+            holder.info.setText(R.string.virtual_folder);
         } else if (item.isDirectory()) {
-            size.setText(R.string.folder);
+            holder.info.setText(R.string.folder);
         } else {
             int type = Extensions.tryParse(App.sInstance.getSettings().getFileInfoType(), 0);
             String value = "";
@@ -122,8 +116,7 @@ public class NetworkEntryAdapter extends FlatFileSystemAdapter {
                     break;
             }
 
-            size.setText(value);
+            holder.info.setText(value);
         }
-        return view;
     }
 }
