@@ -1296,12 +1296,8 @@ public class MainPanel extends BaseFileSystemPanel {
             mCurrentPathView.setText(mBaseDir.getAbsolutePath());
             sendEmptyMessage(DIRECTORY_CHANGED);
 
-            if (selection != null) {
-                ((LinearLayoutManager) mFileSystemList.getLayoutManager()).scrollToPositionWithOffset(selection, 0);
-            }
-//            else {
-//                mFileSystemList.setSelectionAfterHeaderView();
-//            }
+            LinearLayoutManager manager = (LinearLayoutManager) mFileSystemList.getLayoutManager();
+            manager.scrollToPositionWithOffset(selection != null ? selection : 0, 0);
         }
 
         @Override
