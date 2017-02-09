@@ -88,6 +88,8 @@ public class NetworkEntryAdapter extends FileSystemAdapter {
             holder.info.setTextColor(settings.getTextColor());
         }
 
+        holder.configureCell(settings);
+
         FakeFile fakeFile = null;
         if (item instanceof FakeFile) {
             fakeFile = (FakeFile) item;

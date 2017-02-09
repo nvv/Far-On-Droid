@@ -205,6 +205,8 @@ public class LauncherAdapter extends FileSystemAdapter {
         holder.name.setText(info.getName());
         holder.info.setText(info.getSize() > 0 ? FileUtilsExt.byteCountToDisplaySize(info.getSize()) : null);
 
+        holder.configureCell(App.sInstance.getSettings());
+
         holder.name.setTextColor(mSelectedPackages.contains(info.getId()) ?
                 App.sInstance.getSettings().getSelectedColor() : App.sInstance.getSettings().getInstallColor());
 

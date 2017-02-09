@@ -68,13 +68,14 @@ public class Main extends BaseActivity {
         }
 
         if (data != null && data.getBooleanExtra(RESULT_CODE_PANELS_MODE_CHANGED, false)) {
-            Intent intent = getIntent();
-            overridePendingTransition(0, 0);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-            finish();
-
-            overridePendingTransition(0, 0);
-            startActivity(intent);
+//            Intent intent = getIntent();
+//            overridePendingTransition(0, 0);
+//            intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+//            finish();
+//
+//            overridePendingTransition(0, 0);
+//            startActivity(intent);
+            recreate();
         }
 
         if (data != null && data.getBooleanExtra(RESULT_BOTTOM_PANEL_INVALIDATE, false)) {

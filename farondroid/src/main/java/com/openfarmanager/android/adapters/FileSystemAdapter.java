@@ -196,6 +196,8 @@ public class FileSystemAdapter extends RecyclerView.Adapter<FileSystemAdapter.Vi
             setColor(holder.name, holder.info, settings.getTextColor());
         }
 
+        holder.configureCell(settings);
+
         if (item.isUpNavigator()) {
             holder.info.setText(R.string.folder_up);
         } else if (item.isDirectory()) {
@@ -264,12 +266,12 @@ public class FileSystemAdapter extends RecyclerView.Adapter<FileSystemAdapter.Vi
             super(view);
             name = (TextView) view.findViewById(R.id.item_name);
             info = (TextView) view.findViewById(R.id.item_info);
+        }
 
+        public void configureCell(Settings settings) {
             int size = App.sInstance.getSettings().getMainPanelFontSize();
             name.setTextSize(TypedValue.COMPLEX_UNIT_SP, size);
             info.setTextSize(TypedValue.COMPLEX_UNIT_SP, size);
-
-            Settings settings = App.sInstance.getSettings();
 
             Typeface typeface = settings.getMainPanelFontType();
             name.setTypeface(typeface);

@@ -65,6 +65,8 @@ public class ArchiveAdapter extends FileSystemAdapter {
             holder.info.setTextColor(settings.getTextColor());
         }
 
+        holder.configureCell(settings);
+
         if (item.isRoot()) {
             holder.info.setText(R.string.folder_root);
         } else if (item.isUpNavigator()) {
