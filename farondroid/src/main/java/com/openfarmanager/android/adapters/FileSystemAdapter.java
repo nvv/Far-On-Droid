@@ -54,9 +54,9 @@ public class FileSystemAdapter extends RecyclerView.Adapter<FileSystemAdapter.Vi
 
     public static SimpleDateFormat sDateFormat = new SimpleDateFormat("dd MM yyyy HH:mm");
 
-    public FileSystemAdapter(File baseDir, OpenDirectoryActionListener listener) {
+    public FileSystemAdapter(File baseDir, Integer selection, OpenDirectoryActionListener listener) {
         mListener = listener;
-        setBaseDir(baseDir, -1, true);
+        setBaseDir(baseDir, selection == null ? -1 : selection, true);
     }
 
     protected FileSystemAdapter() {

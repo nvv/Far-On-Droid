@@ -413,15 +413,13 @@ public class MainPanel extends BaseFileSystemPanel {
         return (FileSystemAdapter) mFileSystemList.getAdapter();
     }
 
-//    @Override
-//    public void onStart() {
-//        super.onStart();
-//        if (isFileSystemPanel()) {
-//            openDirectory(mBaseDir != null ? mBaseDir : FileSystemScanner.sInstance.getRoot());
-//        }
-//
-//        mFileSystemList.setSelection(mLastListPosition);
-//    }
+    @Override
+    public void onStart() {
+        super.onStart();
+        if (isFileSystemPanel()) {
+            openDirectory(mBaseDir != null ? mBaseDir : FileSystemScanner.sInstance.getRoot(), mLastListPosition);
+        }
+    }
 
     public void onResume() {
         super.onResume();
@@ -456,12 +454,14 @@ public class MainPanel extends BaseFileSystemPanel {
         mSelectedFilesSize.setTextColor(App.sInstance.getSettings().getSelectedColor());
     }
 
-//    @Override
-//    public void onStop() {
-//        super.onStop();
-//        // Save ListView state
-////        mLastListPosition = mFileSystemList.getFirstVisiblePosition();
-//    }
+    @Override
+    public void onStop() {
+        super.onStop();
+        // Save ListView state
+        if (isFileSystemPanel()) {
+            mLastListPosition = ((LinearLayoutManager) mFileSystemList.getLayoutManager()).findFirstVisibleItemPosition();
+        }
+    }
 
     @Override
     public void onDetach () {
@@ -1073,7 +1073,7 @@ public class MainPanel extends BaseFileSystemPanel {
 //        mCurrentPathView.setText(mBaseDir.getAbsolutePath());
         FileSystemAdapter adapter = getAdapter();
         if (adapter == null) {
-            mFileSystemList.initAdapter(new FileSystemAdapter(mBaseDir, mAction));
+            mFileSystemList.initAdapter(new FileSystemAdapter(mBaseDir, selection, mAction));
         } else {
             adapter.resetFilter();
             adapter.setBaseDir(directory.getAbsoluteFile(), selection);
