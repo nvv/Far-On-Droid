@@ -10,10 +10,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewTreeObserver;
 
-import com.openfarmanager.android.fragments.MainToolbarPanel;
 import com.openfarmanager.android.tips.HideToolbarTips;
 import com.openfarmanager.android.toolbar.MenuItemImpl;
 import com.openfarmanager.android.dialogs.QuickPopupDialog;
+import com.openfarmanager.android.view.panels.MainToolbar;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -51,17 +51,18 @@ public abstract class BaseActivity extends FragmentActivity {
                             @Override
                             public void onClick(View v) {
 
-                                MainToolbarPanel.SubMenuDialog dialog = MainToolbarPanel.SubMenuDialog.newInstance(
-                                        getItems(), new MainToolbarPanel.SubMenuDialog.OnActionSelectedListener() {
+                                MainToolbar.SubMenuDialog dialog = MainToolbar.SubMenuDialog.newInstance(view.getContext(),
+                                        getItems(), new MainToolbar.SubMenuDialog.OnActionSelectedListener() {
                                             @Override
                                             public void onActionSelected(MenuItem item) {
                                                 onToolbarItemSelected(item);
                                             }
                                         });
-                                try {
-                                    dialog.show(BaseActivity.this.getSupportFragmentManager(), "dialog");
-                                } catch (Exception ignore) {
-                                }
+                                dialog.show();
+//                                try {
+//                                    dialog.show(BaseActivity.this.getSupportFragmentManager(), "dialog");
+//                                } catch (Exception ignore) {
+//                                }
                             }
                         });
                     }

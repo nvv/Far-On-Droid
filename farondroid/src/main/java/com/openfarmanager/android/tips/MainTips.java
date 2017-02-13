@@ -13,8 +13,8 @@ import com.openfarmanager.android.App;
 import com.openfarmanager.android.R;
 import com.openfarmanager.android.controllers.FileSystemController;
 import com.openfarmanager.android.fragments.MainPanel;
-import com.openfarmanager.android.fragments.MainToolbarPanel;
 import com.openfarmanager.android.model.SelectParams;
+import com.openfarmanager.android.view.panels.MainToolbar;
 
 /**
  * @author Vlad Namashko
@@ -25,14 +25,14 @@ public class MainTips {
     private int mCurrentStep = 0;
 
     private FileSystemController mFileSystemController;
-    private MainToolbarPanel mMainToolbarPanel;
+    private MainToolbar mMainToolbarPanel;
 
     private View mRootAnchor;
     private Point mCurrentPathViewPoint;
 
     private Activity mActivity;
 
-    public MainTips(Activity activity, FileSystemController controller, MainToolbarPanel panel) {
+    public MainTips(Activity activity, FileSystemController controller, MainToolbar panel) {
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
             return;

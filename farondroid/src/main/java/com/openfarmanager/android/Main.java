@@ -22,7 +22,6 @@ import com.openfarmanager.android.core.Settings;
 import com.openfarmanager.android.core.network.NetworkConnectionManager;
 import com.openfarmanager.android.core.network.dropbox.DropboxAPI;
 import com.openfarmanager.android.fragments.BaseFileSystemPanel;
-import com.openfarmanager.android.fragments.MainToolbarPanel;
 import com.openfarmanager.android.fragments.RequestPermissionFragment;
 import com.openfarmanager.android.fragments.YesNoDialog;
 import com.openfarmanager.android.model.NetworkEnum;
@@ -30,6 +29,7 @@ import com.openfarmanager.android.tips.MainTips;
 import com.openfarmanager.android.toolbar.MenuBuilder;
 import com.openfarmanager.android.toolbar.MenuItemImpl;
 import com.openfarmanager.android.view.ToastNotification;
+import com.openfarmanager.android.view.panels.MainToolbar;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -177,7 +177,7 @@ public class Main extends BaseActivity {
 
         Settings settings = App.sInstance.getSettings();
         if (settings.isShowTips()) {
-            new MainTips(this, mFileSystemController, (MainToolbarPanel) getSupportFragmentManager().findFragmentById(R.id.toolbar));
+            new MainTips(this, mFileSystemController, (MainToolbar) findViewById(R.id.toolbar));
             settings.getSharedPreferences().edit().putBoolean(Settings.SHOW_TIPS, false).apply();
         }
     }
@@ -270,6 +270,6 @@ public class Main extends BaseActivity {
 
     @Override
     protected void onToolbarItemSelected(MenuItem item) {
-        getHandler().sendEmptyMessage(MainToolbarPanel.sActions.get(item.getItemId()));
+        getHandler().sendEmptyMessage(MainToolbar.sActions.get(item.getItemId()));
     }
 }

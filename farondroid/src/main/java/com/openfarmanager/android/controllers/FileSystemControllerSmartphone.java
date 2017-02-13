@@ -10,6 +10,7 @@ import com.openfarmanager.android.App;
 import com.openfarmanager.android.R;
 import com.openfarmanager.android.fragments.*;
 import com.openfarmanager.android.model.NetworkEnum;
+import com.openfarmanager.android.view.panels.MainToolbar;
 
 import java.io.File;
 
@@ -46,7 +47,7 @@ public class FileSystemControllerSmartphone extends FileSystemController {
         TabsAdapter adapter = new TabsAdapter(manager);
         mViewPager.setAdapter(adapter);
 
-        mMainToolbar = (MainToolbarPanel) manager.findFragmentById(R.id.toolbar);
+        mToolbar = (MainToolbar) mMainView.findViewById(R.id.toolbar);
         mDirectoryDetailsView = (DirectoryDetailsView) Fragment.instantiate(appContext, DirectoryDetailsView.class.getName());
 
         mLeftArchivePanel = (ArchivePanel) Fragment.instantiate(appContext, ArchivePanel.class.getName());

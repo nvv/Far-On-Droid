@@ -43,7 +43,6 @@ import com.openfarmanager.android.fragments.BasePanel;
 import com.openfarmanager.android.fragments.DirectoryDetailsView;
 import com.openfarmanager.android.fragments.GenericPanel;
 import com.openfarmanager.android.fragments.MainPanel;
-import com.openfarmanager.android.fragments.MainToolbarPanel;
 import com.openfarmanager.android.fragments.NetworkPanel;
 import com.openfarmanager.android.model.Bookmark;
 import com.openfarmanager.android.model.FileActionEnum;
@@ -52,6 +51,7 @@ import com.openfarmanager.android.model.NetworkEnum;
 import com.openfarmanager.android.utils.SystemUtils;
 import com.openfarmanager.android.view.ExpandPanelAnimation;
 import com.openfarmanager.android.view.ToastNotification;
+import com.openfarmanager.android.view.panels.MainToolbar;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -127,7 +127,7 @@ public class FileSystemController {
 
     protected MainPanel mLeftPanel;
     protected MainPanel mRightPanel;
-    protected MainToolbarPanel mMainToolbar;
+    protected MainToolbar mToolbar;
     protected ArchivePanel mLeftArchivePanel;
     protected ArchivePanel mRightArchivePanel;
     protected NetworkPanel mLeftNetworkPanel;
@@ -168,7 +168,7 @@ public class FileSystemController {
         mLeftGenericPanel = (GenericPanel) Fragment.instantiate(appContext, GenericPanel.class.getName());
         mRightGenericPanel = (GenericPanel) Fragment.instantiate(appContext, GenericPanel.class.getName());
 
-        mMainToolbar = (MainToolbarPanel) manager.findFragmentById(R.id.toolbar);
+        mToolbar = (MainToolbar) mMainView.findViewById(R.id.toolbar);
         mLeftFragmentContainer = view.findViewById(R.id.panel_left);
         mRightFragmentContainer = view.findViewById(R.id.panel_right);
 
@@ -185,20 +185,20 @@ public class FileSystemController {
     }
 
     public void invalidateToolbar() {
-        mMainToolbar.invalidate();
+        mToolbar.invalidate();
     }
 
     public void hideMainToolbar() {
-        mMainToolbar.getFragmentManager().beginTransaction().hide(mMainToolbar).commit();
+        mToolbar.setVisibility(View.GONE);
     }
 
     public void showMainToolbar() {
-        mMainToolbar.getFragmentManager().beginTransaction().show(mMainToolbar).commit();
+        mToolbar.setVisibility(View.VISIBLE);
     }
 
     protected void initPanels() {
 
-        mMainToolbar.setHandler(mToolbarHandler);
+        mToolbar.setHandler(mToolbarHandler);
 
         mLeftPanel.setHandler(mPanelHandler);
         mRightPanel.setHandler(mPanelHandler);

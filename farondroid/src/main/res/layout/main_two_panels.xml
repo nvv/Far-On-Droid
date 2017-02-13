@@ -28,11 +28,10 @@
                 android:layout_height="fill_parent"/>
     </LinearLayout>
 
-    <fragment
-            android:name="com.openfarmanager.android.fragments.MainToolbarPanel"
-            android:id="@+id/toolbar"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"/>
+    <com.openfarmanager.android.view.panels.MainToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
 
 </LinearLayout>
 

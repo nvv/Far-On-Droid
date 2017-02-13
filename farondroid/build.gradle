@@ -12,9 +12,24 @@ android {
 
     defaultConfig {
         minSdkVersion 14
+        targetSdkVersion 25
         versionCode 216
         versionName "0.8.5.0"
+
+        jackOptions {
+            enabled true
+        }
     }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    dexOptions {
+        javaMaxHeapSize "4096M"
+    }
+
 /*
     sourceSets {
         main {
@@ -73,6 +88,7 @@ android {
         compile 'org.apache.commons:commons-compress:1.9'
         compile 'commons-net:commons-net:3.4'
         compile 'commons-httpclient:commons-httpclient:3.1'
+        compile 'com.annimon:stream:1.1.5'
 
         compile 'com.android.support:recyclerview-v7:24.2.1'
 
