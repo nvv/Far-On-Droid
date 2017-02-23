@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.Fragment;
@@ -58,6 +59,12 @@ import java.io.FileInputStream;
 import java.util.LinkedHashSet;
 import java.util.List;
 
+import javax.inject.Singleton;
+
+import dagger.Module;
+import dagger.Provides;
+
+import static com.openfarmanager.android.fragments.MainPanel.ARG_PANEL_LOCATION;
 import static com.openfarmanager.android.fragments.MainPanel.LEFT_PANEL;
 import static com.openfarmanager.android.fragments.MainPanel.RIGHT_PANEL;
 
@@ -120,6 +127,8 @@ public class FileSystemController {
     public static final int ADD_STAR = 131;
     public static final int REMOVE_STAR = 132;
     public static final int SHARE = 133;
+    public static final int GOTO_HOME = 134;
+    public static final int OPEN_DIRECTORY = 135;
 
     public static final int ARG_FORCE_OPEN_FILE_IN_EDITOR = 1000;
     public static final int ARG_EXPAND_LEFT_PANEL = 1001;
@@ -177,11 +186,11 @@ public class FileSystemController {
         mLeftVisibleFragment = mLeftPanel;
         mRightVisibleFragment = mRightPanel;
 
+        initPanels();
+
         manager.beginTransaction().add(R.id.panel_left, mLeftPanel).
                 add(R.id.panel_right, mRightPanel).
                 commit();
-
-        initPanels();
     }
 
     public void invalidateToolbar() {
@@ -212,15 +221,21 @@ public class FileSystemController {
         mLeftGenericPanel.setHandler(mPanelHandler);
         mRightGenericPanel.setHandler(mPanelHandler);
 
-        mLeftPanel.setPanelLocation(LEFT_PANEL);
-        mLeftArchivePanel.setPanelLocation(LEFT_PANEL);
-        mLeftNetworkPanel.setPanelLocation(LEFT_PANEL);
-        mLeftGenericPanel.setPanelLocation(LEFT_PANEL);
 
-        mRightPanel.setPanelLocation(RIGHT_PANEL);
-        mRightArchivePanel.setPanelLocation(RIGHT_PANEL);
-        mRightNetworkPanel.setPanelLocation(RIGHT_PANEL);
-        mRightGenericPanel.setPanelLocation(RIGHT_PANEL);
+        Bundle argsLeft = new Bundle();
+        argsLeft.putInt(ARG_PANEL_LOCATION, LEFT_PANEL);
+        Bundle argsRight = new Bundle();
+        argsRight.putInt(ARG_PANEL_LOCATION, RIGHT_PANEL);
+
+        mLeftPanel.setArguments(argsLeft);
+        mLeftArchivePanel.setArguments(argsLeft);
+        mLeftNetworkPanel.setArguments(argsLeft);
+        mLeftGenericPanel.setArguments(argsLeft);
+
+        mRightPanel.setArguments(argsRight);
+        mRightArchivePanel.setArguments(argsRight);
+        mRightNetworkPanel.setArguments(argsRight);
+        mRightGenericPanel.setArguments(argsRight);
     }
 
     public void invalidate() {
@@ -376,15 +391,23 @@ public class FileSystemController {
 
         @Override
         public void handleMessage(Message msg) {
-            MainPanel activePanel = getActivePanel();
-            MainPanel inactivePanel = getInactivePanel();
 
-            if (activePanel != null) {
-                boolean isLeftPanelActive = activePanel.getPanelLocation() == LEFT_PANEL;
-                inactivePanel = isLeftPanelActive ? getRightVisiblePanel() : getLeftVisiblePanel();
+            boolean initPanels = msg.what != GAIN_FOCUS;
 
-                if (inactivePanel == null) {
-                    inactivePanel = getInactivePanel();
+            MainPanel activePanel = null;
+            MainPanel inactivePanel = null;
+
+            if (initPanels) {
+                activePanel = getActivePanel();
+                inactivePanel = getInactivePanel();
+
+                if (activePanel != null) {
+                    boolean isLeftPanelActive = activePanel.getPanelLocation() == LEFT_PANEL;
+                    inactivePanel = isLeftPanelActive ? getRightVisiblePanel() : getLeftVisiblePanel();
+
+                    if (inactivePanel == null) {
+                        inactivePanel = getInactivePanel();
+                    }
                 }
             }
 
@@ -515,6 +538,12 @@ public class FileSystemController {
                     break;
                 case SHARE:
                     inactivePanel.doDropboxTask(activePanel, (DropboxFile) msg.obj, DropboxTask.TASK_SHARE);
+                    break;
+                case GOTO_HOME:
+                    activePanel.openHomeFolder();
+                    break;
+                case OPEN_DIRECTORY:
+                    activePanel.openDirectory((String) msg.obj);
                     break;
             }
         }

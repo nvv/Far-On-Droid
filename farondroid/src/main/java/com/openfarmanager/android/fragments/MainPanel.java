@@ -9,8 +9,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -47,9 +47,9 @@ import com.openfarmanager.android.model.exeptions.SdcardPermissionException;
 import com.openfarmanager.android.utils.CustomFormatter;
 import com.openfarmanager.android.utils.FileUtilsExt;
 import com.openfarmanager.android.utils.StorageUtils;
+import com.openfarmanager.android.view.ActionBar;
 import com.openfarmanager.android.view.FileSystemListView;
 import com.openfarmanager.android.view.ToastNotification;
-import com.openfarmanager.android.view.decoration.HorizontalDividerItemDecoration;
 
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 
@@ -76,41 +76,20 @@ public class MainPanel extends BaseFileSystemPanel {
     public static final int FILE_CREATE_ARCHIVE = 1006;
 
     private File mBaseDir;
-    protected TextView mCurrentPathView;
-//    protected ListView mFileSystemList;
     protected FileSystemListView mFileSystemList;
     protected ProgressBar mProgress;
     protected boolean mIsMultiSelectMode = false;
     protected boolean mIsDataLoading;
 
-    protected List<FileProxy> mSelectedFiles = new ArrayList<FileProxy>();
-    protected List<FileProxy> mPreSelectedFiles = new ArrayList<FileProxy>();
-
-    protected View mChangePathToLeft;
-    protected View mChangePathToRight;
-
-    protected View mAddToBookmarksLeft;
-    protected View mAddToBookmarksRight;
-
-    protected View mNetworkLeft;
-    protected View mNetworkRight;
-
-    protected View mHomeLeft;
-    protected View mHomeRight;
-
-    protected View mCharsetLeft;
-    protected View mCharsetRight;
-
-    protected View mExitLeft;
-    protected View mExitRight;
-
-    protected boolean mIsActivePanel;
+    protected List<FileProxy> mSelectedFiles = new ArrayList<>();
 
     private int mLastListPosition;
 
     protected TextView mSelectedFilesSize;
 
     protected QuickPopupDialog mQuickActionPopup;
+
+    protected ActionBar mActionBar;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -120,13 +99,11 @@ public class MainPanel extends BaseFileSystemPanel {
         mProgress = (ProgressBar) view.findViewById(R.id.loading);
         mSelectedFilesSize = (TextView) view.findViewById(R.id.selected_files_size);
 
-        // use this setting to improve performance if you know that changes
-        // in content do not change the layout size of the RecyclerView
-
-        // specify an adapter (see also next example)
-        //mAdapter = new MyAdapter(myDataset);
-        //mRecyclerView.setAdapter(mAdapter);
-
+        mActionBar = createActionBar();
+        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        layoutParams.gravity = Gravity.CENTER_HORIZONTAL;
+        mActionBar.setPanelLocation(getPanelLocation());
+        ((ViewGroup) view.findViewById(R.id.root_view)).addView(mActionBar, layoutParams);
 
         mFileSystemList.setOnItemClickListener(new FileSystemAdapter.OnItemClickListener() {
             @Override
@@ -197,6 +174,7 @@ public class MainPanel extends BaseFileSystemPanel {
                 } else if (!isFileExists(item)) {
                     ToastNotification.makeText(App.sInstance.getApplicationContext(),
                             getSafeString(R.string.error_non_existsed_directory), Toast.LENGTH_SHORT).show();
+                    gainFocus();
                     openHomeFolder();
                 }
 
@@ -209,16 +187,9 @@ public class MainPanel extends BaseFileSystemPanel {
         });
 
         setupGestures(mFileSystemList);
-/*
-        mFileSystemList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
-                return onLongClick(adapterView, i);
-            }
-        });
-*/
+
         mQuickActionPopup = new QuickPopupDialog(getActivity(), view, R.layout.quick_action_popup);
-        mQuickActionPopup.setPosition((mPanelLocation == LEFT_PANEL ? Gravity.LEFT : Gravity.RIGHT) | Gravity.TOP,
+        mQuickActionPopup.setPosition((getPanelLocation() == LEFT_PANEL ? Gravity.LEFT : Gravity.RIGHT) | Gravity.TOP,
                 (int) (50 * getResources().getDisplayMetrics().density));
         View layout = mQuickActionPopup.getContentView();
         layout.findViewById(R.id.quick_action_copy).setOnClickListener(new View.OnClickListener() {
@@ -253,109 +224,13 @@ public class MainPanel extends BaseFileSystemPanel {
             }
         });
 
-//        mFileSystemList.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
-
-        mCurrentPathView = (TextView) view.findViewById(R.id.current_path);
-        mCurrentPathView.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View view) {
-                return openNavigationPathPopup(view);
-            }
-        });
-
-        mChangePathToLeft = view.findViewById(R.id.change_folder_to_left);
-        mChangePathToRight = view.findViewById(R.id.change_folder_to_right);
-
-        mAddToBookmarksLeft = view.findViewById(R.id.add_to_bookmarks_left);
-        mAddToBookmarksRight = view.findViewById(R.id.add_to_bookmarks_right);
-
-        mNetworkLeft = view.findViewById(R.id.network_left);
-        mNetworkRight = view.findViewById(R.id.network_right);
-
-        mHomeLeft = view.findViewById(R.id.home_left);
-        mHomeRight = view.findViewById(R.id.home_right);
-
-        mCharsetLeft = view.findViewById(R.id.charset_left);
-        mCharsetRight = view.findViewById(R.id.charset_right);
-
-        mExitLeft = view.findViewById(R.id.exit_left);
-        mExitRight = view.findViewById(R.id.exit_right);
-
-        mChangePathToRight.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mHandler.sendMessage(mHandler.obtainMessage(CHANGE_PATH, RIGHT_PANEL));
-            }
-        });
-
-        mChangePathToLeft.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mHandler.sendMessage(mHandler.obtainMessage(CHANGE_PATH, LEFT_PANEL));
-            }
-        });
-
-        mAddToBookmarksLeft.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                gainFocus();
-                mHandler.sendMessage(mHandler.obtainMessage(FileSystemController.CREATE_BOOKMARK));
-            }
-        });
-
-        mAddToBookmarksRight.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                gainFocus();
-                mHandler.sendMessage(mHandler.obtainMessage(FileSystemController.CREATE_BOOKMARK));
-            }
-        });
-
-        mNetworkLeft.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                gainFocus();
-                mHandler.sendMessage(mHandler.obtainMessage(FileSystemController.OPEN_NETWORK));
-            }
-        });
-
-        mNetworkRight.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                gainFocus();
-                mHandler.sendMessage(mHandler.obtainMessage(FileSystemController.OPEN_NETWORK));
-            }
-        });
-
-        mExitLeft.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                gainFocus();
-                mHandler.sendMessage(mHandler.obtainMessage(EXIT_FROM_NETWORK_STORAGE, mPanelLocation));
-            }
-        });
-
-        mExitRight.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                gainFocus();
-                mHandler.sendMessage(mHandler.obtainMessage(EXIT_FROM_NETWORK_STORAGE, mPanelLocation));
-            }
-        });
-
-        mHomeLeft.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                openHomeFolder();
-            }
-        });
-
-        mHomeRight.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                openHomeFolder();
-            }
-        });
+//        mCurrentPathView = (TextView) view.findViewById(R.id.current_path);
+//        mCurrentPathView.setOnLongClickListener(new View.OnLongClickListener() {
+//            @Override
+//            public boolean onLongClick(View view) {
+//                return openNavigationPathPopup(view);
+//            }
+//        });
 
         postInitialization();
         setNavigationButtonsVisibility();
@@ -363,8 +238,12 @@ public class MainPanel extends BaseFileSystemPanel {
         return view;
     }
 
-    private void openHomeFolder() {
-        gainFocus();
+    @NonNull
+    protected ActionBar createActionBar() {
+        return new ActionBar(getContext());
+    }
+
+    public void openHomeFolder() {
         try {
             openDirectory(new File(App.sInstance.getSettings().getHomeFolder()));
         } catch (Exception e) {
@@ -383,8 +262,9 @@ public class MainPanel extends BaseFileSystemPanel {
         mSelectedFiles.clear();
     }
 
-    protected void onNavigationItemSelected(int pos, List<String> items) {
-        File f = new File(TextUtils.join("/", items.subList(0, pos + 1)));
+    @Override
+    public void openDirectory(String path) {
+        File f = new File(path);
         if (isFileExists(f)) {
             openDirectory(f);
         }
@@ -436,20 +316,7 @@ public class MainPanel extends BaseFileSystemPanel {
         setIsActivePanel(mIsActivePanel);
         setNavigationButtonsVisibility();
 
-        int color = App.sInstance.getSettings().getMainPanelColor();
-        mChangePathToLeft.setBackgroundColor(color);
-        mChangePathToRight.setBackgroundColor(color);
-        mAddToBookmarksLeft.setBackgroundColor(color);
-        mAddToBookmarksRight.setBackgroundColor(color);
-        mNetworkLeft.setBackgroundColor(color);
-        mNetworkRight.setBackgroundColor(color);
-        mHomeLeft.setBackgroundColor(color);
-        mHomeRight.setBackgroundColor(color);
-        mExitLeft.setBackgroundColor(color);
-        mExitRight.setBackgroundColor(color);
-        mCharsetLeft.setBackgroundColor(color);
-        mCharsetRight.setBackgroundColor(color);
-
+        mActionBar.updateBackground();
         mSelectedFilesSize.setBackgroundColor(App.sInstance.getSettings().getSecondaryColor());
         mSelectedFilesSize.setTextColor(App.sInstance.getSettings().getSelectedColor());
     }
@@ -954,37 +821,32 @@ public class MainPanel extends BaseFileSystemPanel {
 
     public void setIsActivePanel(final boolean active) {
         if (!mIsInitialized) {
-            addToPendingList(new Runnable() {
-                @Override
-                public void run() {
-                    setIsActivePanel(active);
-                }
-            });
+            addToPendingList(() -> setIsActivePanel(active));
             return;
         }
 
         mIsActivePanel = active;
-        if (mCurrentPathView != null) {
-            mCurrentPathView.setSelected(mIsActivePanel);
+        mActionBar.setActive(active);
 
-            mCurrentPathView.setBackgroundColor(mIsActivePanel ?
-                    App.sInstance.getSettings().getSecondaryColor() : App.sInstance.getSettings().getMainPanelColor());
-
-        }
         if (active && mFileSystemList != null) {
             mFileSystemList.requestFocus();
         }
     }
 
+/*
     public int getPanelLocation() {
         return mPanelLocation;
     }
 
     public void setPanelLocation(int location) {
         mPanelLocation = location;
-        setNavigationButtonsVisibility();
-    }
+        //setNavigationButtonsVisibility();
 
+        if (!mIsInitialized) {
+            addToPendingList(() -> mActionBar.setPanelLocation(location));
+        }
+    }
+*/
     public void setNavigationButtonsVisibility() {
         setNavigationButtonsVisibility(false);
     }
@@ -993,33 +855,30 @@ public class MainPanel extends BaseFileSystemPanel {
         setNavigationButtonsVisibility(true);
     }
 
-    private void setNavigationButtonsVisibility(final boolean forceHide) {
+    protected void setNavigationButtonsVisibility(final boolean forceHide) {
         if (!mIsInitialized) {
-            addToPendingList(new Runnable() {
-                @Override
-                public void run() {
-                    setNavigationButtonsVisibility(forceHide);
-                }
-            });
+            addToPendingList(() -> setNavigationButtonsVisibility(forceHide));
             return;
         }
 
-        boolean isCopyFolderSupported = isCopyFolderSupported();
-        mChangePathToLeft.setVisibility(!forceHide && isCopyFolderSupported && mPanelLocation == LEFT_PANEL ? View.VISIBLE : View.GONE);
-        mChangePathToRight.setVisibility(!forceHide && isCopyFolderSupported && mPanelLocation == RIGHT_PANEL ? View.VISIBLE : View.GONE);
+        mActionBar.updateNavigationItemsVisibility(forceHide, isCopyFolderSupported(), isBookmarksSupported());
 
-        mAddToBookmarksLeft.setVisibility(!forceHide && isBookmarksSupported() && mPanelLocation == LEFT_PANEL ? View.VISIBLE : View.GONE);
-        mAddToBookmarksRight.setVisibility(!forceHide && isBookmarksSupported() && mPanelLocation == RIGHT_PANEL ? View.VISIBLE : View.GONE);
-
-        mNetworkLeft.setVisibility(!forceHide && isCopyFolderSupported && mPanelLocation == LEFT_PANEL ? View.VISIBLE : View.GONE);
-        mNetworkRight.setVisibility(!forceHide && isCopyFolderSupported && mPanelLocation == RIGHT_PANEL ? View.VISIBLE : View.GONE);
-
-
-        boolean isHomeFolderEnabled = App.sInstance.getSettings().isEnableHomeFolder();
-        mHomeLeft.setVisibility(!forceHide && isCopyFolderSupported && isHomeFolderEnabled && mPanelLocation == LEFT_PANEL ?
-                View.VISIBLE : View.GONE);
-        mHomeRight.setVisibility(!forceHide && isCopyFolderSupported && isHomeFolderEnabled && mPanelLocation == RIGHT_PANEL ?
-                View.VISIBLE : View.GONE);
+//        boolean isCopyFolderSupported = isCopyFolderSupported();
+//        mChangePathToLeft.setVisibility(!forceHide && isCopyFolderSupported && mPanelLocation == LEFT_PANEL ? View.VISIBLE : View.GONE);
+//        mChangePathToRight.setVisibility(!forceHide && isCopyFolderSupported && mPanelLocation == RIGHT_PANEL ? View.VISIBLE : View.GONE);
+//
+//        mAddToBookmarksLeft.setVisibility(!forceHide && isBookmarksSupported() && mPanelLocation == LEFT_PANEL ? View.VISIBLE : View.GONE);
+//        mAddToBookmarksRight.setVisibility(!forceHide && isBookmarksSupported() && mPanelLocation == RIGHT_PANEL ? View.VISIBLE : View.GONE);
+//
+//        mNetworkLeft.setVisibility(!forceHide && isCopyFolderSupported && mPanelLocation == LEFT_PANEL ? View.VISIBLE : View.GONE);
+//        mNetworkRight.setVisibility(!forceHide && isCopyFolderSupported && mPanelLocation == RIGHT_PANEL ? View.VISIBLE : View.GONE);
+//
+//
+//        boolean isHomeFolderEnabled = App.sInstance.getSettings().isEnableHomeFolder();
+//        mHomeLeft.setVisibility(!forceHide && isCopyFolderSupported && isHomeFolderEnabled && mPanelLocation == LEFT_PANEL ?
+//                View.VISIBLE : View.GONE);
+//        mHomeRight.setVisibility(!forceHide && isCopyFolderSupported && isHomeFolderEnabled && mPanelLocation == RIGHT_PANEL ?
+//                View.VISIBLE : View.GONE);
     }
 
     public boolean isRootDirectory() {
@@ -1280,7 +1139,9 @@ public class MainPanel extends BaseFileSystemPanel {
     protected void setIsLoading(boolean isLoading) {
         mProgress.setVisibility(isLoading ? View.VISIBLE : View.GONE);
         mFileSystemList.setVisibility(isLoading ? View.GONE : View.VISIBLE);
-        mCurrentPathView.setVisibility(isLoading ? View.GONE : View.VISIBLE);
+        //mCurrentPathView.setVisibility(isLoading ? View.GONE : View.VISIBLE);
+
+        mActionBar.setVisibility(isLoading ? View.GONE : View.VISIBLE);
 
         if (isActive()) {
             mFileSystemList.requestFocus();
@@ -1293,7 +1154,11 @@ public class MainPanel extends BaseFileSystemPanel {
         @Override
         public void onDirectoryOpened(File directory, Integer selection) {
             mBaseDir = directory.getAbsoluteFile();
-            mCurrentPathView.setText(mBaseDir.getAbsolutePath());
+
+//            mCurrentPathView.setText(mBaseDir.getAbsolutePath());
+
+            mActionBar.updateCurrentPath(mBaseDir.getAbsolutePath());
+
             sendEmptyMessage(DIRECTORY_CHANGED);
 
             LinearLayoutManager manager = (LinearLayoutManager) mFileSystemList.getLayoutManager();

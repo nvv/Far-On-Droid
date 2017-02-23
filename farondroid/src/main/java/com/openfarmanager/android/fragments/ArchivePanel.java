@@ -200,18 +200,19 @@ public class ArchivePanel extends MainPanel {
     private void setCurrentPath(ArchiveScanner.File file) {
         String prefix = mLastSelectedFile.getName();
         if (file != null && !file.isRoot()) {
-            prefix += " : " + file.getFullPath();
+            prefix += " : /" + file.getFullPath();
         }
 
-        mCurrentPathView.setText(prefix);
+        mActionBar.updateCurrentPath(prefix);
     }
 
     public String getCurrentPath() {
         return "/" + mCurrentArchiveItem.getFullPath();
     }
 
-    protected void onNavigationItemSelected(int pos, List<String> items) {
-        openArchiveDirectory(mCurrentArchiveItem.findInTree(TextUtils.join("/", items.subList(0, pos + 1))));
+    @Override
+    public void openDirectory(String path) {
+        openArchiveDirectory(mCurrentArchiveItem.findInTree(path));
     }
 
     public boolean isRootDirectory() {

@@ -54,6 +54,8 @@ import static com.openfarmanager.android.controllers.FileSystemController.*;
 @SuppressWarnings("ConstantConditions")
 public abstract class BaseFileSystemPanel extends BasePanel {
 
+    public static final String ARG_PANEL_LOCATION = "arg_panel_location";
+
     public static final int REQUEST_CODE_REQUEST_PERMISSION = 442;
 
     protected File mLastSelectedFile;
@@ -61,7 +63,9 @@ public abstract class BaseFileSystemPanel extends BasePanel {
     protected String mEncryptedArchivePassword;
 
     protected Handler mHandler;
-    protected int mPanelLocation;
+    protected boolean mIsActivePanel;
+
+//    protected int mPanelLocation = -1;
 
     protected HashMap<String, Integer> mDirectorySelection = new HashMap<String, Integer>();
 
@@ -88,47 +92,6 @@ public abstract class BaseFileSystemPanel extends BasePanel {
 
     }
 
-    protected boolean openNavigationPathPopup(View view) {
-        final List<String> items = new ArrayList<String>(Arrays.asList(getCurrentPath().split("/")));
-        if (items.size() == 0) {
-            return false;
-        }
-        items.set(0, "/");
-        items.remove(items.size() - 1);
-
-        if (Build.VERSION.SDK_INT > 10) {
-            ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_selectable_list_item, items);
-            final ListPopupWindow select = new ListPopupWindow(getActivity());
-            select.setBackgroundDrawable(getResources().getDrawable(R.drawable.panel_path_background));
-            select.setAnchorView(view);
-            select.setAdapter(adapter);
-            select.setModal(true);
-            select.setWidth(400);
-            select.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int pos, long id) {
-                    select.dismiss();
-                    onNavigationItemSelected(pos, items);
-                }
-            });
-            select.show();
-        } else {
-            ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), android.R.layout.select_dialog_singlechoice, items);
-            new AlertDialog.Builder(getActivity())
-                    .setSingleChoiceItems(adapter, 0,
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int which) {
-                                    dialog.dismiss();
-                                    onNavigationItemSelected(which, items);
-                                }
-                            })
-
-                    .show();
-        }
-
-        return true;
-    }
-
     public FragmentManager fragmentManager() throws Exception {
         Activity parent = getActivity();
         FragmentManager result = null;
@@ -149,9 +112,13 @@ public abstract class BaseFileSystemPanel extends BasePanel {
         if (mHandler != null) {
             Message message = mHandler.obtainMessage();
             message.what = GAIN_FOCUS;
-            message.arg1 = mPanelLocation;
+            message.arg1 = getPanelLocation();
             mHandler.sendMessage(message);
         }
+    }
+
+    public int getPanelLocation() {
+        return getArguments().getInt(ARG_PANEL_LOCATION);
     }
 
     /**
@@ -620,7 +587,7 @@ public abstract class BaseFileSystemPanel extends BasePanel {
 
     public abstract int select(SelectParams selectParams);
 
-    protected abstract void onNavigationItemSelected(int pos, List<String> items);
+    public abstract void openDirectory(String path);
 
     protected abstract void invalidatePanels(MainPanel inactivePanel);
 

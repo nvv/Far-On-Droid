@@ -3,7 +3,10 @@ package com.openfarmanager.android;
 import android.app.Application;
 import android.content.res.Configuration;
 import android.preference.PreferenceManager;
+
 import com.openfarmanager.android.controllers.FileSystemController;
+import com.openfarmanager.android.di.DaggerFileSystemControllerComponent;
+import com.openfarmanager.android.di.FileSystemControllerComponent;
 import com.openfarmanager.android.core.Settings;
 import com.openfarmanager.android.core.ThreadPool;
 import com.openfarmanager.android.core.appmanager.AppManager;
@@ -20,6 +23,7 @@ import com.openfarmanager.android.core.network.skydrive.SkyDriveAPI;
 import com.openfarmanager.android.core.network.smb.SmbAPI;
 import com.openfarmanager.android.core.network.webdav.WebDavApi;
 import com.openfarmanager.android.core.network.yandexdisk.YandexDiskApi;
+import com.openfarmanager.android.di.FileSystemControllerModule;
 import com.openfarmanager.android.model.NetworkEnum;
 import com.openfarmanager.android.utils.SystemUtils;
 
@@ -48,6 +52,8 @@ public class App extends Application {
     protected GoogleDriveApi mGoogleDriveApi;
     protected MediaFireApi mMediaFireApi;
     protected WebDavApi mWebDavApi;
+
+    protected FileSystemControllerComponent mFileSystemControllerComponent;
 
     @Override
     public void onCreate() {
@@ -129,6 +135,13 @@ public class App extends Application {
     public void setFileSystemController(FileSystemController fileSystemController) {
         mFileSystemController = fileSystemController;
         mConnectionManager.setFileSystemController(fileSystemController);
+
+        mFileSystemControllerComponent = DaggerFileSystemControllerComponent.builder().
+                fileSystemControllerModule(new FileSystemControllerModule(fileSystemController)).build();
+    }
+
+    public FileSystemControllerComponent getFileSystemControllerComponent() {
+        return mFileSystemControllerComponent;
     }
 
     public FileSystemController getFileSystemController() {

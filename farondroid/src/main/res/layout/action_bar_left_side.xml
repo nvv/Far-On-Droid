@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center_horizontal">
+
+    <TextView
+        android:id="@+id/home"
+        android:drawableRight="@drawable/ic_home"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp"
+        android:paddingTop="2dp"
+        android:paddingBottom="5dp"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"/>
+
+    <TextView
+        android:id="@+id/network"
+        android:drawableRight="@drawable/ic_cloud"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp"
+        android:paddingBottom="5dp"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"/>
+
+    <TextView
+        android:id="@+id/add_to_bookmarks"
+        android:drawableLeft="@drawable/ic_star"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp"
+        android:paddingBottom="5dp"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"/>
+
+    <TextView
+        android:id="@+id/current_path"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_weight="1"
+        android:ellipsize="middle"
+        android:gravity="center"
+        android:padding="0dp"
+        android:singleLine="true"
+        android:textColor="@color/white" />
+
+    <TextView
+        android:id="@+id/change_folder"
+        android:text="&gt;"
+        android:layout_weight="0"
+        android:textStyle="bold"
+        android:visibility="gone"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:layout_marginTop="-5dp"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"/>
+</LinearLayout>

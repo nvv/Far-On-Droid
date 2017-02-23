@@ -123,10 +123,10 @@ public class MainTips {
         } else if (mCurrentStep == 4) {
             mShowCaseView.setContentTitle(mActivity.getString(R.string.tools));
             mShowCaseView.setContentText(mActivity.getString(R.string.tools_summary));
-            mShowCaseView.setShowcase(new ViewTarget(R.id.network_left, mActivity), true);
+            mShowCaseView.setShowcase(new ViewTarget(R.id.network, mActivity), true);
         } else if (mCurrentStep == 5) {
             mShowCaseView.setContentText(mActivity.getString(R.string.tools_change_directory));
-            mShowCaseView.setShowcase(new ViewTarget(R.id.change_folder_to_left, mActivity), true);
+            mShowCaseView.setShowcase(new ViewTarget(R.id.change_folder, mActivity), true);
         } else if (mCurrentStep == 6) {
             mShowCaseView.setContentTitle(mActivity.getString(R.string.bottom_panel));
             mShowCaseView.setContentText(mActivity.getString(R.string.bottom_panel_alt));

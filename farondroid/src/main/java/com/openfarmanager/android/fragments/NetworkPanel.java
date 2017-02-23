@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
 import android.text.TextUtils;
 import android.util.Pair;
@@ -48,6 +49,8 @@ import com.openfarmanager.android.model.exeptions.NetworkException;
 import com.openfarmanager.android.model.exeptions.RestoreStoragePathException;
 import com.openfarmanager.android.utils.Extensions;
 import com.openfarmanager.android.utils.FileUtilsExt;
+import com.openfarmanager.android.view.ActionBar;
+import com.openfarmanager.android.view.NetworkActionBar;
 import com.openfarmanager.android.view.ToastNotification;
 
 import org.apache.commons.io.FilenameUtils;
@@ -85,6 +88,8 @@ public class NetworkPanel extends MainPanel {
 
     private Dialog mProgressDialog;
 
+    protected List<FileProxy> mPreSelectedFiles = new ArrayList<>();
+
     private Subscription mSubscription;
     private OpenDirectoryAction mOpenDirectoryAction = new OpenDirectoryAction();
     private Observable<DirectoryUiInfo> mOpenDirectoryObservable = Observable.create(mOpenDirectoryAction);
@@ -94,46 +99,6 @@ public class NetworkPanel extends MainPanel {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         setupHandler();
         View view = super.onCreateView(inflater, container, savedInstanceState);
-/*
-        mFileSystemList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-
-                final FileProxy file = (FileProxy) adapterView.getItemAtPosition(i);
-                if (mIsMultiSelectMode) {
-                    updateLongClickSelection(adapterView, file, false);
-                    return;
-                }
-                mSelectedFiles.clear();
-
-                if (i == 0) {
-                    if (file.isRoot()) { // exit from network
-                        exitFromNetwork();
-                    } else {
-                        openDirectory(file);
-                    }
-                } else if (file.isDirectory()) {
-                    openDirectory(file);
-
-                    String pathKey = file.getParentPath();
-                    if (pathKey.endsWith("/") && !pathKey.equals("/")) {
-                        pathKey = pathKey.substring(0, pathKey.length() - 1);
-                    }
-                    mDirectorySelection.put(pathKey, mFileSystemList.getFirstVisiblePosition() + 1);
-                } else {
-                    mDataSource.open(file);
-                }
-
-            }
-        });
-
-        mFileSystemList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
-                return onLongClick(adapterView, i);
-            }
-        });
-*/
 
         mFileSystemList.setOnItemClickListener(new FileSystemAdapter.OnItemClickListener() {
             @Override
@@ -187,30 +152,7 @@ public class NetworkPanel extends MainPanel {
 
         mCurrentNetworkAccount = App.sInstance.getNetworkApi(getNetworkType()).getCurrentNetworkAccount();
 
-        if (mDataSource.isChangeEncodingSupported()) {
-            mCharsetLeft.setVisibility(mPanelLocation == LEFT_PANEL ? View.VISIBLE : View.GONE);
-            mCharsetRight.setVisibility(mPanelLocation == RIGHT_PANEL ? View.VISIBLE : View.GONE);
-
-            mCharsetLeft.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    gainFocus();
-                    mHandler.sendMessage(mHandler.obtainMessage(OPEN_ENCODING_DIALOG, mDataSource.getNetworkTypeEnum()));
-                }
-            });
-
-            mCharsetRight.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    gainFocus();
-                    mHandler.sendMessage(mHandler.obtainMessage(OPEN_ENCODING_DIALOG, mDataSource.getNetworkTypeEnum()));
-                }
-            });
-
-        }
-
-        mExitLeft.setVisibility(mPanelLocation == LEFT_PANEL ? View.VISIBLE : View.GONE);
-        mExitRight.setVisibility(mPanelLocation == RIGHT_PANEL ? View.VISIBLE : View.GONE);
+        mActionBar.updateNavigationItemsVisibility(false, false, isBookmarksSupported());
 
         return view;
     }
@@ -256,6 +198,11 @@ public class NetworkPanel extends MainPanel {
     }
 
     @Override
+    protected ActionBar createActionBar() {
+        return new NetworkActionBar(getContext(), mDataSource.isChangeEncodingSupported(), mDataSource.getNetworkTypeEnum());
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
         // selected files need to be updated after application resumes
@@ -269,10 +216,16 @@ public class NetworkPanel extends MainPanel {
     }
 
     @Override
+    public void onDetach() {
+        super.onDetach();
+        mDirectorySelection.clear();
+    }
+
+    @Override
     public void onDestroyView() {
         super.onDestroyView();
-        mCharsetLeft.setVisibility(View.GONE);
-        mCharsetRight.setVisibility(View.GONE);
+        //mCharsetLeft.setVisibility(View.GONE);
+        //mCharsetRight.setVisibility(View.GONE);
         if (mSubscription != null && !mSubscription.isUnsubscribed()) {
             mSubscription.unsubscribe();
         }
@@ -351,7 +304,7 @@ public class NetworkPanel extends MainPanel {
         if (mDataSource != null) {
             mDataSource.exitFromNetwork();
         }
-        mHandler.sendMessage(mHandler.obtainMessage(EXIT_FROM_NETWORK_STORAGE, mPanelLocation));
+        mHandler.sendMessage(mHandler.obtainMessage(EXIT_FROM_NETWORK_STORAGE, getPanelLocation()));
     }
 
     public void openDirectory() {
@@ -466,7 +419,7 @@ public class NetworkPanel extends MainPanel {
     }
 
     private void setCurrentPath(String path) {
-        mCurrentPathView.setText(mDataSource.getNetworkType() + " : " + path);
+        mActionBar.updateCurrentPath(mDataSource.getNetworkType() + " : " + path);
     }
 
     public boolean isRootDirectory() {
@@ -506,9 +459,9 @@ public class NetworkPanel extends MainPanel {
         return mCurrentPath.getFullPath();
     }
 
-    protected void onNavigationItemSelected(int pos, List<String> items) {
+    @Override
+    public void openDirectory(String fullPath) {
         try {
-            String fullPath = TextUtils.join("/", items.subList(0, pos + 1));
             openDirectory(mDataSource.createFakeDirectory(fullPath.substring(fullPath.length() == 1 ? 0 : 1)));
         } catch (RestoreStoragePathException e) {
             ToastNotification.makeText(App.sInstance.getApplicationContext(),

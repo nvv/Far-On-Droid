@@ -59,6 +59,8 @@ public class FileSystemControllerSmartphone extends FileSystemController {
         mLeftGenericPanel = (GenericPanel) Fragment.instantiate(appContext, GenericPanel.class.getName());
         mRightGenericPanel = (GenericPanel) Fragment.instantiate(appContext, GenericPanel.class.getName());
 
+        initPanels();
+
         mViewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int i, float v, int i2) {
@@ -76,8 +78,6 @@ public class FileSystemControllerSmartphone extends FileSystemController {
             public void onPageScrollStateChanged(int i) {
             }
         });
-
-        initPanels();
     }
 
     protected void openArchive(MainPanel activePanel, File file) {

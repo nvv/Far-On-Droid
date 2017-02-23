@@ -6,7 +6,6 @@ import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 
 import com.openfarmanager.android.R;
 import com.openfarmanager.android.adapters.FileSystemAdapter;
@@ -56,11 +55,15 @@ public class GenericPanel extends MainPanel {
             }
         });
 
-        mCurrentPathView.setText(getString(R.string.applications));
-        mCurrentPathView.setOnLongClickListener(null);
+        mActionBar.updateCurrentPath(getString(R.string.applications));
 
         mFileSystemList.initAdapter(new LauncherAdapter(mAdapterHandler, mSubscription));
         return view;
+    }
+
+    @Override
+    protected void setNavigationButtonsVisibility(final boolean forceHide) {
+        mActionBar.updateNavigationItemsVisibility(true, false, false);
     }
 
     private void updateLongClick(int i, LauncherAdapter adapter, boolean longClick) {
@@ -113,7 +116,7 @@ public class GenericPanel extends MainPanel {
     }
 
     public void navigateParent() {
-        mHandler.sendMessage(mHandler.obtainMessage(FileSystemController.EXIT_FROM_GENERIC_PANEL, mPanelLocation));
+        mHandler.sendMessage(mHandler.obtainMessage(FileSystemController.EXIT_FROM_GENERIC_PANEL, getPanelLocation()));
     }
 
     public boolean isRootDirectory() {
