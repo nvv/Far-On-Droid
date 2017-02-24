@@ -420,7 +420,10 @@ public class FileSystemController {
                 case GAIN_FOCUS:
                     BasePanel panel = msg.arg1 == LEFT_PANEL ? mLeftVisibleFragment : mRightVisibleFragment;
                     if (panel instanceof MainPanel) {
-                        setActivePanel((MainPanel) panel);
+                        MainPanel mainPanel = (MainPanel) panel;
+                        if (!mainPanel.isActive()) {
+                            setActivePanel(mainPanel);
+                        }
                     }
                     break;
                 case DIRECTORY_CHANGED:
