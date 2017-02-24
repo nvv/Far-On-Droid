@@ -56,6 +56,7 @@ public abstract class IdPathDataSource extends DataSource {
 
         if ((directory.isRoot() || "/".equals(directory.getFullPathRaw())) && mRootPathId == null && directoryFiles.size() > 0) {
             mRootPathId = directoryFiles.get(0).getParentPath();
+            mFilePathMapping.put("/", mRootPathId);
         }
 
         return mDirectoryScanInfo.set(directoryFiles, directoryParent);
