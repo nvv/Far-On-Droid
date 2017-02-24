@@ -224,14 +224,6 @@ public class MainPanel extends BaseFileSystemPanel {
             }
         });
 
-//        mCurrentPathView = (TextView) view.findViewById(R.id.current_path);
-//        mCurrentPathView.setOnLongClickListener(new View.OnLongClickListener() {
-//            @Override
-//            public boolean onLongClick(View view) {
-//                return openNavigationPathPopup(view);
-//            }
-//        });
-
         postInitialization();
         setNavigationButtonsVisibility();
 
@@ -833,20 +825,6 @@ public class MainPanel extends BaseFileSystemPanel {
         }
     }
 
-/*
-    public int getPanelLocation() {
-        return mPanelLocation;
-    }
-
-    public void setPanelLocation(int location) {
-        mPanelLocation = location;
-        //setNavigationButtonsVisibility();
-
-        if (!mIsInitialized) {
-            addToPendingList(() -> mActionBar.setPanelLocation(location));
-        }
-    }
-*/
     public void setNavigationButtonsVisibility() {
         setNavigationButtonsVisibility(false);
     }
@@ -862,23 +840,6 @@ public class MainPanel extends BaseFileSystemPanel {
         }
 
         mActionBar.updateNavigationItemsVisibility(forceHide, isCopyFolderSupported(), isBookmarksSupported());
-
-//        boolean isCopyFolderSupported = isCopyFolderSupported();
-//        mChangePathToLeft.setVisibility(!forceHide && isCopyFolderSupported && mPanelLocation == LEFT_PANEL ? View.VISIBLE : View.GONE);
-//        mChangePathToRight.setVisibility(!forceHide && isCopyFolderSupported && mPanelLocation == RIGHT_PANEL ? View.VISIBLE : View.GONE);
-//
-//        mAddToBookmarksLeft.setVisibility(!forceHide && isBookmarksSupported() && mPanelLocation == LEFT_PANEL ? View.VISIBLE : View.GONE);
-//        mAddToBookmarksRight.setVisibility(!forceHide && isBookmarksSupported() && mPanelLocation == RIGHT_PANEL ? View.VISIBLE : View.GONE);
-//
-//        mNetworkLeft.setVisibility(!forceHide && isCopyFolderSupported && mPanelLocation == LEFT_PANEL ? View.VISIBLE : View.GONE);
-//        mNetworkRight.setVisibility(!forceHide && isCopyFolderSupported && mPanelLocation == RIGHT_PANEL ? View.VISIBLE : View.GONE);
-//
-//
-//        boolean isHomeFolderEnabled = App.sInstance.getSettings().isEnableHomeFolder();
-//        mHomeLeft.setVisibility(!forceHide && isCopyFolderSupported && isHomeFolderEnabled && mPanelLocation == LEFT_PANEL ?
-//                View.VISIBLE : View.GONE);
-//        mHomeRight.setVisibility(!forceHide && isCopyFolderSupported && isHomeFolderEnabled && mPanelLocation == RIGHT_PANEL ?
-//                View.VISIBLE : View.GONE);
     }
 
     public boolean isRootDirectory() {
