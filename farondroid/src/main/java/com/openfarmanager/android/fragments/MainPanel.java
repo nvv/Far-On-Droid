@@ -131,7 +131,6 @@ public class MainPanel extends BaseFileSystemPanel {
                     }
                 }
                 if (item == null) {
-//                    item = (FileSystemFile) adapterView.getItemAtPosition(i);
                     item = (FileSystemFile) adapterView.getItem(i);
                 }
 
@@ -888,35 +887,19 @@ public class MainPanel extends BaseFileSystemPanel {
         setSelectedFilesSizeVisibility();
         showQuickActionPanel();
 
-//        File oldDir = mBaseDir;
-//        mBaseDir = directory.getAbsoluteFile();
-//        mCurrentPathView.setText(mBaseDir.getAbsolutePath());
         FileSystemAdapter adapter = getAdapter();
         if (adapter == null) {
             mFileSystemList.initAdapter(new FileSystemAdapter(mBaseDir, selection, mAction));
         } else {
             adapter.resetFilter();
             adapter.setBaseDir(directory.getAbsoluteFile(), selection);
-//            sendEmptyMessage(DIRECTORY_CHANGED);
         }
-//        if(adapter != null && oldDir != null){
-//            mFileSystemList.setSelection(adapter.getItemPosition(oldDir));
-//        }
     }
 
     protected void setSelectedFilesSizeVisibility() {
         mSelectedFilesSize.setVisibility((!App.sInstance.getSettings().isShowSelectedFilesSize() || mSelectedFiles.size() == 0) ?
                 View.GONE : View.VISIBLE);
     }
-
-//    FlatFileSystemAdapter.OnFolderScannedListener mOnFolderScannedListener = new FlatFileSystemAdapter.OnFolderScannedListener() {
-//        @Override
-//        public void onScanFinished(Integer selection) {
-//            if (selection != null) {
-//                mFileSystemList.setSelection(selection);
-//            }
-//        }
-//    };
 
     private void sendEmptyMessage(int message) {
         if (mHandler != null) {
@@ -1085,23 +1068,12 @@ public class MainPanel extends BaseFileSystemPanel {
             adapter.notifyDataSetChanged();
         }
 
-//        mFileSystemList.setSelectionFromTop(position + direction, mFileSystemList.getSelectedView() != null ?
-//                (int) mFileSystemList.getSelectedView().getY() : 0);
-
-//        mFileSystemList.scrollToPosition(position + direction);
-
         ((LinearLayoutManager) mFileSystemList.getLayoutManager()).scrollToPositionWithOffset(position + direction, 0);
-
-//        mFileSystemList.setSelectionFromTop(position + direction, mFileSystemList.getSelectedView() != null ?
-//                (int) mFileSystemList.getSelectedView().getY() : 0);
-
     }
 
     protected void setIsLoading(boolean isLoading) {
         mProgress.setVisibility(isLoading ? View.VISIBLE : View.GONE);
         mFileSystemList.setVisibility(isLoading ? View.GONE : View.VISIBLE);
-        //mCurrentPathView.setVisibility(isLoading ? View.GONE : View.VISIBLE);
-
         mActionBar.setVisibility(isLoading ? View.GONE : View.VISIBLE);
 
         if (isActive()) {
@@ -1115,8 +1087,6 @@ public class MainPanel extends BaseFileSystemPanel {
         @Override
         public void onDirectoryOpened(File directory, Integer selection) {
             mBaseDir = directory.getAbsoluteFile();
-
-//            mCurrentPathView.setText(mBaseDir.getAbsolutePath());
 
             mActionBar.updateCurrentPath(mBaseDir.getAbsolutePath());
 
