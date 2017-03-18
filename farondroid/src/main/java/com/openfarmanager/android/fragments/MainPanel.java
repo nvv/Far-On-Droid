@@ -875,12 +875,7 @@ public class MainPanel extends BaseFileSystemPanel {
     private void openDirectory(final File directory, final Integer selection) {
 
         if (!mIsInitialized) {
-            addToPendingList(new Runnable() {
-                @Override
-                public void run() {
-                    openDirectory(directory, selection);
-                }
-            });
+            addToPendingList(() -> openDirectory(directory, selection));
             return;
         }
 
@@ -921,7 +916,7 @@ public class MainPanel extends BaseFileSystemPanel {
             String pattern = selectParams.getSelectionString();
             boolean inverseSelection = selectParams.isInverseSelection();
 
-            App.sInstance.getSharedPreferences("action_dialog", 0).edit(). putString("select_pattern", pattern).commit();
+            App.sInstance.getSharedPreferences("action_dialog", 0).edit(). putString("select_pattern", pattern).apply();
 
             FileFilter select = new WildcardFileFilter(pattern);
             File[] contents = mBaseDir.listFiles(select);
@@ -1014,9 +1009,14 @@ public class MainPanel extends BaseFileSystemPanel {
         if (!isRootDirectory()) {
             // get parent file
             File parentFile = mBaseDir.getParentFile();
+            Integer selection = null;
+            if (parentFile != null) {
+                selection = mDirectorySelection.get(parentFile.getAbsolutePath());
+            }
+
             // in case of parent file is null (for example, mBaseDir is already root. this shouldn't be happened)
             // use current dir.
-            openDirectory(parentFile == null ? mBaseDir : parentFile);
+            openDirectory(parentFile == null ? mBaseDir : parentFile, selection);
         }
     }
 
