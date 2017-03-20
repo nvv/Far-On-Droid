@@ -15,7 +15,7 @@ import java.io.IOException;
  */
 public class DocumentProvider extends DocumentsProvider {
 
-    private static String TAG = "::::: >>>";
+    private static String TAG = "DocumentProvider";
     private File mBaseDir;
     private static final String ROOT = "root";
 
