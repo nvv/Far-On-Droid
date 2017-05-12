@@ -37,6 +37,15 @@ public class FileUtilsExt extends FileUtils {
         return count;
     }
 
+    public static long sizeOf(File file) {
+        try {
+            return FileUtils.sizeOf(file);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
     /**
      * Count all child files within <code>files</code> directories.
      *
@@ -176,6 +185,11 @@ public class FileUtilsExt extends FileUtils {
 
     public static String removeFirstSeparator(String path) {
         return path.startsWith("/") && path.length() > 1 ? path.substring(1) : path;
+    }
+
+    public static String addSeparatorToTheEnd(String path) {
+        return !path.endsWith(File.separator) ? path + File.separator : path;
+
     }
 
     public static class DirectoryScanResult {

@@ -30,8 +30,8 @@ public class DeleteFromNetworkTask extends NetworkActionMultiTask {
 
     protected List<FileProxy> mItems;
 
-    public DeleteFromNetworkTask(BaseFileSystemPanel panel, OnActionListener listener, List<FileProxy> items) {
-        super(panel, listener, null);
+    public DeleteFromNetworkTask(BaseFileSystemPanel panel, List<FileProxy> items) {
+        super(panel, null);
         mItems = items;
     }
 

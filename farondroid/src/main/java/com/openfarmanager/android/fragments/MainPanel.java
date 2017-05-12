@@ -11,7 +11,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
-import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,6 +24,11 @@ import com.openfarmanager.android.adapters.FileSystemAdapter;
 import com.openfarmanager.android.controllers.FileSystemController;
 import com.openfarmanager.android.core.archive.ArchiveUtils;
 import com.openfarmanager.android.core.archive.MimeTypes;
+import com.openfarmanager.android.core.bus.RxBus;
+import com.openfarmanager.android.core.bus.TaskCancelledEvent;
+import com.openfarmanager.android.core.bus.TaskErrorEvent;
+import com.openfarmanager.android.core.bus.TaskOkAndPostEvent;
+import com.openfarmanager.android.core.bus.TaskOkEvent;
 import com.openfarmanager.android.dialogs.*;
 import com.openfarmanager.android.dialogs.CreateArchiveDialog;
 import com.openfarmanager.android.dialogs.SearchActionDialog;
@@ -32,12 +36,11 @@ import com.openfarmanager.android.filesystem.DropboxFile;
 import com.openfarmanager.android.filesystem.FileProxy;
 import com.openfarmanager.android.filesystem.FileSystemFile;
 import com.openfarmanager.android.filesystem.FileSystemScanner;
-import com.openfarmanager.android.filesystem.actions.FileActionTask;
-import com.openfarmanager.android.filesystem.actions.OnActionListener;
-import com.openfarmanager.android.filesystem.actions.network.DropboxTask;
-import com.openfarmanager.android.filesystem.actions.network.ExportAsTask;
-import com.openfarmanager.android.filesystem.actions.network.GoogleDriveUpdateTask;
 import com.openfarmanager.android.filesystem.commands.CommandsFactory;
+import com.openfarmanager.android.filesystem.commands.CreateBookmarkCommand;
+import com.openfarmanager.android.filesystem.commands.DropboxCommand;
+import com.openfarmanager.android.filesystem.commands.ExportAsCommand;
+import com.openfarmanager.android.filesystem.commands.GoogleDriveUpdateCommand;
 import com.openfarmanager.android.model.Bookmark;
 import com.openfarmanager.android.model.FileActionEnum;
 import com.openfarmanager.android.model.OpenDirectoryActionListener;
@@ -56,6 +59,9 @@ import org.apache.commons.io.filefilter.WildcardFileFilter;
 import java.io.File;
 import java.io.FileFilter;
 import java.util.*;
+
+import rx.android.schedulers.AndroidSchedulers;
+import rx.subscriptions.CompositeSubscription;
 
 import static com.openfarmanager.android.controllers.FileSystemController.*;
 import static com.openfarmanager.android.model.FileActionEnum.*;
@@ -90,6 +96,8 @@ public class MainPanel extends BaseFileSystemPanel {
     protected QuickPopupDialog mQuickActionPopup;
 
     protected ActionBar mActionBar;
+
+    private CompositeSubscription mSubscriptions;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -294,8 +302,6 @@ public class MainPanel extends BaseFileSystemPanel {
 
     public void onResume() {
         super.onResume();
-        // selected files need to be updated after application resumes
-//        FlatFileSystemAdapter adapter = (FlatFileSystemAdapter) mFileSystemList.getAdapter();
         FileSystemAdapter adapter = getAdapter();
         if (adapter != null) {
             adapter.setSelectedFiles(mSelectedFiles);
@@ -322,13 +328,82 @@ public class MainPanel extends BaseFileSystemPanel {
     }
 
     @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+//        if (isFileSystemPanel()) {
+            mSubscriptions = new CompositeSubscription();
+            mSubscriptions.add(RxBus.getInstance().observerFor(TaskCancelledEvent.class, getPanelLocation()).
+                    observeOn(AndroidSchedulers.mainThread()).subscribe(event -> {
+                        try {
+                            ErrorDialog.newInstance(TaskStatusEnum.getErrorString(TaskStatusEnum.CANCELED)).show(fragmentManager(), "errorDialog");
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }));
+            mSubscriptions.add(RxBus.getInstance().observerFor(TaskErrorEvent.class, getPanelLocation()).
+                    observeOn(AndroidSchedulers.mainThread()).subscribe(event -> {
+
+                if (event.status() == TaskStatusEnum.ERROR_STORAGE_PERMISSION_REQUIRED) {
+                    requestSdcardPermission();
+                } else if (event.status() == TaskStatusEnum.ERROR_EXTRACTING_ARCHIVE_FILES_ENCRYPTION_PASSWORD_REQUIRED) {
+                    try {
+                        RequestPasswordDialog.newInstance(mRequestPasswordCommand).show(fragmentManager(), "confirmDialog");
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                } else if (event.status() == TaskStatusEnum.ERROR_FTP_DELETE_DIRECTORY) { // special case for s/ftp
+                    if (!App.sInstance.getSettings().isFtpAllowRecursiveDelete() && App.sInstance.getSettings().allowedToAskRecursiveDelete()) {
+                        new YesNoDontAskAgainDialog(getActivity()).show();
+                    }
+                } else {
+                    TaskStatusEnum status = event.status();
+                    String error = status == TaskStatusEnum.ERROR_CREATE_DIRECTORY ?
+                            getSafeString(R.string.error_cannot_create_file, (String) event.extra()) : TaskStatusEnum.getErrorString(status, (String) event.extra());
+                    if (status == TaskStatusEnum.ERROR_NETWORK && status.getNetworkErrorException() != null) {
+                        error = status.getNetworkErrorException().getLocalizedError();
+                    }
+
+                    try {
+                        ErrorDialog.newInstance(error).show(fragmentManager(), "errorDialog");
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }));
+            mSubscriptions.add(RxBus.getInstance().observerFor(TaskOkEvent.class, getPanelLocation()).
+                    observeOn(AndroidSchedulers.mainThread()).subscribe(event -> {
+                mSelectedFiles.clear();
+                mHandler.sendEmptyMessage(INVALIDATE);
+            }));
+            mSubscriptions.add(RxBus.getInstance().observerFor(TaskOkAndPostEvent.class, getPanelLocation()).
+                    observeOn(AndroidSchedulers.mainThread()).subscribe(event -> {
+                mSelectedFiles.clear();
+                mHandler.sendEmptyMessage(INVALIDATE);
+                event.getPostAction().run();
+            }));
+//        }
+    }
+
+    @Override
     public void onDetach () {
         super.onDetach();
         if (mQuickActionPopup != null) {
             getSelectedFiles().clear();
             mQuickActionPopup.dismiss();
         }
+
+        if (mSubscriptions != null) {
+            mSubscriptions.unsubscribe();
+        }
     }
+
+//    @Override
+//    public void onDestroy() {
+//        if (mSubscriptions != null) {
+//            mSubscriptions.unsubscribe();
+//        }
+//        super.onDestroy();
+//    }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -581,90 +656,16 @@ public class MainPanel extends BaseFileSystemPanel {
         showDialog(new CopyMoveFileDialog(getActivity(), mFileActionHandler, inactivePanel));
     }
 
-    public void export(final MainPanel activePanel, String downloadLink, String destination) {
-        FileActionTask task = null;
-        try {
-            task = new ExportAsTask(activePanel,
-                    new OnActionListener() {
-                        @Override
-                        public void onActionFinish(TaskStatusEnum status) {
-                            try {
-                                if (status != TaskStatusEnum.OK) {
-                                    try {
-                                        String error = status.getNetworkErrorException().getLocalizedError();
-                                        ErrorDialog.newInstance(error).show(fragmentManager(), "errorDialog");
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                    }
-                                }
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                            invalidatePanels(activePanel);
-                        }
-                    }, downloadLink, destination);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        task.execute();
+    public void export(BaseFileSystemPanel panel, String downloadLink, String destination) {
+        new ExportAsCommand(panel, downloadLink, destination).execute();
     }
 
-    public void updateGoogleDriveData(final MainPanel inactivePanel, String fileId, String data) {
-        FileActionTask task = null;
-        try {
-            task = new GoogleDriveUpdateTask(inactivePanel,
-                    new OnActionListener() {
-                        @Override
-                        public void onActionFinish(TaskStatusEnum status) {
-                            try {
-                                if (status != TaskStatusEnum.OK) {
-                                    try {
-                                        String error = status.getNetworkErrorException().getLocalizedError();
-                                        ErrorDialog.newInstance(error).show(fragmentManager(), "errorDialog");
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                    }
-                                }
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                            inactivePanel.getSelectedFiles().clear();
-                            invalidatePanels(inactivePanel);
-                        }
-                    }, fileId, data);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        task.execute();
+    public void updateGoogleDriveData(MainPanel panel, String fileId, String data) {
+        new GoogleDriveUpdateCommand(panel, fileId, data).execute();
     }
 
-    public void doDropboxTask(final MainPanel inactivePanel, DropboxFile file, int dropboxTask) {
-        FileActionTask task = null;
-        try {
-            task = new DropboxTask(inactivePanel,
-                    new OnActionListener() {
-                        @Override
-                        public void onActionFinish(TaskStatusEnum status) {
-                            try {
-                                if (status != TaskStatusEnum.OK) {
-                                    try {
-                                        String error = status.getNetworkErrorException().getLocalizedError();
-                                        ErrorDialog.newInstance(error).show(fragmentManager(), "errorDialog");
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                    }
-                                }
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                            inactivePanel.getSelectedFiles().clear();
-                            invalidatePanels(inactivePanel);
-                        }
-                    }, file, dropboxTask);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        task.execute();
+    public void doDropboxTask(DropboxFile file, int dropboxTask) {
+        new DropboxCommand(this, file, dropboxTask);
     }
 
     public void extractArchive(final MainPanel inactivePanel) {
@@ -732,6 +733,7 @@ public class MainPanel extends BaseFileSystemPanel {
             adapter.setSelectedFiles(mSelectedFiles);
             adapter.notifyDataSetChanged();
             setSelectedFilesSizeVisibility();
+            calculateSelectedFilesSize();
             showQuickActionPanel();
         }
     }
@@ -1130,27 +1132,26 @@ public class MainPanel extends BaseFileSystemPanel {
                     break;
                 case FILE_COPY:
                     CopyMoveFileDialog.CopyMoveFileResult copyMoveFileResult = (CopyMoveFileDialog.CopyMoveFileResult) msg.obj;
-                    getCopyToCommand(copyMoveFileResult.inactivePanel).execute(
+                    getCopyToCommand(copyMoveFileResult.inactivePanel, new File(copyMoveFileResult.destination)).execute(
                             copyMoveFileResult.inactivePanel, copyMoveFileResult.destination);
                     break;
                 case FILE_MOVE:
                     copyMoveFileResult = (CopyMoveFileDialog.CopyMoveFileResult) msg.obj;
-                    getMoveCommand(copyMoveFileResult.inactivePanel).execute(copyMoveFileResult.inactivePanel,
+                    getMoveCommand(copyMoveFileResult.inactivePanel, copyMoveFileResult).execute(copyMoveFileResult.inactivePanel,
                             copyMoveFileResult.destination, null, copyMoveFileResult.isRename);
                     break;
                 case FILE_CREATE_BOOKMARK:
                     CreateBookmarkDialog.CreateBookmarkResult createBookmarkResult = (CreateBookmarkDialog.CreateBookmarkResult) msg.obj;
-                    mCreateBookmarkCommand.execute(createBookmarkResult.inactivePanel, createBookmarkResult.link,
-                            null, createBookmarkResult.label, createBookmarkResult.networkAccount);
+                    new CreateBookmarkCommand(createBookmarkResult.inactivePanel, createBookmarkResult.link, createBookmarkResult.label, createBookmarkResult.networkAccount).execute();
                     break;
                 case FILE_EXTRACT_ARCHIVE:
-                    ExtractArchiveDialog.ExtractArchiveResult extractArchiveResult = (ExtractArchiveDialog.ExtractArchiveResult) msg.obj;
-                    mExtractArchiveCommand.execute(extractArchiveResult.inactivePanel, extractArchiveResult.destination,
-                            null, extractArchiveResult.isCompressed);
+                    mExtractArchiveResult = (ExtractArchiveDialog.ExtractArchiveResult) msg.obj;
+                    getExtractArchiveCommand(mExtractArchiveResult, getArchivePassword()).execute(mExtractArchiveResult.inactivePanel, mExtractArchiveResult.destination,
+                            getArchivePassword(), mExtractArchiveResult.isCompressed);
                     break;
                 case FILE_CREATE_ARCHIVE:
                     CreateArchiveDialog.CreateArchiveResult createArchiveResult = (CreateArchiveDialog.CreateArchiveResult) msg.obj;
-                    mCreateArchiveCommand.execute(createArchiveResult.inactivePanel, createArchiveResult.archiveName,
+                    getCreateArchiveCommand(createArchiveResult).execute(createArchiveResult.inactivePanel, createArchiveResult.archiveName,
                             createArchiveResult.archiveType, createArchiveResult.isCompressionEnabled, createArchiveResult.compression);
                     break;
                 case SELECT_ACTION:

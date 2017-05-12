@@ -51,8 +51,8 @@ public class CopyToNetworkMultiTask extends NetworkActionMultiTask {
 
     protected String mDestination;
 
-    public CopyToNetworkMultiTask(NetworkPanel panel, OnActionListener listener, List<File> items, String destination) {
-        super(panel, listener, items);
+    public CopyToNetworkMultiTask(NetworkPanel panel, List<File> items, String destination) {
+        super(panel, items);
         mDestination = destination;
     }
 
@@ -197,6 +197,8 @@ public class CopyToNetworkMultiTask extends NetworkActionMultiTask {
                         public void onProgress(long l, long l2) {
                             mDoneSize += (l - mPrevProgress);
                             mPrevProgress = l;
+
+                            System.out.println(":::: >>> " + mDoneSize);
                             updateProgress();
                         }
                     });

@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import com.openfarmanager.android.R;
 import com.openfarmanager.android.core.CancelableCommand;
+import com.openfarmanager.android.dialogs.ExtractArchiveDialog;
 import com.openfarmanager.android.utils.ParcelableWrapper;
 
 /**
@@ -21,17 +22,17 @@ public class RequestPasswordDialog extends BaseDialog {
     public static RequestPasswordDialog newInstance(CancelableCommand command) {
         RequestPasswordDialog dialog = new RequestPasswordDialog();
         Bundle args = new Bundle();
-        args.putParcelable("command", new ParcelableWrapper<CancelableCommand>(command));
+        args.putParcelable("command", new ParcelableWrapper<>(command));
         dialog.setArguments(args);
 
         return dialog;
     }
 
-    public static RequestPasswordDialog newInstance(CancelableCommand command, Object[] extraParams) {
+    public static RequestPasswordDialog newInstance(CancelableCommand command, ExtractArchiveDialog extraParams) {
         RequestPasswordDialog dialog = new RequestPasswordDialog();
         Bundle args = new Bundle();
-        args.putParcelable("command", new ParcelableWrapper<CancelableCommand>(command));
-        args.putParcelable("extraParams", new ParcelableWrapper<Object[]>(extraParams));
+        args.putParcelable("command", new ParcelableWrapper<>(command));
+        args.putParcelable("extraParams", new ParcelableWrapper<>(extraParams));
         dialog.setArguments(args);
 
         return dialog;
@@ -51,29 +52,23 @@ public class RequestPasswordDialog extends BaseDialog {
 
         mPassword = (EditText) view.findViewById(R.id.archive_password);
 
-        view.findViewById(R.id.ok).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                CancelableCommand command = getCommand();
-                if (command != null) {
-                    dismiss();
-                    Parcelable extraParams = getArguments().getParcelable("extraParams");
+        view.findViewById(R.id.ok).setOnClickListener(v -> {
+            CancelableCommand command = getCommand();
+            if (command != null) {
+                dismiss();
+                Parcelable extraParams = getArguments().getParcelable("extraParams");
 
-                    //noinspection unchecked
-                    command.execute(mPassword.getText().toString(), extraParams == null ? extraParams :
-                            ((ParcelableWrapper<Object[]>) extraParams).value);
-                }
+                //noinspection unchecked
+                command.execute(mPassword.getText().toString(), extraParams == null ? extraParams :
+                        ((ParcelableWrapper<Object[]>) extraParams).value);
             }
         });
 
-        view.findViewById(R.id.cancel).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                CancelableCommand command = getCommand();
-                if (command != null) {
-                    dismiss();
-                    command.cancel();
-                }
+        view.findViewById(R.id.cancel).setOnClickListener(v -> {
+            CancelableCommand command = getCommand();
+            if (command != null) {
+                dismiss();
+                command.cancel();
             }
         });
 

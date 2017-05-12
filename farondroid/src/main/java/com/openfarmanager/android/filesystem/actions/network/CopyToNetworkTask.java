@@ -51,12 +51,9 @@ public class CopyToNetworkTask extends NetworkActionTask {
 
     protected String mDestination;
 
-    public CopyToNetworkTask(BaseFileSystemPanel panel, OnActionListener listener, List<File> items, String destination) {
-        mItems = items;
-        mFragmentManager = panel.getFragmentManager();
-        mListener = listener;
+    public CopyToNetworkTask(BaseFileSystemPanel panel, List<File> items, String destination) {
+        super(panel, items);
         mDestination = destination;
-        initNetworkPanelInfo(panel);
     }
 
     @Override
@@ -117,6 +114,11 @@ public class CopyToNetworkTask extends NetworkActionTask {
         return TaskStatusEnum.OK;
     }
 
+    @Override
+    protected Object getExtra() {
+        return mDestination;
+    }
+
     private void copyToDropbox(File source, String destination) throws DropboxException, IOException {
         DropboxAPI api = App.sInstance.getDropboxApi();
         if (isCancelled()) {
@@ -129,18 +131,18 @@ public class CopyToNetworkTask extends NetworkActionTask {
             }
         } else {
             mCurrentFile = source.getName();
-            long tempSize = doneSize;
+            long tempSize = mDoneSize;
             api.putFileOverwrite(destination + "/" + source.getName(), new FileInputStream(source), source.length(), new ProgressListener() {
                 long mPrevProgress = 0;
 
                 @Override
                 public void onProgress(long l, long l2) {
-                    doneSize += (l - mPrevProgress);
+                    mDoneSize += (l - mPrevProgress);
                     mPrevProgress = l;
                     updateProgress();
                 }
             });
-            doneSize = tempSize + source.length();
+            mDoneSize = tempSize + source.length();
         }
     }
 
@@ -171,7 +173,7 @@ public class CopyToNetworkTask extends NetworkActionTask {
             api.upload(destinationId, source.getName(), source, new GoogleDriveWebApi.UploadListener() {
                 @Override
                 public void onProgress(int uploaded, int transferedPortion, int total) {
-                    doneSize += transferedPortion;
+                    mDoneSize += transferedPortion;
                     updateProgress();
                 }
             });
@@ -206,13 +208,13 @@ public class CopyToNetworkTask extends NetworkActionTask {
 
                 @Override
                 public void onProgress(long totalBytes, long numBytesWritten) {
-                    doneSize += (numBytesWritten - mPrevProgress);
+                    mDoneSize += (numBytesWritten - mPrevProgress);
                     mPrevProgress = numBytesWritten;
                     updateProgress();
 
                 }
             });
-            doneSize += source.length();
+            mDoneSize += source.length();
             updateProgress();
         }
     }
@@ -297,14 +299,14 @@ public class CopyToNetworkTask extends NetworkActionTask {
             }
         } else {
             mCurrentFile = source.getName();
-            long tempSize = doneSize;
+            long tempSize = mDoneSize;
             api.client().uploadFile(source.getAbsolutePath(), destination + (destination.endsWith("/") ? "" : "/"),
                     new com.yandex.disk.client.ProgressListener() {
                         long mPrevProgress = 0;
 
                         @Override
                         public void updateProgress(long loaded, long total) {
-                            doneSize += (loaded - mPrevProgress);
+                            mDoneSize += (loaded - mPrevProgress);
                             mPrevProgress = loaded;
                             CopyToNetworkTask.this.updateProgress();
                         }
@@ -314,7 +316,7 @@ public class CopyToNetworkTask extends NetworkActionTask {
                             return false;
                         }
                     });
-            doneSize = tempSize + source.length();
+            mDoneSize = tempSize + source.length();
         }
     }
 
@@ -361,7 +363,7 @@ public class CopyToNetworkTask extends NetworkActionTask {
 
                         @Override
                         public void uploadFinished(long id, String quickKey, String fileName) {
-                            doneSize += source.length();
+                            mDoneSize += source.length();
                             updateProgress();
                         }
 
@@ -397,7 +399,7 @@ public class CopyToNetworkTask extends NetworkActionTask {
                 @Override
                 public void onProgress(long bytes) {
                     if (mTotalFileSize < source.length()) {
-                        doneSize += bytes;
+                        mDoneSize += bytes;
                         mTotalFileSize += bytes;
                         updateProgress();
                     }
@@ -413,7 +415,7 @@ public class CopyToNetworkTask extends NetworkActionTask {
         int len;
         while ((len = in.read(BUFFER)) > 0) {
             out.write(BUFFER, 0, len);
-            doneSize += len;
+            mDoneSize += len;
             updateProgress();
         }
 

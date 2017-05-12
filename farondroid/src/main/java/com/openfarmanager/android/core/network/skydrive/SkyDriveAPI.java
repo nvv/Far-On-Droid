@@ -45,7 +45,7 @@ public class SkyDriveAPI implements LiveAuthListener, NetworkApi {
     private Activity mAuthActivity;
     private SkyDriveAccount mCurrentSkyDriveAccount;
 
-    private final static byte[] BUFFER = new byte[256 * 1024];
+//    private final static byte[] BUFFER = new byte[256 * 1024];
 
     public OnLoginListener mOnLoginListener;
 
@@ -224,6 +224,8 @@ public class SkyDriveAPI implements LiveAuthListener, NetworkApi {
         // download file (via input stream)
         BufferedInputStream inputStream = new BufferedInputStream(new URL(operation.getResult().getString(JsonKeys.SOURCE)).openStream());
         int len;
+
+        byte[] BUFFER = new byte[256 * 1024];
         while ((len = inputStream.read(BUFFER)) > 0) {
             outputStream.write(BUFFER, 0, len);
         }

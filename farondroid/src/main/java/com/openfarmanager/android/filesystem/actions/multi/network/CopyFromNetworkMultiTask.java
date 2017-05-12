@@ -71,8 +71,8 @@ public class CopyFromNetworkMultiTask extends NetworkActionMultiTask {
     protected String mDestination;
     protected List<FileProxy> mItems;
 
-    public CopyFromNetworkMultiTask(BaseFileSystemPanel panel, OnActionListener listener, List<FileProxy> items, String destination) {
-        super(panel, listener, null);
+    public CopyFromNetworkMultiTask(BaseFileSystemPanel panel, List<FileProxy> items, String destination) {
+        super(panel, null);
         mDestination = destination;
         mItems = items;
     }

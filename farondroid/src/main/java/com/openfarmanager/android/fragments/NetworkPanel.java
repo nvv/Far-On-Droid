@@ -5,6 +5,7 @@ import android.app.Dialog;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -669,7 +670,7 @@ public class NetworkPanel extends MainPanel {
             boolean isRoot = Extensions.isNullOrEmpty(file.getParentPath()) || file.getFullPathRaw().equals("/");
             NetworkEntryAdapter adapter = (NetworkEntryAdapter) mFileSystemList.getAdapter();
 
-            System.out.println("::::::::::::  --->   " + directoryInfo.directory.getFullPathRaw() + "  " + directoryInfo.directory.getParentPath() + "  " + directoryInfo.parentPath);
+//            System.out.println("::::::::::::  --->   " + directoryInfo.directory.getFullPathRaw() + "  " + directoryInfo.directory.getParentPath() + "  " + directoryInfo.parentPath);
 
             mUpNavigator = new FakeFile(file.getParentPath(), "..", directoryInfo.parentPath,
                     FileUtilsExt.getParentPath(file.getFullPathRaw()), isRoot);

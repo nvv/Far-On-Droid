@@ -12,6 +12,10 @@ import com.openfarmanager.android.App;
 import com.openfarmanager.android.BuildConfig;
 import com.openfarmanager.android.R;
 import com.openfarmanager.android.core.Settings;
+import com.openfarmanager.android.core.bus.RxBus;
+import com.openfarmanager.android.core.bus.TaskCancelledEvent;
+import com.openfarmanager.android.core.bus.TaskErrorEvent;
+import com.openfarmanager.android.core.bus.TaskOkEvent;
 import com.openfarmanager.android.core.network.smb.SmbAPI;
 import com.openfarmanager.android.dialogs.FileActionProgressDialog;
 import com.openfarmanager.android.filesystem.FileProxy;
@@ -43,14 +47,12 @@ public abstract class MultiActionTask {
     private static final int MSG_POST_RESULT = 1;
     private static final int MSG_SET_HEADER = 2;
 
-    protected final static byte[] BUFFER = new byte[16 * 1024];
-
     private static InternalHandler sHandler;
 
     protected List<File> mItems;
     protected FileActionProgressDialog mProgressDialog;
     protected String mCurrentFile;
-    protected OnActionListener mListener;
+//    protected OnActionListener mListener;
 
     protected long mTotalSize = 0;
     protected long mDoneSize = 0;
@@ -71,18 +73,26 @@ public abstract class MultiActionTask {
     private Map<Future, String> mSubTasksAsynkLabels = new HashMap<>();
     private StringBuilder mActiveSubTasksListBuilder = new StringBuilder();
 
+    private int mInvokedOnPanel;
+
     private int mLabelType;
 
-    public MultiActionTask(final Context context, OnActionListener listener, List<File> items) {
+    public MultiActionTask(final Context context, int invokedOnPanel, List<File> items) {
         mItems = items;
-        mListener = listener;
         mTaskResult = new TaskResult();
         mTaskResult.task = this;
+        mTaskResult.invokedOnPanel = invokedOnPanel;
+        mInvokedOnPanel = invokedOnPanel;
+        mTaskResult.extra = getExtra();
         mLabelType = App.sInstance.getSettings().getMultiActionLabelType();
         init(context);
     }
 
     protected MultiActionTask() {
+    }
+
+    protected Object getExtra() {
+        return "";
     }
 
     protected void init(Context context) {
@@ -192,12 +202,9 @@ public abstract class MultiActionTask {
         return outputDir.exists() || (mUseStorageApi ? StorageUtils.mkDir(mBaseUri, mSdCardPath, outputDir) : outputDir.mkdirs());
     }
 
-    private DialogInterface.OnDismissListener mProgressDialogDismissListener = new DialogInterface.OnDismissListener() {
-        @Override
-        public void onDismiss(DialogInterface dialog) {
-            cancel();
-            mListener.onActionFinish(TaskStatusEnum.CANCELED);
-        }
+    private DialogInterface.OnDismissListener mProgressDialogDismissListener = dialog -> {
+        cancel();
+        RxBus.getInstance().postEvent(new TaskCancelledEvent(mInvokedOnPanel));
     };
 
     public void cancel() {
@@ -218,18 +225,15 @@ public abstract class MultiActionTask {
         return mSubTasksAsynk.size() > 0;
     }
 
-    private Runnable mActionRunnable = new Runnable() {
-        @Override
-        public void run() {
-            calculateSize();
-            TaskStatusEnum status = doAction();
+    private Runnable mActionRunnable = () -> {
+        calculateSize();
+        TaskStatusEnum status = doAction();
 
-            if (hasSubTasks() && handleSubTasks(status)) {
-                return;
-            }
-
-            onTaskDone(status);
+        if (hasSubTasks() && handleSubTasks(status)) {
+            return;
         }
+
+        onTaskDone(status);
     };
 
     /**
@@ -316,9 +320,17 @@ public abstract class MultiActionTask {
                         taskResult.task.mProgressDialog.dismiss();
                     } catch (Exception ignore) { }
 
-                    if (taskResult.task.mListener != null) {
-                        taskResult.task.mListener.onActionFinish(taskResult.status);
+//                    if (taskResult.task.mListener != null) {
+//                        taskResult.task.mListener.onActionFinish(taskResult.status);
+//                    }
+
+                    TaskStatusEnum status = taskResult.status;
+                    if (status == TaskStatusEnum.OK) {
+                        RxBus.getInstance().postEvent(new TaskOkEvent(taskResult.invokedOnPanel));
+                    } else {
+                        RxBus.getInstance().postEvent(new TaskErrorEvent(taskResult.invokedOnPanel).setStatus(status).setExtra(taskResult.extra));
                     }
+
                     break;
                 case MSG_SET_HEADER:
                     taskResult.task.mProgressDialog.setHeader(taskResult.header);
@@ -336,6 +348,8 @@ public abstract class MultiActionTask {
         String fileName;
         String header;
         TaskStatusEnum status;
+        int invokedOnPanel;
+        Object extra;
     }
 
 }

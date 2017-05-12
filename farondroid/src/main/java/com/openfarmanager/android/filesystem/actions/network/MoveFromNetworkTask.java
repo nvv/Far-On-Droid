@@ -7,6 +7,7 @@ import com.openfarmanager.android.core.network.dropbox.DropboxAPI;
 import com.openfarmanager.android.filesystem.FileProxy;
 import com.openfarmanager.android.filesystem.actions.OnActionListener;
 import com.openfarmanager.android.fragments.BaseFileSystemPanel;
+import com.openfarmanager.android.fragments.NetworkPanel;
 import com.openfarmanager.android.model.NetworkEnum;
 import com.openfarmanager.android.model.TaskStatusEnum;
 
@@ -19,15 +20,15 @@ import static com.openfarmanager.android.model.TaskStatusEnum.*;
  */
 public class MoveFromNetworkTask extends CopyFromNetworkTask {
 
-    public MoveFromNetworkTask(BaseFileSystemPanel panel, OnActionListener listener, List<FileProxy> items, String destination) {
-        super(panel, listener, items, destination);
+    public MoveFromNetworkTask(BaseFileSystemPanel panel, List<FileProxy> items, String destination) {
+        super(panel, items, destination);
     }
 
     @Override
     protected TaskStatusEnum doInBackground(Void... voids) {
 
         // TODO: hack
-        totalSize = 1;
+        mTotalSize = 1;
 
         if (mItems.size() < 1) {
             return OK;

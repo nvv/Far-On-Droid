@@ -61,8 +61,8 @@ public class CopyFromNetworkTask extends NetworkActionTask {
     protected String mDestination;
     protected List<FileProxy> mItems;
 
-    public CopyFromNetworkTask(BaseFileSystemPanel panel, OnActionListener listener, List<FileProxy> items, String destination) {
-        super(panel.getFragmentManager(), panel, listener, new ArrayList<File>());
+    public CopyFromNetworkTask(BaseFileSystemPanel panel, List<FileProxy> items, String destination) {
+        super(panel, new ArrayList<File>());
         mDestination = destination;
         mItems = items;
         mNoProgress = true;
@@ -71,7 +71,7 @@ public class CopyFromNetworkTask extends NetworkActionTask {
     @Override
     protected TaskStatusEnum doInBackground(Void... voids) {
         // TODO: hack
-        totalSize = 1;
+        mDoneSize = 1;
 
         try {
             mSdCardPath = SystemUtils.getExternalStorage(mDestination);
@@ -142,6 +142,11 @@ public class CopyFromNetworkTask extends NetworkActionTask {
         }
 
         return TaskStatusEnum.OK;
+    }
+
+    @Override
+    protected Object getExtra() {
+        return mDestination;
     }
 
     private void copyFromGoogleDrive(FileProxy source, String destination) throws IOException {

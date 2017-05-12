@@ -1,6 +1,7 @@
 package com.openfarmanager.android.filesystem.actions;
 
-import android.support.v4.app.FragmentManager;
+import android.content.Context;
+
 import com.openfarmanager.android.core.archive.ArchiveUtils;
 import com.openfarmanager.android.model.TaskStatusEnum;
 import com.openfarmanager.android.model.exeptions.SdcardPermissionException;
@@ -21,10 +22,10 @@ public class CreateArchiveTask extends FileActionTask {
     private boolean mCompressionEnabled;
     private ArchiveUtils.CompressionEnum mCompression;
 
-    public CreateArchiveTask(FragmentManager fragmentManager, OnActionListener listener, List<File> items,
+    public CreateArchiveTask(Context context, int invokedOnPanel, List<File> items,
                              String archiveName, ArchiveUtils.ArchiveType archiveType,
                              boolean compressionEnabled, ArchiveUtils.CompressionEnum compression) {
-        super(fragmentManager, listener, items);
+        super(context, invokedOnPanel, items);
         mArchiveName = archiveName;
         mArchiveType = archiveType;
         mCompressionEnabled = compressionEnabled;
@@ -48,19 +49,19 @@ public class CreateArchiveTask extends FileActionTask {
 
         @Override
         public void beforeStarted(int filesToArchive) {
-            totalSize = filesToArchive;
+            mTotalSize = filesToArchive;
         }
 
         @Override
         public void beforeCompressionStarted(int fileParts) {
-            totalSize = fileParts;
-            doneSize = 0;
+            mTotalSize = fileParts;
+            mDoneSize = 0;
             updateProgress();
         }
 
         @Override
         public void onFileAdded(File file) {
-            doneSize++;
+            mDoneSize++;
             updateProgress();
         }
     };

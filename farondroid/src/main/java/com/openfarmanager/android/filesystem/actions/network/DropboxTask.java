@@ -24,8 +24,8 @@ public class DropboxTask extends NetworkActionTask {
     protected DropboxFile mDropboxFile;
     protected int mTask;
 
-    public DropboxTask(BaseFileSystemPanel panel, OnActionListener listener, DropboxFile file, int task) {
-        super(panel.getFragmentManager(), panel, listener, new ArrayList<File>());
+    public DropboxTask(BaseFileSystemPanel panel, DropboxFile file, int task) {
+        super(panel, new ArrayList<>());
         mDropboxFile = file;
         mNoProgress = true;
         mTask = task;
@@ -33,8 +33,7 @@ public class DropboxTask extends NetworkActionTask {
 
     @Override
     protected TaskStatusEnum doInBackground(Void... params) {
-        // TODO: hack
-        totalSize = 1;
+        mTotalSize = 1;
 
         if (mTask == TASK_SHARE)
 

@@ -1,8 +1,8 @@
 package com.openfarmanager.android.filesystem.actions;
 
+import android.content.Context;
 import android.net.Uri;
 import android.provider.DocumentsContract;
-import android.support.v4.app.FragmentManager;
 
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.model.TaskStatusEnum;
@@ -25,8 +25,8 @@ import static com.openfarmanager.android.model.TaskStatusEnum.*;
  */
 public class DeleteTask extends FileActionTask {
 
-    public DeleteTask(FragmentManager fragmentManager, OnActionListener listener, List<File> items) {
-        super(fragmentManager, listener, items);
+    public DeleteTask(Context context, int invokedOnPanel, List<File> items) {
+        super(context, invokedOnPanel, items);
     }
 
     @Override
@@ -45,7 +45,7 @@ public class DeleteTask extends FileActionTask {
                 Uri baseUri = StorageUtils.checkForPermissionAndGetBaseUri();
                 for (File file : items) {
                     Uri uri = StorageUtils.getDestinationFileUri(baseUri, sdCardPath, file.getAbsolutePath());
-                    doneSize += FileUtils.sizeOf(file);
+                    mDoneSize += FileUtils.sizeOf(file);
                     if (!DocumentsContract.deleteDocument(App.sInstance.getContentResolver(), uri)) {
                         return ERROR_DELETE_FILE;
                     }
@@ -65,7 +65,7 @@ public class DeleteTask extends FileActionTask {
                 }
                 try {
                     if (file.getParentFile().canWrite()) {
-                        doneSize += FileUtils.sizeOf(file);
+                        mDoneSize += FileUtils.sizeOf(file);
                         strategy.delete(file);
                     } else {
                         RootTask.delete(file);

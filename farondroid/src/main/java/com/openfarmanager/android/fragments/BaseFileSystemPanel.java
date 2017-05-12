@@ -1,9 +1,7 @@
 package com.openfarmanager.android.fragments;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Handler;
@@ -11,42 +9,45 @@ import android.os.Message;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.DisplayMetrics;
-import android.view.MotionEvent;
-import android.view.View;
 import android.view.WindowManager;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.ListPopupWindow;
-import android.widget.Toast;
+
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.R;
 import com.openfarmanager.android.core.AbstractCommand;
 import com.openfarmanager.android.core.CancelableCommand;
 import com.openfarmanager.android.core.archive.ArchiveScanner;
-import com.openfarmanager.android.core.archive.ArchiveUtils;
-import com.openfarmanager.android.dialogs.YesNoDontAskAgainDialog;
+import com.openfarmanager.android.dialogs.CopyMoveFileDialog;
+import com.openfarmanager.android.dialogs.CreateArchiveDialog;
+import com.openfarmanager.android.dialogs.ExtractArchiveDialog;
 import com.openfarmanager.android.filesystem.FileProxy;
-import com.openfarmanager.android.filesystem.actions.*;
 import com.openfarmanager.android.filesystem.actions.multi.network.CopyFromNetworkMultiTask;
 import com.openfarmanager.android.filesystem.actions.multi.network.CopyToNetworkMultiTask;
-import com.openfarmanager.android.filesystem.actions.multi.network.MoveFromNetworkMultiTask;
-import com.openfarmanager.android.filesystem.actions.multi.network.MoveToNetworkMultiTask;
-import com.openfarmanager.android.filesystem.actions.network.*;
-import com.openfarmanager.android.model.NetworkAccount;
+import com.openfarmanager.android.filesystem.actions.network.CopyFromNetworkTask;
+import com.openfarmanager.android.filesystem.actions.network.CopyToNetworkTask;
+import com.openfarmanager.android.filesystem.commands.CopyCommand;
+import com.openfarmanager.android.filesystem.commands.CopyFromNetworkCommand;
+import com.openfarmanager.android.filesystem.commands.CopyToNetworkCommand;
+import com.openfarmanager.android.filesystem.commands.CreateArchiveCommand;
+import com.openfarmanager.android.filesystem.commands.ExtractArchiveCommand;
+import com.openfarmanager.android.filesystem.commands.MoveCommand;
+import com.openfarmanager.android.filesystem.commands.MoveFromNetworkCommand;
+import com.openfarmanager.android.filesystem.commands.MoveToNetworkCommand;
+import com.openfarmanager.android.filesystem.commands.RenameCommand;
+import com.openfarmanager.android.filesystem.commands.RenameOnNetworkCommand;
 import com.openfarmanager.android.model.NetworkEnum;
 import com.openfarmanager.android.model.SelectParams;
-import com.openfarmanager.android.model.TaskStatusEnum;
+import com.openfarmanager.android.utils.FileUtilsExt;
 import com.openfarmanager.android.utils.SystemUtils;
 import com.openfarmanager.android.view.OnSwipeTouchListener;
-import com.openfarmanager.android.view.ToastNotification;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-import static com.openfarmanager.android.controllers.FileSystemController.*;
+import static com.openfarmanager.android.controllers.FileSystemController.ARG_EXPAND_LEFT_PANEL;
+import static com.openfarmanager.android.controllers.FileSystemController.ARG_EXPAND_RIGHT_PANEL;
+import static com.openfarmanager.android.controllers.FileSystemController.EXPAND_PANEL;
+import static com.openfarmanager.android.controllers.FileSystemController.GAIN_FOCUS;
 
 /**
  * @author Vlad Namashko
@@ -60,7 +61,9 @@ public abstract class BaseFileSystemPanel extends BasePanel {
 
     protected File mLastSelectedFile;
 
+    // TODO: temp
     protected String mEncryptedArchivePassword;
+    protected ExtractArchiveDialog.ExtractArchiveResult mExtractArchiveResult;
 
     protected Handler mHandler;
     protected boolean mIsActivePanel;
@@ -139,378 +142,53 @@ public abstract class BaseFileSystemPanel extends BasePanel {
         return null;
     }
 
-    public AbstractCommand getCopyToCommand(MainPanel inactivePanel) {
+    public AbstractCommand getCopyToCommand(MainPanel inactivePanel, File destination) {
         if (inactivePanel instanceof NetworkPanel) {
-            return mCopyToNetworkCommand;
+            return new CopyToNetworkCommand((MainPanel) this, (NetworkPanel) inactivePanel);
         }
         if (this instanceof NetworkPanel) {
-            return mCopyFromNetworkCommand;
+            return new CopyFromNetworkCommand((NetworkPanel) this, inactivePanel);
         }
 
-        return mCopyCommand;
+        return new CopyCommand((MainPanel) this, destination);
     }
 
-    public AbstractCommand getMoveCommand(MainPanel inactivePanel) {
+    public AbstractCommand getMoveCommand(MainPanel inactivePanel, CopyMoveFileDialog.CopyMoveFileResult result) {
+        if (result.isRename) {
+            if (this instanceof NetworkPanel) {
+                return new RenameOnNetworkCommand(this, result.destination, getLastSelectedFile());
+            } else {
+                return new MoveCommand((MainPanel) this, result.inactivePanel.getCurrentDir(), result.destination, result.isRename, mLastSelectedFile);
+            }
+        }
+
         if (inactivePanel instanceof NetworkPanel) {
-            return mMoveToNetworkCommand;
+            return new MoveToNetworkCommand((MainPanel) this, (NetworkPanel) inactivePanel);
         } else if (this instanceof NetworkPanel) {
-            return mMoveFromNetworkCommand;
+            return new MoveFromNetworkCommand((NetworkPanel) this, inactivePanel);
         }
 
-        return mMoveCommand;
+        return new MoveCommand((MainPanel) this, result.inactivePanel.getCurrentDir(), result.destination, result.isRename, mLastSelectedFile);
     }
 
-    private void doRename(Object[] args) {
-        doRename(args, false);
+    protected AbstractCommand getCreateArchiveCommand(CreateArchiveDialog.CreateArchiveResult createArchiveResult) {
+        return new CreateArchiveCommand((MainPanel) this,
+                FileUtilsExt.addSeparatorToTheEnd(getCurrentDir().getAbsolutePath()) + createArchiveResult.archiveName, createArchiveResult.archiveType, createArchiveResult.isCompressionEnabled, createArchiveResult.compression);
     }
 
-    public void handleNetworkActionResult(TaskStatusEnum status, Object[] args) {
-        handleNetworkActionResult(status, true, args);
+    protected AbstractCommand getExtractArchiveCommand(ExtractArchiveDialog.ExtractArchiveResult result, String password) {
+        return new ExtractArchiveCommand((MainPanel) this, mLastSelectedFile, new File(result.destination),
+                result.isCompressed, password, getCurrentArchiveItem());
     }
 
-    @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
-    public void handleNetworkActionResult(TaskStatusEnum status, boolean forceInvalidate, Object[] args) {
-        if (status != TaskStatusEnum.OK) {
-
-            if (status == TaskStatusEnum.ERROR_FTP_DELETE_DIRECTORY) { // special case for s/ftp
-                if (!App.sInstance.getSettings().isFtpAllowRecursiveDelete() && App.sInstance.getSettings().allowedToAskRecursiveDelete()) {
-                    new YesNoDontAskAgainDialog(getActivity()).show();
-                    return;
-                }
-            }
-
-            String error;
-            error = status == TaskStatusEnum.ERROR_CREATE_DIRECTORY ?
-                    getSafeString(R.string.error_cannot_create_file, (String) args[1]) : TaskStatusEnum.getErrorString(status, (String) args[1]);
-            if (status == TaskStatusEnum.ERROR_NETWORK && status.getNetworkErrorException() != null) {
-                error = status.getNetworkErrorException().getLocalizedError();
-            }
-
-            try {
-                ErrorDialog.newInstance(error).show(fragmentManager(), "errorDialog");
-            } catch (Exception ignore) {}
-        }
-        invalidatePanels((MainPanel) args[0], forceInvalidate);
-    }
-
-    @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
-    protected void handleNetworkCopyActionResult(TaskStatusEnum status, Object[] args) {
-        try {
-            if (status != TaskStatusEnum.OK) {
-                if (checkIfPermissionRequired(status)) return;
-
-                String error = status == TaskStatusEnum.ERROR_COPY || status == TaskStatusEnum.ERROR_FILE_NOT_EXISTS ?
-                        App.sInstance.getString(R.string.error_cannot_copy_files, args[1]):
-                        TaskStatusEnum.getErrorString(status);
-                if (status == TaskStatusEnum.ERROR_NETWORK && status.getNetworkErrorException() != null) {
-                    error = status.getNetworkErrorException().getLocalizedError();
-                }
-                ErrorDialog.newInstance(error).show(fragmentManager(), "errorDialog");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        invalidatePanels(((MainPanel) args[0]));
-    }
-
-    private void doRename(final Object[] args, boolean networkPanel) {
-        if (networkPanel) {
-            RenameOnNetworkTask task = null;
-            try {
-                task = new RenameOnNetworkTask(BaseFileSystemPanel.this,
-                        new OnActionListener() {
-                            @Override
-                            public void onActionFinish(TaskStatusEnum status) {
-                                handleNetworkActionResult(status, args);
-                            }
-                        }, getLastSelectedFile(), (String) args[1]);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            if (task != null) {
-                task.execute();
-            }
-        } else {
-            TaskStatusEnum status = new RenameTask(mLastSelectedFile, (String) args[1]).execute();
-            if (status != TaskStatusEnum.OK) {
-                if (checkIfPermissionRequired(status)) return;
-
-                try {
-                    ErrorDialog.newInstance(TaskStatusEnum.getErrorString(status)).show(fragmentManager(), "errorDialog");
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-            invalidatePanels((MainPanel) args[0]);
-        }
-    }
-
-    protected AbstractCommand mCopyCommand = new AbstractCommand() {
-
-        @Override
-        public void execute(final Object ... args) {
-            FileActionTask task = null;
-            try {
-                task = new CopyTask(fragmentManager(),
-                        new OnActionListener() {
-                            @Override
-                            public void onActionFinish(TaskStatusEnum status) {
-                                try {
-                                    if (!status.equals(TaskStatusEnum.OK)) {
-                                        if (checkIfPermissionRequired(status)) return;
-
-                                        ErrorDialog.newInstance(
-                                                status.equals(TaskStatusEnum.ERROR_COPY) ?
-                                                        App.sInstance.getString(R.string.error_cannot_copy_files, args[1]):
-                                                        String.format(TaskStatusEnum.getErrorString(status), args[1])).
-                                                show(fragmentManager(), "errorDialog");
-                                    }
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
-                                invalidatePanels(((MainPanel) args[0]));
-                            }
-                        }, getSelectedFiles(), new File((String) args[1]));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            task.execute();
-        }
-    };
-
-    private boolean checkIfPermissionRequired(TaskStatusEnum status) {
-        if (status == TaskStatusEnum.ERROR_STORAGE_PERMISSION_REQUIRED) {
-            BaseFileSystemPanel.this.requestSdcardPermission();
-            return true;
-        }
-        return false;
-    }
-
-    protected AbstractCommand mCopyToNetworkCommand = new AbstractCommand() {
-
-        @Override
-        public void execute(final Object ... args) {
-            try {
-                NetworkPanel networkPanel = (NetworkPanel) args[0];
-                NetworkEnum type = networkPanel.getNetworkType();
-                List<File> files = getSelectedFiles();
-                if (App.sInstance.getSettings().isMultiThreadTasksEnabled(type)) {
-                    new CopyToNetworkMultiTask(networkPanel,
-                            createListener(args), files, (String) args[1]).execute();
-                } else {
-                    new CopyToNetworkTask(networkPanel,
-                            createListener(args), files, (String) args[1]).execute();
-                }
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    };
-
-    protected AbstractCommand mCopyFromNetworkCommand = new AbstractCommand() {
-
-        @Override
-        public void execute(final Object ... args) {
-
-            NetworkPanel panel = (NetworkPanel) BaseFileSystemPanel.this;
-            NetworkEnum type = panel.getNetworkType();
-            String destination = (String) args[1];
-            try {
-                if (App.sInstance.getSettings().isMultiThreadTasksEnabled(type)) {
-                    new CopyFromNetworkMultiTask(panel, createListener(args),
-                            panel.getFiles(), destination).execute();
-                } else {
-                    new CopyFromNetworkTask(panel, createListener(args),
-                            panel.getFiles(), destination).execute();
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    };
-
-    protected AbstractCommand mSelectFilesCommand = new AbstractCommand() {
-        @Override
-        public void execute(final Object... args) {
-            select((SelectParams) args[0]);
-        }
-    };
-
-    protected AbstractCommand mExtractArchiveCommand = new AbstractCommand() {
-        @Override
-        public void execute(final Object... args) {
-            FileActionTask task = null;
-            try {
-                task = new ExtractArchiveTask(fragmentManager(),
-                        new OnActionListener() {
-                            @Override
-                            public void onActionFinish(TaskStatusEnum status) {
-                                if (status == TaskStatusEnum.OK) {
-                                    // all is ok, ignore
-                                } else if (status == TaskStatusEnum.ERROR_EXTRACTING_ARCHIVE_FILES_ENCRYPTION_PASSWORD_REQUIRED) {
-                                    try {
-                                        RequestPasswordDialog.newInstance(mRequestPasswordCommand, args).show(fragmentManager(), "confirmDialog");
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                    }
-                                } else {
-                                    if (checkIfPermissionRequired(status)) return;
-                                    try {
-                                        ErrorDialog.newInstance(TaskStatusEnum.getErrorString(status)).show(fragmentManager(), "error");
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                    }
-                                }
-                                invalidatePanels((MainPanel) args[0]);
-                            }
-                        }, mLastSelectedFile, new File((String) args[1]), (Boolean) args[3], getArchivePassword(), getCurrentArchiveItem());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            task.execute();
-        }
-    };
-
-    protected AbstractCommand mMoveCommand = new AbstractCommand() {
-        @Override
-        public void execute(final Object... args) {
-            if ((Boolean) args[3]) {
-                doRename(args);
-            } else {
-                FileActionTask task = null;
-                try {
-                    task = new MoveTask(fragmentManager(),
-                            new OnActionListener() {
-                                @Override
-                                public void onActionFinish(TaskStatusEnum status) {
-                                    if (!status.equals(TaskStatusEnum.OK)) {
-                                        if (checkIfPermissionRequired(status)) return;
-                                        try {
-                                            ErrorDialog.newInstance(TaskStatusEnum.getErrorString(status)).show(fragmentManager(), "error");
-                                        } catch (Exception e) {
-                                            e.printStackTrace();
-                                        }
-                                    }
-                                    invalidatePanels((MainPanel) args[0]);
-                                }
-                            }, getSelectedFiles(), ((MainPanel) args[0]).getCurrentDir(), (String) args[1]);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                task.execute();
-            }
-        }
-    };
-
-    protected AbstractCommand mMoveToNetworkCommand = new AbstractCommand() {
-        @Override
-        public void execute(final Object... args) {
-            if ((Boolean) args[3]) {
-                doRename(args, true);
-            } else {
-                try {
-                    NetworkPanel panel = (NetworkPanel) args[0];
-                    NetworkEnum type = panel.getNetworkType();
-                    if (App.sInstance.getSettings().isMultiThreadTasksEnabled(type)) {
-                        new MoveToNetworkMultiTask(panel, createListener(args),
-                                getSelectedFiles(), panel.getCurrentPath()).execute();
-                    } else {
-                        new MoveToNetworkTask(panel, createListener(args),
-                                getSelectedFiles(), panel.getCurrentPath()).execute();
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    };
-
-    protected AbstractCommand mMoveFromNetworkCommand = new AbstractCommand() {
-        @Override
-        public void execute(final Object... args) {
-            if ((Boolean) args[3]) {
-                doRename(args, true);
-            } else {
-                try {
-                    NetworkEnum type = ((NetworkPanel) BaseFileSystemPanel.this).getNetworkType();
-                    String destination = ((MainPanel) args[0]).getCurrentPath();
-                    if (App.sInstance.getSettings().isMultiThreadTasksEnabled(type)) {
-                        new MoveFromNetworkMultiTask(BaseFileSystemPanel.this, createListener(args),
-                                getSelectedFileProxies(), destination).execute();
-                    } else {
-                        new MoveFromNetworkTask(BaseFileSystemPanel.this, createListener(args),
-                                getSelectedFileProxies(), destination).execute();
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-            }
-        }
-    };
-
-    protected AbstractCommand mCreateBookmarkCommand = new AbstractCommand() {
-        @Override
-        public void execute(final Object... args) {
-            TaskStatusEnum status = App.sInstance.getBookmarkManager().createBookmark((String) args[1],
-                    (String) args[3], (NetworkAccount) args[4]);
-
-            if (status != TaskStatusEnum.OK) {
-                try {
-                    ErrorDialog.newInstance(TaskStatusEnum.getErrorString(status)).show(fragmentManager(), "errorDialog");
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            } else {
-                ToastNotification.makeText(App.sInstance.getApplicationContext(),
-                        getSafeString(R.string.bookmark_created), Toast.LENGTH_SHORT).show();
-            }
-
-            invalidatePanels((MainPanel) args[0]);
-        }
-    };
-
-    protected AbstractCommand mCreateArchiveCommand = new AbstractCommand() {
-        @Override
-        public void execute(final Object... args) {
-            String currentPath = getCurrentDir().getAbsolutePath();
-            if (!currentPath.endsWith(File.separator)) {
-                currentPath += File.separator;
-            }
-
-            FileActionTask task = null;
-            try {
-                task = new CreateArchiveTask(fragmentManager(),
-                        new OnActionListener() {
-                            @Override
-                            public void onActionFinish(TaskStatusEnum status) {
-                                if (!status.equals(TaskStatusEnum.OK)) {
-                                    if (checkIfPermissionRequired(status)) return;
-                                    try {
-                                        ErrorDialog.newInstance(TaskStatusEnum.getErrorString(status)).show(fragmentManager(), "error");
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                    }
-                                }
-                                invalidatePanels((MainPanel) args[0]);
-                            }
-                        }, getSelectedFiles(), currentPath + args[1],
-                        (ArchiveUtils.ArchiveType) args[2],
-                        (Boolean) args[3], (ArchiveUtils.CompressionEnum) args[4]);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            task.execute();
-        }
-    };
+    protected AbstractCommand mSelectFilesCommand = (AbstractCommand) args -> select((SelectParams) args[0]);
 
     protected CancelableCommand mRequestPasswordCommand = new CancelableCommand() {
 
         @Override
         public void execute(final Object... args) {
             mEncryptedArchivePassword = (String) args[0];
-            mExtractArchiveCommand.execute((args.length > 1) ? (Object[]) args[1] : null);
+            getExtractArchiveCommand(mExtractArchiveResult, mEncryptedArchivePassword).execute();
             mEncryptedArchivePassword = null;
         }
 
@@ -519,15 +197,6 @@ public abstract class BaseFileSystemPanel extends BasePanel {
 
         }
     };
-
-    private OnActionListener createListener(final Object[] args) {
-        return new OnActionListener() {
-            @Override
-            public void onActionFinish(TaskStatusEnum status) {
-                handleNetworkActionResult(status, args);
-            }
-        };
-    }
 
     public void requestSdcardPermission() {
         if (Build.VERSION.SDK_INT >= 21) {

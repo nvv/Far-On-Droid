@@ -3,6 +3,8 @@ package com.openfarmanager.android.filesystem.actions.network;
 import android.support.v4.app.FragmentManager;
 import com.dropbox.client2.exception.DropboxException;
 import com.microsoft.live.LiveOperationException;
+import com.openfarmanager.android.core.bus.RxBus;
+import com.openfarmanager.android.core.bus.TaskErrorEvent;
 import com.openfarmanager.android.core.network.NetworkApi;
 import com.openfarmanager.android.filesystem.actions.OnActionListener;
 import com.openfarmanager.android.fragments.BaseFileSystemPanel;
@@ -23,17 +25,10 @@ public class CreateNewAtNetworkTask extends NetworkActionTask {
     protected String mDestinationFolder;
     protected String mName;
 
-    public CreateNewAtNetworkTask(BaseFileSystemPanel panel, FragmentManager fragmentManager, OnActionListener listener,
-                                 String destinationForlder, String name) {
-        // TODO: temporary
-        super.mItems = new ArrayList<>();
-
+    public CreateNewAtNetworkTask(BaseFileSystemPanel panel, String destinationForlder, String name) {
+        super(panel, new ArrayList<>());
         mDestinationFolder = destinationForlder;
         mName = name;
-        mFragmentManager = fragmentManager;
-        mListener = listener;
-
-        initNetworkPanelInfo(panel);
     }
 
     @Override
@@ -53,4 +48,8 @@ public class CreateNewAtNetworkTask extends NetworkActionTask {
         }
     }
 
+    @Override
+    protected Object getExtra() {
+        return mName;
+    }
 }

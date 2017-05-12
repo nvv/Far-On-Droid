@@ -1,6 +1,6 @@
 package com.openfarmanager.android.filesystem.actions;
 
-import android.support.v4.app.FragmentManager;
+import android.content.Context;
 
 import com.github.junrar.Archive;
 import com.openfarmanager.android.core.archive.ArchiveScanner;
@@ -37,21 +37,14 @@ public class ExtractArchiveTask extends FileActionTask {
     private boolean mIsCompressed;
     private String mEncryptedArchivePassword;
 
-    public ExtractArchiveTask(FragmentManager fragmentManager, OnActionListener listener,
-                              File archiveFile, File destination, boolean compressed, String encryptedArchivePassword,
-                              ArchiveScanner.File extractTree) {
-        super(fragmentManager, listener, new ArrayList<File>());
+    public ExtractArchiveTask(Context context, int forPanel, File archiveFile, File destination,
+                              boolean compressed, String encryptedArchivePassword, ArchiveScanner.File extractTree) {
+        super(context, forPanel, new ArrayList<>());
         mArchiveFile = archiveFile;
         mDestinationFolder = destination;
         mExtractTree = extractTree;
         mIsCompressed = compressed;
         mEncryptedArchivePassword = encryptedArchivePassword;
-    }
-
-    public ExtractArchiveTask(FragmentManager fragmentManager, OnActionListener listener,
-                              File archiveFile, File destination, boolean compressed,
-                              ArchiveScanner.File extractTree) {
-        this(fragmentManager, listener, archiveFile, destination, compressed, null, extractTree);
     }
 
     @Override
@@ -138,12 +131,12 @@ public class ExtractArchiveTask extends FileActionTask {
     private ArchiveUtils.ExtractArchiveListener mListener = new ArchiveUtils.ExtractArchiveListener() {
         @Override
         public void beforeExtractStarted(int filesToExtract) {
-            totalSize = filesToExtract;
+            mTotalSize = filesToExtract;
         }
 
         @Override
         public void onFileExtracted(ArchiveScanner.File extractedFile) {
-            doneSize++;
+            mTotalSize++;
             updateProgress();
         }
     };

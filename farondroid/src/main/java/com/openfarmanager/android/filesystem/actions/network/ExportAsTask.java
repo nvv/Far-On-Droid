@@ -15,13 +15,11 @@ import java.util.ArrayList;
  */
 public class ExportAsTask extends NetworkActionTask {
 
-    private final static byte[] BUFFER = new byte[256 * 1024];
-
     protected String mDestination;
     protected String mDownloadLink;
 
-    public ExportAsTask(BaseFileSystemPanel panel, OnActionListener listener, String downloadLink, String destination) {
-        super(panel.getFragmentManager(), panel, listener, new ArrayList<File>());
+    public ExportAsTask(BaseFileSystemPanel panel, String downloadLink, String destination) {
+        super(panel, new ArrayList<>());
         mDestination = destination;
         mNoProgress = true;
         mDownloadLink = downloadLink;
@@ -30,7 +28,7 @@ public class ExportAsTask extends NetworkActionTask {
     @Override
     protected TaskStatusEnum doInBackground(Void... voids) {
         // TODO: hack
-        totalSize = 1;
+        mTotalSize = 1;
 
         try {
             App.sInstance.getGoogleDriveApi().download(mDownloadLink, mDestination);

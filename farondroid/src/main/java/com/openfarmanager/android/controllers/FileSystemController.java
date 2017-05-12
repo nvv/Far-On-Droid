@@ -129,6 +129,7 @@ public class FileSystemController {
     public static final int SHARE = 133;
     public static final int GOTO_HOME = 134;
     public static final int OPEN_DIRECTORY = 135;
+    public static final int INVALIDATE = 136;
 
     public static final int ARG_FORCE_OPEN_FILE_IN_EDITOR = 1000;
     public static final int ARG_EXPAND_LEFT_PANEL = 1001;
@@ -243,10 +244,12 @@ public class FileSystemController {
         MainPanel rightPanel = getRightVisiblePanel();
 
         if (leftPanel != null) {
+            leftPanel.getSelectedFiles().clear();
             leftPanel.invalidate();
         }
 
         if (rightPanel != null) {
+            rightPanel.getSelectedFiles().clear();
             rightPanel.invalidate();
         }
     }
@@ -540,13 +543,16 @@ public class FileSystemController {
                     inactivePanel.updateGoogleDriveData(activePanel, googleDriveFile.getId(), getStarredData(false));
                     break;
                 case SHARE:
-                    inactivePanel.doDropboxTask(activePanel, (DropboxFile) msg.obj, DropboxTask.TASK_SHARE);
+                    inactivePanel.doDropboxTask((DropboxFile) msg.obj, DropboxTask.TASK_SHARE);
                     break;
                 case GOTO_HOME:
                     activePanel.openHomeFolder();
                     break;
                 case OPEN_DIRECTORY:
                     activePanel.openDirectory((String) msg.obj);
+                    break;
+                case INVALIDATE:
+                    invalidate();
                     break;
             }
         }

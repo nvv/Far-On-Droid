@@ -22,8 +22,8 @@ import static com.openfarmanager.android.model.TaskStatusEnum.ERROR_FILE_NOT_EXI
  */
 public class MoveToNetworkMultiTask extends CopyToNetworkMultiTask {
 
-    public MoveToNetworkMultiTask(NetworkPanel panel, OnActionListener listener, List<File> items, String destination) {
-        super(panel, listener, items, destination);
+    public MoveToNetworkMultiTask(NetworkPanel panel, List<File> items, String destination) {
+        super(panel, items, destination);
     }
 
     @Override
@@ -47,17 +47,14 @@ public class MoveToNetworkMultiTask extends CopyToNetworkMultiTask {
         return mActionRunnable;
     }
 
-    private Runnable mActionRunnable = new Runnable() {
-        @Override
-        public void run() {
-            calculateSize();
-            TaskStatusEnum status = MoveToNetworkMultiTask.super.doAction();
+    private Runnable mActionRunnable = () -> {
+        calculateSize();
+        TaskStatusEnum status = MoveToNetworkMultiTask.super.doAction();
 
-            if (hasSubTasks() && handleSubTasks(status)) {
-                return;
-            }
-
-            onTaskDone(doAction());
+        if (hasSubTasks() && handleSubTasks(status)) {
+            return;
         }
+
+        onTaskDone(doAction());
     };
 }

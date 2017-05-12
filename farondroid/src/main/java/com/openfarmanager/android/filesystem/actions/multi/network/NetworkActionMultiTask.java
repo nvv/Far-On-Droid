@@ -22,8 +22,8 @@ public abstract class NetworkActionMultiTask extends MultiActionTask {
     protected NetworkEnum mNetworkType;
     protected DataSource mDataSource;
 
-    public NetworkActionMultiTask(BaseFileSystemPanel panel, OnActionListener listener, List<File> items) {
-        super(panel.getActivity(), listener, items);
+    public NetworkActionMultiTask(BaseFileSystemPanel panel, List<File> items) {
+        super(panel.getContext(), panel.getPanelLocation(), items);
         NetworkPanel networkPanel = (NetworkPanel) panel;
         mNetworkType = networkPanel.getNetworkType();
         mDataSource = networkPanel.getDataSource();

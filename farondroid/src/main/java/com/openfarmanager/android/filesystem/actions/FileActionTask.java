@@ -1,19 +1,26 @@
 package com.openfarmanager.android.filesystem.actions;
 
+import android.content.Context;
+import android.content.DialogInterface;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.support.v4.app.FragmentManager;
-import com.openfarmanager.android.fragments.FileActionProgressDialog;
-import com.openfarmanager.android.model.TaskStatusEnum;
-import com.openfarmanager.android.utils.StorageUtils;
 
-import org.apache.commons.io.FileUtils;
+import com.annimon.stream.Stream;
+import com.openfarmanager.android.App;
+import com.openfarmanager.android.core.bus.RxBus;
+import com.openfarmanager.android.core.bus.TaskCancelledEvent;
+import com.openfarmanager.android.core.bus.TaskErrorEvent;
+import com.openfarmanager.android.core.bus.TaskOkEvent;
+import com.openfarmanager.android.dialogs.FileActionProgressDialog;
+import com.openfarmanager.android.model.TaskStatusEnum;
+import com.openfarmanager.android.utils.FileUtilsExt;
+import com.openfarmanager.android.utils.StorageUtils;
 
 import java.io.File;
 import java.util.List;
 
 /**
- * User: sokhotnyi
+ * @author Vlad Namashko
  */
 public abstract class FileActionTask extends AsyncTask<Void, Integer, TaskStatusEnum> {
 
@@ -21,12 +28,11 @@ public abstract class FileActionTask extends AsyncTask<Void, Integer, TaskStatus
 
     protected List<File> mItems;
     protected FileActionProgressDialog mProgressDialog;
-    protected FragmentManager mFragmentManager;
+    protected Context mContext;
     protected String mCurrentFile;
-    protected OnActionListener mListener;
 
-    protected long totalSize = 0;
-    protected long doneSize = 0;
+    protected long mTotalSize = 0;
+    protected long mDoneSize = 0;
 
     protected boolean mNoProgress;
 
@@ -34,42 +40,31 @@ public abstract class FileActionTask extends AsyncTask<Void, Integer, TaskStatus
     protected Uri mBaseUri;
     protected boolean mUseStorageApi;
 
+    protected int mInvokedOnPanel;
+
     /**
      * Task start time in milliseconds. For debug purposes.
      */
     protected long mTaskStartTime;
 
-    public FileActionTask(FragmentManager fragmentManager, OnActionListener listener, List<File> items) {
+    public FileActionTask(Context context, int invokedOnPanel, List<File> items) {
+        mContext = context;
+        mInvokedOnPanel = invokedOnPanel;
         mItems = items;
-        mFragmentManager = fragmentManager;
-        mListener = listener;
     }
 
-    public FileActionTask() {
+    protected FileActionTask() {
     }
 
     @Override
     protected void onPreExecute() {
 
-        for (File file : mItems) {
-            try {
-                totalSize += FileUtils.sizeOf(file);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+        Stream.of(mItems).forEach(file -> mTotalSize += FileUtilsExt.sizeOf(file));
 
-        mProgressDialog = FileActionProgressDialog.newInstance(new FileActionProgressDialog.OnDismissListener() {
-            @Override
-            public void onDismiss() {
-                cancel(true);
-                mListener.onActionFinish(TaskStatusEnum.CANCELED);
-            }
-        });
-
+        mProgressDialog = new FileActionProgressDialog(mContext, mProgressDialogDismissListener);
         mProgressDialog.setIndeterminate(mNoProgress);
+        mProgressDialog.show();
 
-        mProgressDialog.show(mFragmentManager, "progress_dialog");
         super.onPreExecute();
     }
 
@@ -86,15 +81,21 @@ public abstract class FileActionTask extends AsyncTask<Void, Integer, TaskStatus
             mProgressDialog.dismiss();
         } catch (Exception ignore) { }
 
-        if (mListener != null) {
-            mListener.onActionFinish(status);
+        if (status == TaskStatusEnum.OK) {
+            RxBus.getInstance().postEvent(new TaskOkEvent(mInvokedOnPanel));
+        } else {
+            RxBus.getInstance().postEvent(new TaskErrorEvent(mInvokedOnPanel).setStatus(status).setExtra(getExtra()));
         }
         super.onPostExecute(status);
     }
 
+    protected Object getExtra() {
+        return "";
+    }
+
     protected void updateProgress() {
-        if (totalSize > 0) {
-            publishProgress((int) (100 * doneSize / totalSize));
+        if (mTotalSize > 0) {
+            publishProgress((int) (100 * mDoneSize / mTotalSize));
         }
     }
 
@@ -107,4 +108,12 @@ public abstract class FileActionTask extends AsyncTask<Void, Integer, TaskStatus
         return outputDir.exists() || (mUseStorageApi ? StorageUtils.mkDir(mBaseUri, mSdCardPath, outputDir) : outputDir.mkdirs());
     }
 
+    private DialogInterface.OnDismissListener mProgressDialogDismissListener = new DialogInterface.OnDismissListener() {
+        @Override
+        public void onDismiss(DialogInterface dialog) {
+            cancel(true);
+//            mListener.onActionFinish(TaskStatusEnum.CANCELED);
+            RxBus.getInstance().postEvent(new TaskCancelledEvent(mInvokedOnPanel));
+        }
+    };
 }

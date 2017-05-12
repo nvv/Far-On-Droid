@@ -442,7 +442,7 @@ public class ArchiveUtils {
         }
 
         File finalOutputFile = new File(output.getAbsolutePath() + "." + CompressionEnum.toString(additionalCompression));
-        if (!finalOutputFile.exists() && (checkUseStorageApi ? !StorageUtils.createNewFile(output, sdCardPath) : !output.createNewFile())) {
+        if (!finalOutputFile.exists() && (checkUseStorageApi ? !StorageUtils.createNewFile(output, sdCardPath) : !finalOutputFile.createNewFile())) {
             throw new CreateArchiveException();
         }
 

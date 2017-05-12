@@ -25,8 +25,8 @@ import static com.openfarmanager.android.model.TaskStatusEnum.createNetworkError
  */
 public class MoveFromNetworkMultiTask extends CopyFromNetworkMultiTask {
 
-    public MoveFromNetworkMultiTask(BaseFileSystemPanel panel, OnActionListener listener, List<FileProxy> items, String destination) {
-        super(panel, listener, items, destination);
+    public MoveFromNetworkMultiTask(BaseFileSystemPanel panel, List<FileProxy> items, String destination) {
+        super(panel, items, destination);
     }
 
     @Override

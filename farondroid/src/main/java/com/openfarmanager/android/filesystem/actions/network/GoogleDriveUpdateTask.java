@@ -16,8 +16,8 @@ public class GoogleDriveUpdateTask extends NetworkActionTask {
     protected String mFileId;
     protected String mUpdateData;
 
-    public GoogleDriveUpdateTask(BaseFileSystemPanel panel, OnActionListener listener, String fileId, String updateData) {
-        super(panel.getFragmentManager(), panel, listener, new ArrayList<File>());
+    public GoogleDriveUpdateTask(BaseFileSystemPanel panel, String fileId, String updateData) {
+        super(panel, new ArrayList<File>());
         mFileId = fileId;
         mNoProgress = true;
         mUpdateData = updateData;
@@ -25,8 +25,7 @@ public class GoogleDriveUpdateTask extends NetworkActionTask {
 
     @Override
     protected TaskStatusEnum doInBackground(Void... voids) {
-        // TODO: hack
-        totalSize = 1;
+        mTotalSize = 1;
 
         try {
             App.sInstance.getGoogleDriveApi().updateData(mFileId, mUpdateData);

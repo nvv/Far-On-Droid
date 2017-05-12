@@ -38,12 +38,9 @@ public class FileActionProgressDialog extends Dialog {
         mProgress = (ProgressBar) view.findViewById(android.R.id.progress);
         mProgress.setIndeterminate(mIndeterminate);
 
-        view.findViewById(R.id.cancel).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                dismiss();
-                mOnDismissListener.onDismiss(FileActionProgressDialog.this);
-            }
+        view.findViewById(R.id.cancel).setOnClickListener(view1 -> {
+            dismiss();
+            mOnDismissListener.onDismiss(FileActionProgressDialog.this);
         });
 
         setContentView(view);

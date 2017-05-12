@@ -20,10 +20,10 @@ import static com.openfarmanager.android.model.TaskStatusEnum.*;
  */
 public class MoveToNetworkTask extends CopyToNetworkTask {
 
-    public MoveToNetworkTask(BaseFileSystemPanel panel, OnActionListener listener, List<File> items,
+    public MoveToNetworkTask(BaseFileSystemPanel panel, List<File> items,
                              String destination) {
 
-        super(panel, listener, items, destination);
+        super(panel, items, destination);
     }
 
     @Override

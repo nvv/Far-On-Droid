@@ -1,7 +1,6 @@
 package com.openfarmanager.android.filesystem.actions;
 
-import android.net.Uri;
-import android.support.v4.app.FragmentManager;
+import android.content.Context;
 
 import com.openfarmanager.android.model.TaskStatusEnum;
 import com.openfarmanager.android.model.exeptions.SdcardPermissionException;
@@ -32,9 +31,9 @@ public class MoveTask extends FileActionTask {
     protected File mDestinationFolder;
     protected String mDestinationFileName;
     
-    public MoveTask(FragmentManager fragmentManager, OnActionListener listener, List<File> items, File destination, 
+    public MoveTask(Context context, int invokedOnPanel, List<File> items, File destination,
                     String destinationFileName) {
-        super(fragmentManager, listener, items);
+        super(context, invokedOnPanel, items);
         mDestinationFolder = destination;
         mDestinationFileName = destinationFileName;
     }
@@ -74,7 +73,7 @@ public class MoveTask extends FileActionTask {
         List<File> items = new ArrayList<>(mItems);
         for (File file : items) {
             try {
-                doneSize += FileUtils.sizeOf(file);
+                mDoneSize += FileUtils.sizeOf(file);
                 if (mUseStorageApi) {
                     moveOnSdcard(file, mDestinationFolder);
                 } else if (!mDestinationFolder.canWrite() || !file.getParentFile().canWrite()) {

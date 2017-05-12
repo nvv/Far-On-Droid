@@ -1,9 +1,8 @@
 package com.openfarmanager.android.filesystem.actions;
 
-import android.support.v4.app.FragmentManager;
+import android.content.Context;
 import android.util.Log;
 
-import com.google.common.io.Files;
 import com.openfarmanager.android.BuildConfig;
 import com.openfarmanager.android.model.TaskStatusEnum;
 import com.openfarmanager.android.model.exeptions.SdcardPermissionException;
@@ -11,11 +10,6 @@ import com.openfarmanager.android.utils.FileUtilsExt;
 import com.openfarmanager.android.utils.SystemUtils;
 
 import java.io.*;
-import java.nio.ByteBuffer;
-import java.nio.channels.Channels;
-import java.nio.channels.FileChannel;
-import java.nio.channels.ReadableByteChannel;
-import java.nio.channels.WritableByteChannel;
 import java.util.ConcurrentModificationException;
 import java.util.List;
 
@@ -29,8 +23,8 @@ public class CopyTask extends FileActionTask {
 
     protected File mDestinationFolder;
 
-    public CopyTask(FragmentManager fragmentManager, OnActionListener listener, List<File> items, File destination) {
-        super(fragmentManager, listener, items);
+    public CopyTask(Context context, int invokedOnPanel, List<File> items, File destination) {
+        super(context, invokedOnPanel, items);
         mDestinationFolder = destination;
     }
 
@@ -119,11 +113,17 @@ public class CopyTask extends FileActionTask {
             int len;
             while ((len = in.read(BUFFER)) > 0) {
                 out.write(BUFFER, 0, len);
-                doneSize += len;
+                mDoneSize += len;
                 updateProgress();
             }
             in.close();
             out.close();
         }
     }
+
+    @Override
+    protected Object getExtra() {
+        return mDestinationFolder;
+    }
+
 }

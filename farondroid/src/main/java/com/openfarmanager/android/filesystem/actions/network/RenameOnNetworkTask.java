@@ -1,29 +1,26 @@
 package com.openfarmanager.android.filesystem.actions.network;
 
-import android.support.v4.app.FragmentManager;
 import com.dropbox.client2.exception.DropboxException;
 import com.openfarmanager.android.filesystem.FileProxy;
-import com.openfarmanager.android.filesystem.actions.FileActionTask;
-import com.openfarmanager.android.filesystem.actions.OnActionListener;
 import com.openfarmanager.android.fragments.BaseFileSystemPanel;
-import com.openfarmanager.android.model.NetworkEnum;
 import com.openfarmanager.android.model.TaskStatusEnum;
 import com.openfarmanager.android.model.exeptions.NetworkException;
 
-import java.io.File;
 import java.util.ArrayList;
 
-import static com.openfarmanager.android.model.TaskStatusEnum.*;
+import static com.openfarmanager.android.model.TaskStatusEnum.ERROR_FILE_NOT_EXISTS;
+import static com.openfarmanager.android.model.TaskStatusEnum.ERROR_RENAME_FILE;
+import static com.openfarmanager.android.model.TaskStatusEnum.ERROR_WRONG_DESTINATION_FILE_NAME;
+import static com.openfarmanager.android.model.TaskStatusEnum.OK;
+import static com.openfarmanager.android.model.TaskStatusEnum.createNetworkError;
 
 public class RenameOnNetworkTask extends NetworkActionTask {
 
-private String mDestinationFileName;
+    private String mDestinationFileName;
     private FileProxy mSrcFile;
 
-    public RenameOnNetworkTask(BaseFileSystemPanel panel, OnActionListener listener,
-                               FileProxy file, String destinationName) {
-        mFragmentManager = panel.getFragmentManager();
-        mListener = listener;
+    public RenameOnNetworkTask(BaseFileSystemPanel panel, String destinationName, FileProxy file) {
+        super(panel, new ArrayList<>());
         mItems = new ArrayList<>();
         mSrcFile = file;
         mDestinationFileName = destinationName;
