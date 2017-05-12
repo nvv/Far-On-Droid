@@ -44,6 +44,7 @@ public class GoogleDriveAuthWindow extends Dialog {
         final Api api = new Api();
 
         final WebView webView = (WebView) mView.findViewById(R.id.web_view_auth);
+        webView.getSettings().setUserAgentString("Mozilla/5.0 (Linux; <Android Version>; <Build Tag etc.>) AppleWebKit/<WebKit Rev> (KHTML, like Gecko) Chrome/<Chrome Rev> Mobile Safari/<WebKit Rev>");
         webView.getSettings().setJavaScriptEnabled(true);
         webView.setWebViewClient(new WebViewClient() {
 
