@@ -2,7 +2,7 @@ package com.openfarmanager.android.filesystem.actions.multi.network;
 
 import android.net.Uri;
 
-import com.dropbox.client2.exception.DropboxException;
+import com.dropbox.core.v2.files.Metadata;
 import com.jcraft.jsch.SftpException;
 import com.mediafire.sdk.MFApiException;
 import com.mediafire.sdk.MFException;
@@ -153,8 +153,6 @@ public class CopyFromNetworkMultiTask extends NetworkActionMultiTask {
                 return ERROR_COPY;
             } catch (IllegalArgumentException e) {
                 return ERROR_COPY;
-            } catch (DropboxException e) {
-                return createNetworkError(NetworkException.handleNetworkException(e));
             } catch (LiveOperationException e) {
                 return ERROR_COPY;
             } catch (Exception e) {
@@ -249,7 +247,7 @@ public class CopyFromNetworkMultiTask extends NetworkActionMultiTask {
 
     }
 
-    private void copyFromDropbox(final FileProxy source, final String destination) throws DropboxException, IOException {
+    private void copyFromDropbox(final FileProxy source, final String destination) throws IOException {
         final DropboxAPI api = App.sInstance.getDropboxApi();
         if (isCancelled()) {
             throw new InterruptedIOException();
@@ -259,12 +257,12 @@ public class CopyFromNetworkMultiTask extends NetworkActionMultiTask {
         if (source.isDirectory()) {
             try {
                 createDirectoryIfNotExists(destination);
-                com.dropbox.client2.DropboxAPI.Entry currentNode = api.metadata(source.getFullPath(), -1, null, true, null);
+                List<Metadata> currentNode = api.listFiles(source.getFullPath());
 
-                if (currentNode.contents.size() == 0) {
+                if (currentNode != null && currentNode.size() == 0) {
                     createDirectoryIfNotExists(fullSourceFilePath);
                 } else {
-                    for (com.dropbox.client2.DropboxAPI.Entry entry : currentNode.contents) {
+                    for (Metadata entry : currentNode) {
                         copyFromDropbox(new DropboxFile(entry), fullSourceFilePath);
                     }
                 }

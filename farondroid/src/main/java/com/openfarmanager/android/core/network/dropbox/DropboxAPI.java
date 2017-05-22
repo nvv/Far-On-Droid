@@ -4,13 +4,6 @@ import android.app.Activity;
 import android.database.Cursor;
 
 import com.annimon.stream.Stream;
-import com.dropbox.client2.ProgressListener;
-import com.dropbox.client2.android.AndroidAuthSession;
-import com.dropbox.client2.exception.DropboxException;
-import com.dropbox.client2.exception.DropboxServerException;
-import com.dropbox.client2.session.AccessTokenPair;
-import com.dropbox.client2.session.AppKeyPair;
-import com.dropbox.client2.session.Session;
 import com.dropbox.core.DbxException;
 import com.dropbox.core.DbxRequestConfig;
 import com.dropbox.core.android.Auth;
@@ -20,6 +13,7 @@ import com.dropbox.core.v2.files.Metadata;
 import com.dropbox.core.v2.files.SearchResult;
 import com.dropbox.core.v2.files.UploadUploader;
 import com.dropbox.core.v2.files.WriteMode;
+import com.dropbox.core.v2.sharing.SharedFolderMetadata;
 import com.dropbox.core.v2.users.FullAccount;
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.R;
@@ -42,11 +36,10 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DropboxAPI extends com.dropbox.client2.DropboxAPI<AndroidAuthSession> implements NetworkApi {
+public class DropboxAPI implements NetworkApi {
 
     private final static String APP_KEY = "6gnp59nffh0a5xj";
     private final static String APP_SECRET = "rhm6h3u043l91vv";
-    private final static Session.AccessType ACCESS_TYPE = Session.AccessType.DROPBOX;
 
     public static final String DROPBOX_KEY = "dropbox_key";
     public static final String DROPBOX_SECRET = "dropbox_secret";
@@ -56,8 +49,7 @@ public class DropboxAPI extends com.dropbox.client2.DropboxAPI<AndroidAuthSessio
 
     private DropboxAccount mCurrentAuthenticatedAccount;
 
-    public DropboxAPI(AndroidAuthSession session) {
-        super(session);
+    public DropboxAPI() {
     }
 
     public void startDropboxAuthentication(Activity activity) {
@@ -88,10 +80,6 @@ public class DropboxAPI extends com.dropbox.client2.DropboxAPI<AndroidAuthSessio
 
     public List<Metadata> listFiles(String path) throws DbxException {
         return mDropboxClient.files().listFolder("/".equals(path) ? "" : path).getEntries();
-    }
-
-    public static AndroidAuthSession createSession() {
-        return new AndroidAuthSession(new AppKeyPair(APP_KEY, APP_SECRET), ACCESS_TYPE);
     }
 
     public int getAuthorizedAccountsCount() {
@@ -156,8 +144,7 @@ public class DropboxAPI extends com.dropbox.client2.DropboxAPI<AndroidAuthSessio
 
     @Override
     public String createDirectory(String baseDirectory, String newDirectoryName) throws Exception {
-        Entry folder = createFolder(baseDirectory + "/" + newDirectoryName);
-        return folder.path;
+        return mDropboxClient.files().createFolder(baseDirectory + "/" + newDirectoryName).getPathLower();
     }
 
     @Override
@@ -184,7 +171,7 @@ public class DropboxAPI extends com.dropbox.client2.DropboxAPI<AndroidAuthSessio
 
     @Override
     public boolean rename(FileProxy file, String toPath) throws Exception {
-        return move(file.getFullPath(), toPath) != null;
+        return mDropboxClient.files().move(file.getFullPath(), toPath) != null;
     }
 
     public void setAuthTokensToSession(DropboxAccount account) {
@@ -207,6 +194,10 @@ public class DropboxAPI extends com.dropbox.client2.DropboxAPI<AndroidAuthSessio
 
     public void downloadFile(String path, OutputStream outputStream) throws IOException, DbxException {
         mDropboxClient.files().download(path).download(outputStream);
+    }
+
+    public String share(String fullPath) throws Exception {
+        return mDropboxClient.sharing().createSharedLinkWithSettings(fullPath).getUrl();
     }
 
     public static class DropboxAccount extends NetworkAccount {

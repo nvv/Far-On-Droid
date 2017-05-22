@@ -1,7 +1,5 @@
 package com.openfarmanager.android.filesystem.actions.network;
 
-import android.support.v4.app.FragmentManager;
-import com.dropbox.client2.exception.DropboxException;
 import com.microsoft.live.LiveOperationException;
 import com.openfarmanager.android.core.bus.RxBus;
 import com.openfarmanager.android.core.bus.TaskErrorEvent;
@@ -37,8 +35,6 @@ public class CreateNewAtNetworkTask extends NetworkActionTask {
 
         try {
             return api.createDirectory(mDestinationFolder, mName) != null ? OK : ERROR_CREATE_DIRECTORY;
-        } catch (DropboxException e) {
-            return createNetworkError(NetworkException.handleNetworkException(e));
         } catch (WebdavException e) {
             return createNetworkError(NetworkException.handleNetworkException(e));
         } catch (LiveOperationException e) {

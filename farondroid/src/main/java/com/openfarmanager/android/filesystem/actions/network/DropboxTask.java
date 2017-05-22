@@ -3,8 +3,8 @@ package com.openfarmanager.android.filesystem.actions.network;
 import android.content.Intent;
 import android.net.Uri;
 
-import com.dropbox.client2.DropboxAPI;
 import com.openfarmanager.android.App;
+import com.openfarmanager.android.core.network.dropbox.DropboxAPI;
 import com.openfarmanager.android.filesystem.DropboxFile;
 import com.openfarmanager.android.filesystem.FileProxy;
 import com.openfarmanager.android.filesystem.actions.OnActionListener;
@@ -38,11 +38,11 @@ public class DropboxTask extends NetworkActionTask {
         if (mTask == TASK_SHARE)
 
             try {
-                final DropboxAPI.DropboxLink dropboxLink = App.sInstance.getDropboxApi().share(mDropboxFile.getFullPath());
+                final String dropboxLink = App.sInstance.getDropboxApi().share(mDropboxFile.getFullPath());
                 Intent intent = new Intent(Intent.ACTION_SEND);
                 intent.setType("text/plain");
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                intent.putExtra(Intent.EXTRA_TEXT, dropboxLink.url);
+                intent.putExtra(Intent.EXTRA_TEXT, dropboxLink);
                 App.sInstance.startActivity(intent);
 
             } catch (Exception e) {

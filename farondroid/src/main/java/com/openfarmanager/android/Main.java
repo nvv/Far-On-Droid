@@ -15,9 +15,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import com.dropbox.client2.exception.DropboxException;
-import com.dropbox.core.DbxException;
-import com.dropbox.core.v2.users.FullAccount;
 import com.openfarmanager.android.controllers.FileSystemController;
 import com.openfarmanager.android.controllers.FileSystemControllerSmartphone;
 import com.openfarmanager.android.core.Settings;
@@ -30,7 +27,6 @@ import com.openfarmanager.android.model.NetworkEnum;
 import com.openfarmanager.android.tips.MainTips;
 import com.openfarmanager.android.toolbar.MenuBuilder;
 import com.openfarmanager.android.toolbar.MenuItemImpl;
-import com.openfarmanager.android.utils.Extensions;
 import com.openfarmanager.android.view.ToastNotification;
 import com.openfarmanager.android.view.panels.MainToolbar;
 
@@ -38,16 +34,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
 
 import rx.Completable;
-import rx.Observable;
-import rx.Single;
-import rx.Subscriber;
-import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action0;
-import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 

@@ -543,7 +543,7 @@ public class FileSystemController {
                     inactivePanel.updateGoogleDriveData(activePanel, googleDriveFile.getId(), getStarredData(false));
                     break;
                 case SHARE:
-                    inactivePanel.doDropboxTask((DropboxFile) msg.obj, DropboxTask.TASK_SHARE);
+                    activePanel.doDropboxTask((DropboxFile) msg.obj, DropboxTask.TASK_SHARE);
                     break;
                 case GOTO_HOME:
                     activePanel.openHomeFolder();

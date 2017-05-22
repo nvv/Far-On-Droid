@@ -4,7 +4,6 @@ import android.os.Handler;
 import android.util.Pair;
 
 import com.annimon.stream.Stream;
-import com.dropbox.client2.DropboxAPI;
 import com.dropbox.core.v2.files.DeletedMetadata;
 import com.dropbox.core.v2.files.Metadata;
 import com.openfarmanager.android.App;

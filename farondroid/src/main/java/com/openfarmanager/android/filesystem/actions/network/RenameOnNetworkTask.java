@@ -1,6 +1,5 @@
 package com.openfarmanager.android.filesystem.actions.network;
 
-import com.dropbox.client2.exception.DropboxException;
 import com.openfarmanager.android.filesystem.FileProxy;
 import com.openfarmanager.android.fragments.BaseFileSystemPanel;
 import com.openfarmanager.android.model.TaskStatusEnum;
@@ -41,8 +40,6 @@ public class RenameOnNetworkTask extends NetworkActionTask {
             }
         } catch (NullPointerException e) {
             return ERROR_FILE_NOT_EXISTS;
-        } catch (DropboxException e) {
-            return createNetworkError(NetworkException.handleNetworkException(e));
         } catch (Exception e) {
             return ERROR_RENAME_FILE;
         }

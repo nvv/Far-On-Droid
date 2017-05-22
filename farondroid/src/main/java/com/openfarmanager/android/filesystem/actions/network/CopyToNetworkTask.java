@@ -1,7 +1,5 @@
 package com.openfarmanager.android.filesystem.actions.network;
 
-import com.dropbox.client2.ProgressListener;
-import com.dropbox.client2.exception.DropboxException;
 import com.dropbox.core.DbxException;
 import com.dropbox.core.v2.files.UploadUploader;
 import com.mediafire.sdk.MFApiException;
@@ -108,8 +106,6 @@ public class CopyToNetworkTask extends NetworkActionTask {
                 return ERROR_COPY;
             } catch (IllegalArgumentException e) {
                 return ERROR_COPY;
-            } catch (DropboxException e) {
-                return createNetworkError(NetworkException.handleNetworkException(e));
             } catch (Exception e) {
                 e.printStackTrace();
                 return ERROR_COPY;

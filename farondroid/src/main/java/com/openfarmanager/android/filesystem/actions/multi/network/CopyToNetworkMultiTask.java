@@ -1,7 +1,5 @@
 package com.openfarmanager.android.filesystem.actions.multi.network;
 
-import com.dropbox.client2.ProgressListener;
-import com.dropbox.client2.exception.DropboxException;
 import com.dropbox.core.v2.files.UploadUploader;
 import com.mediafire.sdk.MFApiException;
 import com.mediafire.sdk.MFException;
@@ -104,8 +102,6 @@ public class CopyToNetworkMultiTask extends NetworkActionMultiTask {
                         ERROR_COPY : createNetworkError(ex);
             } catch (IllegalArgumentException e) {
                 return ERROR_COPY;
-            } catch (DropboxException e) {
-                return createNetworkError(NetworkException.handleNetworkException(e));
             } catch (Exception e) {
                 e.printStackTrace();
                 return ERROR_COPY;
@@ -183,7 +179,7 @@ public class CopyToNetworkMultiTask extends NetworkActionMultiTask {
         }
     }
 
-    private void copyToDropbox(final File source, final String destination) throws DropboxException, IOException {
+    private void copyToDropbox(final File source, final String destination) throws IOException {
         final DropboxAPI api = App.sInstance.getDropboxApi();
         if (isCancelled()) {
             throw new InterruptedIOException();

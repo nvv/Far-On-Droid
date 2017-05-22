@@ -665,7 +665,7 @@ public class MainPanel extends BaseFileSystemPanel {
     }
 
     public void doDropboxTask(DropboxFile file, int dropboxTask) {
-        new DropboxCommand(this, file, dropboxTask);
+        new DropboxCommand(this, file, dropboxTask).execute();
     }
 
     public void extractArchive(final MainPanel inactivePanel) {

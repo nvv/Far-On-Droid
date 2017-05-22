@@ -68,7 +68,7 @@ public class App extends Application {
         mNetworkAccountManager = new NetworkAccountManager();
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 
-        mDropboxApi = new DropboxAPI(DropboxAPI.createSession());
+        mDropboxApi = new DropboxAPI();
         mSkyDriveAPI = new SkyDriveAPI();
         mFtpAPI = new FtpAPI();
         mSftpApi = new SftpAPI();

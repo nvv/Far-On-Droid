@@ -1,6 +1,5 @@
 package com.openfarmanager.android.filesystem;
 
-import com.dropbox.client2.DropboxAPI;
 import com.dropbox.core.v2.files.FileMetadata;
 import com.dropbox.core.v2.files.FolderMetadata;
 import com.dropbox.core.v2.files.Metadata;
@@ -26,7 +25,7 @@ import java.util.List;
  *
  * @author Vlad Namashko
  */
-public class DropboxFile implements FileProxy<DropboxAPI.Entry> {
+public class DropboxFile implements FileProxy {
 
     private String mName;
     private String mParentPath;
@@ -37,10 +36,6 @@ public class DropboxFile implements FileProxy<DropboxAPI.Entry> {
     private boolean mIsFolder;
     private long mSize;
     private long mModified;
-
-    public DropboxFile(DropboxAPI.Entry entry) {
-
-    }
 
     public DropboxFile(Metadata entry) {
         mName = entry.getName();
@@ -109,7 +104,7 @@ public class DropboxFile implements FileProxy<DropboxAPI.Entry> {
     }
 
     @Override
-    public List<DropboxAPI.Entry> getChildren() {
+    public List<Metadata> getChildren() {
         return null;
     }
 

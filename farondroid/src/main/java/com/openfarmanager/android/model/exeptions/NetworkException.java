@@ -1,6 +1,5 @@
 package com.openfarmanager.android.model.exeptions;
 
-import com.dropbox.client2.exception.*;
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.R;
 import com.openfarmanager.android.core.network.smb.SmbAPI;
@@ -42,7 +41,7 @@ public class NetworkException extends RuntimeException {
         e.printStackTrace();
         NetworkException exception = new NetworkException();
 
-        if (e instanceof DropboxUnlinkedException) {
+        /*if (e instanceof DropboxUnlinkedException) {
             // happen either because you have not set an AccessTokenPair on your session, or because the user unlinked your app (revoked the access token pair).
             exception.mErrorCause = ErrorCause.Unlinked_Error;
             exception.mLocalizedError = getString(R.string.error_account_unlinked);
@@ -81,7 +80,7 @@ public class NetworkException extends RuntimeException {
         } else if (e instanceof DropboxException) {
             exception.mErrorCause = ErrorCause.Common_Error;
             exception.mLocalizedError = e.getMessage();
-        } else if (e instanceof SocketTimeoutException) {
+        } else */ if (e instanceof SocketTimeoutException) {
             exception.mErrorCause = ErrorCause.Socket_Timeout;
             exception.mLocalizedError = getString(R.string.error_socket_timeout_exception);
         } else if (e instanceof SmbAuthException) {
