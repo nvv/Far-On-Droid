@@ -272,14 +272,12 @@ public class CopyFromNetworkMultiTask extends NetworkActionMultiTask {
                 throw NetworkException.handleNetworkException(e);
             }
         } else {
-            runSubTaskAsynk(new Callable() {
-                @Override
-                public Object call() throws Exception {
-                    createDirectoryIfNotExists(destination);
-                    File destinationFile = createFileIfNotExists(fullSourceFilePath);
-                    api.getFile(source.getFullPath(), null, getOutputStream(mSdCardPath, mUseStorageApi, mBaseUri, destinationFile), null);
-                    return null;
-                }
+            runSubTaskAsynk(() -> {
+                createDirectoryIfNotExists(destination);
+                File destinationFile = createFileIfNotExists(fullSourceFilePath);
+//                    api.getFile(source.getFullPath(), null, getOutputStream(mSdCardPath, mUseStorageApi, mBaseUri, destinationFile), null);
+                api.downloadFile(source.getFullPath(), getOutputStream(mSdCardPath, mUseStorageApi, mBaseUri, destinationFile));
+                return null;
             }, source);
         }
     }

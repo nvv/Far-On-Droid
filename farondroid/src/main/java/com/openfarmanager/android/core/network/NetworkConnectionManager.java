@@ -17,6 +17,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.dropbox.core.android.Auth;
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.R;
 import com.openfarmanager.android.adapters.NetworkAccountChooserAdapter;
@@ -295,7 +296,7 @@ public class NetworkConnectionManager {
     }
 
     private void startDropboxAuthentication(MainPanel panel) {
-        App.sInstance.getDropboxApi().getSession().startAuthentication(panel.getActivity());
+        App.sInstance.getDropboxApi().startDropboxAuthentication(panel.getActivity());
         mNetworkAuthRequested = true;
     }
 
@@ -456,7 +457,13 @@ public class NetworkConnectionManager {
                 break;
             case Dropbox:
                 DropboxAPI.DropboxAccount dropboxAccount = (DropboxAPI.DropboxAccount) networkAccount;
-                if (dropboxAccount.getKey() == null && dropboxAccount.getSecret() == null) { // new
+                if (dropboxAccount.getToken() == null) { // new
+                    // legacy accounts authorized for previous dropbox api, need to be cleaned
+                    if (dropboxAccount.getKey() != null) {
+                        ToastNotification.makeText(panel.getActivity(), App.sInstance.getString(R.string.error_account_auth_expired), Toast.LENGTH_LONG).show();
+                        NetworkAccountDbAdapter.delete(dropboxAccount.getId());
+                        return;
+                    }
                     startDropboxAuthentication(panel);
                 } else {
                     App.sInstance.getDropboxApi().setAuthTokensToSession(dropboxAccount);

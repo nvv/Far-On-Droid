@@ -69,6 +69,7 @@
     <string name="error_quick_view_error_while_calculating_detailes">Error while calculating folder details: %s</string>
     <string name="error_quick_view_null_file">Can\'t read directory</string>
     <string name="error_account_unlinked">Network account is unlinked. Most likely this happens because your authentication tokens were expired. Panel will be closed. Delete this account?</string>
+    <string name="error_account_auth_expired">Authentication token for this account has been expired. Account will be deleted</string>
     <string name="error_io_error">Network IO error. Please, try again.</string>
     <string name="error_canceled">Operation canceled. Please, try again.</string>
     <string name="error_common">Unrecognized network error. Please, try again.</string>

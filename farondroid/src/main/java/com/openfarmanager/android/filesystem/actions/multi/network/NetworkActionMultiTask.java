@@ -23,10 +23,10 @@ public abstract class NetworkActionMultiTask extends MultiActionTask {
     protected DataSource mDataSource;
 
     public NetworkActionMultiTask(BaseFileSystemPanel panel, List<File> items) {
-        super(panel.getContext(), panel.getPanelLocation(), items);
         NetworkPanel networkPanel = (NetworkPanel) panel;
         mNetworkType = networkPanel.getNetworkType();
         mDataSource = networkPanel.getDataSource();
+        initAction(panel.getContext(), panel.getPanelLocation(), items);
     }
 
     protected NetworkActionMultiTask() {

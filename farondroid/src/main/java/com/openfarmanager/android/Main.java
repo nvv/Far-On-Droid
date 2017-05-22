@@ -16,6 +16,8 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.dropbox.client2.exception.DropboxException;
+import com.dropbox.core.DbxException;
+import com.dropbox.core.v2.users.FullAccount;
 import com.openfarmanager.android.controllers.FileSystemController;
 import com.openfarmanager.android.controllers.FileSystemControllerSmartphone;
 import com.openfarmanager.android.core.Settings;
@@ -28,6 +30,7 @@ import com.openfarmanager.android.model.NetworkEnum;
 import com.openfarmanager.android.tips.MainTips;
 import com.openfarmanager.android.toolbar.MenuBuilder;
 import com.openfarmanager.android.toolbar.MenuItemImpl;
+import com.openfarmanager.android.utils.Extensions;
 import com.openfarmanager.android.view.ToastNotification;
 import com.openfarmanager.android.view.panels.MainToolbar;
 
@@ -35,11 +38,15 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
 
+import rx.Completable;
 import rx.Observable;
+import rx.Single;
 import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
@@ -193,32 +200,31 @@ public class Main extends BaseActivity {
             return;
         }
         NetworkConnectionManager manager = App.sInstance.getNetworkConnectionManager();
-        if (dropboxAPI.getSession().authenticationSuccessful() && manager.isNetworkAuthRequested()) {
-            dropboxAPI.getSession().finishAuthentication();
+//        if (dropboxAPI.getSession().authenticationSuccessful() && manager.isNetworkAuthRequested()) {
+        if (dropboxAPI.getOauthToken() != null && manager.isNetworkAuthRequested()) {
+
+            //dropboxAPI.getSession().finishAuthentication();
             manager.resetNetworkAuth();
 
             mFileSystemController.showProgressDialog(R.string.loading);
-            Subscription subscription = Observable.create(new Observable.OnSubscribe<Void>() {
-                @Override
-                public void call(Subscriber<? super Void> subscriber) {
-                    try {
-                        com.dropbox.client2.DropboxAPI.Account account = dropboxAPI.accountInfo();
-                        String userName = account.displayName + "(" + account.uid + ")";
-                        dropboxAPI.storeAccessTokens(userName, dropboxAPI.getSession().getAccessTokenPair());
-                    } catch (DropboxException e) {
-                        e.printStackTrace();
-                    }
-                    subscriber.onNext(null);
-                }
+
+            mSubscription.add(Completable.fromAction(() -> {
+                 dropboxAPI.initSession(dropboxAPI.getOauthToken());
+                 try {
+                     dropboxAPI.storeAccessTokens(dropboxAPI.getAccountDisplayName(), dropboxAPI.getOauthToken());
+                 } catch (Exception e) {
+                     throw new RuntimeException(e);
+                 }
             }).subscribeOn(Schedulers.computation()).
-                    observeOn(AndroidSchedulers.mainThread()).subscribe(new Action1<Void>() {
-                @Override
-                public void call(Void aVoid) {
-                    mFileSystemController.dismissProgressDialog();
-                    mFileSystemController.openNetworkPanel(NetworkEnum.Dropbox);
-                }
-            });
-            mSubscription.add(subscription);
+                    observeOn(AndroidSchedulers.mainThread()).subscribe(
+                    throwable -> {
+                        mFileSystemController.dismissProgressDialog();
+                        ToastNotification.makeText(this, App.sInstance.getString(R.string.error_common), Toast.LENGTH_LONG).show();
+                    },
+                    () -> {
+                        mFileSystemController.dismissProgressDialog();
+                        mFileSystemController.openNetworkPanel(NetworkEnum.Dropbox);
+                    }));
         }
     }
 

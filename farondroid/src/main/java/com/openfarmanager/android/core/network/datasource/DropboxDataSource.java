@@ -3,7 +3,10 @@ package com.openfarmanager.android.core.network.datasource;
 import android.os.Handler;
 import android.util.Pair;
 
+import com.annimon.stream.Stream;
 import com.dropbox.client2.DropboxAPI;
+import com.dropbox.core.v2.files.DeletedMetadata;
+import com.dropbox.core.v2.files.Metadata;
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.filesystem.DropboxFile;
 import com.openfarmanager.android.filesystem.FileProxy;
@@ -41,12 +44,9 @@ public class DropboxDataSource extends RawPathDataSource {
 
     public NetworkPanel.DirectoryScanInfo openDirectory(FileProxy directory) {
         List<FileProxy> files = new ArrayList<FileProxy>();
-        DropboxAPI.Entry currentNode;
         try {
-            currentNode = App.sInstance.getDropboxApi().metadata(directory.getFullPath(), -1, null, true, null);
-            for (DropboxAPI.Entry entry : currentNode.contents) {
-                files.add(new DropboxFile(entry));
-            }
+            List<Metadata> metadataList = App.sInstance.getDropboxApi().listFiles(directory.getFullPath());
+            Stream.of(metadataList).filter(entry -> !(entry instanceof DeletedMetadata)).forEach(entry -> files.add(new DropboxFile(entry)));
             FileSystemScanner.sInstance.sort(files);
         } catch (Exception e) {
             throw NetworkException.handleNetworkException(e);
@@ -77,15 +77,12 @@ public class DropboxDataSource extends RawPathDataSource {
     public void open(final FileProxy file) {
         mHandler.sendEmptyMessage(MSG_NETWORK_SHOW_PROGRESS);
 
-        Extensions.runAsync(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    mHandler.sendMessage(mHandler.obtainMessage(MSG_NETWORK_OPEN,
-                            new Pair<FileProxy, String>(file, App.sInstance.getDropboxApi().media(file.getFullPath(), false).url)));
-                } catch (Exception e) {
-                    mHandler.sendEmptyMessage(MSG_NETWORK_HIDE_PROGRESS);
-                }
+        Extensions.runAsync(() -> {
+            try {
+                mHandler.sendMessage(mHandler.obtainMessage(MSG_NETWORK_OPEN,
+                        new Pair<>(file, App.sInstance.getDropboxApi().getFileLink(file))));
+            } catch (Exception e) {
+                mHandler.sendEmptyMessage(MSG_NETWORK_HIDE_PROGRESS);
             }
         });
     }

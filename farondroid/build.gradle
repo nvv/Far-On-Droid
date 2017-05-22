@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+
 android {
 
     useLibrary 'org.apache.http.legacy'
@@ -18,11 +19,8 @@ android {
         minSdkVersion 16
         targetSdkVersion 25
         versionCode 234
-        versionName "0.9"
+        versionName "0.9.1"
 
-//        jackOptions {
-//            enabled true
-//        }
     }
 
     compileOptions {
@@ -83,6 +81,9 @@ android {
         compile project(':farondroid:libs-src:yandexdisk:sdk')
         compile project(':farondroid:libs-src:showcase-library:src:main')
         compile project(':farondroid:libs-src:mediafire')
+
+        compile 'com.dropbox.core:dropbox-core-sdk:2.1.1'
+        compile 'io.reactivex:rxjava:1.1.6'
 
         compile 'com.android.support:support-v4:25.2.0'
         compile 'io.reactivex:rxandroid:1.2.1'

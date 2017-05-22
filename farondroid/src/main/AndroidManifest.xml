@@ -38,6 +38,7 @@
         <activity android:name=".FileView" android:configChanges="orientation|keyboardHidden" android:windowSoftInputMode="adjustPan"/>
         <activity android:name=".Help" android:configChanges="orientation|keyboardHidden"/>
         <activity android:name=".SettingsActivity" android:theme="@style/PreferencesTheme"/>
+<!--
         <activity android:name="com.dropbox.client2.android.AuthActivity" android:launchMode="singleTask"
                   android:configChanges="orientation|keyboard">
             <intent-filter>
@@ -47,5 +48,22 @@
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
         </activity>
+-->
+
+        <activity
+            android:name="com.dropbox.core.android.AuthActivity"
+            android:configChanges="orientation|keyboard"
+            android:launchMode="singleTask">
+            <intent-filter>
+
+                <data android:scheme="db-6gnp59nffh0a5xj" />
+
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
     </application>
 </manifest>

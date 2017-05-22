@@ -1,9 +1,17 @@
 package com.openfarmanager.android.filesystem;
 
 import com.dropbox.client2.DropboxAPI;
+import com.dropbox.core.v2.files.FileMetadata;
+import com.dropbox.core.v2.files.FolderMetadata;
+import com.dropbox.core.v2.files.Metadata;
+import com.openfarmanager.android.core.archive.MimeTypes;
 import com.openfarmanager.android.model.Bookmark;
+import com.openfarmanager.android.model.MimeTypeEnum;
 import com.openfarmanager.android.utils.CustomFormatter;
 import com.openfarmanager.android.utils.FileUtilsExt;
+
+import org.apache.commons.io.FilenameUtils;
+import org.apache.james.mime4j.util.MimeUtil;
 
 import static com.openfarmanager.android.utils.Extensions.*;
 
@@ -22,36 +30,55 @@ public class DropboxFile implements FileProxy<DropboxAPI.Entry> {
 
     private String mName;
     private String mParentPath;
-    private DropboxAPI.Entry mEntry;
 
+    private String mMimeType;
+
+    private String mPath;
+    private boolean mIsFolder;
     private long mSize;
     private long mModified;
 
-    private static final SimpleDateFormat sSimpleDateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss");
-
     public DropboxFile(DropboxAPI.Entry entry) {
-        mEntry = entry;
-        mName = entry.fileName();
-        mSize = CustomFormatter.parseSize(entry.size);
 
-        if (!entry.isDir) {
-            try {
-                mModified = sSimpleDateFormat.parse(entry.clientMtime).getTime();
-            } catch (Exception e) {
-                mModified = 0;
+    }
+
+    public DropboxFile(Metadata entry) {
+        mName = entry.getName();
+
+        mPath = entry.getPathLower();
+        if (entry instanceof FileMetadata) {
+            FileMetadata fileMetadata = (FileMetadata) entry;
+
+            mSize = fileMetadata.getSize();
+
+            Date serverModified = fileMetadata.getServerModified();
+            Date clientModified = fileMetadata.getClientModified();
+
+            Date modified = null;
+            if (clientModified != null && serverModified != null) {
+                modified = clientModified.after(serverModified) ? clientModified : serverModified;
+            } else if (clientModified != null) {
+                modified = clientModified;
+            } else if (serverModified != null) {
+                modified = serverModified;
             }
+
+            mModified = modified != null ? modified.getTime() : new Date().getTime();
+            mMimeType = MimeTypes.lookupMimeType(FilenameUtils.getExtension(mName));
+        } else {
+            mSize = 0;
+            mIsFolder = true;
         }
 
-        mParentPath = entry.path.substring(0, entry.path.lastIndexOf("/") + 1);
+        mParentPath = entry.getPathLower().substring(0, entry.getPathLower().lastIndexOf("/") + 1);
     }
 
     public DropboxFile(String path) {
-        mEntry = new DropboxAPI.Entry();
         path = FileUtilsExt.removeLastSeparator(path);
         mName = FileUtilsExt.getFileName(path);
-        mEntry.path = path;
+
+        mPath = path;
         mSize = 0;
-        mEntry.isDir = true;
         mModified = System.currentTimeMillis();
         mParentPath = path.substring(0, path.lastIndexOf("/") + 1);
     }
@@ -68,7 +95,7 @@ public class DropboxFile implements FileProxy<DropboxAPI.Entry> {
 
     @Override
     public boolean isDirectory() {
-        return mEntry.isDir;
+        return mIsFolder;
     }
 
     @Override
@@ -83,17 +110,17 @@ public class DropboxFile implements FileProxy<DropboxAPI.Entry> {
 
     @Override
     public List<DropboxAPI.Entry> getChildren() {
-        return mEntry.contents;
+        return null;
     }
 
     @Override
     public String getFullPath() {
-        return mEntry.path;
+        return mPath;
     }
 
     @Override
     public String getFullPathRaw() {
-        return mEntry.path;
+        return mPath;
     }
 
     @Override
@@ -108,7 +135,7 @@ public class DropboxFile implements FileProxy<DropboxAPI.Entry> {
 
     @Override
     public boolean isRoot() {
-        return mEntry.path.equals("/");
+        return mPath.equals("/");
     }
 
     @Override
@@ -128,6 +155,6 @@ public class DropboxFile implements FileProxy<DropboxAPI.Entry> {
 
     @Override
     public String getMimeType() {
-        return mEntry.mimeType;
+        return mMimeType;
     }
 }

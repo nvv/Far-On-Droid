@@ -19,7 +19,6 @@ import com.openfarmanager.android.core.bus.TaskOkEvent;
 import com.openfarmanager.android.core.network.smb.SmbAPI;
 import com.openfarmanager.android.dialogs.FileActionProgressDialog;
 import com.openfarmanager.android.filesystem.FileProxy;
-import com.openfarmanager.android.filesystem.actions.OnActionListener;
 import com.openfarmanager.android.model.TaskStatusEnum;
 import com.openfarmanager.android.utils.StorageUtils;
 
@@ -78,6 +77,10 @@ public abstract class MultiActionTask {
     private int mLabelType;
 
     public MultiActionTask(final Context context, int invokedOnPanel, List<File> items) {
+        initAction(context, invokedOnPanel, items);
+    }
+
+    protected void initAction(final Context context, int invokedOnPanel, List<File> items) {
         mItems = items;
         mTaskResult = new TaskResult();
         mTaskResult.task = this;
@@ -85,7 +88,7 @@ public abstract class MultiActionTask {
         mInvokedOnPanel = invokedOnPanel;
         mTaskResult.extra = getExtra();
         mLabelType = App.sInstance.getSettings().getMultiActionLabelType();
-        init(context);
+        initProgressDialog(context);
     }
 
     protected MultiActionTask() {
@@ -95,7 +98,7 @@ public abstract class MultiActionTask {
         return "";
     }
 
-    protected void init(Context context) {
+    private void initProgressDialog(Context context) {
         mProgressDialog = new FileActionProgressDialog(context, mProgressDialogDismissListener);
         mProgressDialog.setIndeterminate(isIndeterminate());
         mProgressDialog.show();

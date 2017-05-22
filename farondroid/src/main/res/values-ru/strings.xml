@@ -67,6 +67,7 @@
     <string name="error_quick_view_error_while_calculating_detailes">Ошибка при расчете деталей папки: %s</string>
     <string name="error_quick_view_null_file">Не могу просканировать папку</string>
     <string name="error_account_unlinked">Сетевой аккаунт недействителен. Скорее всего это случилось из-за того, что ваши токены аутентификации истекли. Панель будет закрыта. Удалить этот аккаунт?</string>
+    <string name="error_account_auth_expired">Авторизация для данного профиля истекла. Профиль будет удален</string>
     <string name="error_io_error">Сетевая ошибка. Пожалуйста, попробуйте еще раз.</string>
     <string name="error_canceled">Операция отменена. Пожалуйста, попробуйте еще раз.</string>
     <string name="error_common">Неопределенная ошибка сети. Пожалуйста, попробуйте еще раз.</string>

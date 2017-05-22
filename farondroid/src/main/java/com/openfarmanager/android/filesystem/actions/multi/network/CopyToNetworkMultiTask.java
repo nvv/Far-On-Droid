@@ -2,6 +2,7 @@ package com.openfarmanager.android.filesystem.actions.multi.network;
 
 import com.dropbox.client2.ProgressListener;
 import com.dropbox.client2.exception.DropboxException;
+import com.dropbox.core.v2.files.UploadUploader;
 import com.mediafire.sdk.MFApiException;
 import com.mediafire.sdk.MFException;
 import com.mediafire.sdk.MFSessionNotStartedException;
@@ -39,6 +40,7 @@ import java.util.concurrent.Future;
 import jcifs.smb.SmbFile;
 import jcifs.smb.SmbFileOutputStream;
 
+import static com.openfarmanager.android.model.NetworkEnum.Dropbox;
 import static com.openfarmanager.android.model.TaskStatusEnum.CANCELED;
 import static com.openfarmanager.android.model.TaskStatusEnum.ERROR_COPY;
 import static com.openfarmanager.android.model.TaskStatusEnum.ERROR_FILE_NOT_EXISTS;
@@ -117,6 +119,11 @@ public class CopyToNetworkMultiTask extends NetworkActionMultiTask {
     }
 
     @Override
+    protected boolean isIndeterminate() {
+        return Dropbox == mNetworkType;
+    }
+
+    @Override
     public TaskStatusEnum handleSubTaskException(Exception e) {
         if (e instanceof NullPointerException) {
             return ERROR_FILE_NOT_EXISTS;
@@ -187,23 +194,11 @@ public class CopyToNetworkMultiTask extends NetworkActionMultiTask {
                 copyToDropbox(new File(source, file), destination + "/" + source.getName());
             }
         } else {
-            runSubTaskAsynk(new Callable() {
-                @Override
-                public Object call() throws Exception {
-                    api.putFileOverwrite(destination + "/" + source.getName(), new FileInputStream(source), source.length(), new ProgressListener() {
-                        long mPrevProgress = 0;
-
-                        @Override
-                        public void onProgress(long l, long l2) {
-                            mDoneSize += (l - mPrevProgress);
-                            mPrevProgress = l;
-
-                            System.out.println(":::: >>> " + mDoneSize);
-                            updateProgress();
-                        }
-                    });
-                    return null;
-                }
+            runSubTaskAsynk(() -> {
+                UploadUploader uploadUploader = api.uploadFile(destination + "/" + source.getName());
+                copyStreamRoutine(source, uploadUploader.getOutputStream());
+                uploadUploader.finish();
+                return null;
             }, source);
         }
     }
@@ -475,11 +470,13 @@ public class CopyToNetworkMultiTask extends NetworkActionMultiTask {
         int len;
         byte[] buf = new byte[512 * 1024];
         while ((len = in.read(buf)) > 0) {
+            System.out.println("::::::   " + len);
             out.write(buf, 0, len);
             mDoneSize += len;
             updateProgress();
         }
 
+        out.flush();
         out.close();
         in.close();
     }

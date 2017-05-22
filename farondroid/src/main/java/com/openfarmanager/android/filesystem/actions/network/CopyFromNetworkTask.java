@@ -3,6 +3,7 @@ package com.openfarmanager.android.filesystem.actions.network;
 import android.net.Uri;
 
 import com.dropbox.client2.exception.DropboxException;
+import com.dropbox.core.DbxException;
 import com.jcraft.jsch.SftpException;
 import com.mediafire.sdk.MFApiException;
 import com.mediafire.sdk.MFException;
@@ -208,7 +209,7 @@ public class CopyFromNetworkTask extends NetworkActionTask {
 
     }
 
-    private void copyFromDropbox(FileProxy source, String destination) throws DropboxException, IOException {
+    private void copyFromDropbox(FileProxy source, String destination) throws DbxException, IOException {
         DropboxAPI api = App.sInstance.getDropboxApi();
         if (isCancelled()) {
             throw new InterruptedIOException();
@@ -236,7 +237,7 @@ public class CopyFromNetworkTask extends NetworkActionTask {
             File destinationFile = createFileIfNotExists(fullSourceFilePath);
 
             setCurrentFile(source);
-            api.getFile(source.getFullPath(), null, getOutputStream(mSdCardPath, mUseStorageApi, mBaseUri, destinationFile), null);
+            api.downloadFile(source.getFullPath(), getOutputStream(mSdCardPath, mUseStorageApi, mBaseUri, destinationFile));
         }
     }
 

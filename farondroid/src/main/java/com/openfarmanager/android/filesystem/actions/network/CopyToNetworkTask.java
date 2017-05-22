@@ -2,6 +2,8 @@ package com.openfarmanager.android.filesystem.actions.network;
 
 import com.dropbox.client2.ProgressListener;
 import com.dropbox.client2.exception.DropboxException;
+import com.dropbox.core.DbxException;
+import com.dropbox.core.v2.files.UploadUploader;
 import com.mediafire.sdk.MFApiException;
 import com.mediafire.sdk.MFException;
 import com.mediafire.sdk.MFSessionNotStartedException;
@@ -37,6 +39,7 @@ import java.util.List;
 import jcifs.smb.SmbFile;
 import jcifs.smb.SmbFileOutputStream;
 
+import static com.openfarmanager.android.model.NetworkEnum.Dropbox;
 import static com.openfarmanager.android.model.TaskStatusEnum.CANCELED;
 import static com.openfarmanager.android.model.TaskStatusEnum.ERROR_COPY;
 import static com.openfarmanager.android.model.TaskStatusEnum.ERROR_FILE_NOT_EXISTS;
@@ -54,6 +57,7 @@ public class CopyToNetworkTask extends NetworkActionTask {
     public CopyToNetworkTask(BaseFileSystemPanel panel, List<File> items, String destination) {
         super(panel, items);
         mDestination = destination;
+        mNoProgress = Dropbox == mNetworkType;
     }
 
     @Override
@@ -119,7 +123,7 @@ public class CopyToNetworkTask extends NetworkActionTask {
         return mDestination;
     }
 
-    private void copyToDropbox(File source, String destination) throws DropboxException, IOException {
+    private void copyToDropbox(File source, String destination) throws DbxException, IOException {
         DropboxAPI api = App.sInstance.getDropboxApi();
         if (isCancelled()) {
             throw new InterruptedIOException();
@@ -130,19 +134,9 @@ public class CopyToNetworkTask extends NetworkActionTask {
                 copyToDropbox(new File(source, file), destination + "/" + source.getName());
             }
         } else {
-            mCurrentFile = source.getName();
-            long tempSize = mDoneSize;
-            api.putFileOverwrite(destination + "/" + source.getName(), new FileInputStream(source), source.length(), new ProgressListener() {
-                long mPrevProgress = 0;
-
-                @Override
-                public void onProgress(long l, long l2) {
-                    mDoneSize += (l - mPrevProgress);
-                    mPrevProgress = l;
-                    updateProgress();
-                }
-            });
-            mDoneSize = tempSize + source.length();
+            UploadUploader uploadUploader = api.uploadFile(destination + "/" + source.getName());
+            copyStreamRoutine(source, uploadUploader.getOutputStream());
+            uploadUploader.finish();
         }
     }
 
