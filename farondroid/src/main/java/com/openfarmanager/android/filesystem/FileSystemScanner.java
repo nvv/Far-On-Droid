@@ -85,6 +85,12 @@ public class FileSystemScanner {
 
     public List<FileProxy> fallingDown(File currentNode, String mFilter) throws FileIsNotDirectoryException {
         if (!currentNode.isFile()) {
+            if (Build.VERSION.SDK_INT >= 24 && StorageUtils.getSdPath().startsWith(currentNode.getAbsolutePath())
+                    && !StorageUtils.getSdPath().equals(currentNode.getAbsolutePath())) {
+                // don't allow to open subfolder of sd card root on SDK >= 24
+                return null;
+            }
+
             String[] files = null;
             List<FileProxy> result = new LinkedList<FileProxy>();
 

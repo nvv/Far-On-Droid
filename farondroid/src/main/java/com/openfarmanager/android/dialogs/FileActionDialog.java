@@ -11,6 +11,7 @@ import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.R;
@@ -45,24 +46,22 @@ public class FileActionDialog extends Dialog {
 
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(
                 App.sInstance.getApplicationContext(), android.R.layout.simple_list_item_1,
-                android.R.id.text1, (String[]) mActionNames) {
+                android.R.id.text1, mActionNames) {
 
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
                 View item = super.getView(position, convertView, parent);
                 item.setMinimumWidth(actionsList.getWidth());
+                ((TextView) item.findViewById(android.R.id.text1)).setTextColor(item.getResources().getColor(R.color.white));
                 return item;
             }
         };
 
         actionsList.setAdapter(adapter);
 
-        actionsList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                dismiss();
-                mHandler.sendMessage(Message.obtain(mHandler, MainPanel.SELECT_ACTION, mActions[i]));
-            }
+        actionsList.setOnItemClickListener((adapterView, view1, i, l) -> {
+            dismiss();
+            mHandler.sendMessage(Message.obtain(mHandler, MainPanel.SELECT_ACTION, mActions[i]));
         });
         setContentView(view);
     }

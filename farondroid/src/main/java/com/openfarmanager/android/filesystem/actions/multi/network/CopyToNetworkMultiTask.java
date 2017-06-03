@@ -466,7 +466,6 @@ public class CopyToNetworkMultiTask extends NetworkActionMultiTask {
         int len;
         byte[] buf = new byte[512 * 1024];
         while ((len = in.read(buf)) > 0) {
-            System.out.println("::::::   " + len);
             out.write(buf, 0, len);
             mDoneSize += len;
             updateProgress();

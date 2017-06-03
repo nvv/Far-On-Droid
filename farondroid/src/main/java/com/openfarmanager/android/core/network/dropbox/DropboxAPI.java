@@ -6,6 +6,7 @@ import android.database.Cursor;
 import com.annimon.stream.Stream;
 import com.dropbox.core.DbxException;
 import com.dropbox.core.DbxRequestConfig;
+import com.dropbox.core.RateLimitException;
 import com.dropbox.core.android.Auth;
 import com.dropbox.core.v2.DbxClientV2;
 import com.dropbox.core.v2.files.DeletedMetadata;
@@ -185,7 +186,16 @@ public class DropboxAPI implements NetworkApi {
 
     @Override
     public void delete(FileProxy file) throws Exception {
-        mDropboxClient.files().delete(file.getFullPath());
+        try {
+            mDropboxClient.files().delete(file.getFullPath());
+        } catch (RateLimitException e) {
+            if (e.getMessage().contains("too_many_write_operations")) {
+                Thread.sleep(250);
+                delete(file);
+            } else {
+                throw e;
+            }
+        }
     }
 
     public UploadUploader uploadFile(String path) throws DbxException {
