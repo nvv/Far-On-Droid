@@ -63,6 +63,7 @@
                         android:id="@+id/invert_selection"
                         android:text="@string/invert_selection"
                         android:button="@drawable/check_box_selector"
+                        android:layout_marginTop="10dp"
                         android:layout_width="fill_parent"
                         android:layout_height="fill_parent"/>
             </LinearLayout>
@@ -115,6 +116,31 @@
 
             </TableLayout>
         </ViewFlipper>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:orientation="horizontal">
+
+            <CheckBox
+                android:id="@+id/include_files"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:button="@drawable/check_box_selector"
+                android:checked="true"
+                android:text="@string/include_files" />
+
+            <CheckBox
+                android:id="@+id/include_folders"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:button="@drawable/check_box_selector"
+                android:checked="true"
+                android:text="@string/include_folders" />
+
+        </LinearLayout>
 
         <LinearLayout
                 android:orientation="horizontal"

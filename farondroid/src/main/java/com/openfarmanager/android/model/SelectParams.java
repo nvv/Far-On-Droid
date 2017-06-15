@@ -11,16 +11,26 @@ public class SelectParams {
     private String mSelectionString;
     private boolean mInverseSelection;
     private boolean mTodayDate;
+    private boolean mIncludeFiles;
+    private boolean mIncludeFolders;
     private Date mDateFrom;
     private Date mDateTo;
 
-    public SelectParams(SelectionType type, String selectionString, boolean inverseSelection, boolean todayDate, Date dateFrom, Date dateTo) {
-        mType = type;
+    public SelectParams(String selectionString, boolean inverseSelection, boolean includeFiles, boolean includeFolders) {
+        mType = SelectionType.NAME;
         mSelectionString = selectionString;
         mInverseSelection = inverseSelection;
+        mIncludeFiles = includeFiles;
+        mIncludeFolders = includeFolders;
+    }
+
+    public SelectParams(boolean todayDate, Date dateFrom, Date dateTo, boolean includeFiles, boolean includeFolders) {
+        mType = SelectionType.MODIFICATION_DATE;
         mTodayDate = todayDate;
         mDateFrom = dateFrom;
         mDateTo = dateTo;
+        mIncludeFiles = includeFiles;
+        mIncludeFolders = includeFolders;
     }
 
     public SelectionType getType() {
@@ -45,6 +55,14 @@ public class SelectParams {
 
     public Date getDateTo() {
         return mDateTo;
+    }
+
+    public boolean isIncludeFiles() {
+        return mIncludeFiles;
+    }
+
+    public boolean isIncludeFolders() {
+        return mIncludeFolders;
     }
 
 

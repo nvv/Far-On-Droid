@@ -6,6 +6,7 @@
     <color name="black">#000000</color>
     <color name="main_grey">#c0c0c0</color>
     <color name="grey_button">#ffb5b5b5</color>
+    <color name="grey_disabled">#848383</color>
     <color name="error_red">#800000</color>
     <color name="yellow">#ffff00</color>
     <color name="cyan">#ff00ffff</color>

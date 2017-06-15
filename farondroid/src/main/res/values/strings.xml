@@ -408,4 +408,7 @@ More network stuff will appear in future versions.
     <string name="recursive_delete_allowed">Recursive delete allowed. Try again.</string>
     <string name="allow_recursive_delete">Allow recursive delete</string>
     <string name="cannot_open_directory">Can\'t open selected directory</string>
+
+    <string name="include_files">Include files</string>
+    <string name="include_folders">Include folders</string>
 </resources>

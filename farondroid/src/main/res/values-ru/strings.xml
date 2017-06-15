@@ -398,4 +398,7 @@
     <string name="recursive_delete_allowed">Рекурсивное удаление разрешено. Попробуйте еще раз.</string>
     <string name="allow_recursive_delete">Разрешить рекурсивное удаление</string>
     <string name="cannot_open_directory">Не удалось открыть директорию</string>
+
+    <string name="include_files">Включить файлы</string>
+    <string name="include_folders">Включить директории</string>
 </resources>

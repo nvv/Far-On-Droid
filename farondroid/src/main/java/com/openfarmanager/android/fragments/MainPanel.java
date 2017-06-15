@@ -41,6 +41,7 @@ import com.openfarmanager.android.filesystem.commands.CreateBookmarkCommand;
 import com.openfarmanager.android.filesystem.commands.DropboxCommand;
 import com.openfarmanager.android.filesystem.commands.ExportAsCommand;
 import com.openfarmanager.android.filesystem.commands.GoogleDriveUpdateCommand;
+import com.openfarmanager.android.filesystem.filter.FileTypeFilter;
 import com.openfarmanager.android.model.Bookmark;
 import com.openfarmanager.android.model.FileActionEnum;
 import com.openfarmanager.android.model.OpenDirectoryActionListener;
@@ -920,8 +921,8 @@ public class MainPanel extends BaseFileSystemPanel {
 
             App.sInstance.getSharedPreferences("action_dialog", 0).edit(). putString("select_pattern", pattern).apply();
 
-            FileFilter select = new WildcardFileFilter(pattern);
-            File[] contents = mBaseDir.listFiles(select);
+            File[] contents = mBaseDir.listFiles(new FileTypeFilter(
+                    selectParams.isIncludeFiles(), selectParams.isIncludeFolders()).addFilter(new WildcardFileFilter(pattern)));
 
             if (contents != null) {
                 if (inverseSelection) {
@@ -939,7 +940,7 @@ public class MainPanel extends BaseFileSystemPanel {
                 }
             }
         } else {
-            File[] allFiles = mBaseDir.listFiles();
+            File[] allFiles = mBaseDir.listFiles(new FileTypeFilter(selectParams.isIncludeFiles(), selectParams.isIncludeFolders()));
             if (selectParams.isTodayDate()) {
 
                 Calendar today = Calendar.getInstance();
