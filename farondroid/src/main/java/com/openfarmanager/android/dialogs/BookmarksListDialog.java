@@ -59,7 +59,12 @@ public class BookmarksListDialog extends Dialog {
     private BookmarkAdapter.OnClickListener mOnClickListener = new BookmarkAdapter.OnClickListener() {
         @Override
         public void onBookmarkClicked(Bookmark bookmark) {
-            mHandler.sendMessage(mHandler.obtainMessage(FileSystemController.OPEN_PATH, bookmark.getBookmarkPath()));
+            if (bookmark.isNetworkLink()) {
+                mHandler.sendMessage(mHandler.obtainMessage(FileSystemController.OPEN_NETWORK, bookmark));
+            } else {
+                mHandler.sendMessage(mHandler.obtainMessage(FileSystemController.OPEN_PATH, bookmark.getBookmarkPath()));
+            }
+
             dismiss();
         }
 
