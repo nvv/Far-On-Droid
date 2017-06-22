@@ -1,5 +1,8 @@
 package com.openfarmanager.android.utils;
 
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -7,7 +10,9 @@ import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import rx.Observer;
+import io.reactivex.Observer;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.observers.DisposableObserver;
 
 
 /**
@@ -24,16 +29,7 @@ public class HardwareUtils {
     public static HashMap<String, String> getHardwareAddresses(final HashMap<String, String> addresses) {
         final Pattern pattern = Pattern.compile(MAC_REGEX);
 
-        CommandLineUtils.excecuteReadCommand("/proc/net/arp").subscribe(new Observer<String>() {
-            @Override
-            public void onCompleted() {
-
-            }
-
-            @Override
-            public void onError(Throwable e) {
-                e.printStackTrace();
-            }
+        CommandLineUtils.executeReadCommand("/proc/net/arp").subscribe(new DisposableObserver<String>() {
 
             @Override
             public void onNext(String line) {
@@ -54,6 +50,15 @@ public class HardwareUtils {
                 if (!mac.equals(NOMAC)) {
                     addresses.put(ip, mac);
                 }
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                t.printStackTrace();
+            }
+
+            @Override
+            public void onComplete() {
 
             }
         });

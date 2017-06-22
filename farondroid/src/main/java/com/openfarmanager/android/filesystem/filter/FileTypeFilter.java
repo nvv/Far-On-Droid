@@ -13,18 +13,25 @@ public class FileTypeFilter implements java.io.FileFilter {
 
     private FileFilter mAdditionalFilter;
 
+    private boolean mIsInverseSelection;
+
     public FileTypeFilter(boolean isIncludeFiles, boolean isIncludeFolders) {
         mIsIncludeFiles = isIncludeFiles;
         mIsIncludeFolders = isIncludeFolders;
     }
 
-    public FileFilter addFilter(FileFilter fileFilter) {
+    public FileTypeFilter addFilter(FileFilter fileFilter) {
         mAdditionalFilter = fileFilter;
+        return this;
+    }
+
+    public FileTypeFilter setInverseSelection(boolean inverseSelection) {
+        mIsInverseSelection = inverseSelection;
         return this;
     }
 
     @Override
     public boolean accept(File file) {
-        return (mAdditionalFilter == null || mAdditionalFilter.accept(file)) && (file.isDirectory() ? mIsIncludeFolders : mIsIncludeFiles);
+        return mIsInverseSelection != ((mAdditionalFilter == null || mAdditionalFilter.accept(file)) && (file.isDirectory() ? mIsIncludeFolders : mIsIncludeFiles));
     }
 }

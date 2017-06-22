@@ -1,10 +1,9 @@
 package com.openfarmanager.android.core.bus;
 
-import rx.Observable;
-import rx.functions.Func1;
-import rx.subjects.PublishSubject;
-import rx.subjects.SerializedSubject;
-import rx.subjects.Subject;
+
+import io.reactivex.Observable;
+import io.reactivex.subjects.PublishSubject;
+import io.reactivex.subjects.Subject;
 
 /**
  * Rx Java EventBus implementation
@@ -25,7 +24,7 @@ public class RxBus {
         return sInstance;
     }
 
-    private final Subject<BusEvent, BusEvent> mBus = new SerializedSubject<>(PublishSubject.create());
+    private final Subject<BusEvent> mBus = PublishSubject.create();
 
     public void postEvent(BusEvent event) {
         mBus.onNext(event);

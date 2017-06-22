@@ -59,11 +59,6 @@ import java.io.FileInputStream;
 import java.util.LinkedHashSet;
 import java.util.List;
 
-import javax.inject.Singleton;
-
-import dagger.Module;
-import dagger.Provides;
-
 import static com.openfarmanager.android.fragments.MainPanel.ARG_PANEL_LOCATION;
 import static com.openfarmanager.android.fragments.MainPanel.LEFT_PANEL;
 import static com.openfarmanager.android.fragments.MainPanel.RIGHT_PANEL;

@@ -14,8 +14,6 @@ import com.openfarmanager.android.view.panels.MainToolbar;
 
 import java.io.File;
 
-import rx.subscriptions.CompositeSubscription;
-
 import static com.openfarmanager.android.fragments.MainPanel.LEFT_PANEL;
 
 /**

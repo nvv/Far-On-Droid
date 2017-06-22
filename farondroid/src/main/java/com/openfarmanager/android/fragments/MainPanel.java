@@ -17,6 +17,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.MimeTypeMap;
 import android.widget.*;
+
+import com.annimon.stream.Stream;
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.R;
 //import com.openfarmanager.android.adapters.FlatFileSystemAdapter;
@@ -61,8 +63,8 @@ import java.io.File;
 import java.io.FileFilter;
 import java.util.*;
 
-import rx.android.schedulers.AndroidSchedulers;
-import rx.subscriptions.CompositeSubscription;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
 
 import static com.openfarmanager.android.controllers.FileSystemController.*;
 import static com.openfarmanager.android.model.FileActionEnum.*;
@@ -98,7 +100,7 @@ public class MainPanel extends BaseFileSystemPanel {
 
     protected ActionBar mActionBar;
 
-    private CompositeSubscription mSubscriptions;
+    private CompositeDisposable mSubscriptions;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -332,7 +334,7 @@ public class MainPanel extends BaseFileSystemPanel {
     public void onAttach(Context context) {
         super.onAttach(context);
 //        if (isFileSystemPanel()) {
-            mSubscriptions = new CompositeSubscription();
+            mSubscriptions = new CompositeDisposable();
             mSubscriptions.add(RxBus.getInstance().observerFor(TaskCancelledEvent.class, getPanelLocation()).
                     observeOn(AndroidSchedulers.mainThread()).subscribe(event -> {
                         try {
@@ -394,7 +396,7 @@ public class MainPanel extends BaseFileSystemPanel {
         }
 
         if (mSubscriptions != null) {
-            mSubscriptions.unsubscribe();
+            mSubscriptions.clear();
         }
     }
 
@@ -917,28 +919,14 @@ public class MainPanel extends BaseFileSystemPanel {
         if (selectParams.getType() == SelectParams.SelectionType.NAME) {
 
             String pattern = selectParams.getSelectionString();
-            boolean inverseSelection = selectParams.isInverseSelection();
 
             App.sInstance.getSharedPreferences("action_dialog", 0).edit(). putString("select_pattern", pattern).apply();
 
-            File[] contents = mBaseDir.listFiles(new FileTypeFilter(
-                    selectParams.isIncludeFiles(), selectParams.isIncludeFolders()).addFilter(new WildcardFileFilter(pattern)));
+            File[] contents = mBaseDir.listFiles(new FileTypeFilter(selectParams.isIncludeFiles(),
+                    selectParams.isIncludeFolders()).addFilter(new WildcardFileFilter(pattern)).
+                    setInverseSelection(selectParams.isInverseSelection()));
 
-            if (contents != null) {
-                if (inverseSelection) {
-                    File[] allFiles = mBaseDir.listFiles();
-                    List selection = Arrays.asList(contents);
-                    for (File file : allFiles) {
-                        if (!selection.contains(file)) {
-                            mSelectedFiles.add(new FileSystemFile(file.getAbsolutePath()));
-                        }
-                    }
-                } else {
-                    for (File file : contents) {
-                        mSelectedFiles.add(new FileSystemFile(file.getAbsolutePath()));
-                    }
-                }
-            }
+            Stream.of(contents).forEach(file -> mSelectedFiles.add(new FileSystemFile(file.getAbsolutePath())));
         } else {
             File[] allFiles = mBaseDir.listFiles(new FileTypeFilter(selectParams.isIncludeFiles(), selectParams.isIncludeFolders()));
             if (selectParams.isTodayDate()) {

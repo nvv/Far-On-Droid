@@ -1,9 +1,6 @@
 package com.openfarmanager.android.core.network;
 
-import android.app.Activity;
 import android.app.Dialog;
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
 import android.util.DisplayMetrics;
@@ -17,7 +14,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.dropbox.core.android.Auth;
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.R;
 import com.openfarmanager.android.adapters.NetworkAccountChooserAdapter;
@@ -53,18 +49,22 @@ import com.openfarmanager.android.model.exeptions.InitYandexDiskException;
 import com.openfarmanager.android.utils.NetworkUtil;
 import com.openfarmanager.android.utils.SystemUtils;
 import com.openfarmanager.android.view.ToastNotification;
-import com.yandex.disk.client.Credentials;
 
-import rx.Observable;
-import rx.Observer;
-import rx.Subscriber;
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
-import rx.subscriptions.CompositeSubscription;
+import io.reactivex.Completable;
+import io.reactivex.CompletableObserver;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
 
+import static com.openfarmanager.android.controllers.FileSystemController.FTP_CONNECTED;
+import static com.openfarmanager.android.controllers.FileSystemController.MEDIA_FIRE_CONNECTED;
+import static com.openfarmanager.android.controllers.FileSystemController.SFTP_CONNECTED;
+import static com.openfarmanager.android.controllers.FileSystemController.SMB_CONNECTED;
+import static com.openfarmanager.android.controllers.FileSystemController.SMB_IP_SELECTED;
+import static com.openfarmanager.android.controllers.FileSystemController.SMB_SCAN_CANCELED;
+import static com.openfarmanager.android.controllers.FileSystemController.SMB_SCAN_NETWORK_REQUESTED;
+import static com.openfarmanager.android.controllers.FileSystemController.WEBDAV_CONNECTED;
+import static com.openfarmanager.android.controllers.FileSystemController.YANDEX_DISK_CONNECTED;
 import static com.openfarmanager.android.utils.Extensions.runAsync;
-import static com.openfarmanager.android.controllers.FileSystemController.*;
 
 /**
  * @author Vlad Namashko
@@ -75,9 +75,9 @@ public class NetworkConnectionManager {
     private FileSystemController mFileSystemController;
     protected boolean mNetworkAuthRequested;
 
-    protected CompositeSubscription mSubscription;
+    protected CompositeDisposable mSubscription;
 
-    public void setRxSubscription(CompositeSubscription subscription) {
+    public void setRxSubscription(CompositeDisposable subscription) {
         mSubscription = subscription;
     }
 
@@ -510,19 +510,21 @@ public class NetworkConnectionManager {
                     startMediaFireAuthentication(panel);
                 } else {
                     showProgressDialog(R.string.loading);
-                    Subscription subscription = Observable.create(new Observable.OnSubscribe<Void>() {
+                    Completable.create(source -> {
+                        try {
+                            App.sInstance.getMediaFireApi().startSession(account);
+                            source.onComplete();
+                        } catch (Exception e) {
+                            source.onError(e);
+                        };
+                    }).subscribe(new CompletableObserver() {
                         @Override
-                        public void call(Subscriber<? super Void> subscriber) {
-                            try {
-                                App.sInstance.getMediaFireApi().startSession(account);
-                                subscriber.onCompleted();
-                            } catch (Exception e) {
-                                subscriber.onError(e);
-                            }
+                        public void onSubscribe(Disposable d) {
+                            mSubscription.add(d);
                         }
-                    }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(new Observer<Void>() {
+
                         @Override
-                        public void onCompleted() {
+                        public void onComplete() {
                             dismissProgressDialog();
                             openNetworkPanel(NetworkEnum.MediaFire, path);
                         }
@@ -533,12 +535,7 @@ public class NetworkConnectionManager {
                             ToastNotification.makeText(App.sInstance.getApplicationContext(),
                                     App.sInstance.getString(R.string.mediafire_connection_error), Toast.LENGTH_LONG).show();
                         }
-
-                        @Override
-                        public void onNext(Void aVoid) {
-                        }
                     });
-                    mSubscription.add(subscription);
                 }
 
                 break;

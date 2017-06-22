@@ -7,21 +7,11 @@ import android.content.pm.IPackageStatsObserver;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageStats;
 import android.content.pm.ResolveInfo;
-import android.graphics.Color;
-import android.graphics.Typeface;
 import android.net.Uri;
-import android.os.AsyncTask;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.provider.Settings;
 import android.text.TextUtils;
-import android.util.Log;
-import android.util.TypedValue;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.openfarmanager.android.App;
@@ -38,28 +28,26 @@ import java.io.File;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 
-import rx.Observable;
-import rx.Observer;
-import rx.Subscriber;
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.schedulers.Schedulers;
-import rx.subscriptions.CompositeSubscription;
+import io.reactivex.Observable;
+import io.reactivex.Single;
+import io.reactivex.SingleOnSubscribe;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 
 public class LauncherAdapter extends FileSystemAdapter {
 
     private Handler mHandler;
 
     private List<String> mSelectedPackages = new ArrayList<String>();
-    private CompositeSubscription mSubscription;
+    private CompositeDisposable mSubscription;
 
-    public LauncherAdapter(Handler handler, CompositeSubscription subscription) {
+    public LauncherAdapter(Handler handler, CompositeDisposable subscription) {
         mHandler = handler;
         mSubscription = subscription;
         refresh();
@@ -68,109 +56,82 @@ public class LauncherAdapter extends FileSystemAdapter {
     public void refresh() {
         mSelectedPackages.clear();
         mHandler.sendEmptyMessage(GenericPanel.START_LOADING);
-        Subscription subscription = Observable.create(new Observable.OnSubscribe<List<FileProxy>>() {
-            @Override
-            public void call(final Subscriber<? super List<FileProxy>> subscriber) {
-                List<FileProxy> result = new LinkedList<FileProxy>();
+        Disposable disposable = Single.create((SingleOnSubscribe<List<FileProxy>>) e -> {
+                    List<FileProxy> result = new LinkedList<>();
 
-                final Intent mainIntent = new Intent(Intent.ACTION_MAIN, null);
-                mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+                    final Intent mainIntent = new Intent(Intent.ACTION_MAIN, null);
+                    mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
 
-                final PackageManager manager = App.sInstance.getPackageManager();
-                final List<ResolveInfo> apps = manager.queryIntentActivities(mainIntent, 0);
+                    final PackageManager manager = App.sInstance.getPackageManager();
+                    final List<ResolveInfo> apps = manager.queryIntentActivities(mainIntent, 0);
 
-                if (apps != null) {
-                    for (ResolveInfo info : apps) {
-                        ComponentName componentName = new ComponentName(info.activityInfo.applicationInfo.packageName, info.activityInfo.name);
-                        ComponentProxy applicationInfo = new ComponentProxy();
-                        applicationInfo.mComponentName = componentName;
-                        applicationInfo.mName = String.valueOf(info.loadLabel(manager));
-                        applicationInfo.mPackagePath = info.activityInfo.applicationInfo.sourceDir;
-                        if (TextUtils.isEmpty(applicationInfo.mName)) {
-                            applicationInfo.mName = info.activityInfo.name;
+                    if (apps != null) {
+                        for (ResolveInfo info : apps) {
+                            ComponentName componentName = new ComponentName(info.activityInfo.applicationInfo.packageName, info.activityInfo.name);
+                            ComponentProxy applicationInfo = new ComponentProxy();
+                            applicationInfo.mComponentName = componentName;
+                            applicationInfo.mName = String.valueOf(info.loadLabel(manager));
+                            applicationInfo.mPackagePath = info.activityInfo.applicationInfo.sourceDir;
+                            if (TextUtils.isEmpty(applicationInfo.mName)) {
+                                applicationInfo.mName = info.activityInfo.name;
+                            }
+                            result.add(applicationInfo);
                         }
-                        result.add(applicationInfo);
                     }
-                }
 
-                Collections.sort(result, new Comparator<FileProxy>() {
-                    @Override
-                    public int compare(FileProxy applicationInfo, FileProxy applicationInfo2) {
-                        return applicationInfo.getName().compareToIgnoreCase(applicationInfo2.getName());
-                    }
-                });
-                subscriber.onNext(result);
-            }
-        }).subscribeOn(Schedulers.computation()).observeOn(AndroidSchedulers.mainThread()).subscribe(new Action1<List<FileProxy>>() {
-            @Override
-            public void call(List<FileProxy> result) {
-                mFiles = result;
-                notifyDataSetChanged();
-                mHandler.sendEmptyMessage(GenericPanel.STOP_LOADING);
-                populateApplicationSize();
-            }
-        });
+                    Collections.sort(result, (info1, info2) -> info1.getName().compareToIgnoreCase(info2.getName()));
+                    e.onSuccess(result);
+                }).subscribeOn(Schedulers.computation()).observeOn(AndroidSchedulers.mainThread()).subscribe(
+                result -> {
+                    mFiles = result;
+                    notifyDataSetChanged();
+                    mHandler.sendEmptyMessage(GenericPanel.STOP_LOADING);
+                    populateApplicationSize();
+                }, Throwable::printStackTrace
+            );
 
-        mSubscription.add(subscription);
+        mSubscription.add(disposable);
     }
 
     private void populateApplicationSize() {
 
-        Subscription subscription = Observable.create(new Observable.OnSubscribe<Void>() {
-            @Override
-            public void call(final Subscriber<? super Void> subscriber) {
-                try {
-                    final PackageManager manager = App.sInstance.getPackageManager();
-                    Method getPackageSizeInfo = manager.getClass().getMethod("getPackageSizeInfo",
-                            String.class,
-                            IPackageStatsObserver.class);
+        Disposable disposable = Observable.create(emitter -> {
+            try {
+                final PackageManager manager = App.sInstance.getPackageManager();
+                Method getPackageSizeInfo = manager.getClass().getMethod("getPackageSizeInfo",
+                        String.class,
+                        IPackageStatsObserver.class);
 
-                    final Semaphore codeSizeSemaphore = new Semaphore(1, true);
+                final Semaphore codeSizeSemaphore = new Semaphore(1, true);
 
-                    for (FileProxy param : mFiles) {
-                        try {
-                            codeSizeSemaphore.acquire();
-                        } catch (InterruptedException e) {
-                            e.printStackTrace(System.err);
-                        }
-
-                        final FileProxy final_param = param;
-                        getPackageSizeInfo.invoke(manager, ((ComponentProxy) param).mComponentName.getPackageName(),
-                                new IPackageStatsObserver.Stub() {
-                                    public void onGetStatsCompleted(PackageStats pStats, boolean succeedded)
-                                            throws RemoteException {
-                                        ((ComponentProxy) final_param).mSize = pStats.codeSize + pStats.dataSize;
-                                        codeSizeSemaphore.release();
-                                        if (!subscriber.isUnsubscribed()) {
-                                            subscriber.onNext(null);
-                                        }
-                                    }
-                                });
+                for (FileProxy param : mFiles) {
+                    try {
+                        codeSizeSemaphore.acquire();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace(System.err);
                     }
 
-
-                } catch (Exception e) {
-                    e.printStackTrace(System.err);
+                    final FileProxy fileProxy = param;
+                    getPackageSizeInfo.invoke(manager, ((ComponentProxy) param).mComponentName.getPackageName(),
+                            new IPackageStatsObserver.Stub() {
+                                public void onGetStatsCompleted(PackageStats pStats, boolean succeedded)
+                                        throws RemoteException {
+                                    ((ComponentProxy) fileProxy).mSize = pStats.codeSize + pStats.dataSize;
+                                    codeSizeSemaphore.release();
+                                    if (!emitter.isDisposed()) {
+                                        emitter.onNext(fileProxy);
+                                    }
+                                }
+                            });
                 }
-            }
-        }).subscribeOn(Schedulers.computation()).observeOn(AndroidSchedulers.mainThread()).subscribe(new Subscriber<Void>() {
-            @Override
-            public void onCompleted() {
 
-            }
 
-            @Override
-            public void onError(Throwable e) {
-                e.printStackTrace();
+            } catch (Exception e) {
+                e.printStackTrace(System.err);
             }
+        }).subscribeOn(Schedulers.computation()).observeOn(AndroidSchedulers.mainThread()).subscribe(fileProxy -> notifyDataSetChanged(), Throwable::printStackTrace);
 
-            @Override
-            public void onNext(Void aVoid) {
-                notifyDataSetChanged();
-            }
-        });
-
-        mSubscription.add(subscription);
+        mSubscription.add(disposable);
     }
 
     public void setSelectedFiles(List<FileProxy> selectedFiles) {

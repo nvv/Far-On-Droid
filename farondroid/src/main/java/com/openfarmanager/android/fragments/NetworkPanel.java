@@ -5,23 +5,19 @@ import android.app.Dialog;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
-import android.text.TextUtils;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.widget.AdapterView;
-import android.widget.ListAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.annimon.stream.Stream;
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.R;
 import com.openfarmanager.android.adapters.FileSystemAdapter;
@@ -41,6 +37,7 @@ import com.openfarmanager.android.core.network.datasource.YandexDiskDataSource;
 import com.openfarmanager.android.dialogs.CreateBookmarkDialog;
 import com.openfarmanager.android.filesystem.FakeFile;
 import com.openfarmanager.android.filesystem.FileProxy;
+import com.openfarmanager.android.filesystem.filter.FileTypeFilter;
 import com.openfarmanager.android.model.Bookmark;
 import com.openfarmanager.android.model.FileActionEnum;
 import com.openfarmanager.android.model.NetworkAccount;
@@ -62,14 +59,15 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import rx.Observable;
-import rx.Observer;
-import rx.Subscriber;
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
+import io.reactivex.Single;
+import io.reactivex.SingleObserver;
+import io.reactivex.SingleOnSubscribe;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 
-import static com.openfarmanager.android.controllers.FileSystemController.*;
+import static com.openfarmanager.android.controllers.FileSystemController.EXIT_FROM_NETWORK_STORAGE;
 
 /**
  * Panel for 'network filesystem' (like Dropbox, Google Drive etc).
@@ -91,10 +89,7 @@ public class NetworkPanel extends MainPanel {
 
     protected List<FileProxy> mPreSelectedFiles = new ArrayList<>();
 
-    private Subscription mSubscription;
-    private OpenDirectoryAction mOpenDirectoryAction = new OpenDirectoryAction();
-    private Observable<DirectoryUiInfo> mOpenDirectoryObservable = Observable.create(mOpenDirectoryAction);
-    private OpenDirectoryObserver mOpenDirectoryObserver = new OpenDirectoryObserver();
+    private CompositeDisposable mSubscription;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -225,10 +220,12 @@ public class NetworkPanel extends MainPanel {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        //mCharsetLeft.setVisibility(View.GONE);
-        //mCharsetRight.setVisibility(View.GONE);
-        if (mSubscription != null && !mSubscription.isUnsubscribed()) {
-            mSubscription.unsubscribe();
+        clearSubscription();
+    }
+
+    protected void clearSubscription() {
+        if (mSubscription != null && !mSubscription.isDisposed()) {
+            mSubscription.clear();
         }
     }
 
@@ -305,6 +302,7 @@ public class NetworkPanel extends MainPanel {
         if (mDataSource != null) {
             mDataSource.exitFromNetwork();
         }
+        clearSubscription();
         mHandler.sendMessage(mHandler.obtainMessage(EXIT_FROM_NETWORK_STORAGE, getPanelLocation()));
     }
 
@@ -320,12 +318,7 @@ public class NetworkPanel extends MainPanel {
 
     public void openBookmark(final String directoryInfo) {
         if (!mIsInitialized) {
-            addToPendingList(new Runnable() {
-                @Override
-                public void run() {
-                    openBookmark(directoryInfo);
-                }
-            });
+            addToPendingList(() -> openBookmark(directoryInfo));
             return;
         }
 
@@ -339,15 +332,39 @@ public class NetworkPanel extends MainPanel {
 
                 if (mDataSource instanceof IdPathDataSource) {
                     setIsLoading(true);
-                    Extensions.runAsync(new Runnable() {
-                        @Override
-                        public void run() {
-                            FakeFile proxy = new FakeFile(((IdPathDataSource) mDataSource).requestFileInfo(id));
-                            proxy.setFullPath(path);
-                            openDirectory(proxy);
+//                    Extensions.runAsync(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            FakeFile proxy = new FakeFile(((IdPathDataSource) mDataSource).requestFileInfo(id));
+//                            proxy.setFullPath(path);
+//                            openDirectory(proxy);
+//
+//                        }
+//                    });
 
+                    Single.create((SingleOnSubscribe<FakeFile>) emitter -> {
+                        FakeFile proxy = new FakeFile(((IdPathDataSource) mDataSource).requestFileInfo(id));
+                        proxy.setFullPath(path);
+                        emitter.onSuccess(proxy);
+                    }).subscribeOn(Schedulers.io()).
+                            observeOn(AndroidSchedulers.mainThread()).subscribe(new SingleObserver<FakeFile>() {
+
+                        @Override
+                        public void onSubscribe(Disposable d) {
+                            addDisposable(d);
+                        }
+
+                        @Override
+                        public void onSuccess(FakeFile proxy) {
+                            openDirectory(proxy);
+                        }
+
+                        @Override
+                        public void onError(Throwable e) {
+                            handleNetworkException((NetworkException) e);
                         }
                     });
+
                 } else {
                     String parentPath = FileUtilsExt.getParentPath(path);
                     openDirectory(new FakeFile(id, FileUtilsExt.getFileName(path), parentPath, path,
@@ -366,19 +383,124 @@ public class NetworkPanel extends MainPanel {
 
     public void openDirectory(final FileProxy file, final boolean restorePosition) {
         if (!mIsInitialized) {
-            addToPendingList(new Runnable() {
-                @Override
-                public void run() {
-                    openDirectory(file, restorePosition);
-                }
-            });
+            addToPendingList(() -> openDirectory(file, restorePosition));
             return;
         }
 
-        mOpenDirectoryAction.init(file, restorePosition);
-        mOpenDirectoryObserver.setLoading();
-        mSubscription = mOpenDirectoryObservable.subscribeOn(Schedulers.computation()).
-                observeOn(AndroidSchedulers.mainThread()).subscribe(mOpenDirectoryObserver);
+        showQuickActionPanel();
+        setSelectedFilesSizeVisibility();
+        setIsLoading(true);
+
+        Single.create((SingleOnSubscribe<DirectoryUiInfo>) emitter -> {
+            try {
+                DirectoryScanInfo scanInfo = mDataSource.openDirectory(file);
+
+                // due to files object are changed we need to refresh them.
+                syncSelectedFiles(mSelectedFiles, scanInfo.files);
+                syncSelectedFiles(mPreSelectedFiles, scanInfo.files);
+
+                emitter.onSuccess(new DirectoryUiInfo(file, restorePosition, scanInfo.files, scanInfo.parentPath));
+            } catch (NetworkException e) {
+                emitter.onError(e);
+            }
+        }).subscribeOn(Schedulers.io()).
+                observeOn(AndroidSchedulers.mainThread()).subscribe(new SingleObserver<DirectoryUiInfo>() {
+            @Override
+            public void onSubscribe(Disposable d) {
+                addDisposable(d);
+            }
+
+            @Override
+            public void onSuccess(DirectoryUiInfo directoryInfo) {
+                setIsLoading(false);
+
+                FileProxy file = directoryInfo.directory;
+                String path = file.getFullPathRaw();
+
+                setCurrentPath(path);
+                boolean isRoot = Extensions.isNullOrEmpty(file.getParentPath()) || file.getFullPathRaw().equals("/");
+                NetworkEntryAdapter adapter = (NetworkEntryAdapter) mFileSystemList.getAdapter();
+
+                mUpNavigator = new FakeFile(file.getParentPath(), "..", directoryInfo.parentPath,
+                        FileUtilsExt.getParentPath(file.getFullPathRaw()), isRoot);
+                if (adapter != null) {
+                    adapter.setItems(directoryInfo.files, mUpNavigator);
+                    adapter.setSelectedFiles(mSelectedFiles);
+                } else {
+                    mFileSystemList.initAdapter(new NetworkEntryAdapter(directoryInfo.files, mUpNavigator));
+                }
+                mCurrentPath = new FakeFile(file.getId(), path, file.getParentPath(), file.getFullPathRaw(), isRoot);
+
+                if (directoryInfo.restorePosition) {
+                    Integer selection = mDirectorySelection.get(isRoot ? "/" : path);
+                    ((LinearLayoutManager) mFileSystemList.getLayoutManager()).scrollToPositionWithOffset(selection != null ? selection : 0, 0);
+
+                }
+
+                if (mPreSelectedFiles.size() > 0) {
+                    calculateSelectedFilesSize();
+                }
+                showQuickActionPanel();
+                setSelectedFilesSizeVisibility();
+
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                handleNetworkException((NetworkException) e);
+            }
+        });
+    }
+
+    protected void handleNetworkException(NetworkException e) {
+        NetworkException exception = e;
+        switch (exception.getErrorCause()) {
+            case Unlinked_Error:
+                // exit from network, delete account (optional)
+                handleUnlinkedError(exception);
+                exitFromNetwork();
+                break;
+            case FTP_Connection_Closed:
+                // exit from network
+                handleError(exception);
+                //exitFromNetwork();
+            case Yandex_Disk_Error:
+                // exit from network
+                handleUnlinkedError(exception);
+                //exitFromNetwork();
+                break;
+            case IO_Error:
+            case Common_Error:
+            case Cancel_Error:
+            case Server_error:
+            case Socket_Timeout:
+            default:
+                // error, propose to retry
+                handleErrorAndRetry(exception, () -> openDirectory(mCurrentPath));
+                break;
+        }
+    }
+
+    protected void addDisposable(Disposable d) {
+        if (mSubscription == null) {
+            mSubscription = new CompositeDisposable();
+        }
+        mSubscription.add(d);
+    }
+
+    private void syncSelectedFiles(List<FileProxy> files, List<FileProxy> allFiles) {
+        if (files.size() > 0) {
+            ArrayList<String> preSelectedFiles = new ArrayList<>();
+            for (FileProxy proxy : files) {
+                preSelectedFiles.add(proxy.getFullPath());
+            }
+            files.clear();
+            for (FileProxy fileProxy : allFiles) {
+                if (preSelectedFiles.contains(fileProxy.getFullPath())) {
+                    mSelectedFiles.add(fileProxy);
+                }
+            }
+        }
     }
 
     @Override
@@ -475,35 +597,17 @@ public class NetworkPanel extends MainPanel {
         NetworkEntryAdapter adapter = (NetworkEntryAdapter) mFileSystemList.getAdapter();
         List<FileProxy> allFiles = adapter.getFiles();
 
+        allFiles = Stream.of(allFiles).filter(f -> f.isDirectory() ? selectParams.isIncludeFolders() : selectParams.isIncludeFiles()).toList();
+        mSelectedFiles.clear();
         if (selectParams.getType() == SelectParams.SelectionType.NAME) {
-
             String pattern = selectParams.getSelectionString();
-
             App.sInstance.getSharedPreferences("action_dialog", 0).edit(). putString("select_pattern", pattern).apply();
+            List<FileProxy> contents = Stream.of(allFiles).filter(file -> {
+                boolean match = FilenameUtils.wildcardMatch(file.getName(), pattern);
+                return selectParams.isInverseSelection() != match;
+            }).toList();
 
-            boolean inverseSelection = selectParams.isInverseSelection();
-            List<FileProxy> contents = new ArrayList<FileProxy>();
-
-            for (FileProxy file : allFiles) {
-                if (FilenameUtils.wildcardMatch(file.getName(), pattern)) {
-                    contents.add(file);
-                }
-            }
-
-            mSelectedFiles.clear();
-            if (contents.size() > 0) {
-                if (inverseSelection) {
-                    for (FileProxy file : allFiles) {
-                        if (!contents.contains(file)) {
-                            mSelectedFiles.add(file);
-                        }
-                    }
-                } else {
-                    for (FileProxy file : contents) {
-                        mSelectedFiles.add(file);
-                    }
-                }
-            }
+            mSelectedFiles.addAll(contents);
         } else {
             if (selectParams.isTodayDate()) {
 
@@ -572,164 +676,6 @@ public class NetworkPanel extends MainPanel {
                 }
             }, true).show(fragmentManager(), "errorDialog");
         } catch (Exception ignore) {}
-    }
-
-    private class OpenDirectoryAction implements Observable.OnSubscribe<DirectoryUiInfo> {
-
-        private DirectoryUiInfo directoryInfo = new DirectoryUiInfo();
-
-        public void init(FileProxy directory, boolean restorePosition) {
-            directoryInfo.directory = directory;
-            directoryInfo.restorePosition = restorePosition;
-        }
-
-        @Override
-        public void call(Subscriber<? super DirectoryUiInfo> subscriber) {
-            try {
-                DirectoryScanInfo scanInfo = mDataSource.openDirectory(directoryInfo.directory);
-
-                // due to files object are changed we need to refresh them.
-                syncSelectedFiles(mSelectedFiles, scanInfo.files);
-                syncSelectedFiles(mPreSelectedFiles, scanInfo.files);
-
-                directoryInfo.files = scanInfo.files;
-                directoryInfo.parentPath = scanInfo.parentPath;
-
-                subscriber.onNext(directoryInfo);
-            } catch (NetworkException e) {
-                subscriber.onError(e);
-            }
-        }
-
-        private void syncSelectedFiles(List<FileProxy> files, List<FileProxy> allFiles) {
-            if (files.size() > 0) {
-                ArrayList<String> preSelectedFiles = new ArrayList<>();
-                for (FileProxy proxy : files) {
-                    preSelectedFiles.add(proxy.getFullPath());
-                }
-                files.clear();
-                for (FileProxy fileProxy : allFiles) {
-                    if (preSelectedFiles.contains(fileProxy.getFullPath())) {
-                        mSelectedFiles.add(fileProxy);
-                    }
-                }
-            }
-        }
-    }
-
-    private class OpenDirectoryObserver implements Observer<DirectoryUiInfo> {
-
-        public void setLoading() {
-            showQuickActionPanel();
-            setSelectedFilesSizeVisibility();
-            setIsLoading(true);
-        }
-
-        @Override
-        public void onCompleted() {
-        }
-
-        @Override
-        public void onError(Throwable e) {
-            NetworkException exception = (NetworkException) e;
-            switch (exception.getErrorCause()) {
-                case Unlinked_Error:
-                    // exit from network, delete account (optional)
-                    handleUnlinkedError(exception);
-                    exitFromNetwork();
-                    break;
-                case FTP_Connection_Closed:
-                    // exit from network
-                    handleError(exception);
-                    //exitFromNetwork();
-                case Yandex_Disk_Error:
-                    // exit from network
-                    handleUnlinkedError(exception);
-                    //exitFromNetwork();
-                    break;
-                case IO_Error: case Common_Error: case Cancel_Error: case Server_error: case Socket_Timeout: default:
-                    // error, propose to retry
-                    handleErrorAndRetry(exception, new Runnable() {
-                        @Override
-                        public void run() {
-                            openDirectory(mCurrentPath);
-                        }
-                    });
-                    break;
-            }
-        }
-
-        @Override
-        public void onNext(DirectoryUiInfo directoryInfo) {
-            setIsLoading(false);
-
-            FileProxy file = directoryInfo.directory;
-            String path = file.getFullPathRaw();
-
-            setCurrentPath(path);
-            boolean isRoot = Extensions.isNullOrEmpty(file.getParentPath()) || file.getFullPathRaw().equals("/");
-            NetworkEntryAdapter adapter = (NetworkEntryAdapter) mFileSystemList.getAdapter();
-
-//            System.out.println("::::::::::::  --->   " + directoryInfo.directory.getFullPathRaw() + "  " + directoryInfo.directory.getParentPath() + "  " + directoryInfo.parentPath);
-
-            mUpNavigator = new FakeFile(file.getParentPath(), "..", directoryInfo.parentPath,
-                    FileUtilsExt.getParentPath(file.getFullPathRaw()), isRoot);
-            if (adapter != null) {
-                adapter.setItems(directoryInfo.files, mUpNavigator);
-                adapter.setSelectedFiles(mSelectedFiles);
-            } else {
-                mFileSystemList.initAdapter(new NetworkEntryAdapter(directoryInfo.files, mUpNavigator));
-            }
-            mCurrentPath = new FakeFile(file.getId(), path, file.getParentPath(), file.getFullPathRaw(), isRoot);
-
-            if (directoryInfo.restorePosition) {
-                Integer selection = mDirectorySelection.get(isRoot ? "/" : path);
-                ((LinearLayoutManager) mFileSystemList.getLayoutManager()).scrollToPositionWithOffset(selection != null ? selection : 0, 0);
-
-            }
-
-
-//            if (mPath == null) {
-//                // something very weired
-//                exitFromNetwork();
-//            }
-//
-//            mPath = mDataSource.getPath(mPath);
-//
-//            if (mPath.endsWith("/")) {
-//                mPath = mPath.substring(0, mPath.length() - 1);
-//            }
-//
-//            setCurrentPath(Extensions.isNullOrEmpty(mPath) ? "/" : mPath);
-//
-//            String parentPath = mPath.substring(0, mPath.lastIndexOf("/") + 1);
-//            ListAdapter adapter = mFileSystemList.getAdapter();
-//
-//            FakeFile upNavigator = new FakeFile("..", mDataSource.getParentPath(parentPath), Extensions.isNullOrEmpty(parentPath));
-//            if (adapter != null && adapter instanceof NetworkEntryAdapter) {
-//                ((NetworkEntryAdapter) adapter).setItems(files, upNavigator);
-//                ((NetworkEntryAdapter) adapter).setSelectedFiles(mSelectedFiles);
-//            } else {
-//                mFileSystemList.setAdapter(new NetworkEntryAdapter(files, upNavigator));
-//            }
-//            mCurrentPath = new FakeFile(Extensions.isNullOrEmpty(mPath) ? "/" : mPath,
-//                    mDataSource.getParentPath(parentPath), Extensions.isNullOrEmpty(parentPath));
-//
-//            if (mRestorePosition) {
-//                Integer selection = mDirectorySelection.get(Extensions.isNullOrEmpty(mPath) ? "/" : mPath);
-//                mFileSystemList.setSelection(selection != null ? selection : 0);
-//            }
-
-            if (mPreSelectedFiles.size() > 0) {
-                calculateSelectedFilesSize();
-            }
-            showQuickActionPanel();
-            setSelectedFilesSizeVisibility();
-
-            if (!mSubscription.isUnsubscribed()) {
-                mSubscription.unsubscribe();
-            }
-        }
     }
 
     private Handler mHandler = new Handler() {
@@ -815,6 +761,13 @@ public class NetworkPanel extends MainPanel {
         public boolean restorePosition;
         public List<FileProxy> files;
         public String parentPath;
+
+        public DirectoryUiInfo(FileProxy directory, boolean restorePosition, List<FileProxy> files, String parentPath) {
+            this.directory = directory;
+            this.restorePosition = restorePosition;
+            this.files = files;
+            this.parentPath = parentPath;
+        }
 
     }
 

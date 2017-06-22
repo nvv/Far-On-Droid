@@ -56,10 +56,13 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import rx.Observable;
-import rx.Subscriber;
-import rx.Subscription;
-import rx.schedulers.Schedulers;
+import io.reactivex.Completable;
+import io.reactivex.Observable;
+import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.Observer;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 
 import static com.openfarmanager.android.controllers.EditViewController.MSG_BIG_FILE;
 import static com.openfarmanager.android.controllers.EditViewController.MSG_TEXT_CHANGED;
@@ -100,6 +103,8 @@ public class Viewer extends Fragment {
 
     private int mCalculatedRowHeight = -1;
 
+//    private CompositeDisposable mCompositeDisposable;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
@@ -114,6 +119,9 @@ public class Viewer extends Fragment {
 
         mSearchResultsPopup = new QuickPopupDialog(getActivity(), view, R.layout.search_results_popup);
         mSearchResultsPopup.setPosition(Gravity.RIGHT | Gravity.TOP, (int) (50 * getResources().getDisplayMetrics().density));
+
+//        mCompositeDisposable = new CompositeDisposable();
+
         return view;
     }
 
@@ -142,6 +150,7 @@ public class Viewer extends Fragment {
             mLoadFileTask = null;
         }
 
+//        mCompositeDisposable.clear();
         mSearchResultsPopup.dismiss();
         super.onDestroy();
     }
@@ -339,47 +348,38 @@ public class Viewer extends Fragment {
         });
 
         matches.setText("0");
-        final Subscription subscription = Observable.create(new Observable.OnSubscribe<SearchResult>() {
-            @Override
-            public void call(Subscriber<? super SearchResult> subscriber) {
-                ArrayList<String> lines = mAdapter.getText();
-                SearchResult searchResult = new SearchResult();
-                for (int i = 0; i < lines.size(); i++) {
-                    searchResult.reset();
-                    String line = lines.get(i);
-                    doSearchInText(line, pattern, caseSensitive, wholeWords, regularExpression, searchResult);
+//        final Subscription subscription = Observable.create(
 
-                    if (searchResult.count > 0) {
-                        searchResult.lineNumber = i;
-                        subscriber.onNext(searchResult);
-                    }
+        CompositeDisposable compositeDisposable = new CompositeDisposable();
+        Observable.create((ObservableOnSubscribe<SearchResult>) e -> {
+            ArrayList<String> lines = mAdapter.getText();
+            SearchResult searchResult = new SearchResult();
+            for (int i = 0; i < lines.size(); i++) {
+                if (e.isDisposed()) {
+                    break;
                 }
 
-                subscriber.onCompleted();
-            }
-        }).subscribeOn(Schedulers.from(getThreadPool())).subscribe(new Subscriber<SearchResult>() {
+                searchResult.reset();
+                String line = lines.get(i);
+                doSearchInText(line, pattern, caseSensitive, wholeWords, regularExpression, searchResult);
 
+                if (searchResult.count > 0) {
+                    searchResult.lineNumber = i;
+                    e.onNext(searchResult);
+                }
+            }
+
+            e.onComplete();
+        }).subscribeOn(Schedulers.from(getThreadPool())).subscribe(new Observer<SearchResult>() {
             private int mTotalOccurrence;
 
             @Override
-            public void onCompleted() {
-                updateUi(new Runnable() {
-                    @Override
-                    public void run() {
-                        progress.setVisibility(View.GONE);
-                    }
-                });
-            }
-
-            @Override
-            public void onError(Throwable e) {
-
+            public void onSubscribe(Disposable d) {
+                compositeDisposable.add(d);
             }
 
             @Override
             public void onNext(SearchResult searchResult) {
-                //System.out.println("::::  " + searchResult.first + " " + searchResult.second);
-
                 mTotalOccurrence += searchResult.count;
                 searchLines.add(searchResult.lineNumber);
 
@@ -394,6 +394,16 @@ public class Viewer extends Fragment {
                 updateUi(mUpdateOccurrences);
             }
 
+            @Override
+            public void onError(Throwable t) {
+
+            }
+
+            @Override
+            public void onComplete() {
+                updateUi(() -> progress.setVisibility(View.GONE));
+            }
+
             private Runnable mUpdateOccurrences = new Runnable() {
                 @Override
                 public void run() {
@@ -402,13 +412,10 @@ public class Viewer extends Fragment {
             };
         });
 
-        close.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                subscription.unsubscribe();
-                mAdapter.stopSearch();
-                mSearchResultsPopup.dismiss();
-            }
+        close.setOnClickListener(v -> {
+            compositeDisposable.clear();
+            mAdapter.stopSearch();
+            mSearchResultsPopup.dismiss();
         });
     }
 
@@ -460,24 +467,13 @@ public class Viewer extends Fragment {
 
     public void save() {
         mAdapter.saveCurrentEditLine(getActivity().getCurrentFocus());
-        mSaveObservable.subscribe(new Subscriber<Boolean>() {
-            @Override
-            public void onCompleted() {
-                mHandler.sendMessage(Message.obtain(mHandler, MSG_TEXT_CHANGED, mText.isTextChanged()));
-            }
-
-            @Override
-            public void onError(Throwable e) {
-                e.printStackTrace();
-                if (e instanceof SdcardPermissionException && Build.VERSION.SDK_INT >= 21) {
-                    Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
-                    startActivityForResult(intent, BaseFileSystemPanel.REQUEST_CODE_REQUEST_PERMISSION);
-                }
-            }
-
-            @Override
-            public void onNext(Boolean aBoolean) {
-
+        mSaveObservable.subscribe(() -> {
+            mHandler.sendMessage(Message.obtain(mHandler, MSG_TEXT_CHANGED, mText.isTextChanged()));
+        }, throwable -> {
+            throwable.printStackTrace();
+            if (throwable instanceof SdcardPermissionException && Build.VERSION.SDK_INT >= 21) {
+                Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+                startActivityForResult(intent, BaseFileSystemPanel.REQUEST_CODE_REQUEST_PERMISSION);
             }
         });
     }
@@ -485,38 +481,17 @@ public class Viewer extends Fragment {
     public void replace(final String pattern, final String replaceTo, final boolean caseSensitive,
                         final boolean wholeWords, final boolean regularExpression) {
 
-        Observable.create(new Observable.OnSubscribe<Boolean>() {
-            @Override
-            public void call(Subscriber<? super Boolean> subscriber) {
-                mText.replace(pattern, replaceTo, caseSensitive ? IOCase.SENSITIVE : IOCase.INSENSITIVE,
-                        wholeWords, regularExpression);
-                subscriber.onCompleted();
-            }
-        }).subscribeOn(Schedulers.from(getThreadPool())).subscribe(new Subscriber<Boolean>() {
-            @Override
-            public void onCompleted() {
-                updateUi(onReplaceCompleted);
-            }
-
-            @Override
-            public void onError(Throwable e) {
-                e.printStackTrace();
-            }
-
-            @Override
-            public void onNext(Boolean aBoolean) {
-
-            }
-
-            private Runnable onReplaceCompleted = new Runnable() {
-                @Override
-                public void run() {
-                    updateAdapter();
-                    mSearchResultsPopup.dismiss();
-                    mHandler.sendMessage(Message.obtain(mHandler, MSG_TEXT_CHANGED, mText.isTextChanged()));
-                }
-            };
-        });
+        Completable.create(e -> {
+            mText.replace(pattern, replaceTo, caseSensitive ? IOCase.SENSITIVE : IOCase.INSENSITIVE,
+                    wholeWords, regularExpression);
+            e.onComplete();
+        }).subscribeOn(Schedulers.from(getThreadPool())).subscribe(() -> {
+            updateUi(() -> {
+                updateAdapter();
+                mSearchResultsPopup.dismiss();
+                mHandler.sendMessage(Message.obtain(mHandler, MSG_TEXT_CHANGED, mText.isTextChanged()));
+            });
+        }, Throwable::printStackTrace);
     }
 
     // TODO: we need to avoid this говнокод!!!
@@ -733,23 +708,20 @@ public class Viewer extends Fragment {
         getActivity().runOnUiThread(runnable);
     }
 
-    private Observable<Boolean> mSaveObservable = Observable.create(new Observable.OnSubscribe<Boolean>() {
-        @Override
-        public void call(Subscriber<? super Boolean> subscriber) {
-            try {
-                String sdCardPath = SystemUtils.getExternalStorage(mFile.getAbsolutePath());
-                if (checkUseStorageApi(sdCardPath)) {
-                    checkForPermissionAndGetBaseUri();
-                    OutputStream stream = StorageUtils.getStorageOutputFileStream(mFile, sdCardPath);
-                    mText.save(stream);
-                } else {
-                    mText.save(mFile);
-                }
-            } catch (Exception e) {
-                subscriber.onError(e);
+    private Completable mSaveObservable = Completable.create(emitter -> {
+        try {
+            String sdCardPath = SystemUtils.getExternalStorage(mFile.getAbsolutePath());
+            if (checkUseStorageApi(sdCardPath)) {
+                checkForPermissionAndGetBaseUri();
+                OutputStream stream = StorageUtils.getStorageOutputFileStream(mFile, sdCardPath);
+                mText.save(stream);
+            } else {
+                mText.save(mFile);
             }
-            subscriber.onCompleted();
+        } catch (Exception e) {
+            emitter.onError(e);
         }
-    }).subscribeOn(Schedulers.from(getThreadPool()));
+        emitter.onComplete();
+    }).subscribeOn(Schedulers.from(getThreadPool()));;
 
 }

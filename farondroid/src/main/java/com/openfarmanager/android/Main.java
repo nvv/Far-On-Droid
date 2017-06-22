@@ -35,10 +35,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import rx.Completable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
-import rx.subscriptions.CompositeSubscription;
+import io.reactivex.Completable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.schedulers.Schedulers;
 
 public class Main extends BaseActivity {
 
@@ -51,7 +51,7 @@ public class Main extends BaseActivity {
     public static String RESULT_REQUEST_SDCARD_ACCEESS = "RESULT_REQUEST_SDCARD_ACCEESS";
 
     private FileSystemController mFileSystemController;
-    protected CompositeSubscription mSubscription;
+    protected CompositeDisposable mSubscription;
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -94,7 +94,7 @@ public class Main extends BaseActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mSubscription = new CompositeSubscription();
+        mSubscription = new CompositeDisposable();
         App.sInstance.getNetworkConnectionManager().setRxSubscription(mSubscription);
         setContentView(App.sInstance.getSettings().isMultiPanelMode() ? R.layout.main_two_panels : R.layout.main_one_panel);
         if (findViewById(R.id.view_pager) == null) {
@@ -206,13 +206,12 @@ public class Main extends BaseActivity {
                  }
             }).subscribeOn(Schedulers.computation()).
                     observeOn(AndroidSchedulers.mainThread()).subscribe(
-                    throwable -> {
-                        mFileSystemController.dismissProgressDialog();
-                        ToastNotification.makeText(this, App.sInstance.getString(R.string.error_common), Toast.LENGTH_LONG).show();
-                    },
                     () -> {
                         mFileSystemController.dismissProgressDialog();
                         mFileSystemController.openNetworkPanel(NetworkEnum.Dropbox);
+                    }, throwable -> {
+                        mFileSystemController.dismissProgressDialog();
+                        ToastNotification.makeText(this, App.sInstance.getString(R.string.error_common), Toast.LENGTH_LONG).show();
                     }));
         }
     }
@@ -230,7 +229,7 @@ public class Main extends BaseActivity {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mSubscription.unsubscribe();
+        mSubscription.clear();
     }
 
     @Override

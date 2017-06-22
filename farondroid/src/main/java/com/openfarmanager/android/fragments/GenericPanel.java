@@ -14,7 +14,7 @@ import com.openfarmanager.android.controllers.FileSystemController;
 import com.openfarmanager.android.filesystem.FileProxy;
 import com.openfarmanager.android.model.FileActionEnum;
 
-import rx.subscriptions.CompositeSubscription;
+import io.reactivex.disposables.CompositeDisposable;
 
 /**
  * Created on 11/10/2013.
@@ -26,14 +26,14 @@ public class GenericPanel extends MainPanel {
     public static final int START_LOADING = 10000;
     public static final int STOP_LOADING = 10001;
 
-    private CompositeSubscription mSubscription;
+    private CompositeDisposable mSubscription;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         setupHandler();
         View view = super.onCreateView(inflater, container, savedInstanceState);
 
-        mSubscription = new CompositeSubscription();
+        mSubscription = new CompositeDisposable();
 
         mFileSystemList.setOnItemClickListener(new FileSystemAdapter.OnItemClickListener() {
             @Override
@@ -100,7 +100,7 @@ public class GenericPanel extends MainPanel {
     @Override
     public void onDetach () {
         super.onDetach();
-        mSubscription.unsubscribe();
+        mSubscription.clear();
     }
 
     protected FileActionEnum[] getAvailableActions() {
