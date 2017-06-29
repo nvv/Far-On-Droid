@@ -116,12 +116,8 @@ public class SelectDialog extends Dialog {
                 return;
             }
 
-            DatePickerDialog datePickerDialog = new DatePickerDialog(getContext(), new DatePickerDialog.OnDateSetListener() {
-                @Override
-                public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                    dateFrom.setText(String.format("%s/%s/%s", year, monthOfYear, dayOfMonth));
-                }
-            }, todayYear, todayMonth, todayDay);
+            DatePickerDialog datePickerDialog = new DatePickerDialog(getContext(), (view, year, monthOfYear, dayOfMonth) ->
+                    dateFrom.setText(String.format("%s/%s/%s", year, monthOfYear, dayOfMonth)), todayYear, todayMonth, todayDay);
             datePickerDialog.show();
         });
 
@@ -140,14 +136,20 @@ public class SelectDialog extends Dialog {
         mOkButton.setOnClickListener(v -> {
 
             SelectParams selectParams;
+
+            boolean invertSelection = ((CheckBox) findViewById(R.id.invert_selection)).isChecked();
+
+            boolean isIncludeFiles = includeFiles.isChecked();
+            boolean isIncludeFolders = includeFolders.isChecked();
+
             if (pages.getDisplayedChild() == 0) { // select by name
                 String selectionString = ((EditText) findViewById(R.id.selection_string)).getText().toString();
-                boolean invertSelection = ((CheckBox) findViewById(R.id.invert_selection)).isChecked();
+                boolean caseSensitive = ((CheckBox) findViewById(R.id.case_sensitive)).isChecked();
 
-                selectParams = new SelectParams(selectionString, invertSelection, includeFiles.isChecked(), includeFolders.isChecked());
+                selectParams = new SelectParams(selectionString, caseSensitive, invertSelection, isIncludeFiles, isIncludeFolders);
             } else {
                 if (isToday.value) {
-                    selectParams = new SelectParams(true, null, null, includeFiles.isChecked(), includeFolders.isChecked());
+                    selectParams = new SelectParams(true, null, null, invertSelection, isIncludeFiles, isIncludeFolders);
                 } else {
                     try {
                         String fromString = dateFrom.getText().toString();
@@ -173,9 +175,9 @@ public class SelectDialog extends Dialog {
 
                         Date dateTo1 = calendar.getTime();
 
-                        selectParams = new SelectParams(false, dateFrom1, dateTo1, includeFiles.isChecked(), includeFolders.isChecked());
+                        selectParams = new SelectParams(false, dateFrom1, dateTo1, invertSelection, isIncludeFiles, isIncludeFolders);
                     } catch (Exception e) {
-                        selectParams = new SelectParams(true, null, null, includeFiles.isChecked(), includeFolders.isChecked());
+                        selectParams = new SelectParams(true, null, null, invertSelection, isIncludeFiles, isIncludeFolders);
                     }
                 }
             }

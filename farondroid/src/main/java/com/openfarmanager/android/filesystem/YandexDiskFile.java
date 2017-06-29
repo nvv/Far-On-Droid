@@ -4,6 +4,7 @@ import com.openfarmanager.android.model.Bookmark;
 import com.openfarmanager.android.utils.FileUtilsExt;
 import com.yandex.disk.client.ListItem;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -69,7 +70,7 @@ public class YandexDiskFile implements FileProxy {
 
     @Override
     public List getChildren() {
-        return null;
+        return new ArrayList();
     }
 
     @Override

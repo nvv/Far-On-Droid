@@ -23,7 +23,7 @@ import java.util.List;
  */
 public class NetworkEntryAdapter extends FileSystemAdapter {
 
-    private List<FileProxy> mEntries;
+    //private List<FileProxy> mEntries;
     //private String mParentPath;
     private FileProxy mUpNavigator;
 
@@ -32,19 +32,15 @@ public class NetworkEntryAdapter extends FileSystemAdapter {
     }
 
     public void setItems(List<FileProxy> entries, FileProxy upNavigator) {
-        mEntries = entries;
+        mFiles = entries;
         mUpNavigator = upNavigator;
         mIsRoot = upNavigator.isRoot();
         notifyDataSetChanged();
     }
 
-    public List<FileProxy> getFiles() {
-        return mEntries;
-    }
-
     @Override
     public int getItemCount() {
-        return mEntries.size() + 1;
+        return mFiles.size() + 1;
     }
 
     @Override
@@ -52,7 +48,7 @@ public class NetworkEntryAdapter extends FileSystemAdapter {
         if (i == 0) {
             return mUpNavigator;
         }
-        return mEntries.get(i - 1);
+        return mFiles.get(i - 1);
     }
 
     @Override

@@ -300,8 +300,8 @@ public class LauncherAdapter extends FileSystemAdapter {
         }
 
         @Override
-        public List<ComponentProxy> getChildren() {
-            return null;
+        public List getChildren() {
+            return new ArrayList();
         }
 
         @Override

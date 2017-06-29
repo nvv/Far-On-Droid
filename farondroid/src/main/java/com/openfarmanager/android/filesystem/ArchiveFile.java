@@ -42,7 +42,7 @@ public class ArchiveFile extends ArchiveScanner.File implements FileProxy<Archiv
     }
 
     @Override
-    public List<ArchiveScanner.File> getChildren() {
+    public List<FileProxy> getChildren() {
         return super.getChildren();
     }
 

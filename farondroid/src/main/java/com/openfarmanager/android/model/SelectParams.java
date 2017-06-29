@@ -10,25 +10,28 @@ public class SelectParams {
     private SelectionType mType;
     private String mSelectionString;
     private boolean mInverseSelection;
+    private boolean mCaseSensitive;
     private boolean mTodayDate;
     private boolean mIncludeFiles;
     private boolean mIncludeFolders;
     private Date mDateFrom;
     private Date mDateTo;
 
-    public SelectParams(String selectionString, boolean inverseSelection, boolean includeFiles, boolean includeFolders) {
+    public SelectParams(String selectionString, boolean caseSensitive, boolean inverseSelection, boolean includeFiles, boolean includeFolders) {
         mType = SelectionType.NAME;
         mSelectionString = selectionString;
         mInverseSelection = inverseSelection;
+        mCaseSensitive = caseSensitive;
         mIncludeFiles = includeFiles;
         mIncludeFolders = includeFolders;
     }
 
-    public SelectParams(boolean todayDate, Date dateFrom, Date dateTo, boolean includeFiles, boolean includeFolders) {
+    public SelectParams(boolean todayDate, Date dateFrom, Date dateTo, boolean inverseSelection, boolean includeFiles, boolean includeFolders) {
         mType = SelectionType.MODIFICATION_DATE;
         mTodayDate = todayDate;
         mDateFrom = dateFrom;
         mDateTo = dateTo;
+        mInverseSelection = inverseSelection;
         mIncludeFiles = includeFiles;
         mIncludeFolders = includeFolders;
     }
@@ -63,6 +66,10 @@ public class SelectParams {
 
     public boolean isIncludeFolders() {
         return mIncludeFolders;
+    }
+
+    public boolean isCaseSensitive() {
+        return mCaseSensitive;
     }
 
 

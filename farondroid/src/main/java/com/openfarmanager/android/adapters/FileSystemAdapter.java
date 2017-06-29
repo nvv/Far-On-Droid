@@ -73,6 +73,10 @@ public class FileSystemAdapter extends RecyclerView.Adapter<FileSystemAdapter.Vi
         return mFiles.get(i - 1);
     }
 
+    public List<FileProxy> getFiles() {
+        return mFiles;
+    }
+
     private void setColor(TextView name, TextView size, int color) {
         name.setTextColor(color);
         size.setTextColor(color);

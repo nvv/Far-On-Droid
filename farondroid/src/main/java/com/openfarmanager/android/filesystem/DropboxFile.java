@@ -16,6 +16,7 @@ import static com.openfarmanager.android.utils.Extensions.*;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -104,8 +105,8 @@ public class DropboxFile implements FileProxy {
     }
 
     @Override
-    public List<Metadata> getChildren() {
-        return null;
+    public List getChildren() {
+        return new ArrayList();
     }
 
     @Override

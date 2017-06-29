@@ -3,7 +3,6 @@ package com.openfarmanager.android.core;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Typeface;
-import android.os.Environment;
 import android.preference.PreferenceManager;
 
 import com.openfarmanager.android.App;
@@ -12,8 +11,6 @@ import com.openfarmanager.android.filesystem.FileSystemScanner;
 import com.openfarmanager.android.model.NetworkEnum;
 import com.openfarmanager.android.utils.StorageUtils;
 import com.openfarmanager.android.utils.SystemUtils;
-
-import java.io.File;
 
 public class Settings {
 
@@ -172,7 +169,7 @@ public class Settings {
 
     public void setFileSortValue(String value) {
         getSharedPreferences().edit().putString(Settings.FILES_SORT, value).commit();
-        FileSystemScanner.sInstance.initFilters();
+        FileSystemScanner.sInstance.initSorters();
     }
 
     public void setFileInfoTypeValue(String value) {

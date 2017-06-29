@@ -3,10 +3,9 @@ package com.openfarmanager.android.filesystem;
 import android.os.Build;
 import android.text.TextUtils;
 import com.openfarmanager.android.App;
-import com.openfarmanager.android.core.Settings;
 import com.openfarmanager.android.filesystem.actions.RootTask;
-import com.openfarmanager.android.filesystem.filter.Filter;
-import com.openfarmanager.android.filesystem.filter.FilterFactory;
+import com.openfarmanager.android.filesystem.filter.Sorter;
+import com.openfarmanager.android.filesystem.filter.SorterFactory;
 import com.openfarmanager.android.model.exeptions.FileIsNotDirectoryException;
 import com.openfarmanager.android.utils.StorageUtils;
 
@@ -25,7 +24,7 @@ public class FileSystemScanner {
 
     public static final FileSystemScanner sInstance;
 
-    private LinkedList<Filter> mFilters;
+    private LinkedList<Sorter> mSorters;
 
     static {
         sInstance = new FileSystemScanner();
@@ -34,8 +33,8 @@ public class FileSystemScanner {
     private Comparator<FileProxy> mComparator = new Comparator<FileProxy>() {
         public int compare(FileProxy f1, FileProxy f2) {
             int result = 0;
-            for (Filter filter : mFilters) {
-                if ((result = filter.doFilter(f1, f2)) != 0) {
+            for (Sorter sorter : mSorters) {
+                if ((result = sorter.doSort(f1, f2)) != 0) {
                     return result;
                 }
             }
@@ -44,21 +43,21 @@ public class FileSystemScanner {
     };
 
     private FileSystemScanner() {
-        initFilters();
+        initSorters();
     }
 
-    public void initFilters() {
+    public void initSorters() {
         ROOT = App.sInstance.getSettings().isSDCardRoot() ? StorageUtils.getSdPath() : "/";
 
-        mFilters = new LinkedList<Filter>();
+        mSorters = new LinkedList<>();
         if (App.sInstance.getSettings().isFoldersFirst()) {
-            mFilters.add(FilterFactory.createDirectoryUpFilter());
+            mSorters.add(SorterFactory.createDirectoryUpFilter());
         }
-        mFilters.add(FilterFactory.createPreferredFilter());
+        mSorters.add(SorterFactory.createPreferredFilter());
     }
 
     public static Collection<File> getTree(File... root) {
-        ArrayList<File> tree = new ArrayList<File>();
+        ArrayList<File> tree = new ArrayList<>();
         for (File f : root) {
             addFilesRecursively(f, tree);
         }

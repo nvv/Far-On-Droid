@@ -18,7 +18,6 @@ import android.view.ViewGroup;
 import android.webkit.MimeTypeMap;
 import android.widget.*;
 
-import com.annimon.stream.Stream;
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.R;
 //import com.openfarmanager.android.adapters.FlatFileSystemAdapter;
@@ -43,7 +42,9 @@ import com.openfarmanager.android.filesystem.commands.CreateBookmarkCommand;
 import com.openfarmanager.android.filesystem.commands.DropboxCommand;
 import com.openfarmanager.android.filesystem.commands.ExportAsCommand;
 import com.openfarmanager.android.filesystem.commands.GoogleDriveUpdateCommand;
-import com.openfarmanager.android.filesystem.filter.FileTypeFilter;
+import com.openfarmanager.android.filesystem.filter.DateFilter;
+import com.openfarmanager.android.filesystem.filter.FileFilter;
+import com.openfarmanager.android.filesystem.filter.FileNameFilter;
 import com.openfarmanager.android.model.Bookmark;
 import com.openfarmanager.android.model.FileActionEnum;
 import com.openfarmanager.android.model.OpenDirectoryActionListener;
@@ -57,10 +58,10 @@ import com.openfarmanager.android.view.ActionBar;
 import com.openfarmanager.android.view.FileSystemListView;
 import com.openfarmanager.android.view.ToastNotification;
 
-import org.apache.commons.io.filefilter.WildcardFileFilter;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOCase;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.util.*;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -910,72 +911,28 @@ public class MainPanel extends BaseFileSystemPanel {
     @Override
     public int select(SelectParams selectParams) {
 
-        if (mBaseDir == null) {
-            // handle unexpected situation.
-            return 0;
-        }
-
         mSelectedFiles.clear();
+
+        List<FileProxy> allFiles = getAdapter().getFiles();
+
         if (selectParams.getType() == SelectParams.SelectionType.NAME) {
-
             String pattern = selectParams.getSelectionString();
-
             App.sInstance.getSharedPreferences("action_dialog", 0).edit(). putString("select_pattern", pattern).apply();
-
-            File[] contents = mBaseDir.listFiles(new FileTypeFilter(selectParams.isIncludeFiles(),
-                    selectParams.isIncludeFolders()).addFilter(new WildcardFileFilter(pattern)).
-                    setInverseSelection(selectParams.isInverseSelection()));
-
-            Stream.of(contents).forEach(file -> mSelectedFiles.add(new FileSystemFile(file.getAbsolutePath())));
-        } else {
-            File[] allFiles = mBaseDir.listFiles(new FileTypeFilter(selectParams.isIncludeFiles(), selectParams.isIncludeFolders()));
-            if (selectParams.isTodayDate()) {
-
-                Calendar today = Calendar.getInstance();
-                Calendar currentDay = Calendar.getInstance();
-
-                for (File file : allFiles) {
-                    currentDay.setTime(new Date(file.lastModified()));
-                    if (isSameDay(today, currentDay)) {
-                        mSelectedFiles.add(new FileSystemFile(file.getAbsolutePath()));
-                    }
-                }
-            } else {
-                long startDate = selectParams.getDateFrom().getTime();
-                long endDate = selectParams.getDateTo().getTime();
-                for (File file : allFiles) {
-                    if (file.lastModified() > startDate && file.lastModified() < endDate) {
-                        mSelectedFiles.add(new FileSystemFile(file.getAbsolutePath()));
-                    }
-                }
-            }
-
         }
+
+        FileFilter fileFilter = selectParams.getType() == SelectParams.SelectionType.NAME ?
+                new FileNameFilter(selectParams) : new DateFilter(selectParams);
+        mSubscriptions.add(fileFilter.filter(allFiles).subscribe(list -> mSelectedFiles.addAll(list), Throwable::printStackTrace));
 
         FileSystemAdapter adapter = getAdapter();
         adapter.setSelectedFiles(mSelectedFiles);
         adapter.notifyDataSetChanged();
+
         setSelectedFilesSizeVisibility();
         calculateSelectedFilesSize();
         showQuickActionPanel();
 
         return mSelectedFiles.size();
-    }
-
-    /**
-     * <p>Checks if two calendars represent the same day ignoring time.</p>
-     * @param cal1  the first calendar, not altered, not null
-     * @param cal2  the second calendar, not altered, not null
-     * @return true if they represent the same day
-     * @throws IllegalArgumentException if either calendar is <code>null</code>
-     */
-    public static boolean isSameDay(Calendar cal1, Calendar cal2) {
-        if (cal1 == null || cal2 == null) {
-            throw new IllegalArgumentException("The dates must not be null");
-        }
-        return (cal1.get(Calendar.ERA) == cal2.get(Calendar.ERA) &&
-                cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
-                cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR));
     }
 
     public void addSelectedFiles(LinkedHashSet<File> selectedFiles) {

@@ -60,12 +60,13 @@
                         android:layout_height="wrap_content"/>
 
                 <CheckBox
-                        android:id="@+id/invert_selection"
-                        android:text="@string/invert_selection"
-                        android:button="@drawable/check_box_selector"
-                        android:layout_marginTop="10dp"
-                        android:layout_width="fill_parent"
-                        android:layout_height="fill_parent"/>
+                    android:id="@+id/case_sensitive"
+                    android:text="@string/case_sensitive"
+                    android:button="@drawable/check_box_selector"
+                    android:layout_marginTop="10dp"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"/>
+
             </LinearLayout>
 
             <TableLayout
@@ -117,10 +118,19 @@
             </TableLayout>
         </ViewFlipper>
 
+        <CheckBox
+            android:id="@+id/invert_selection"
+            android:text="@string/invert_selection"
+            android:button="@drawable/check_box_selector"
+            android:layout_marginTop="20dp"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"/>
+
+
         <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="10dp"
             android:orientation="horizontal">
 
             <CheckBox

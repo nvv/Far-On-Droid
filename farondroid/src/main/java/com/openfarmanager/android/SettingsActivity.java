@@ -12,7 +12,6 @@ import android.preference.CheckBoxPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceCategory;
-import android.preference.PreferenceScreen;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.WindowManager;
@@ -443,7 +442,7 @@ public class SettingsActivity extends PreferenceActivity {
         @Override
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
             if ("folders_first".equals(s) || "sdcard_root".equals(s)) {
-                FileSystemScanner.sInstance.initFilters();
+                FileSystemScanner.sInstance.initSorters();
             } else if ("multi_panels".equals(s)) {
                 mResultData.putExtra(Main.RESULT_CODE_PANELS_MODE_CHANGED, true);
                 SharedPreferences preferences = App.sInstance.getSettings().getSharedPreferences();

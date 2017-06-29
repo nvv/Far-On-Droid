@@ -5,6 +5,6 @@ import com.openfarmanager.android.filesystem.FileProxy;
 /**
  * Vlad Namashko
  */
-public interface Filter {
-    int doFilter(FileProxy file1, FileProxy file2);
+public interface Sorter {
+    int doSort(FileProxy file1, FileProxy file2);
 }

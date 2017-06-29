@@ -73,7 +73,7 @@ public class MainTips {
         float density = mActivity.getResources().getDisplayMetrics().density;
 
         if (mCurrentStep == 0) {
-            int selectedFiles = panel.select(new SelectParams("*", false, true, true));
+            int selectedFiles = panel.select(new SelectParams("*", false, false, true, true));
             if (selectedFiles == 0) {
                 // skip "selected files"
                 mCurrentStep = 2;

@@ -15,7 +15,7 @@ import java.util.List;
  */
 public class ArchiveAdapter extends FileSystemAdapter {
 
-    private List<FileProxy> mArchiveEntries;
+//    private List<FileProxy> mArchiveEntries;
     private ArchiveScanner.File mCurrentLevelParent;
 
     public ArchiveAdapter(ArchiveScanner.File node) {
@@ -23,19 +23,17 @@ public class ArchiveAdapter extends FileSystemAdapter {
     }
 
     public void setItems(ArchiveScanner.File node) {
-        mArchiveEntries = new ArrayList<>();
+        mFiles = new ArrayList<>();
         mCurrentLevelParent = node;
         if (node != null && node.getSortedChildren() != null && !node.getSortedChildren().isEmpty()) {
-            for (ArchiveScanner.File file : node.getSortedChildren()) {
-                mArchiveEntries.add(new ArchiveFile(file));
-            }
+            mFiles.addAll(node.getSortedChildren());
         }
         notifyDataSetChanged();
     }
 
     @Override
     public int getItemCount() {
-        return mArchiveEntries.size() + 1;
+        return mFiles.size() + 1;
     }
 
     @Override
@@ -43,7 +41,7 @@ public class ArchiveAdapter extends FileSystemAdapter {
         if (i == 0) {
             return new ArchiveFile(ArchiveScanner.File.createUpperNode(mCurrentLevelParent));
         }
-        return mArchiveEntries.get(i - 1);
+        return mFiles.get(i - 1);
     }
 
     @Override

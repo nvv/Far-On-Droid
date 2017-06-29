@@ -1,7 +1,9 @@
 package com.openfarmanager.android.core.archive;
 
-import com.openfarmanager.android.filesystem.filter.ArchiveFilter;
-import com.openfarmanager.android.filesystem.filter.FilterFactory;
+import com.openfarmanager.android.filesystem.ArchiveFile;
+import com.openfarmanager.android.filesystem.FileProxy;
+import com.openfarmanager.android.filesystem.filter.Sorter;
+import com.openfarmanager.android.filesystem.filter.SorterFactory;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -13,7 +15,7 @@ import static com.openfarmanager.android.utils.Extensions.isNullOrEmpty;
 public class ArchiveScanner {
 
     private File mRoot;
-    private LinkedList<ArchiveFilter> mFilters;
+    private LinkedList<Sorter> mSorters;
 
     public static final ArchiveScanner sInstance;
 
@@ -23,16 +25,16 @@ public class ArchiveScanner {
 
     private ArchiveScanner() {
         mRoot = File.createRoot();
-        mFilters = new LinkedList<ArchiveFilter>();
-        mFilters.add(FilterFactory.createArchiveDirectoryUpFilter());
-        mFilters.add(FilterFactory.createArchiveAlphabeticFilter());
+        mSorters = new LinkedList<>();
+        mSorters.add(SorterFactory.createDirectoryUpFilter());
+        mSorters.add(SorterFactory.createAlphabeticFilter());
     }
 
-    public final Comparator<File> mComparator = new Comparator<File>() {
-        public int compare(File f1, File f2) {
+    public final Comparator<FileProxy> mComparator = new Comparator<FileProxy>() {
+        public int compare(FileProxy f1, FileProxy f2) {
             int result = 0;
-            for (ArchiveFilter filter : mFilters) {
-                if ((result = filter.doFilter(f1, f2)) != 0) {
+            for (Sorter sorter : mSorters) {
+                if ((result = sorter.doSort(f1, f2)) != 0) {
                     return result;
                 }
             }
@@ -56,7 +58,7 @@ public class ArchiveScanner {
         private boolean mUp;
 
         private File mParent;
-        private List<File> mChildren;
+        private List<FileProxy> mChildren;
         private boolean mRoot;
         private int mChildFilesCount;
 
@@ -93,10 +95,10 @@ public class ArchiveScanner {
         public void addNode(String name, boolean isDirectory, long size) {
             File child = new File(name, isDirectory, size, this);
             if (mChildren == null) {
-                mChildren = new LinkedList<File>();
+                mChildren = new LinkedList<>();
             }
 
-            mChildren.add(child);
+            mChildren.add(new ArchiveFile(child));
         }
 
         public void processFile(String path, long fileSize) {
@@ -137,11 +139,11 @@ public class ArchiveScanner {
                 return mChildFilesCount;
             }
 
-            for (File child : mChildren) {
+            for (FileProxy child : mChildren) {
                 if (!child.isDirectory()) {
                     mChildFilesCount++;
                 } else {
-                    mChildFilesCount += child.countFiles();
+                    mChildFilesCount += child.getChildren().size();
                 }
             }
 
@@ -168,13 +170,13 @@ public class ArchiveScanner {
                 return null;
             }
 
-            for (File child : mChildren) {
+            for (FileProxy child : mChildren) {
                 if (child.getFullPath().equals(fileName)) {
-                    return child;
+                    return (File) child;
                 }
 
                 if (child.isDirectory()) {
-                    File childFile = child.findFile(fileName);
+                    File childFile = ((File) child).findFile(fileName);
                     if (childFile != null) {
                         return childFile;
                     }
@@ -205,16 +207,16 @@ public class ArchiveScanner {
                 return null;
             }
 
-            for (File child : mChildren) {
+            for (FileProxy child : mChildren) {
                 if (child.isDirectory() && child.getName().equals(directoryName)) {
-                    return child;
+                    return (File) child;
                 }
             }
 
             return null;
         }
 
-        public void sort(List<File> filesToSort) {
+        public void sort(List<FileProxy> filesToSort) {
             if (filesToSort != null) {
                 Collections.sort(filesToSort, ArchiveScanner.sInstance.mComparator);
             }
@@ -236,7 +238,7 @@ public class ArchiveScanner {
             return mParent;
         }
 
-        public List<File> getChildren() {
+        public List<FileProxy> getChildren() {
             return mChildren;
         }
 
@@ -275,7 +277,7 @@ public class ArchiveScanner {
             return fullPath.toString();
         }
 
-        public List<File> getSortedChildren() {
+        public List<FileProxy> getSortedChildren() {
             sort(mChildren);
             return mChildren;
         }

@@ -22,7 +22,7 @@ public interface FileProxy<T> {
 
     public long lastModifiedDate();
 
-    public List<T> getChildren();
+    public List<FileProxy> getChildren();
 
     public String getFullPath();
 
