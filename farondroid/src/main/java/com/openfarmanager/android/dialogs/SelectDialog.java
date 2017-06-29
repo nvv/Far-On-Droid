@@ -45,6 +45,7 @@ public class SelectDialog extends Dialog {
         final View date = findViewById(R.id.select_date);
         final View dateToday = findViewById(R.id.date_today);
         final View datePeriod = findViewById(R.id.date_period);
+        final View datePeriodHolder = findViewById(R.id.date_period_holder);
         final TextView dateFrom = (TextView) findViewById(R.id.date_from);
         final TextView dateTo = (TextView) findViewById(R.id.date_to);
         final ViewFlipper pages = (ViewFlipper) findViewById(R.id.pages);
@@ -97,7 +98,7 @@ public class SelectDialog extends Dialog {
             isToday.value = true;
         });
 
-        datePeriod.setOnClickListener(v -> {
+        datePeriodHolder.setOnClickListener(v -> {
             dateToday.setBackgroundResource(R.color.main_grey);
             datePeriod.setBackgroundResource(R.color.selected_item);
 

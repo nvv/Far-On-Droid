@@ -85,7 +85,7 @@
                             android:layout_height="wrap_content"/>
                 </TableRow>
 
-                <TableRow>
+                <TableRow android:id="@+id/date_period_holder" android:paddingTop="4dp">
 
                     <TextView
                             android:id="@+id/date_period"
