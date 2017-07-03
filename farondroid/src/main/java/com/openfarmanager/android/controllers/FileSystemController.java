@@ -125,6 +125,8 @@ public class FileSystemController {
     public static final int GOTO_HOME = 134;
     public static final int OPEN_DIRECTORY = 135;
     public static final int INVALIDATE = 136;
+    public static final int SELECT_ALL = 137;
+    public static final int UNSELECT_ALL = 138;
 
     public static final int ARG_FORCE_OPEN_FILE_IN_EDITOR = 1000;
     public static final int ARG_EXPAND_LEFT_PANEL = 1001;
@@ -548,6 +550,14 @@ public class FileSystemController {
                     break;
                 case INVALIDATE:
                     invalidate();
+                    break;
+                case SELECT_ALL:
+                    activePanel.selectAll();
+                    activePanel.invalidate();
+                    break;
+                case UNSELECT_ALL:
+                    activePanel.unselectAll();
+                    activePanel.invalidate();
                     break;
             }
         }

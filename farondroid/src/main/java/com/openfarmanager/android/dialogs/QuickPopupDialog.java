@@ -9,6 +9,7 @@ import android.widget.PopupWindow;
 
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.R;
+import com.openfarmanager.android.view.presenters.view.WidgetOnPanelView;
 
 /**
  * @author Vlad Namashko.
@@ -27,7 +28,7 @@ public class QuickPopupDialog extends PopupWindow {
         App app = App.sInstance;
         View layout = ((LayoutInflater) app.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(layoutId, null);
         layout.setBackgroundColor(app.getSettings().getSecondaryColor());
-        layout.getBackground().setAlpha(170);
+        layout.getBackground().setAlpha(135);
 
         setWidth(WindowManager.LayoutParams.WRAP_CONTENT);
         setHeight(WindowManager.LayoutParams.WRAP_CONTENT);

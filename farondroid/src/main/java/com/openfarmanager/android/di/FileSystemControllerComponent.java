@@ -2,6 +2,7 @@ package com.openfarmanager.android.di;
 
 import com.openfarmanager.android.view.presenters.ActionBarPresenterImpl;
 import com.openfarmanager.android.view.presenters.NetworkActionBarPresenterImpl;
+import com.openfarmanager.android.view.presenters.QuickActionViewPresenterImpl;
 
 import javax.inject.Singleton;
 
@@ -18,4 +19,5 @@ public interface FileSystemControllerComponent {
 
     void inject(NetworkActionBarPresenterImpl presenter);
 
+    void inject(QuickActionViewPresenterImpl presenter);
 }

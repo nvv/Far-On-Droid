@@ -18,6 +18,7 @@ import android.view.ViewGroup;
 import android.webkit.MimeTypeMap;
 import android.widget.*;
 
+import com.annimon.stream.Stream;
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.R;
 //import com.openfarmanager.android.adapters.FlatFileSystemAdapter;
@@ -57,9 +58,6 @@ import com.openfarmanager.android.utils.StorageUtils;
 import com.openfarmanager.android.view.ActionBar;
 import com.openfarmanager.android.view.FileSystemListView;
 import com.openfarmanager.android.view.ToastNotification;
-
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOCase;
 
 import java.io.File;
 import java.util.*;
@@ -199,41 +197,7 @@ public class MainPanel extends BaseFileSystemPanel {
 
         setupGestures(mFileSystemList);
 
-        mQuickActionPopup = new QuickPopupDialog(getActivity(), view, R.layout.quick_action_popup);
-        mQuickActionPopup.setPosition((getPanelLocation() == LEFT_PANEL ? Gravity.LEFT : Gravity.RIGHT) | Gravity.TOP,
-                (int) (50 * getResources().getDisplayMetrics().density));
-        View layout = mQuickActionPopup.getContentView();
-        layout.findViewById(R.id.quick_action_copy).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                gainFocus();
-                mHandler.sendMessage(mHandler.obtainMessage(FILE_ACTION, FileActionEnum.COPY));
-            }
-        });
-
-        layout.findViewById(R.id.quick_action_delete).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                gainFocus();
-                mHandler.sendMessage(mHandler.obtainMessage(FILE_ACTION, FileActionEnum.DELETE));
-            }
-        });
-
-        layout.findViewById(R.id.quick_action_select).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                selectAll();
-                invalidate(false);
-            }
-        });
-
-        layout.findViewById(R.id.quick_action_deselect).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                unselectAll();
-                invalidate(false);
-            }
-        });
+        mQuickActionPopup = new QuickPopupFileActionsView(getActivity(), view, getPanelLocation());
 
         postInitialization();
         setNavigationButtonsVisibility();
@@ -401,14 +365,6 @@ public class MainPanel extends BaseFileSystemPanel {
         }
     }
 
-//    @Override
-//    public void onDestroy() {
-//        if (mSubscriptions != null) {
-//            mSubscriptions.unsubscribe();
-//        }
-//        super.onDestroy();
-//    }
-
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -447,16 +403,11 @@ public class MainPanel extends BaseFileSystemPanel {
     }
 
     protected void calculateSelectedFilesSize() {
-
         if (!App.sInstance.getSettings().isShowSelectedFilesSize()) {
             return;
         }
 
-        long size = 0;
-        for (FileProxy f : mSelectedFiles) {
-            size += f.isDirectory() ? 0 : f.getSize();
-        }
-
+        long size = Stream.of(mSelectedFiles).filter(f -> !f.isDirectory()).mapToLong(FileProxy::getSize).sum();
         mSelectedFilesSize.setText(getString(R.string.selected_files, CustomFormatter.formatBytes(size), mSelectedFiles.size()));
     }
 

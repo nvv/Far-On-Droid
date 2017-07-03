@@ -4,7 +4,7 @@ import android.os.Handler;
 import android.os.Message;
 
 import com.openfarmanager.android.App;
-import com.openfarmanager.android.view.presenters.view.ActionBarView;
+import com.openfarmanager.android.view.presenters.view.WidgetOnPanelView;
 
 import javax.inject.Inject;
 
@@ -15,12 +15,12 @@ import static com.openfarmanager.android.controllers.FileSystemController.*;
  */
 public class ActionBarPresenterImpl implements ActionBarPresenter {
 
-    ActionBarView mActionBarView;
+    WidgetOnPanelView mActionBarView;
 
     @Inject
     Handler mHandler;
 
-    public ActionBarPresenterImpl(ActionBarView view) {
+    public ActionBarPresenterImpl(WidgetOnPanelView view) {
         mActionBarView = view;
         App.sInstance.getFileSystemControllerComponent().inject(this);
     }

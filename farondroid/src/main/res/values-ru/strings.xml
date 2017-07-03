@@ -297,7 +297,7 @@
 
     <string name="action_share">Поделиться</string>
     <string name="btn_tools">Инструменты</string>
-    <string name="selected_files" formatted="false">%s в %s файлах</string>
+    <string name="selected_files" formatted="false">%s в %d файлах</string>
     <string name="main_panel_font">Шрифт основной панели</string>
     <string name="viewer_font">Шрифт просмотрщика файлов</string>
     <string name="main_panel_color">Цвет основной панели</string>

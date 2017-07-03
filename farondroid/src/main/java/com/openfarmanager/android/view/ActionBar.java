@@ -1,10 +1,8 @@
 package com.openfarmanager.android.view;
 
 import android.content.Context;
-import android.os.Handler;
 import android.text.TextUtils;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.ListPopupWindow;
@@ -14,7 +12,7 @@ import com.openfarmanager.android.App;
 import com.openfarmanager.android.R;
 import com.openfarmanager.android.view.presenters.ActionBarPresenter;
 import com.openfarmanager.android.view.presenters.ActionBarPresenterImpl;
-import com.openfarmanager.android.view.presenters.view.ActionBarView;
+import com.openfarmanager.android.view.presenters.view.WidgetOnPanelView;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,7 +23,7 @@ import static com.openfarmanager.android.fragments.MainPanel.LEFT_PANEL;
 /**
  * author: Vlad Namashko
  */
-public class ActionBar extends FrameLayout implements ActionBarView {
+public class ActionBar extends FrameLayout implements WidgetOnPanelView {
 
     protected int mPanelLocation;
 

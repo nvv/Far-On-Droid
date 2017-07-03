@@ -1,8 +1,7 @@
 package com.openfarmanager.android.view.presenters;
 
-import com.openfarmanager.android.App;
 import com.openfarmanager.android.model.NetworkEnum;
-import com.openfarmanager.android.view.presenters.view.ActionBarView;
+import com.openfarmanager.android.view.presenters.view.WidgetOnPanelView;
 
 import static com.openfarmanager.android.controllers.FileSystemController.EXIT_FROM_NETWORK_STORAGE;
 import static com.openfarmanager.android.controllers.FileSystemController.OPEN_ENCODING_DIALOG;
@@ -14,7 +13,7 @@ public class NetworkActionBarPresenterImpl extends ActionBarPresenterImpl implem
 
     private NetworkEnum mNetworkType;
 
-    public NetworkActionBarPresenterImpl(ActionBarView view, NetworkEnum networkEnum) {
+    public NetworkActionBarPresenterImpl(WidgetOnPanelView view, NetworkEnum networkEnum) {
         super(view);
         mNetworkType = networkEnum;
 //        App.sInstance.getFileSystemControllerComponent().inject(this);
