@@ -12,9 +12,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
@@ -25,7 +23,7 @@ import io.reactivex.schedulers.Schedulers;
  */
 public class SearchFilter {
 
-    private SearchOptions mSearchOptions;
+    protected SearchOptions mSearchOptions;
 
     public SearchFilter(SearchOptions searchOptions) {
         mSearchOptions = searchOptions;

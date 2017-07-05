@@ -2,9 +2,7 @@ package com.openfarmanager.android.dialogs;
 
 import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.graphics.Color;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
@@ -19,31 +17,20 @@ import android.widget.Toast;
 
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.R;
-import com.openfarmanager.android.core.network.NetworkApi;
 import com.openfarmanager.android.filesystem.FileProxy;
-import com.openfarmanager.android.filesystem.FileSystemFile;
+import com.openfarmanager.android.filesystem.search.NetworkSearchFilter;
 import com.openfarmanager.android.filesystem.search.SearchFilter;
 import com.openfarmanager.android.filesystem.search.SearchOptions;
 import com.openfarmanager.android.model.NetworkEnum;
 import com.openfarmanager.android.view.ToastNotification;
 
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOCase;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.schedulers.Schedulers;
 
 /**
  * Performs search and shows result.
@@ -60,7 +47,6 @@ public class SearchResultDialog extends Dialog {
 
     private final List<FileProxy> mData = Collections.synchronizedList(new LinkedList<FileProxy>());
 
-    private NetworkScanner mNetworkScanner;
     private ProgressBar mProgressBar;
 
     private SearchFilter mSearchFilter;
@@ -80,7 +66,7 @@ public class SearchResultDialog extends Dialog {
         mSearchOptions = searchOption;
         mListener = listener;
 
-        mSearchFilter = new SearchFilter(searchOption);
+        mSearchFilter = mNetworkType != null ? new NetworkSearchFilter(searchOption, mNetworkType) : new SearchFilter(searchOption);
         mSubscription = new CompositeDisposable();
     }
 
@@ -199,23 +185,15 @@ public class SearchResultDialog extends Dialog {
         setOnDismissListener(dialog -> mSubscription.clear());
 
         mProgressBar.setVisibility(View.VISIBLE);
-        if (mCurrentDir != null) {
-            if (mNetworkType != null) {
-                if (mNetworkScanner == null) {
-                    mNetworkScanner = new NetworkScanner(mNetworkType);
-                    mNetworkScanner.execute(mCurrentDir);
-                }
-            } else {
-                mSearchFilter.searchAsync(mCurrentDir).observeOn(AndroidSchedulers.mainThread()).subscribe(
-                        fileProxy -> {
-                            mData.add(fileProxy);
-                            ((BaseAdapter) mList.getAdapter()).notifyDataSetChanged();
-                        },
-                        throwable -> {
-                        },
-                        () -> mProgressBar.setVisibility(View.GONE));
-            }
-        }
+        mSearchFilter.searchAsync(mCurrentDir).observeOn(AndroidSchedulers.mainThread()).subscribe(
+                fileProxy -> {
+                    mData.add(fileProxy);
+                    ((BaseAdapter) mList.getAdapter()).notifyDataSetChanged();
+                },
+                throwable -> {
+                },
+                () -> mProgressBar.setVisibility(View.GONE));
+
     }
 
     private boolean checkFileSelected() {
@@ -225,51 +203,6 @@ public class SearchResultDialog extends Dialog {
         }
 
         return true;
-    }
-
-    /**
-     * Finds files in network storage
-     */
-    private class NetworkScanner extends AsyncTask<String, Void, List<FileProxy>> {
-
-        private NetworkEnum mNetworkType;
-
-        public NetworkScanner(NetworkEnum networkType) {
-            mNetworkType = networkType;
-        }
-
-        @Override
-        protected void onPreExecute() {
-            mProgressBar.setVisibility(View.VISIBLE);
-        }
-
-        @Override
-        protected List<FileProxy> doInBackground(String ... path) {
-            return getNetworkApi().search(path[0], mSearchOptions.fileMask);
-        }
-
-        @Override
-        protected void onPostExecute(List<FileProxy> searchResult) {
-            mData.clear();
-            mData.addAll(searchResult);
-            ((BaseAdapter) mList.getAdapter()).notifyDataSetChanged();
-            mProgressBar.setVisibility(View.INVISIBLE);
-        }
-
-        private NetworkApi getNetworkApi() {
-            switch (mNetworkType) {
-                case Dropbox: default:
-                    return App.sInstance.getDropboxApi();
-                case SkyDrive:
-                    return App.sInstance.getSkyDriveApi();
-                case GoogleDrive:
-                    return App.sInstance.getGoogleDriveApi();
-                case MediaFire:
-                    return App.sInstance.getMediaFireApi();
-                case WebDav:
-                    return App.sInstance.getWebDavApi();
-            }
-        }
     }
 
     public interface SearchResultListener extends Serializable {
