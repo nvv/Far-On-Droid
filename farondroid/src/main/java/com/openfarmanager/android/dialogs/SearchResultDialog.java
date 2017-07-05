@@ -12,7 +12,6 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
-import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -23,6 +22,8 @@ import com.openfarmanager.android.R;
 import com.openfarmanager.android.core.network.NetworkApi;
 import com.openfarmanager.android.filesystem.FileProxy;
 import com.openfarmanager.android.filesystem.FileSystemFile;
+import com.openfarmanager.android.filesystem.search.SearchFilter;
+import com.openfarmanager.android.filesystem.search.SearchOptions;
 import com.openfarmanager.android.model.NetworkEnum;
 import com.openfarmanager.android.view.ToastNotification;
 
@@ -40,6 +41,10 @@ import java.util.List;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.schedulers.Schedulers;
+
 /**
  * Performs search and shows result.
  *
@@ -55,22 +60,28 @@ public class SearchResultDialog extends Dialog {
 
     private final List<FileProxy> mData = Collections.synchronizedList(new LinkedList<FileProxy>());
 
-    private FolderScanner mScanner;
     private NetworkScanner mNetworkScanner;
     private ProgressBar mProgressBar;
 
+    private SearchFilter mSearchFilter;
+
     private NetworkEnum mNetworkType;
-    private SearchActionDialog.SearchActionResult mSearchOptions;
+    private SearchOptions mSearchOptions;
     private SearchResultListener mListener;
     private String mCurrentDir;
 
+    private CompositeDisposable mSubscription;
+
     public SearchResultDialog(Context context, NetworkEnum networkType, String currentDir,
-                              SearchActionDialog.SearchActionResult searchOption, SearchResultListener listener) {
+                              SearchOptions searchOption, SearchResultListener listener) {
         super(context);
         mNetworkType = networkType;
         mCurrentDir = currentDir;
         mSearchOptions = searchOption;
         mListener = listener;
+
+        mSearchFilter = new SearchFilter(searchOption);
+        mSubscription = new CompositeDisposable();
     }
 
     @Override
@@ -80,44 +91,32 @@ public class SearchResultDialog extends Dialog {
         mDialogView = View.inflate(App.sInstance.getApplicationContext(), R.layout.search_result, null);
         setContentView(mDialogView);
 
-        mDialogView.findViewById(R.id.cancel).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                dismiss();
+        mDialogView.findViewById(R.id.cancel).setOnClickListener(view -> dismiss());
+
+        mDialogView.findViewById(R.id.go_to).setOnClickListener(view -> {
+            if (!checkFileSelected()) {
+                return;
             }
+            mListener.onGotoFile(mSelected);
+            dismiss();
         });
 
-        mDialogView.findViewById(R.id.go_to).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (!checkFileSelected()) {
-                    return;
-                }
-                mListener.onGotoFile(mSelected);
-                dismiss();
-            }
+        mDialogView.findViewById(R.id.new_search).setOnClickListener(view -> {
+            mListener.onResetSearch();
+            dismiss();
         });
 
-        mDialogView.findViewById(R.id.new_search).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mListener.onResetSearch();
-                dismiss();
+        mDialogView.findViewById(R.id.view).setOnClickListener(view -> {
+            if (!checkFileSelected()) {
+                return;
             }
-        });
-
-        mDialogView.findViewById(R.id.view).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (!checkFileSelected()) {
-                    return;
-                }
-                mListener.onViewFile(mSelected);
-                dismiss();
-            }
+            mListener.onViewFile(mSelected);
+            dismiss();
         });
 
         mDialogView.findViewById(R.id.view).setVisibility(mSearchOptions.isNetworkPanel ? View.GONE : View.VISIBLE);
+
+        setOnDismissListener(dialog -> mSubscription.clear());
 
         mProgressBar = (ProgressBar) mDialogView.findViewById(android.R.id.progress);
 
@@ -134,27 +133,21 @@ public class SearchResultDialog extends Dialog {
             }
         });
 
-        mList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                mSelected = (FileProxy) view.getTag();
-                mSelectedFilePosition = i;
-                ((BaseAdapter) mList.getAdapter()).notifyDataSetChanged();
-            }
+        mList.setOnItemClickListener((adapterView, view, i, l) -> {
+            mSelected = (FileProxy) view.getTag();
+            mSelectedFilePosition = i;
+            ((BaseAdapter) mList.getAdapter()).notifyDataSetChanged();
         });
 
-        mList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
-                mSelected = (FileProxy) view.getTag();
+        mList.setOnItemLongClickListener((adapterView, view, i, l) -> {
+            mSelected = (FileProxy) view.getTag();
 
-                if (!checkFileSelected()) {
-                    return true;
-                }
-                mListener.onGotoFile(mSelected);
-                dismiss();
+            if (!checkFileSelected()) {
                 return true;
             }
+            mListener.onGotoFile(mSelected);
+            dismiss();
+            return true;
         });
 
         mList.setAdapter(new BaseAdapter() {
@@ -203,15 +196,9 @@ public class SearchResultDialog extends Dialog {
             }
         });
 
-        setOnDismissListener(new OnDismissListener() {
-            @Override
-            public void onDismiss(DialogInterface dialog) {
-                if (mScanner != null) {
-                    mScanner.cancel(true);
-                }
-            }
-        });
+        setOnDismissListener(dialog -> mSubscription.clear());
 
+        mProgressBar.setVisibility(View.VISIBLE);
         if (mCurrentDir != null) {
             if (mNetworkType != null) {
                 if (mNetworkScanner == null) {
@@ -219,10 +206,14 @@ public class SearchResultDialog extends Dialog {
                     mNetworkScanner.execute(mCurrentDir);
                 }
             } else {
-                if (mScanner == null) {
-                    mScanner = new FolderScanner();
-                    mScanner.execute(new File(mCurrentDir));
-                }
+                mSearchFilter.searchAsync(mCurrentDir).observeOn(AndroidSchedulers.mainThread()).subscribe(
+                        fileProxy -> {
+                            mData.add(fileProxy);
+                            ((BaseAdapter) mList.getAdapter()).notifyDataSetChanged();
+                        },
+                        throwable -> {
+                        },
+                        () -> mProgressBar.setVisibility(View.GONE));
             }
         }
     }
@@ -234,109 +225,6 @@ public class SearchResultDialog extends Dialog {
         }
 
         return true;
-    }
-
-    private IOCase isCaseSensitive() {
-        return mSearchOptions.caseSensitive ? IOCase.SENSITIVE : IOCase.INSENSITIVE;
-    }
-
-    /**
-     * Finds files and folder by Wildcard
-     */
-    private class FolderScanner extends AsyncTask<File, Void, Void> {
-
-        @Override
-        protected void onPreExecute() {
-            mProgressBar.setVisibility(View.VISIBLE);
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            mProgressBar.setVisibility(View.INVISIBLE);
-        }
-
-        @Override
-        protected Void doInBackground(File... files) {
-            for (File f : files) {
-                searchDirectory(f);
-            }
-            return null;
-        }
-
-        private void searchDirectory(File mDir) {
-            if (mDir == null) {
-                return;
-            }
-            File[] files = mDir.listFiles();
-
-            if (files == null) {
-                return;
-            }
-
-            for (File f : files) {
-                if (isCancelled()) {
-                    return;
-                }
-
-                if (FilenameUtils.wildcardMatch(f.getName(), mSearchOptions.fileMask, isCaseSensitive())) {
-                    if (mSearchOptions.keyword != null && f.isFile()) {
-                        if (searchFile(f)) {
-                            mData.add(new FileSystemFile(f.getAbsolutePath()));
-                            publishProgress();
-                        }
-                    } else {
-                        mData.add(new FileSystemFile(f.getAbsolutePath()));
-                        publishProgress();
-                    }
-                }
-                if (isCancelled()) {
-                    return;
-                }
-                if (f.isDirectory() && f.canRead()) {
-                    searchDirectory(f);
-                }
-            }
-        }
-
-        private boolean searchFile(File f) {
-            if (!f.canRead()) {
-                return false;
-            }
-            BufferedReader is = null;
-            try {
-                String keyword = mSearchOptions.keyword;
-                Pattern pattern = Pattern.compile(mSearchOptions.wholeWords ? String.format("\\b%s\\b", Pattern.quote(keyword)) : Pattern.quote(keyword),
-                        isCaseSensitive() == IOCase.INSENSITIVE ? Pattern.CASE_INSENSITIVE : 0);
-                is = new BufferedReader(new FileReader(f));
-                String line;
-                while ((line = is.readLine()) != null) {
-                    if (pattern.matcher(line).find()) {
-                        return true;
-                    }
-                }
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (PatternSyntaxException e) {
-                e.printStackTrace();
-            } catch (OutOfMemoryError e) {
-                e.printStackTrace();
-            } finally {
-                if (is != null) {
-                    try {
-                        is.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-            return false;
-        }
-
-        @Override
-        protected void onProgressUpdate(Void... values) {
-            ((BaseAdapter) mList.getAdapter()).notifyDataSetChanged();
-        }
     }
 
     /**

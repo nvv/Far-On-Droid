@@ -1,5 +1,6 @@
 package com.openfarmanager.android.fragments;
 
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Dialog;
 import android.content.Context;
@@ -46,6 +47,7 @@ import com.openfarmanager.android.filesystem.commands.GoogleDriveUpdateCommand;
 import com.openfarmanager.android.filesystem.filter.DateFilter;
 import com.openfarmanager.android.filesystem.filter.FileFilter;
 import com.openfarmanager.android.filesystem.filter.FileNameFilter;
+import com.openfarmanager.android.filesystem.search.SearchOptions;
 import com.openfarmanager.android.model.Bookmark;
 import com.openfarmanager.android.model.FileActionEnum;
 import com.openfarmanager.android.model.OpenDirectoryActionListener;
@@ -896,11 +898,11 @@ public class MainPanel extends BaseFileSystemPanel {
 
         final FileSystemAdapter adapter = getAdapter();
         adapter.setSelectedFiles(mSelectedFiles);
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                adapter.notifyDataSetChanged();
-            }
+        getActivity().runOnUiThread(() -> {
+            adapter.notifyDataSetChanged();
+            setSelectedFilesSizeVisibility();
+            calculateSelectedFilesSize();
+            showQuickActionPanel();
         });
     }
 
@@ -1001,6 +1003,7 @@ public class MainPanel extends BaseFileSystemPanel {
         }
     };
 
+    @SuppressLint("HandlerLeak")
     protected Handler mFileActionHandler = new Handler() {
 
         @Override
@@ -1056,7 +1059,7 @@ public class MainPanel extends BaseFileSystemPanel {
                     break;
                 case SEARCH_ACTION:
                     try {
-                        SearchActionDialog.SearchActionResult result = (SearchActionDialog.SearchActionResult) msg.obj;
+                        SearchOptions result = (SearchOptions) msg.obj;
                         showDialog(new SearchResultDialog(getActivity(), result.isNetworkPanel ? ((NetworkPanel) MainPanel.this).getNetworkType() : null,
                                 getCurrentPath(), result, new SearchResultDialog.SearchResultListener() {
                             @Override
@@ -1065,14 +1068,10 @@ public class MainPanel extends BaseFileSystemPanel {
                                     gotoSearchFile(fileProxy);
                                 } else {
                                     final File file = (FileSystemFile) fileProxy;
-                                    openDirectory(file.isDirectory() ? file : file.getParentFile());
-                                    if (!file.isDirectory()) {
-                                        addSelectedFiles(new LinkedHashSet<File>() {{
-                                            add(file);
-                                        }});
-                                        calculateSelectedFilesSize();
-                                    }
-                                    invalidate();
+                                    openDirectory(file.getParentFile());
+                                    addSelectedFiles(new LinkedHashSet<File>() {{
+                                        add(file);
+                                    }});
                                 }
                             }
 

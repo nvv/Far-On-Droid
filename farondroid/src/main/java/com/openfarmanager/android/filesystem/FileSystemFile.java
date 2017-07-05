@@ -24,6 +24,10 @@ public class FileSystemFile extends File implements FileProxy<File> {
         super(path);
     }
 
+    public FileSystemFile(File file) {
+        super(file.getParent(), file.getName());
+    }
+
     public FileSystemFile(File dir, String name) {
         super(dir, name);
     }

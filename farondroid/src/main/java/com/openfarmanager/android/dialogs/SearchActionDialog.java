@@ -10,6 +10,7 @@ import android.widget.EditText;
 
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.R;
+import com.openfarmanager.android.filesystem.search.SearchOptions;
 import com.openfarmanager.android.fragments.MainPanel;
 
 /**
@@ -62,7 +63,7 @@ public class SearchActionDialog extends BaseFileDialog {
                 .putString(FILEMASK, fileMask)
                 .putString(KEYWORD, keyword)
                 .putBoolean(CASE_SENSITIVE, caseSensitive)
-                .putBoolean(WHOLE_WORDS, wholeWords).commit();
+                .putBoolean(WHOLE_WORDS, wholeWords).apply();
     }
 
     @Override
@@ -84,22 +85,6 @@ public class SearchActionDialog extends BaseFileDialog {
         saveSettings(fileMask, keyword, caseSensitive, wholeWords);
 
         mHandler.sendMessage(mHandler.obtainMessage(MainPanel.SEARCH_ACTION,
-                new SearchActionResult(fileMask, keyword, caseSensitive, wholeWords)));
-    }
-
-    public class SearchActionResult {
-        public String fileMask;
-        public String keyword;
-        public boolean caseSensitive;
-        public boolean wholeWords;
-        public boolean isNetworkPanel;
-
-        public SearchActionResult(String fileMask, String keyword, boolean caseSensitive, boolean wholeWords) {
-            this.fileMask = fileMask;
-            this.keyword = keyword;
-            this.caseSensitive = caseSensitive;
-            this.wholeWords = wholeWords;
-            isNetworkPanel = mOnlyFileSearch;
-        }
+                new SearchOptions(fileMask, keyword, caseSensitive, wholeWords).setIsNetowrkPanel(mOnlyFileSearch)));
     }
 }

@@ -16,6 +16,8 @@
         <item name="android:gravity">center</item>
         <item name="android:singleLine">true</item>
         <item name="android:minHeight">40dp</item>
+        <item name="android:paddingLeft">10dp</item>
+        <item name="android:paddingRight">10dp</item>
     </style>
 
     <style name="Action_Dialog" parent="android:Theme.Dialog">

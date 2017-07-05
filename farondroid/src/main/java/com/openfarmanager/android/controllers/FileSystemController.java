@@ -859,13 +859,6 @@ public class FileSystemController {
                 }
                 activePanel.addSelectedFiles(activePanelDiffFiles);
                 inactivePanel.addSelectedFiles(inactivePanelDiffFiles);
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        activePanel.showQuickActionPanel();
-                        inactivePanel.showQuickActionPanel();
-                    }
-                });
             }
         }, getActivePanel().getAllFiles(), getInactivePanel().getAllFiles());
         task.execute();
