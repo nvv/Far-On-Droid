@@ -401,4 +401,7 @@
 
     <string name="include_files">Включить файлы</string>
     <string name="include_folders">Включить директории</string>
+
+    <string name="text_search_options">Параметры поиска текста</string>
+    <string name="advanced_search">Расширенные параметры поиска</string>
 </resources>

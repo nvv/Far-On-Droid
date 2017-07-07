@@ -14,33 +14,13 @@ public class DateFilter extends FileFilter {
         super(params);
 
         mPredicate = file -> {
-            if (params.isTodayDate()) {
-                Calendar today = Calendar.getInstance();
-                Calendar currentDay = Calendar.getInstance();
-                currentDay.setTime(new Date(file.lastModifiedDate()));
-                return isSameDay(today, currentDay);
-            } else {
-                long startDate = params.getDateFrom().getTime();
-                long endDate = params.getDateTo().getTime();
-                return file.lastModifiedDate() > startDate && file.lastModifiedDate() < endDate;
-            }
-        };
-    }
+//            long startDate = params.getDateFrom().getTime();
+//            long endDate = params.getDateTo().getTime();
+//            return file.lastModifiedDate() > startDate && file.lastModifiedDate() < endDate;
+            return (params.getDateFrom() == null || file.lastModifiedDate() > params.getDateFrom().getTime()) &&
+                    (params.getDateTo() == null || file.lastModifiedDate() < params.getDateTo().getTime());
 
-    /**
-     * <p>Checks if two calendars represent the same day ignoring time.</p>
-     * @param cal1  the first calendar, not altered, not null
-     * @param cal2  the second calendar, not altered, not null
-     * @return true if they represent the same day
-     * @throws IllegalArgumentException if either calendar is <code>null</code>
-     */
-    private static boolean isSameDay(Calendar cal1, Calendar cal2) {
-        if (cal1 == null || cal2 == null) {
-            throw new IllegalArgumentException("The dates must not be null");
-        }
-        return (cal1.get(Calendar.ERA) == cal2.get(Calendar.ERA) &&
-                cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
-                cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR));
+        };
     }
 
 }

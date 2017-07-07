@@ -69,53 +69,11 @@
 
             </LinearLayout>
 
-            <TableLayout
-                    android:layout_width="fill_parent"
-                    android:layout_height="fill_parent">
+            <com.openfarmanager.android.view.DatesPickerView
+                android:id="@+id/dates_picker"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
 
-                <TableRow>
-
-                    <TextView
-                            android:id="@+id/date_today"
-                            android:text="@string/today"
-                            android:background="@color/selected_item"
-                            android:padding="2dp"
-                            android:layout_marginBottom="10dp"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"/>
-                </TableRow>
-
-                <TableRow android:id="@+id/date_period_holder" android:paddingTop="4dp">
-
-                    <TextView
-                            android:id="@+id/date_period"
-                            android:text="@string/period"
-                            android:padding="2dp"
-                            android:background="@color/main_grey"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"/>
-
-                    <TextView
-                            android:id="@+id/date_from"
-                            android:padding="2dp"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"/>
-
-                    <TextView
-                            android:text="-"
-                            android:padding="2dp"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"/>
-
-                    <TextView
-                            android:id="@+id/date_to"
-                            android:padding="2dp"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"/>
-
-                </TableRow>
-
-            </TableLayout>
         </ViewFlipper>
 
         <CheckBox

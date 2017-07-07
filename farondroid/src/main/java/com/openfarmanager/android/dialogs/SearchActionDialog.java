@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 
 import com.openfarmanager.android.App;
@@ -48,6 +49,11 @@ public class SearchActionDialog extends BaseFileDialog {
             mDialogView.findViewById(R.id.case_sensitive).setVisibility(View.GONE);
             mDialogView.findViewById(R.id.whole_words).setVisibility(View.GONE);
         }
+
+        View advancedSearchFrame = mDialogView.findViewById(R.id.advanced_search_frame);
+        ((CheckBox) mDialogView.findViewById(R.id.advanced_search)).setOnCheckedChangeListener((buttonView, isChecked) -> {
+            advancedSearchFrame.setVisibility(isChecked ? View.VISIBLE : View.GONE);
+        });
     }
 
     private void restoreSettings() {
@@ -85,6 +91,6 @@ public class SearchActionDialog extends BaseFileDialog {
         saveSettings(fileMask, keyword, caseSensitive, wholeWords);
 
         mHandler.sendMessage(mHandler.obtainMessage(MainPanel.SEARCH_ACTION,
-                new SearchOptions(fileMask, keyword, caseSensitive, wholeWords).setIsNetowrkPanel(mOnlyFileSearch)));
+                new SearchOptions(fileMask, keyword, caseSensitive, wholeWords).setIsNetworkPanel(mOnlyFileSearch)));
     }
 }

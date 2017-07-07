@@ -19,7 +19,7 @@ public class SearchOptions {
         this.wholeWords = wholeWords;
     }
 
-    public SearchOptions setIsNetowrkPanel(boolean isNetworkPanel) {
+    public SearchOptions setIsNetworkPanel(boolean isNetworkPanel) {
         this.isNetworkPanel = isNetworkPanel;
         return this;
     }

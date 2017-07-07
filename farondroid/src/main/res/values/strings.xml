@@ -411,4 +411,10 @@ More network stuff will appear in future versions.
 
     <string name="include_files">Include files</string>
     <string name="include_folders">Include folders</string>
+
+    <string name="text_search_options">Search text options</string>
+    <string name="advanced_search">Advanced search options</string>
+
+    <string name="date_after">After</string>
+    <string name="date_before">Before</string>
 </resources>

@@ -55,7 +55,15 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"/>
 
+        <TextView
+            android:layout_marginTop="12dp"
+            android:text="@string/text_search_options"
+            android:textColor="@color/white"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"/>
+
         <LinearLayout
+                android:layout_marginTop="6dp"
                 android:orientation="horizontal"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content">
@@ -75,6 +83,26 @@
                     android:layout_width="fill_parent"
                     android:layout_weight="1"
                     android:layout_height="fill_parent"/>
+        </LinearLayout>
+
+        <CheckBox
+            android:layout_marginTop="20dp"
+            android:id="@+id/advanced_search"
+            android:text="@string/advanced_search"
+            android:button="@drawable/check_box_selector"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"/>
+
+        <LinearLayout
+            android:id="@+id/advanced_search_frame"
+            android:visibility="gone"
+            android:layout_width="fill_parent"
+            android:layout_height="200dp"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal">
+
+
+
         </LinearLayout>
 
         <LinearLayout

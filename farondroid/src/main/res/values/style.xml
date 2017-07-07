@@ -20,6 +20,11 @@
         <item name="android:paddingRight">10dp</item>
     </style>
 
+    <style name="dialog_button_holder" parent="dialog_button">
+        <item name="android:minHeight">30dp</item>
+        <item name="android:minWidth">120dp</item>
+    </style>
+
     <style name="Action_Dialog" parent="android:Theme.Dialog">
         <item name="android:windowBackground">@null</item>
     </style>

@@ -18,6 +18,7 @@ import com.openfarmanager.android.R;
 import com.openfarmanager.android.core.AbstractCommand;
 import com.openfarmanager.android.model.SelectParams;
 import com.openfarmanager.android.utils.SimpleWrapper;
+import com.openfarmanager.android.view.DatesPickerView;
 
 import java.io.File;
 import java.util.Calendar;
@@ -43,11 +44,7 @@ public class SelectDialog extends Dialog {
 
         final View name = findViewById(R.id.select_name);
         final View date = findViewById(R.id.select_date);
-        final View dateToday = findViewById(R.id.date_today);
-        final View datePeriod = findViewById(R.id.date_period);
-        final View datePeriodHolder = findViewById(R.id.date_period_holder);
-        final TextView dateFrom = (TextView) findViewById(R.id.date_from);
-        final TextView dateTo = (TextView) findViewById(R.id.date_to);
+        final DatesPickerView datesPickerView = (DatesPickerView) findViewById(R.id.dates_picker);
         final ViewFlipper pages = (ViewFlipper) findViewById(R.id.pages);
 
         mOkButton = (Button) findViewById(R.id.ok);
@@ -64,12 +61,6 @@ public class SelectDialog extends Dialog {
 
         final Calendar calendar = Calendar.getInstance();
 
-        final int todayDay = calendar.get(Calendar.DAY_OF_MONTH);
-        final int todayMonth = calendar.get(Calendar.MONTH);
-        final int todayYear = calendar.get(Calendar.YEAR);
-
-        final SimpleWrapper<Boolean> isToday = new SimpleWrapper<Boolean>();
-
         name.setOnClickListener(v -> {
             date.setBackgroundResource(R.color.main_grey);
             name.setBackgroundResource(R.color.selected_item);
@@ -82,54 +73,6 @@ public class SelectDialog extends Dialog {
             name.setBackgroundResource(R.color.main_grey);
 
             pages.setDisplayedChild(1);
-        });
-
-        dateFrom.setClickable(false);
-        dateTo.setClickable(false);
-
-        isToday.value = true;
-        dateToday.setOnClickListener(v -> {
-            datePeriod.setBackgroundResource(R.color.main_grey);
-            dateToday.setBackgroundResource(R.color.selected_item);
-
-            dateFrom.setClickable(false);
-            dateTo.setClickable(false);
-
-            isToday.value = true;
-        });
-
-        datePeriodHolder.setOnClickListener(v -> {
-            dateToday.setBackgroundResource(R.color.main_grey);
-            datePeriod.setBackgroundResource(R.color.selected_item);
-
-            dateFrom.setClickable(true);
-            dateTo.setClickable(true);
-
-            isToday.value = false;
-        });
-
-        dateFrom.setText(String.format("%s/%s/%s", todayYear, todayMonth, todayDay));
-        dateTo.setText(String.format("%s/%s/%s", todayYear, todayMonth, todayDay));
-
-        dateFrom.setOnClickListener(v -> {
-
-            if (isToday.value) {
-                return;
-            }
-
-            DatePickerDialog datePickerDialog = new DatePickerDialog(getContext(), (view, year, monthOfYear, dayOfMonth) ->
-                    dateFrom.setText(String.format("%s/%s/%s", year, monthOfYear, dayOfMonth)), todayYear, todayMonth, todayDay);
-            datePickerDialog.show();
-        });
-
-        dateTo.setOnClickListener(v -> {
-
-            if (isToday.value) {
-                return;
-            }
-
-            DatePickerDialog datePickerDialog = new DatePickerDialog(getContext(), (view, year, monthOfYear, dayOfMonth) -> dateTo.setText(String.format("%s/%s/%s", year, monthOfYear, dayOfMonth)), todayYear, todayMonth, todayDay);
-            datePickerDialog.show();
         });
 
         findViewById(R.id.cancel).setOnClickListener(v -> dismiss());
@@ -149,38 +92,7 @@ public class SelectDialog extends Dialog {
 
                 selectParams = new SelectParams(selectionString, caseSensitive, invertSelection, isIncludeFiles, isIncludeFolders);
             } else {
-                if (isToday.value) {
-                    selectParams = new SelectParams(true, null, null, invertSelection, isIncludeFiles, isIncludeFolders);
-                } else {
-                    try {
-                        String fromString = dateFrom.getText().toString();
-                        String toString = dateTo.getText().toString();
-
-                        String[] toStringParts = toString.split("\\/");
-                        String[] fromStringParts = fromString.split("\\/");
-
-                        calendar.set(Calendar.YEAR, Integer.parseInt(fromStringParts[0]));
-                        calendar.set(Calendar.MONTH, Integer.parseInt(fromStringParts[1]));
-                        calendar.set(Calendar.DAY_OF_MONTH, Integer.parseInt(fromStringParts[2]));
-                        calendar.set(Calendar.HOUR_OF_DAY, 0);
-                        calendar.set(Calendar.MINUTE, 0);
-                        calendar.set(Calendar.SECOND, 0);
-
-                        Date dateFrom1 = calendar.getTime();
-
-                        calendar.set(Calendar.YEAR, Integer.parseInt(toStringParts[0]));
-                        calendar.set(Calendar.MONTH, Integer.parseInt(toStringParts[1]));
-                        calendar.set(Calendar.DAY_OF_MONTH, Integer.parseInt(toStringParts[2]));
-                        calendar.set(Calendar.HOUR_OF_DAY, 23);
-                        calendar.set(Calendar.MINUTE, 59);
-
-                        Date dateTo1 = calendar.getTime();
-
-                        selectParams = new SelectParams(false, dateFrom1, dateTo1, invertSelection, isIncludeFiles, isIncludeFolders);
-                    } catch (Exception e) {
-                        selectParams = new SelectParams(true, null, null, invertSelection, isIncludeFiles, isIncludeFolders);
-                    }
-                }
+                selectParams = new SelectParams(datesPickerView.getSelectedDateAfter(), datesPickerView.getSelectedDateBefore(), invertSelection, isIncludeFiles, isIncludeFolders);
             }
 
             if (mCommand != null) {
