@@ -1,5 +1,10 @@
 package com.openfarmanager.android.filesystem.search;
 
+
+import com.openfarmanager.android.utils.CustomFormatter;
+
+import java.util.Date;
+
 /**
  * @author Vlad Namashko
  */
@@ -10,13 +15,22 @@ public class SearchOptions {
     public boolean caseSensitive;
     public boolean wholeWords;
 
+    public boolean includeFiles;
+    public boolean includeFolders;
+
+    public long biggerThenSizeBytes = -1;
+    public long smallerThenSizeBytes = -1;
+    public Date dateBefore;
+    public Date dateAfter;
+
     public boolean isNetworkPanel;
 
-    public SearchOptions(String fileMask, String keyword, boolean caseSensitive, boolean wholeWords) {
-        this.fileMask = fileMask;
-        this.keyword = keyword;
-        this.caseSensitive = caseSensitive;
-        this.wholeWords = wholeWords;
+    public void setMaxSizeRestriction(int biggerThenSize, int biggerThenUnit) {
+        biggerThenSizeBytes = CustomFormatter.convertToBytes(biggerThenSize, biggerThenUnit);
+    }
+
+    public void setMinSizeRestriction(int smallerThenSize, int smallerThenUnit) {
+        smallerThenSizeBytes = CustomFormatter.convertToBytes(smallerThenSize, smallerThenUnit);
     }
 
     public SearchOptions setIsNetworkPanel(boolean isNetworkPanel) {

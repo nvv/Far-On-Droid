@@ -868,11 +868,6 @@ public class MainPanel extends BaseFileSystemPanel {
 
         List<FileProxy> allFiles = getAdapter().getFiles();
 
-        if (selectParams.getType() == SelectParams.SelectionType.NAME) {
-            String pattern = selectParams.getSelectionString();
-            App.sInstance.getSharedPreferences("action_dialog", 0).edit(). putString("select_pattern", pattern).apply();
-        }
-
         FileFilter fileFilter = selectParams.getType() == SelectParams.SelectionType.NAME ?
                 new FileNameFilter(selectParams) : new DateFilter(selectParams);
         mSubscriptions.add(fileFilter.filter(allFiles).subscribe(list -> mSelectedFiles.addAll(list), Throwable::printStackTrace));

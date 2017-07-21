@@ -404,4 +404,9 @@
 
     <string name="text_search_options">Параметры поиска текста</string>
     <string name="advanced_search">Расширенные параметры поиска</string>
+
+    <string name="bigger_than">Больше чем</string>
+    <string name="smaller_than">Меньше чем</string>
+
+    <string name="search_result">Результат поиска</string>
 </resources>

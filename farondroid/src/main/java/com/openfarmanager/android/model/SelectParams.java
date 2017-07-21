@@ -1,5 +1,7 @@
 package com.openfarmanager.android.model;
 
+import com.openfarmanager.android.filesystem.search.SearchOptions;
+
 import java.util.Date;
 
 /**
@@ -32,6 +34,17 @@ public class SelectParams {
         mInverseSelection = inverseSelection;
         mIncludeFiles = includeFiles;
         mIncludeFolders = includeFolders;
+    }
+
+    public SelectParams(SearchOptions options) {
+        mSelectionString = options.fileMask;
+        mInverseSelection = false;
+        mCaseSensitive = options.caseSensitive;
+        mIncludeFiles = options.includeFiles;
+        mIncludeFolders = options.includeFolders;
+
+        mDateFrom = options.dateAfter;
+        mDateTo = options.dateBefore;
     }
 
     public SelectionType getType() {

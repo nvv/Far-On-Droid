@@ -4,6 +4,7 @@ import android.text.TextUtils;
 
 import com.openfarmanager.android.filesystem.FileProxy;
 import com.openfarmanager.android.filesystem.FileSystemFile;
+import com.openfarmanager.android.filesystem.filter.DateFilter;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOCase;
@@ -42,7 +43,7 @@ public class SearchFilter {
     }
 
     private void searchDirectory(ObservableEmitter<FileProxy> e, File directory) {
-        File[] files = directory.listFiles();
+        File[] files = directory.listFiles(file -> file.isDirectory() ? mSearchOptions.includeFolders : mSearchOptions.includeFiles);
         if (files == null || files.length == 0) {
             return;
         }
@@ -54,11 +55,13 @@ public class SearchFilter {
 
             if (FilenameUtils.wildcardMatch(file.getName(), mSearchOptions.fileMask, isCaseSensitive())) {
                 boolean searchKeyword = !TextUtils.isEmpty(mSearchOptions.keyword);
+
+                FileSystemFile proxy = new FileSystemFile(file);
                 if (searchKeyword && file.isFile()) {
-                    if (searchFile(file)) {
-                        e.onNext(new FileSystemFile(file));
+                    if (searchFile(file) && DateFilter.fileFilter(proxy, mSearchOptions.dateAfter, mSearchOptions.dateBefore) && filterBySize(proxy)) {
+                        e.onNext(proxy);
                     }
-                } else if ((file.isDirectory() && !searchKeyword) || file.isFile()) {
+                } else if ((file.isDirectory() && !searchKeyword) || (file.isFile() && DateFilter.fileFilter(proxy, mSearchOptions.dateAfter, mSearchOptions.dateBefore) && filterBySize(proxy))) {
                     e.onNext(new FileSystemFile(file));
                 }
             }
@@ -67,6 +70,12 @@ public class SearchFilter {
                 searchDirectory(e, file);
             }
         }
+    }
+
+    private boolean filterBySize(FileProxy file) {
+
+        return (mSearchOptions.biggerThenSizeBytes == -1 || file.getSize() > mSearchOptions.biggerThenSizeBytes) &&
+                (mSearchOptions.smallerThenSizeBytes == -1 || file.getSize() < mSearchOptions.smallerThenSizeBytes);
     }
 
     private boolean searchFile(File file) {

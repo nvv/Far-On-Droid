@@ -5,6 +5,7 @@
     <color name="white">#ffffff</color>
     <color name="black">#000000</color>
     <color name="main_grey">#c0c0c0</color>
+    <color name="grey_1">#d2d2d2</color>
     <color name="grey_button">#ffb5b5b5</color>
     <color name="grey_disabled">#848383</color>
     <color name="error_red">#800000</color>

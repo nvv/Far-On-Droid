@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
 import android.view.Window;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioGroup;
 import android.widget.TextView;
@@ -26,6 +27,8 @@ public abstract class BaseFileDialog extends Dialog {
 
     protected EditText mDestination;
 
+    protected Button mOkButton;
+
     public BaseFileDialog(Context context, Handler handler, MainPanel inactivePanel) {
         super(context, R.style.Action_Dialog);
         mHandler = handler;
@@ -36,31 +39,24 @@ public abstract class BaseFileDialog extends Dialog {
     public void onCreate(Bundle savedInstanceState) {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
 
-        mDialogView = View.inflate(App.sInstance.getApplicationContext(), getContentView(), null);
+        mDialogView = View.inflate(getContext(), getContentView(), null);
         setContentView(mDialogView);
 
         mDestination = (EditText) mDialogView.findViewById(R.id.destination);
         mError = (TextView) mDialogView.findViewById(R.id.error);
 
-        mDialogView.findViewById(R.id.cancel).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dismiss();
+        mDialogView.findViewById(R.id.cancel).setOnClickListener(v -> dismiss());
+
+        mOkButton = (Button) mDialogView.findViewById(R.id.ok);
+        mOkButton.setOnClickListener(v -> {
+            clearError();
+            if (!validate()) {
+                return;
             }
-        });
 
-        mDialogView.findViewById(R.id.ok).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                clearError();
-                if (!validate()) {
-                    return;
-                }
+            execute();
 
-                execute();
-
-                dismiss();
-            }
+            dismiss();
         });
     }
 

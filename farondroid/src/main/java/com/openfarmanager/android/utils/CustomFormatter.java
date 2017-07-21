@@ -50,6 +50,21 @@ public class CustomFormatter {
     }
 
     /**
+     * @param size file size number
+     * @param unit {0, 1, 2} corresponds to {KB, MB, GB}
+     *
+     * @return file size in bytes
+     */
+    public static long convertToBytes(int size, int unit) {
+        long s = size;
+        for (int i = unit + 1; i >= 1; i--) {
+            s *= divisor;
+        }
+
+        return s;
+    }
+
+    /**
      * Convert formatted (human readable string) to bytes.
      *
      * @param text human readable string

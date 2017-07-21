@@ -417,4 +417,9 @@ More network stuff will appear in future versions.
 
     <string name="date_after">After</string>
     <string name="date_before">Before</string>
+
+    <string name="bigger_than">Bigger than</string>
+    <string name="smaller_than">Smaller than</string>
+    <string name="search_result">Search result</string>
+
 </resources>

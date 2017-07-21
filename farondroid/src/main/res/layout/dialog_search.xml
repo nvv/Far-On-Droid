@@ -1,145 +1,272 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             android:layout_width="fill_parent"
-             android:background="@color/main_grey"
-             android:padding="5dp"
-             android:layout_height="fill_parent">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@color/main_grey"
+    android:padding="5dp">
+
 
     <LinearLayout
-            android:orientation="vertical"
-            android:layout_marginTop="10dp"
-            android:paddingTop="40dp"
-            android:paddingLeft="30dp"
-            android:paddingRight="30dp"
-            android:background="@drawable/confirm_dialog_frame"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/confirm_dialog_frame"
+        android:orientation="vertical"
+        android:paddingLeft="30dp"
+        android:paddingRight="30dp"
+        android:paddingTop="40dp">
+
+        <ScrollView
             android:layout_width="fill_parent"
             android:layout_height="fill_parent">
 
-        <!-- just for compatibility -->
-        <TextView
-            android:id="@+id/error"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp"
-            android:textColor="@color/error_red"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:visibility="gone"/>
-
-        <TextView
-                android:id="@+id/destination_label"
-                android:text="@string/file_mask"
-                android:textColor="@color/white"
+            <LinearLayout
                 android:layout_width="fill_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
 
-        <EditText
-                android:id="@+id/destination"
-                android:textColor="@color/black"
-                android:background="@color/selected_item"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"/>
+                <!-- just for compatibility -->
+                <TextView
+                    android:id="@+id/error"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="12dp"
+                    android:textColor="@color/error_red"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:visibility="gone" />
 
-        <TextView
-                android:id="@+id/keyword_label"
-                android:text="@string/containing_text"
-                android:textColor="@color/white"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"/>
+                <TextView
+                    android:id="@+id/destination_label"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/file_mask"
+                    android:textColor="@color/white" />
 
-        <EditText
-                android:id="@+id/keyword"
-                android:textColor="@color/black"
-                android:background="@color/selected_item"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"/>
+                <EditText
+                    android:id="@+id/destination"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/selected_item"
+                    android:textColor="@color/black" />
 
-        <TextView
-            android:layout_marginTop="12dp"
-            android:text="@string/text_search_options"
-            android:textColor="@color/white"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"/>
+                <TextView
+                    android:id="@+id/keyword_label"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/containing_text"
+                    android:textColor="@color/white" />
 
-        <LinearLayout
-                android:layout_marginTop="6dp"
-                android:orientation="horizontal"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content">
+                <EditText
+                    android:id="@+id/keyword"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/selected_item"
+                    android:textColor="@color/black" />
 
-            <CheckBox
-                    android:id="@+id/case_sensitive"
-                    android:text="@string/case_sensitive"
+                <TableLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent">
+
+                    <TableRow android:paddingTop="12dp">
+                        <TextView
+                            android:layout_width="fill_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/text_search_options"
+                            android:textColor="@color/white" />
+                    </TableRow>
+
+                    <TableRow android:paddingTop="6dp">
+                        <CheckBox
+                            android:id="@+id/case_sensitive"
+                            android:layout_width="fill_parent"
+                            android:layout_height="fill_parent"
+                            android:layout_weight="1"
+                            android:button="@drawable/check_box_selector"
+                            android:text="@string/case_sensitive" />
+
+                        <CheckBox
+                            android:id="@+id/whole_words"
+                            android:layout_width="fill_parent"
+                            android:layout_height="fill_parent"
+                            android:layout_weight="1"
+                            android:button="@drawable/check_box_selector"
+                            android:text="@string/whole_words" />
+                    </TableRow>
+
+                    <TableRow android:paddingTop="12dp">
+                        <TextView
+                            android:layout_width="fill_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/search_result"
+                            android:textColor="@color/white" />
+                    </TableRow>
+
+                    <TableRow android:paddingTop="10dp">
+                        <CheckBox
+                            android:id="@+id/include_files"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:button="@drawable/check_box_selector"
+                            android:checked="true"
+                            android:layout_weight="1"
+                            android:text="@string/include_files" />
+
+                        <CheckBox
+                            android:id="@+id/include_folders"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:button="@drawable/check_box_selector"
+                            android:layout_weight="1"
+                            android:checked="true"
+                            android:text="@string/include_folders" />
+                    </TableRow>
+
+                </TableLayout>
+
+                <CheckBox
+                    android:id="@+id/advanced_search"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
                     android:button="@drawable/check_box_selector"
+                    android:text="@string/advanced_search" />
+
+                <LinearLayout
+                    android:id="@+id/advanced_search_frame"
                     android:layout_width="fill_parent"
-                    android:layout_weight="1"
-                    android:layout_height="fill_parent"/>
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:background="@color/grey_1"
+                    android:orientation="vertical"
+                    android:padding="6dp"
+                    android:visibility="gone">
 
-            <CheckBox
-                    android:id="@+id/whole_words"
-                    android:text="@string/whole_words"
-                    android:button="@drawable/check_box_selector"
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/last_modified"
+                        android:textColor="@color/white" />
+
+                    <com.openfarmanager.android.view.DatesPickerView
+                        android:id="@+id/dates_picker"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="6dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/size"
+                        android:textColor="@color/white" />
+
+                    <TableLayout
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent"
+                        android:layout_margin="6dp">
+
+                        <TableRow android:paddingTop="4dp">
+
+                            <CheckBox
+                                android:id="@+id/size_bigger_than_enabled"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:button="@drawable/check_box_selector"
+                                android:text="@string/bigger_than" />
+
+                            <EditText
+                                android:id="@+id/size_bigger_than"
+                                android:layout_width="80dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginLeft="6dp"
+                                android:background="@color/selected_item"
+                                android:inputType="number"
+                                android:textColor="@color/black" />
+
+                            <Spinner
+                                android:id="@+id/size_bigger_than_unit"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginLeft="6dp"
+                                android:entries="@array/size_units"
+                                android:popupTheme="@android:style/Theme.Holo.Light" />
+
+                        </TableRow>
+
+                        <TableRow android:paddingTop="4dp">
+
+                            <CheckBox
+                                android:id="@+id/size_smaller_than_enabled"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:button="@drawable/check_box_selector"
+                                android:text="@string/smaller_than" />
+
+                            <EditText
+                                android:id="@+id/size_smaller_than"
+                                android:layout_width="80dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginLeft="6dp"
+                                android:background="@color/selected_item"
+                                android:inputType="number"
+                                android:textColor="@color/black" />
+
+                            <Spinner
+                                android:id="@+id/size_smaller_than_unit"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginLeft="6dp"
+                                android:entries="@array/size_units"
+                                android:popupTheme="@android:style/Theme.Holo.Light" />
+
+                        </TableRow>
+
+                    </TableLayout>
+
+                </LinearLayout>
+
+                <LinearLayout
                     android:layout_width="fill_parent"
-                    android:layout_weight="1"
-                    android:layout_height="fill_parent"/>
-        </LinearLayout>
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="30dp"
+                    android:orientation="horizontal">
 
-        <CheckBox
-            android:layout_marginTop="20dp"
-            android:id="@+id/advanced_search"
-            android:text="@string/advanced_search"
-            android:button="@drawable/check_box_selector"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"/>
+                    <Button
+                        android:id="@+id/cancel"
+                        style="@style/dialog_button"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.5"
+                        android:text="@string/btn_cancel" />
 
-        <LinearLayout
-            android:id="@+id/advanced_search_frame"
-            android:visibility="gone"
-            android:layout_width="fill_parent"
-            android:layout_height="200dp"
-            android:layout_marginTop="8dp"
-            android:orientation="horizontal">
+                    <Button
+                        android:id="@+id/ok"
+                        style="@style/dialog_button"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.5"
+                        android:text="@string/btn_ok" />
+                </LinearLayout>
+            </LinearLayout>
 
+        </ScrollView>
 
-
-        </LinearLayout>
-
-        <LinearLayout
-                android:orientation="horizontal"
-                android:layout_width="fill_parent"
-                android:layout_marginTop="30dp"
-                android:layout_height="wrap_content">
-
-            <Button
-                    android:id="@+id/cancel"
-                    android:text="@string/btn_cancel"
-                    style="@style/dialog_button"
-                    android:layout_weight="0.5"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"/>
-            <Button
-                    android:id="@+id/ok"
-                    android:text="@string/btn_ok"
-                    style="@style/dialog_button"
-                    android:layout_weight="0.5"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"/>
-        </LinearLayout>
     </LinearLayout>
 
-
     <TextView
-            android:id="@+id/current_action"
-            android:text="@string/btn_find"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
-            android:textSize="16dp"
-            android:textColor="@color/white"
-            android:ellipsize="middle"
-            android:background="@color/main_grey"
-            android:layout_gravity="center_horizontal"/>
+        android:id="@+id/current_action"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:background="@color/main_grey"
+        android:ellipsize="middle"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:text="@string/btn_find"
+        android:textColor="@color/white"
+        android:textSize="16dp" />
 
 </FrameLayout>
