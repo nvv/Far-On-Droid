@@ -1,8 +1,10 @@
 package com.openfarmanager.android.filesystem.search;
 
+import com.annimon.stream.Stream;
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.core.network.NetworkApi;
 import com.openfarmanager.android.filesystem.FileProxy;
+import com.openfarmanager.android.filesystem.filter.DateFilter;
 import com.openfarmanager.android.model.NetworkEnum;
 
 import java.util.List;
@@ -25,9 +27,8 @@ public class NetworkSearchFilter extends SearchFilter {
         return io.reactivex.Observable.create(e -> {
             List<FileProxy> list = getNetworkApi().search(currentDirectory, mSearchOptions.fileMask);
             if (list != null && list.size() > 0) {
-                for (FileProxy file : list) {
-                    e.onNext(file);
-                }
+                Stream.of(list).filter(file -> (file.isDirectory() ? mSearchOptions.includeFolders : mSearchOptions.includeFiles) &&
+                        DateFilter.fileFilter(file, mSearchOptions.dateAfter, mSearchOptions.dateBefore) && filterBySize(file)).forEach(e::onNext);
             }
             e.onComplete();
         });

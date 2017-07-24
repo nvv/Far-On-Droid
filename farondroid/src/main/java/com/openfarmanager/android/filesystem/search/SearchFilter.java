@@ -72,9 +72,8 @@ public class SearchFilter {
         }
     }
 
-    private boolean filterBySize(FileProxy file) {
-
-        return (mSearchOptions.biggerThenSizeBytes == -1 || file.getSize() > mSearchOptions.biggerThenSizeBytes) &&
+    protected boolean filterBySize(FileProxy file) {
+        return file.isDirectory() || (mSearchOptions.biggerThenSizeBytes == -1 || file.getSize() > mSearchOptions.biggerThenSizeBytes) &&
                 (mSearchOptions.smallerThenSizeBytes == -1 || file.getSize() < mSearchOptions.smallerThenSizeBytes);
     }
 

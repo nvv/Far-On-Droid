@@ -72,6 +72,7 @@ public class SearchActionDialog extends BaseFileDialog {
         text.setSelection(text.getText().length());
 
         if (mOnlyFileSearch) {
+            mDialogView.findViewById(R.id.search_text_options_label).setVisibility(View.GONE);
             mDialogView.findViewById(R.id.keyword_label).setVisibility(View.GONE);
             mDialogView.findViewById(R.id.keyword).setVisibility(View.GONE);
             mDialogView.findViewById(R.id.case_sensitive).setVisibility(View.GONE);
