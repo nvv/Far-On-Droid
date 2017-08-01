@@ -5,7 +5,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 
-import com.mediafire.sdk.api.responses.data_models.FileInfo;
+import com.annimon.stream.Stream;
 import com.microsoft.live.*;
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.R;
@@ -27,6 +27,9 @@ import static com.openfarmanager.android.utils.Extensions.*;
 import java.io.*;
 import java.net.URL;
 import java.util.*;
+
+import io.reactivex.*;
+import io.reactivex.Observable;
 
 /**
  * @author Vlad Namashko
@@ -177,29 +180,30 @@ public class SkyDriveAPI implements LiveAuthListener, NetworkApi {
     }
 
     @Override
-    public List<FileProxy> search(String path, String query) {
-        List<FileProxy> searchResult = new ArrayList<FileProxy>();
+    public io.reactivex.Observable<FileProxy> search(String path, String query) {
 
-        try {
-            LiveOperation liveOperation = mSkyDriveConnectClient.get("me/skydrive/search?q=" + query);
+        return Observable.create(emitter -> {
+            try {
+                LiveOperation liveOperation = mSkyDriveConnectClient.get("me/skydrive/search?q=" + query);
 
-            if (liveOperation != null) {
-                JSONObject result = liveOperation.getResult();
+                if (liveOperation != null) {
+                    JSONObject result = liveOperation.getResult();
 
-                if (!result.isNull(JsonKeys.DATA)) {
-                    JSONArray items = (JSONArray) result.get(JsonKeys.DATA);
-                    for (int i = 0; i < items.length(); i++) {
-                        JSONObject data = (JSONObject) items.get(i);
-                        searchResult.add(new SkyDriveFile(data, path));
+                    if (!result.isNull(JsonKeys.DATA)) {
+                        JSONArray items = (JSONArray) result.get(JsonKeys.DATA);
+                        for (int i = 0; i < items.length(); i++) {
+                            JSONObject data = (JSONObject) items.get(i);
+//                        searchResult.add(new SkyDriveFile(data, path));
+                            emitter.onNext(new SkyDriveFile(data, path));
+                        }
                     }
-
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 
-        return searchResult;
+            emitter.onComplete();
+        });
     }
 
     @Override

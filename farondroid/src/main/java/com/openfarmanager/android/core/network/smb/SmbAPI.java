@@ -22,6 +22,8 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
 import jcifs.UniAddress;
 import jcifs.smb.NtlmPasswordAuthentication;
 import jcifs.smb.SmbException;
@@ -152,7 +154,7 @@ public class SmbAPI implements NetworkApi {
     }
 
     @Override
-    public List<FileProxy> search(String path, String query) {
+    public Observable<FileProxy> search(String path, String query) {
         throw new RuntimeException();
     }
 

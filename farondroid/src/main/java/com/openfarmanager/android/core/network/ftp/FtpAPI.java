@@ -17,7 +17,6 @@ import com.openfarmanager.android.model.exeptions.NetworkException;
 
 import static com.openfarmanager.android.utils.Extensions.tryParse;
 
-import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 import org.apache.commons.net.ftp.FTPReply;
@@ -29,6 +28,9 @@ import java.net.SocketTimeoutException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
+
+import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
 
 /**
  * @author Vlad Namashko
@@ -227,7 +229,7 @@ public class FtpAPI implements NetworkApi {
     }
 
     @Override
-    public List<FileProxy> search(String path, String query) {
+    public Observable<FileProxy> search(String path, String query) {
         throw new RuntimeException();
     }
 

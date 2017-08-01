@@ -46,7 +46,7 @@ public class SftpDataSource extends RawPathDataSource {
 
     @Override
     public boolean isSearchSupported() {
-        return false;
+        return true;
     }
 
     @Override

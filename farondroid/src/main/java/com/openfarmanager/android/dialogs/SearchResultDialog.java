@@ -102,8 +102,6 @@ public class SearchResultDialog extends Dialog {
 
         mDialogView.findViewById(R.id.view).setVisibility(mSearchOptions.isNetworkPanel ? View.GONE : View.VISIBLE);
 
-        setOnDismissListener(dialog -> mSubscription.clear());
-
         mProgressBar = (ProgressBar) mDialogView.findViewById(android.R.id.progress);
 
         mList = (ListView) mDialogView.findViewById(android.R.id.list);
@@ -185,14 +183,14 @@ public class SearchResultDialog extends Dialog {
         setOnDismissListener(dialog -> mSubscription.clear());
 
         mProgressBar.setVisibility(View.VISIBLE);
-        mSearchFilter.searchAsync(mCurrentDir).observeOn(AndroidSchedulers.mainThread()).subscribe(
+        mSubscription.add(mSearchFilter.searchAsync(mCurrentDir).observeOn(AndroidSchedulers.mainThread()).subscribe(
                 fileProxy -> {
                     mData.add(fileProxy);
                     ((BaseAdapter) mList.getAdapter()).notifyDataSetChanged();
                 },
                 throwable -> {
                 },
-                () -> mProgressBar.setVisibility(View.GONE));
+                () -> mProgressBar.setVisibility(View.GONE)));
 
     }
 

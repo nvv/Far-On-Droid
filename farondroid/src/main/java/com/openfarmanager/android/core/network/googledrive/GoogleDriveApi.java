@@ -26,6 +26,10 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
+
+import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
 
 /**
  * author: Vlad Namashko
@@ -225,22 +229,17 @@ public class GoogleDriveApi implements NetworkApi {
     }
 
     @Override
-    public List<FileProxy> search(String path, String query) {
-        List<FileProxy> list = new ArrayList<FileProxy>();
+    public Observable<FileProxy> search(String path, String query) {
 
-        try {
-            List<File> files = mDriveApi.search(query);
-
-            for (File file : files) {
-                list.add(new GoogleDriveFile(file, path));
+        return Observable.create(emitter -> {
+            try {
+                List<File> files = mDriveApi.search(query);
+                com.annimon.stream.Stream.of(files).forEach(file -> emitter.onNext(new GoogleDriveFile(file, path)));
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-
-            FileSystemScanner.sInstance.sort(list);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return list;
+            emitter.onComplete();
+        });
     }
 
     @Override

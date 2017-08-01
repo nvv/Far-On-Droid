@@ -16,7 +16,6 @@ import com.mediafire.sdk.api.responses.FolderGetContentsResponse;
 import com.mediafire.sdk.api.responses.FolderUpdateResponse;
 import com.mediafire.sdk.api.responses.data_models.File;
 import com.mediafire.sdk.api.responses.data_models.Folder;
-import com.microsoft.live.LiveOperation;
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.R;
 import com.openfarmanager.android.core.DataStorageHelper;
@@ -24,20 +23,16 @@ import com.openfarmanager.android.core.dbadapters.NetworkAccountDbAdapter;
 import com.openfarmanager.android.core.network.NetworkApi;
 import com.openfarmanager.android.filesystem.FileProxy;
 import com.openfarmanager.android.filesystem.MediaFireFile;
-import com.openfarmanager.android.filesystem.SkyDriveFile;
 import com.openfarmanager.android.model.NetworkAccount;
 import com.openfarmanager.android.model.NetworkEnum;
 import com.openfarmanager.android.model.exeptions.NetworkException;
 
-import org.json.JSONObject;
-
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
-import static com.openfarmanager.android.utils.Extensions.isNullOrEmpty;
+import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
 
 /**
  * @author Vlad Namashko
@@ -171,7 +166,7 @@ public class MediaFireApi implements NetworkApi {
     }
 
     @Override
-    public List<FileProxy> search(String path, String query) {
+    public Observable<FileProxy> search(String path, String query) {
         return null;
     }
 

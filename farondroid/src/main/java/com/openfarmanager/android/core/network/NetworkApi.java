@@ -5,6 +5,9 @@ import com.openfarmanager.android.model.NetworkAccount;
 
 import java.util.List;
 
+import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
+
 public interface NetworkApi {
 
     int getAuthorizedAccountsCount();
@@ -19,7 +22,7 @@ public interface NetworkApi {
 
     String createDirectory(String baseDirectory, String newDirectoryName) throws Exception;
 
-    List<FileProxy> search(String path, String query);
+    Observable<FileProxy> search(String path, String query);
 
     boolean rename(FileProxy srcFile, String s) throws Exception;
 }

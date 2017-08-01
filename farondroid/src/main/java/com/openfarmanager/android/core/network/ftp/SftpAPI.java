@@ -22,6 +22,8 @@ import com.openfarmanager.android.model.exeptions.FtpDirectoryDeleteException;
 import com.openfarmanager.android.model.exeptions.InAppAuthException;
 import com.openfarmanager.android.model.exeptions.NetworkException;
 
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOCase;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -31,6 +33,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.Vector;
+
+import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
 
 import static com.openfarmanager.android.utils.Extensions.tryParse;
 
@@ -49,6 +54,8 @@ public class SftpAPI implements NetworkApi {
     private ChannelSftp mSftpChannel;
 
     private SftpAccount mCurrentAccount;
+
+    private Session mCurrentSession;
 
     public void connectAndSave(String server, int port, String user, String password,
                                boolean isLoginByPrivateKey, byte[] privateKey) throws InAppAuthException {
@@ -88,28 +95,33 @@ public class SftpAPI implements NetworkApi {
     public void connect(String server, int port, String user, String password,
                         boolean isLoginByPrivateKey, byte[] privateKey) throws InAppAuthException {
         JSch jsch = new JSch();
-        Session session;
         try {
-            session = jsch.getSession(user, server, port);
+            mCurrentSession = jsch.getSession(user, server, port);
         } catch (JSchException e) {
             e.printStackTrace();
             throw new InAppAuthException(App.sInstance.getString(R.string.error_sftp_connection_error));
         }
-        session.setPassword(password);
+        mCurrentSession.setPassword(password);
         Properties prop = new Properties();
         prop.put("StrictHostKeyChecking", "no");
-        session.setConfig(prop);
+        mCurrentSession.setConfig(prop);
+        initChannel();
+    }
+
+    protected void initChannel() {
         Channel channel;
         try {
-            session.connect();
-            channel = session.openChannel("sftp");
+            if (!mCurrentSession.isConnected()) {
+                mCurrentSession.connect();
+            }
+            channel = mCurrentSession.openChannel("sftp");
             channel.connect();
         } catch (JSchException e) {
             throw new InAppAuthException(App.sInstance.getString(R.string.error_sftp_connection_error));
         }
         mSftpChannel = (ChannelSftp) channel;
 
-        String charset = App.sInstance.getSettings().getSftpCharset(server);
+        String charset = App.sInstance.getSettings().getSftpCharset(mCurrentSession.getHost());
         if (charset != null) {
             setCharsetEncoding(charset);
         }
@@ -243,8 +255,37 @@ public class SftpAPI implements NetworkApi {
     }
 
     @Override
-    public List<FileProxy> search(String path, String query) {
-        throw new RuntimeException();
+    public Observable<FileProxy> search(String path, String query) {
+        return Observable.create(e -> {
+            try {
+                search(path, query, e);
+                e.onComplete();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                String pwd = mSftpChannel.pwd();
+                mSftpChannel.disconnect();
+                initChannel();
+                mSftpChannel.cd(pwd);
+            }
+
+        });
+    }
+
+    private void search(String path, String query, ObservableEmitter<FileProxy> emitter) throws Exception {
+        Vector sftpFiles = mSftpChannel.ls(path);
+        for (Object entry : sftpFiles) {
+            ChannelSftp.LsEntry lsEntry = (ChannelSftp.LsEntry) entry;
+            if (!lsEntry.getFilename().equals(".") && !lsEntry.getFilename().equals("..")) {
+                SftpFile sftpFile = new SftpFile(path, lsEntry);
+                if (sftpFile.isDirectory()) {
+                    search(sftpFile.getFullPath(), query, emitter);
+                } else {
+                    if (FilenameUtils.wildcardMatch(sftpFile.getName(), query, IOCase.INSENSITIVE)) {
+                        emitter.onNext(sftpFile);
+                    }
+                }
+            }
+        }
     }
 
     @Override

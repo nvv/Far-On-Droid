@@ -14,7 +14,6 @@ import com.dropbox.core.v2.files.Metadata;
 import com.dropbox.core.v2.files.SearchResult;
 import com.dropbox.core.v2.files.UploadUploader;
 import com.dropbox.core.v2.files.WriteMode;
-import com.dropbox.core.v2.sharing.SharedFolderMetadata;
 import com.dropbox.core.v2.users.FullAccount;
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.R;
@@ -32,10 +31,12 @@ import org.json.JSONObject;
 
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
+
+import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
 
 public class DropboxAPI implements NetworkApi {
 
@@ -149,21 +150,21 @@ public class DropboxAPI implements NetworkApi {
     }
 
     @Override
-    public List<FileProxy> search(String path, String query) {
-
-        List<FileProxy> searchResult = new ArrayList<FileProxy>();
-        try {
-            SearchResult result = mDropboxClient.files().search("/".equals(path) ? "" : path, query);
-            if (result != null && result.getMatches() != null) {
-                Stream.of(result.getMatches()).
-                        filter(match -> match != null && !(match.getMetadata() instanceof DeletedMetadata)).
-                        forEach(match -> searchResult.add(new DropboxFile(match.getMetadata())));
+    public Observable<FileProxy> search(String path, String query) {
+        return Observable.create(emitter -> {
+            try {
+                SearchResult result = mDropboxClient.files().search("/".equals(path) ? "" : path, query);
+                if (result != null && result.getMatches() != null) {
+                    Stream.of(result.getMatches()).
+                            filter(match -> match != null && !(match.getMetadata() instanceof DeletedMetadata)).
+                            forEach(match -> emitter.onNext(new DropboxFile(match.getMetadata())));
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 
-        return searchResult;
+            emitter.onComplete();
+        });
     }
 
     public String getFileLink(FileProxy proxy) throws DbxException {

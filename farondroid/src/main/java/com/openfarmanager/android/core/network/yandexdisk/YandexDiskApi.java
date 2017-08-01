@@ -1,7 +1,6 @@
 package com.openfarmanager.android.core.network.yandexdisk;
 
 import android.database.Cursor;
-import android.util.Base64;
 
 import com.openfarmanager.android.App;
 import com.openfarmanager.android.R;
@@ -21,15 +20,15 @@ import com.yandex.disk.client.ListParsingHandler;
 import com.yandex.disk.client.TransportClient;
 import com.yandex.disk.client.exceptions.UnknownServerWebdavException;
 import com.yandex.disk.client.exceptions.WebdavClientInitException;
-import com.yandex.disk.client.exceptions.WebdavException;
-import com.yandex.disk.client.exceptions.WebdavNotAuthorizedException;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
 
 /**
  * @author Vlad Namashko
@@ -212,7 +211,7 @@ public class YandexDiskApi implements NetworkApi {
     }
 
     @Override
-    public List<FileProxy> search(String path, String query) {
+    public Observable<FileProxy> search(String path, String query) {
         return null;
     }
 
