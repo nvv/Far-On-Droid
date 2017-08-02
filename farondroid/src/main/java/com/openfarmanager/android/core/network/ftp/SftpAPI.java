@@ -169,7 +169,7 @@ public class SftpAPI implements NetworkApi {
     }
 
     public List<FileProxy> getDirectoryFiles(String path) throws NetworkException {
-        List<FileProxy> files = new ArrayList<FileProxy>();
+        List<FileProxy> files = new ArrayList<>();
         try {
             if (!path.equals(mSftpChannel.pwd())) {
                 mSftpChannel.cd(path);
@@ -262,13 +262,17 @@ public class SftpAPI implements NetworkApi {
                 e.onComplete();
             } catch (Exception ex) {
                 ex.printStackTrace();
-                String pwd = mSftpChannel.pwd();
-                mSftpChannel.disconnect();
-                initChannel();
-                mSftpChannel.cd(pwd);
+                refreshConnection();
             }
 
         });
+    }
+
+    protected void refreshConnection() throws SftpException {
+        String pwd = mSftpChannel.pwd();
+        mSftpChannel.disconnect();
+        initChannel();
+        mSftpChannel.cd(pwd);
     }
 
     private void search(String path, String query, ObservableEmitter<FileProxy> emitter) throws Exception {

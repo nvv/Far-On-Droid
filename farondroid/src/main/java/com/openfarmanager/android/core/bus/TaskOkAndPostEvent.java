@@ -3,7 +3,7 @@ package com.openfarmanager.android.core.bus;
 /**
  * @author Vlad Namashko
  */
-public class TaskOkAndPostEvent extends TaskOkEvent {
+public class TaskOkAndPostEvent extends PanelEvent {
 
     private Runnable mPostAction;
 

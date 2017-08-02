@@ -66,6 +66,7 @@ import io.reactivex.SingleOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 
 import static com.openfarmanager.android.controllers.FileSystemController.EXIT_FROM_NETWORK_STORAGE;
@@ -392,7 +393,7 @@ public class NetworkPanel extends MainPanel {
         setSelectedFilesSizeVisibility();
         setIsLoading(true);
 
-        Single.create((SingleOnSubscribe<DirectoryUiInfo>) emitter -> {
+        addDisposable(Single.create((SingleOnSubscribe<DirectoryUiInfo>) emitter -> {
             try {
                 DirectoryScanInfo scanInfo = mDataSource.openDirectory(file);
 
@@ -405,52 +406,39 @@ public class NetworkPanel extends MainPanel {
                 emitter.onError(e);
             }
         }).subscribeOn(Schedulers.io()).
-                observeOn(AndroidSchedulers.mainThread()).subscribe(new SingleObserver<DirectoryUiInfo>() {
-            @Override
-            public void onSubscribe(Disposable d) {
-                addDisposable(d);
+                observeOn(AndroidSchedulers.mainThread()).subscribe(directoryInfo -> {
+            setIsLoading(false);
+
+            FileProxy fileProxy = directoryInfo.directory;
+            String path = fileProxy.getFullPathRaw();
+
+            setCurrentPath(path);
+            boolean isRoot = Extensions.isNullOrEmpty(fileProxy.getParentPath()) || fileProxy.getFullPathRaw().equals("/");
+            NetworkEntryAdapter adapter = (NetworkEntryAdapter) mFileSystemList.getAdapter();
+
+            mUpNavigator = new FakeFile(fileProxy.getParentPath(), "..", directoryInfo.parentPath,
+                    FileUtilsExt.getParentPath(fileProxy.getFullPathRaw()), isRoot);
+            if (adapter != null) {
+                adapter.setItems(directoryInfo.files, mUpNavigator);
+                adapter.setSelectedFiles(mSelectedFiles);
+            } else {
+                mFileSystemList.initAdapter(new NetworkEntryAdapter(directoryInfo.files, mUpNavigator));
             }
+            mCurrentPath = new FakeFile(fileProxy.getId(), path, fileProxy.getParentPath(), fileProxy.getFullPathRaw(), isRoot);
 
-            @Override
-            public void onSuccess(DirectoryUiInfo directoryInfo) {
-                setIsLoading(false);
-
-                FileProxy file = directoryInfo.directory;
-                String path = file.getFullPathRaw();
-
-                setCurrentPath(path);
-                boolean isRoot = Extensions.isNullOrEmpty(file.getParentPath()) || file.getFullPathRaw().equals("/");
-                NetworkEntryAdapter adapter = (NetworkEntryAdapter) mFileSystemList.getAdapter();
-
-                mUpNavigator = new FakeFile(file.getParentPath(), "..", directoryInfo.parentPath,
-                        FileUtilsExt.getParentPath(file.getFullPathRaw()), isRoot);
-                if (adapter != null) {
-                    adapter.setItems(directoryInfo.files, mUpNavigator);
-                    adapter.setSelectedFiles(mSelectedFiles);
-                } else {
-                    mFileSystemList.initAdapter(new NetworkEntryAdapter(directoryInfo.files, mUpNavigator));
-                }
-                mCurrentPath = new FakeFile(file.getId(), path, file.getParentPath(), file.getFullPathRaw(), isRoot);
-
-                if (directoryInfo.restorePosition) {
-                    Integer selection = mDirectorySelection.get(isRoot ? "/" : path);
-                    ((LinearLayoutManager) mFileSystemList.getLayoutManager()).scrollToPositionWithOffset(selection != null ? selection : 0, 0);
-
-                }
-
-                if (mPreSelectedFiles.size() > 0) {
-                    calculateSelectedFilesSize();
-                }
-                showQuickActionPanel();
-                setSelectedFilesSizeVisibility();
+            if (directoryInfo.restorePosition) {
+                Integer selection = mDirectorySelection.get(isRoot ? "/" : path);
+                ((LinearLayoutManager) mFileSystemList.getLayoutManager()).scrollToPositionWithOffset(selection != null ? selection : 0, 0);
 
             }
 
-            @Override
-            public void onError(Throwable e) {
-                handleNetworkException((NetworkException) e);
+            if (mPreSelectedFiles.size() > 0) {
+                calculateSelectedFilesSize();
             }
-        });
+            showQuickActionPanel();
+            setSelectedFilesSizeVisibility();
+        }, throwable -> handleNetworkException((NetworkException) throwable)));
+
     }
 
     protected void handleNetworkException(NetworkException e) {

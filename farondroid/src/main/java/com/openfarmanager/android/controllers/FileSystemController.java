@@ -553,11 +553,11 @@ public class FileSystemController {
                     break;
                 case SELECT_ALL:
                     activePanel.selectAll();
-                    activePanel.invalidate();
+                    activePanel.invalidate(false);
                     break;
                 case UNSELECT_ALL:
                     activePanel.unselectAll();
-                    activePanel.invalidate();
+                    activePanel.invalidate(false);
                     break;
             }
         }
