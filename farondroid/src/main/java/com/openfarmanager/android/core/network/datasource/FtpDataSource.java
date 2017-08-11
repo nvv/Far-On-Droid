@@ -45,7 +45,7 @@ public class FtpDataSource extends RawPathDataSource {
 
     @Override
     public boolean isSearchSupported() {
-        return false;
+        return true;
     }
 
     @Override

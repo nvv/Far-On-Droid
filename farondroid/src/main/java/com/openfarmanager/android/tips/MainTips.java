@@ -34,10 +34,6 @@ public class MainTips {
 
     public MainTips(Activity activity, FileSystemController controller, MainToolbar panel) {
 
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
-            return;
-        }
-
         mActivity = activity;
         mFileSystemController = controller;
         mMainToolbarPanel = panel;

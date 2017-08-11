@@ -54,6 +54,8 @@ public class NetworkSearchFilter extends SearchFilter {
                 return App.sInstance.getWebDavApi();
             case SFTP:
                 return App.sInstance.getSftpApi();
+            case FTP:
+                return App.sInstance.getFtpApi();
         }
     }
 

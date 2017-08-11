@@ -32,7 +32,7 @@ public class FtpFile implements FileProxy {
         mModDate = source.getTimestamp().getTime().getTime();
 
         mFullPath = currentPath + (currentPath.endsWith("/") ? "" : "/") + source.getName();
-        mParentPath = FileUtilsExt.removeLastSeparator(FileUtilsExt.getParentPath(mFullPath));
+        mParentPath = FileUtilsExt.removeLastSeparator(currentPath);
     }
 
     public FtpFile(String path) {

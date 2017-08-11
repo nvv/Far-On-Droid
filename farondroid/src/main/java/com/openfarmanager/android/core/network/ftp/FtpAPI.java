@@ -17,6 +17,8 @@ import com.openfarmanager.android.model.exeptions.NetworkException;
 
 import static com.openfarmanager.android.utils.Extensions.tryParse;
 
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOCase;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 import org.apache.commons.net.ftp.FTPReply;
@@ -230,7 +232,43 @@ public class FtpAPI implements NetworkApi {
 
     @Override
     public Observable<FileProxy> search(String path, String query) {
-        throw new RuntimeException();
+        return Observable.create(e -> {
+            try {
+                search(path, query, e);
+                e.onComplete();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                refreshConnection();
+            }
+
+        });
+    }
+
+    private void refreshConnection() {
+        try {
+            mFtpClient.abort();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void search(String path, String query, ObservableEmitter<FileProxy> emitter) throws Exception {
+        if (!path.equals(mFtpClient.printWorkingDirectory())) {
+            mFtpClient.changeWorkingDirectory(path);
+        }
+        FTPFile[] ftpFiles = mFtpClient.listFiles();
+        for (FTPFile ftpFile : ftpFiles) {
+            if (!emitter.isDisposed()) {
+                FtpFile file = new FtpFile(path, ftpFile);
+                if (file.isDirectory()) {
+                    search(file.getFullPath(), query, emitter);
+                } else {
+                    if (FilenameUtils.wildcardMatch(file.getName(), query, IOCase.INSENSITIVE)) {
+                        emitter.onNext(file);
+                    }
+                }
+            }
+        }
     }
 
     @Override

@@ -2,6 +2,7 @@ package com.openfarmanager.android;
 
 import android.app.Application;
 import android.content.res.Configuration;
+import android.os.StrictMode;
 import android.preference.PreferenceManager;
 
 import com.openfarmanager.android.controllers.FileSystemController;
@@ -77,6 +78,9 @@ public class App extends Application {
         mGoogleDriveApi = new GoogleDriveApi();
         mMediaFireApi = new MediaFireApi();
         mWebDavApi = new WebDavApi();
+
+        StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
+        StrictMode.setVmPolicy(builder.build());
 
         setLocale();
     }
