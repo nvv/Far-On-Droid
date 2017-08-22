@@ -38,8 +38,12 @@ public class FileSystemFile extends File implements FileProxy<File> {
         mIsBookmark = true;
 
         File[] children = listFiles();
-        mChildren = new ArrayList<>(children.length);
-        Stream.of(children).forEach(child -> mChildren.add(new FileSystemFile(child.getAbsolutePath())));
+        if (children != null) {
+            mChildren = new ArrayList<>(children.length);
+            Stream.of(children).forEach(child -> mChildren.add(new FileSystemFile(child.getAbsolutePath())));
+        } else {
+            mChildren = new ArrayList<>();
+        }
     }
 
     public FileSystemFile(File dir, String name, boolean isVirtualDirectory) {
