@@ -84,13 +84,20 @@ public class FileSystemScanner {
 
     public List<FileProxy> fallingDown(File currentNode, String mFilter) throws FileIsNotDirectoryException {
         if (!currentNode.isFile()) {
+            String[] files = null;
+
             if (Build.VERSION.SDK_INT >= 24 && StorageUtils.getSdPath().startsWith(currentNode.getAbsolutePath())
                     && !StorageUtils.getSdPath().equals(currentNode.getAbsolutePath())) {
+
+                files = RootTask.ls(currentNode);
+                if (files != null) {
+                    return buildFileList(currentNode, files, new LinkedList<>());
+                }
+
                 // don't allow to open subfolder of sd card root on SDK >= 24
                 return null;
             }
 
-            String[] files = null;
             List<FileProxy> result = new LinkedList<FileProxy>();
 
             if (currentNode.canRead()) {
@@ -111,19 +118,23 @@ public class FileSystemScanner {
             if (files == null) {
                 return Build.VERSION.SDK_INT >= 24 ? null : result;
             } else {
-                for (String f : files) {
-                    FileSystemFile file = new FileSystemFile(currentNode, f);
-                    if (App.sInstance.getSettings().isHideSystemFiles() && file.isHidden()) {
-                        continue;
-                    }
-                    result.add(file);
-                }
-                sort(result);
-                return result;
+                return buildFileList(currentNode, files, result);
             }
         } else {
             throw new FileIsNotDirectoryException(currentNode.getAbsolutePath());
         }
+    }
+
+    private List<FileProxy> buildFileList(File currentNode, String[] files, List<FileProxy> result) {
+        for (String f : files) {
+            FileSystemFile file = new FileSystemFile(currentNode, f);
+            if (App.sInstance.getSettings().isHideSystemFiles() && file.isHidden()) {
+                continue;
+            }
+            result.add(file);
+        }
+        sort(result);
+        return result;
     }
 
     public void sort(List<FileProxy> filesToSort) {
