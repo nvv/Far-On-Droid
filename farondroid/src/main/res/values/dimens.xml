@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="fast_navigation_handle_size">30dp</dimen>
+    <dimen name="fast_navigation_bubble_size">60dp</dimen>
+</resources>

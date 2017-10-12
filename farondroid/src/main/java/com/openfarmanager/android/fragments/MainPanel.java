@@ -107,7 +107,7 @@ public class MainPanel extends BaseFileSystemPanel {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         setupHandler();
         View view = inflater.inflate(R.layout.main_panel, container, false);
-        mFileSystemList = (FileSystemListView) view.findViewById(android.R.id.list);
+        mFileSystemList = (FileSystemListView) view.findViewById(R.id.file_system_view);
         mProgress = (ProgressBar) view.findViewById(R.id.loading);
         mSelectedFilesSize = (TextView) view.findViewById(R.id.selected_files_size);
 
@@ -197,7 +197,7 @@ public class MainPanel extends BaseFileSystemPanel {
             }
         });
 
-        setupGestures(mFileSystemList);
+        setupGestures(mFileSystemList.getRecyclerView());
 
         mQuickActionPopup = new QuickPopupFileActionsView(getActivity(), view, getPanelLocation());
 

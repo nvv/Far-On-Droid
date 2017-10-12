@@ -14,7 +14,7 @@
         android:layout_width="match_parent"
         android:overScrollMode="never"
         android:fadingEdge="none"
-        android:id="@android:id/list"/>
+        android:id="@+id/file_system_view"/>
 
     <TextView
             android:id="@+id/selected_files_size"
