@@ -13,12 +13,15 @@ android {
     }
 
     repositories {
-        maven { url "http://git.site.com:8081/nexus/content/groups/public" }
         mavenCentral()
+        jcenter()
+        maven { url "https://maven.google.com" }
+        google()
     }
 
     dependencies {
-        compile 'com.google.code.gson:gson:2.2.4'
-        compile 'com.google.guava:guava:11.0.2'
+        compile 'com.google.code.gson:gson:2.8.0'
+        compile 'com.google.guava:guava:24.1-android'
     }
+    buildToolsVersion '27.0.3'
 }
