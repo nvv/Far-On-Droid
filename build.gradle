@@ -20,9 +20,10 @@ buildscript {
         mavenCentral()
         jcenter()
         maven { url "https://maven.google.com" }
+        google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.0.0-alpha3'
+        classpath 'com.android.tools.build:gradle:3.5.0'
     }
 
     ext {

@@ -62,7 +62,7 @@ android {
     flavorDimensions "build"
 
     productFlavors {
-        main {
+        prod {
             applicationId "com.openfarmanager.android"
             dimension "build"
         }
