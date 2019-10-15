@@ -5,30 +5,58 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentStatePagerAdapter
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProviders
+import androidx.viewpager.widget.ViewPager
 import com.openfarmanager.android.filesystempanel.Panel
+import com.openfarmanager.android.filesystempanel.vm.BottomBarVM
+import com.openfarmanager.android.filesystempanel.vm.MainViewVM
 import dagger.android.AndroidInjection
 import dagger.android.support.DaggerAppCompatActivity
+import kotlinx.android.synthetic.main.main_one_panel.*
+import java.text.FieldPosition
 import javax.inject.Inject
 
 class Main : DaggerAppCompatActivity() {
 
-    private val MY_PERMISSIONS_REQUEST_WRITE_STORAGE = 1024
-
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
+
+    private lateinit var mainVM: MainViewVM
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         AndroidInjection.inject(this)
-        setContentView(R.layout.main_activity)
+        setContentView(R.layout.main_one_panel)
 
-        supportFragmentManager.beginTransaction()
-                .add(R.id.content, Panel(), null)
-                .addToBackStack(null)
-                .commit()
+        mainVM = ViewModelProviders.of(this, viewModelFactory).get(MainViewVM::class.java)
 
+        val leftPanelSelection = leftPanelSelector
+        val rightPanelSelection = rightPanelSelector
+
+        panels.adapter = TabsAdapter(supportFragmentManager)
+        panels.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
+            override fun onPageScrollStateChanged(state: Int) {
+            }
+
+            override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
+            }
+
+            override fun onPageSelected(position: Int) {
+                val isLeftPanel = position == 0
+
+                mainVM.requestFocus(if (isLeftPanel) Panel.POSITION_LEFT else Panel.POSITION_RIGHT)
+                leftPanelSelection.setBackgroundResource(if (isLeftPanel) R.color.yellow else R.color.main_grey);
+                rightPanelSelection.setBackgroundResource(if (!isLeftPanel) R.color.yellow else R.color.main_grey);
+            }
+        })
+
+        mainVM.requestFocus(Panel.POSITION_LEFT)
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) !=
                 PackageManager.PERMISSION_GRANTED) {
@@ -73,5 +101,20 @@ class Main : DaggerAppCompatActivity() {
                 // Ignore all other requests.
             }
         }
+    }
+
+    private inner class TabsAdapter(fm: FragmentManager) :
+            FragmentStatePagerAdapter(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
+
+        override fun getCount() = 2
+
+        override fun getItem(position: Int): Fragment {
+            return if (position == 0) Panel.newInstance(Panel.POSITION_LEFT) else Panel.newInstance(Panel.POSITION_RIGHT)
+        }
+
+    }
+
+    companion object {
+        private const val MY_PERMISSIONS_REQUEST_WRITE_STORAGE = 1024
     }
 }

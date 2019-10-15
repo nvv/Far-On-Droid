@@ -2,7 +2,8 @@ package com.openfarmanager.android.di
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.openfarmanager.android.filesystempanel.vm.FileSystemViewVM
+import com.openfarmanager.android.filesystempanel.vm.FileSystemPanelVM
+import com.openfarmanager.android.filesystempanel.vm.MainViewVM
 import dagger.Binds
 import dagger.Module
 import dagger.multibindings.IntoMap
@@ -15,6 +16,11 @@ internal abstract class ViewModelModule {
 
     @Binds
     @IntoMap
-    @ViewModelKey(FileSystemViewVM::class)
-    protected abstract fun resumeViewModel(resumeViewModel: FileSystemViewVM): ViewModel
+    @ViewModelKey(FileSystemPanelVM::class)
+    protected abstract fun fileSystemPanelViewModel(fileSystemPanelVM: FileSystemPanelVM): ViewModel
+
+    @Binds
+    @IntoMap
+    @ViewModelKey(MainViewVM::class)
+    protected abstract fun mainViewModel(mainVM: MainViewVM): ViewModel
 }

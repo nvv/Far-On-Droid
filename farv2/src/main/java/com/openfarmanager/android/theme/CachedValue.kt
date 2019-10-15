@@ -2,6 +2,7 @@ package com.openfarmanager.android.theme
 
 import android.annotation.SuppressLint
 import android.content.SharedPreferences
+import java.lang.RuntimeException
 
 class CachedValue<T>(val name: String, value: T? = null, private val defValue: T? = null, private val type: Class<T>) {
 
@@ -40,6 +41,10 @@ class CachedValue<T>(val name: String, value: T? = null, private val defValue: T
                 return field
             }
         }
+
+    fun safeValue(): T {
+        return value ?: defValue ?: throw RuntimeException()
+    }
 
     init {
         sharedPreferences = sharedPref

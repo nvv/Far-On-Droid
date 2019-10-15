@@ -1,3 +1,37 @@
 <resources>
     <string name="app_name">FarOnDroid</string>
+
+    <string name="btn_cancel">Cancel</string>
+    <string name="btn_ok">Ok</string>
+    <string name="btn_yes">Yes</string>
+    <string name="btn_no">No</string>
+    <string name="btn_dont_ask">Don\'t ask again</string>
+    <string name="btn_skip">Skip</string>
+    <string name="btn_save">Save</string>
+    <string name="btn_select">Select</string>
+    <string name="btn_replace">Replace</string>
+    <string name="btn_settings">Settings (F11)</string>
+    <string name="btn_encoding">Encoding</string>
+    <string name="btn_back">Back</string>
+    <string name="btn_next">Next</string>
+    <string name="btn_finish">Finish</string>
+
+    <string name="btn_alt">Alt</string>
+    <string name="btn_menu">Menu</string>
+    <string name="btn_new">New</string>
+    <string name="btn_edit">Edit</string>
+    <string name="btn_more">More</string>
+    <string name="btn_tools">Tools</string>
+    <string name="btn_help">Help (F10)</string>
+    <string name="btn_network">Network</string>
+    <string name="btn_diff">Diff</string>
+    <string name="btn_find">Find</string>
+
+    <string name="applications">Applications</string>
+    <string name="network">Network</string>
+    <string name="bookmarks">Bookmarks</string>
+    <string name="quick_view">Quick View</string>
+    <string name="action_exit">Exit</string>
+
+    <string name="dialog_actions">Actions</string>
 </resources>

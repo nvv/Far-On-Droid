@@ -2,6 +2,7 @@ package com.openfarmanager.android.di
 
 import com.openfarmanager.android.App
 import com.openfarmanager.android.filesystempanel.adapter.FileSystemAdapter
+import com.openfarmanager.android.filesystempanel.view.BottomBar
 import dagger.BindsInstance
 import dagger.Component
 import javax.inject.Singleton
@@ -15,6 +16,8 @@ import javax.inject.Singleton
 interface UiComponent {
 
     fun inject(adapter: FileSystemAdapter)
+
+    fun inject(bottomBar: BottomBar)
 
     @Component.Builder
     interface Builder {

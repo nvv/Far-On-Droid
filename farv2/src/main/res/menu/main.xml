@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/action_alt"
+        android:title="Alt"/>
+
+    <item
+        android:id="@+id/action_select"
+        android:title="@string/btn_select"/>
+
+    <item
+        android:title="@string/btn_menu"
+        android:id="@+id/menu_action">
+    </item>
+
+    <item
+            android:title="@string/btn_tools"
+            android:orderInCategory="9"
+            android:id="@+id/menu_tools">
+        <menu>
+            <item
+                android:id="@+id/action_network"
+                android:title="@string/network"/>
+
+            <item
+                android:id="@+id/action_applauncher"
+                android:title="@string/applications"/>
+        </menu>
+    </item>
+
+    <item
+        android:id="@+id/action_quckview"
+        android:title="@string/quick_view"/>
+
+    <item
+        android:title="@string/btn_more"
+        android:orderInCategory="10"
+        android:id="@+id/menu_more">
+        <menu>
+            <item
+                android:id="@+id/action_new"
+                android:title="@string/btn_new"/>
+            <item
+                    android:id="@+id/action_bookmarks"
+                    android:title="@string/bookmarks"/>
+            <item
+                android:id="@+id/action_find"
+                android:title="@string/btn_find"/>
+            <item
+                android:id="@+id/action_diff"
+                android:title="@string/btn_diff"/>
+            <item
+                android:id="@+id/action_help"
+                android:title="@string/btn_help"/>
+            <item
+                android:id="@+id/action_settings"
+                android:title="@string/btn_settings"/>
+            <item
+                android:id="@+id/action_exit"
+                android:orderInCategory="100"
+                android:title="@string/action_exit"/>
+
+        </menu>
+
+    </item>
+
+</menu>

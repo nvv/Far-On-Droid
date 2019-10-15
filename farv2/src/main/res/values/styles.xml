@@ -12,4 +12,8 @@
         <item name="android:windowFullscreen">true</item>
     </style>
 
+    <style name="Action_Dialog" parent="android:Theme.Dialog">
+        <item name="android:windowBackground">@null</item>
+    </style>
+
 </resources>

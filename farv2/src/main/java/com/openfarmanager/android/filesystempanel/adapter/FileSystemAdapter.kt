@@ -14,12 +14,12 @@ import javax.inject.Inject
 
 class FileSystemAdapter : RecyclerView.Adapter<FileSystemAdapter.ViewHolder>() {
 
-    private var files: List<Entity>? = null
+    private var files: List<AdapterEntity>? = null
 
     @Inject
     lateinit var themePref: ThemePref
 
-    var clickListener: ((Entity) -> Unit)? = null
+    var clickListener: ((Int, Entity) -> Unit)? = null
 
     init {
         App.uiComponent.inject(this)
@@ -35,13 +35,39 @@ class FileSystemAdapter : RecyclerView.Adapter<FileSystemAdapter.ViewHolder>() {
         files?.get(position)?.let {entity ->
             holder.bind(entity)
             holder.itemView.setOnClickListener {
-                clickListener?.invoke(entity)
+                clickListener?.invoke(position, entity.entity)
             }
         }
     }
 
+    fun selectItems(selectedItems: Set<Entity>) {
+        val changes = mutableListOf<Int>()
+        files?.forEachIndexed { index, item ->
+            if (item.isSelected) {
+                if (!selectedItems.contains(item.entity)) {
+                    item.isSelected = false
+                    changes += index
+                }
+            } else {
+                if (selectedItems.contains(item.entity)) {
+                    item.isSelected = true
+                    changes += index
+                }
+            }
+        }
+
+        changes.forEach {
+            notifyItemChanged(it)
+        }
+    }
+
+    fun selectItem(position: Int, isSelected: Boolean) {
+        files?.get(position)?.isSelected = isSelected
+        notifyItemChanged(position)
+    }
+
     fun setItems(items: List<Entity>) {
-        files = items
+        files = items.map { item -> AdapterEntity(item) }.toList()
         notifyDataSetChanged()
     }
 
@@ -50,12 +76,13 @@ class FileSystemAdapter : RecyclerView.Adapter<FileSystemAdapter.ViewHolder>() {
         val name = view.findViewById(R.id.item_name) as TextView
         val info = view.findViewById(R.id.item_info) as TextView
 
-        fun bind(file: Entity) {
-            name.text = file.name()
+        fun bind(file: AdapterEntity) {
+            name.text = file.entity.name()
             info.text = info.length().toString()
 
             when {
-                file.isDirectory() -> setColor(themePref.folderColor)
+                file.isSelected -> setColor(themePref.selectedColor)
+                file.entity.isDirectory() -> setColor(themePref.folderColor)
                 else -> setColor(themePref.textColor)
             }
 
@@ -83,4 +110,6 @@ class FileSystemAdapter : RecyclerView.Adapter<FileSystemAdapter.ViewHolder>() {
         }
     }
 
+    data class AdapterEntity(val entity: Entity,
+                             var isSelected: Boolean = false)
 }
