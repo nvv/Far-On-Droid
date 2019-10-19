@@ -1,25 +1,34 @@
 package com.openfarmanager.android.model
 
+import android.net.Uri
+import android.webkit.MimeTypeMap
+import com.openfarmanager.android.core.archive.MimeTypes
 import java.io.File
 
 open class FileEntity(private val file: File) : Entity {
 
-    override fun name() = file.name
+    override val name by lazy { file.name }
 
-    override fun path() = file.absolutePath
+    override val path by lazy {  file.absolutePath }
 
-    override fun size() = file.length()
+    override val size by lazy { file.length() }
 
-    override fun isDirectory() = file.isDirectory
+    override val lastModifiedDate by lazy { file.lastModified() }
 
-    override fun canAccess() = file.canRead() && !file.isHidden
+    override val isDirectory by lazy { file.isDirectory }
+
+    override val isHidden by lazy { file.isHidden }
+
+    override val canAccess by lazy { file.canRead() && !file.isHidden }
+
+    val mimeType = MimeTypes.getMimeType(MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(file).toString()))
 
 }
 
-class UpNavigator(private val file: File) : FileEntity(file) {
+class UpNavigator(file: File) : FileEntity(file) {
 
-    override fun name() = ".."
+    override val name = ".."
 
-    override fun path() = file.absolutePath
+    override val path = file.absolutePath
 
 }

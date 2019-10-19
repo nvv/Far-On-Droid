@@ -2,13 +2,22 @@ package com.openfarmanager.android.model
 
 interface Entity {
 
-    fun name(): String
+    val name: String
 
-    fun path(): String
+    val path: String
 
-    fun size(): Long
+    val size: Long
 
-    fun isDirectory(): Boolean
+    val lastModifiedDate: Long
 
-    fun canAccess(): Boolean
+    val isDirectory: Boolean
+
+    val isHidden: Boolean
+
+    val canAccess: Boolean
+
+}
+
+fun Entity.extention(): String {
+    return name.substringAfterLast(".", "")
 }

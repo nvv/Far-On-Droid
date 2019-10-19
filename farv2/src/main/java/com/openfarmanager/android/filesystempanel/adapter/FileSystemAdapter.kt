@@ -7,7 +7,10 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.openfarmanager.android.App
 import com.openfarmanager.android.R
+import com.openfarmanager.android.core.archive.ArchiveUtils
+import com.openfarmanager.android.core.archive.MimeTypes
 import com.openfarmanager.android.model.Entity
+import com.openfarmanager.android.model.extention
 import com.openfarmanager.android.theme.ThemePref
 import java.io.File
 import javax.inject.Inject
@@ -77,12 +80,15 @@ class FileSystemAdapter : RecyclerView.Adapter<FileSystemAdapter.ViewHolder>() {
         val info = view.findViewById(R.id.item_info) as TextView
 
         fun bind(file: AdapterEntity) {
-            name.text = file.entity.name()
+            name.text = file.entity.name
             info.text = info.length().toString()
 
             when {
                 file.isSelected -> setColor(themePref.selectedColor)
-                file.entity.isDirectory() -> setColor(themePref.folderColor)
+                !file.entity.canAccess -> setColor(themePref.hiddenColor)
+                file.entity.isDirectory -> setColor(themePref.folderColor)
+                file.entity.extention() == MimeTypes.MIME_APPLICATION_ANDROID_PACKAGE -> setColor(themePref.installColor)
+                ArchiveUtils.isArchiveFile(file.entity) -> setColor(themePref.archiveColor)
                 else -> setColor(themePref.textColor)
             }
 

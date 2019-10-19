@@ -5,17 +5,21 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.annotation.IntDef
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import com.openfarmanager.android.R
+import com.openfarmanager.android.filesystempanel.view.ToastNotification
 import com.openfarmanager.android.filesystempanel.vm.BottomBarVM
 import com.openfarmanager.android.filesystempanel.vm.FileSystemPanelVM
 import com.openfarmanager.android.filesystempanel.vm.MainViewVM
+import com.openfarmanager.android.model.FileEntity
 import dagger.android.support.AndroidSupportInjection
 import kotlinx.android.synthetic.main.main_panel.*
+import java.io.File
 import javax.inject.Inject
 
 class Panel : Fragment() {
@@ -61,8 +65,12 @@ class Panel : Fragment() {
         }
 
         panelVM.scanResult.observe(this, Observer { result ->
-            pathView.text = result.path
+            pathView.text = result.directory.path
             fileSystemView.showFiles(result.files)
+        })
+
+        panelVM.openDirectoryError.observe(this, Observer { ex ->
+            ToastNotification().makeText(view.context, ex.message.toString(), Toast.LENGTH_LONG).show()
         })
 
         panelVM.selectedFilePosition.observe(this, Observer { result ->
@@ -73,7 +81,7 @@ class Panel : Fragment() {
             panelVM.handleClick(position, entity)
         }
 
-        panelVM.openDirectory("/storage/emulated/0")
+        panelVM.openDirectory(FileEntity(File("/storage/emulated/0")))
     }
 
     companion object {

@@ -2,6 +2,8 @@ package com.openfarmanager.android.di
 
 import android.content.Context
 import com.openfarmanager.android.App
+import com.openfarmanager.android.core.filesystem.FileSystemScanner
+import com.openfarmanager.android.core.filesystem.StorageUtils
 import com.openfarmanager.android.theme.ThemePref
 import dagger.Module
 import dagger.Provides
@@ -18,4 +20,13 @@ class AppModule {
     @Provides
     @Singleton
     fun provideSharedPrefs(): ThemePref = App.themePref
+
+    @Provides
+    @Singleton
+    fun provideStorageUtils(): StorageUtils = StorageUtils()
+
+    @Provides
+    @Singleton
+    fun provideFileSystemScanner(pref: ThemePref, utils: StorageUtils): FileSystemScanner = FileSystemScanner(pref, utils)
+
 }

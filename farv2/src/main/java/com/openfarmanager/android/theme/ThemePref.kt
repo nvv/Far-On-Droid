@@ -23,6 +23,10 @@ class ThemePref {
 
         private const val BOTTOM_PANEL_FONT_SIZE = "bottom_panel_font_size"
         private const val MAIN_PANEL_FONT_NAME = "main_panel_font"
+
+        private const val FOLDERS_FIRST = "folders_first"
+        private const val FILES_SORT = "files_sort"
+        private const val HIDE_SYSTEM_FILES = "hide_system_files"
     }
 
     private var cachedValues = HashSet<CachedValue<*>>()
@@ -45,6 +49,11 @@ class ThemePref {
     // main panel
     private lateinit var mainPanelFontPathValue: CachedValue<String>
     var mainPanelFontValue = Typeface.DEFAULT
+
+    // file system settings
+    private lateinit var folderFirstValue: CachedValue<Boolean>
+    private lateinit var filesSortValue: CachedValue<String>
+    private lateinit var hideSystemFilesValue: CachedValue<Boolean>
 
     private lateinit var context: Context
 
@@ -87,6 +96,16 @@ class ThemePref {
         if (!mainPanelFontPathValue.safeValue().isNullOrEmpty()) {
             mainPanelFontValue = Typeface.createFromFile(mainPanelFontPathValue.safeValue())
         }
+
+        folderFirstValue = CachedValue(FOLDERS_FIRST, true, Boolean::class.java)
+                .also { cachedValues.add(it) }
+
+        filesSortValue = CachedValue(FILES_SORT, "0", String::class.java)
+                .also { cachedValues.add(it) }
+
+        hideSystemFilesValue = CachedValue(HIDE_SYSTEM_FILES, false, Boolean::class.java)
+                .also { cachedValues.add(it) }
+
     }
 
     var textColor: Int
@@ -150,6 +169,24 @@ class ThemePref {
         set(value) {
             mainPanelFontPathValue.value = value
             mainPanelFontValue = Typeface.createFromFile(mainPanelFontPathValue.safeValue())
+        }
+
+    var folderFirst: Boolean
+        get() = folderFirstValue.safeValue()
+        set(value) {
+            folderFirstValue.value = value
+        }
+
+    var filesSort: String
+        get() = filesSortValue.safeValue()
+        set(value) {
+            filesSortValue.value = value
+        }
+
+    var hideSystemFiles: Boolean
+        get() = hideSystemFilesValue.safeValue()
+        set(value) {
+            hideSystemFilesValue.value = value
         }
 
     private fun resolveColor(color: Int?): Int =
