@@ -9,6 +9,7 @@ import com.openfarmanager.android.App
 import com.openfarmanager.android.R
 import com.openfarmanager.android.core.archive.ArchiveUtils
 import com.openfarmanager.android.core.archive.MimeTypes
+import com.openfarmanager.android.core.utils.CustomFormatter
 import com.openfarmanager.android.model.Entity
 import com.openfarmanager.android.model.extention
 import com.openfarmanager.android.theme.ThemePref
@@ -81,7 +82,8 @@ class FileSystemAdapter : RecyclerView.Adapter<FileSystemAdapter.ViewHolder>() {
 
         fun bind(file: AdapterEntity) {
             name.text = file.entity.name
-            info.text = info.length().toString()
+            info.text = if (file.entity.isDirectory) info.context.getString(R.string.folder) else
+                CustomFormatter.formatBytes(file.entity.size)
 
             when {
                 file.isSelected -> setColor(themePref.selectedColor)
@@ -91,22 +93,6 @@ class FileSystemAdapter : RecyclerView.Adapter<FileSystemAdapter.ViewHolder>() {
                 ArchiveUtils.isArchiveFile(file.entity) -> setColor(themePref.archiveColor)
                 else -> setColor(themePref.textColor)
             }
-
-            /*
-            if (mSelectedFiles.contains(item)) {
-                setColor(holder.name, holder.info, settings.getSelectedColor());
-            } else if ((!fileItem.canRead() || fileItem.isHidden()) && !item.isVirtualDirectory()) {
-                setColor(holder.name, holder.info, settings.getHiddenColor());
-            } else if (item.isDirectory()) {
-                setColor(holder.name, holder.info, settings.getFolderColor());
-            } else if (ArchiveUtils.getMimeType(fileItem).equals(MimeTypes.MIME_APPLICATION_ANDROID_PACKAGE)) {
-                setColor(holder.name, holder.info, settings.getInstallColor());
-            } else if (ArchiveUtils.isArchiveFile(fileItem)) {
-                setColor(holder.name, holder.info, settings.getArchiveColor());
-            } else {
-                setColor(holder.name, holder.info, settings.getTextColor());
-            }
-             */
         }
 
 
