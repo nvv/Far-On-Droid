@@ -34,4 +34,6 @@
     <string name="action_exit">Exit</string>
 
     <string name="dialog_actions">Actions</string>
+
+    <string name="folder">Folder</string>
 </resources>
