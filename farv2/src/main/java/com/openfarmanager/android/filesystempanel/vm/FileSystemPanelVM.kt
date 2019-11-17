@@ -4,11 +4,8 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.openfarmanager.android.core.filesystem.FileSystemScanner
 import com.openfarmanager.android.core.filesystem.exceptions.OpenDirectoryException
-import com.openfarmanager.android.model.Entity
-import com.openfarmanager.android.model.FileEntity
-import com.openfarmanager.android.model.UpNavigator
+import com.openfarmanager.android.model.filesystem.Entity
 import com.openfarmanager.android.core.filesystem.scanresult.ScanResult
-import java.io.File
 import java.lang.Exception
 import javax.inject.Inject
 
@@ -20,14 +17,17 @@ class FileSystemPanelVM @Inject constructor(val fileSystemScanner: FileSystemSca
     val openDirectoryError = MutableLiveData<Exception>()
 
     var isSelectionMode = false
+    lateinit var currentDirectory: Entity
+    var isActive = false
 
-    private val selectedFileList = mutableSetOf<Entity>()
+    val selectedFileList = mutableSetOf<Entity>()
 
     fun openDirectory(directory: Entity) {
         selectedFileList.clear()
 
         try {
             scanResult.value = ScanResult(directory, fileSystemScanner.openDirectory(directory))
+            currentDirectory = directory
         } catch (ex: OpenDirectoryException) {
             openDirectoryError.value = ex
         }
@@ -35,17 +35,20 @@ class FileSystemPanelVM @Inject constructor(val fileSystemScanner: FileSystemSca
 
     fun handleClick(position: Int, entity: Entity) {
         if (isSelectionMode) {
-            val contains = selectedFileList.contains(entity)
-            if (contains) {
-                selectedFileList -= entity
-            } else {
-                selectedFileList += entity
-            }
-            selectedFiles.value = selectedFileList
-            selectedFilePosition.value = Pair(position, !contains)
+            selectItem(position, entity)
         } else {
             openDirectory(entity)
         }
     }
 
+    fun selectItem(position: Int, entity: Entity, forceSelect: Boolean = false) {
+        val doUnselect = selectedFileList.contains(entity) && !forceSelect
+        if (doUnselect) {
+            selectedFileList -= entity
+        } else {
+            selectedFileList += entity
+        }
+        selectedFiles.value = selectedFileList
+        selectedFilePosition.value = Pair(position, !doUnselect)
+    }
 }

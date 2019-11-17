@@ -36,4 +36,19 @@
     <string name="dialog_actions">Actions</string>
 
     <string name="folder">Folder</string>
+
+    <!-- actions -->
+    <string name="info">Info</string>
+    <string name="copy">Copy</string>
+    <string name="delete">Delete</string>
+
+    <!-- confirm dialogs -->
+    <string name="destination">Destination</string>
+    <string name="error">Error</string>
+    <string name="progress">Progress</string>
+
+    <!-- errors -->
+    <string name="error_cannot_copy_files_to_the_same_directory">Can\'t copy selected file (s) to the same directory</string>
+    <string name="error_not_valid_directory">Not valid directory:\n\n%s</string>
+
 </resources>

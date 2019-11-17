@@ -8,9 +8,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.openfarmanager.android.R
 import com.openfarmanager.android.filesystempanel.adapter.FileSystemAdapter
 import com.openfarmanager.android.filesystempanel.view.decoration.HorizontalDividerItemDecoration
-import com.openfarmanager.android.model.Entity
+import com.openfarmanager.android.model.filesystem.Entity
 import kotlinx.android.synthetic.main.file_system_view.view.*
-import java.io.File
 
 class FileSystemView(context: Context, attrs: AttributeSet) : FrameLayout(context, attrs) {
 
@@ -29,6 +28,10 @@ class FileSystemView(context: Context, attrs: AttributeSet) : FrameLayout(contex
 
     fun setClickListener(clickListener: ((Int, Entity) -> Unit)) {
         fileSystemAdapter.clickListener = clickListener
+    }
+
+    fun setOnLongClickListener(longClickListener: ((Int, Entity) -> Unit)) {
+        fileSystemAdapter.longClickListener = longClickListener
     }
 
     fun showFiles(files: List<Entity>) {

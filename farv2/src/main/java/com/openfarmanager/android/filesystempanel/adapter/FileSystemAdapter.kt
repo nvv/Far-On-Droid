@@ -10,10 +10,9 @@ import com.openfarmanager.android.R
 import com.openfarmanager.android.core.archive.ArchiveUtils
 import com.openfarmanager.android.core.archive.MimeTypes
 import com.openfarmanager.android.core.utils.CustomFormatter
-import com.openfarmanager.android.model.Entity
-import com.openfarmanager.android.model.extention
+import com.openfarmanager.android.model.filesystem.Entity
+import com.openfarmanager.android.model.filesystem.extension
 import com.openfarmanager.android.theme.ThemePref
-import java.io.File
 import javax.inject.Inject
 
 class FileSystemAdapter : RecyclerView.Adapter<FileSystemAdapter.ViewHolder>() {
@@ -24,6 +23,8 @@ class FileSystemAdapter : RecyclerView.Adapter<FileSystemAdapter.ViewHolder>() {
     lateinit var themePref: ThemePref
 
     var clickListener: ((Int, Entity) -> Unit)? = null
+
+    var longClickListener: ((Int, Entity) -> Unit)? = null
 
     init {
         App.uiComponent.inject(this)
@@ -40,6 +41,10 @@ class FileSystemAdapter : RecyclerView.Adapter<FileSystemAdapter.ViewHolder>() {
             holder.bind(entity)
             holder.itemView.setOnClickListener {
                 clickListener?.invoke(position, entity.entity)
+            }
+            holder.itemView.setOnLongClickListener {
+                longClickListener?.invoke(position, entity.entity)
+                true
             }
         }
     }
@@ -89,7 +94,7 @@ class FileSystemAdapter : RecyclerView.Adapter<FileSystemAdapter.ViewHolder>() {
                 file.isSelected -> setColor(themePref.selectedColor)
                 !file.entity.canAccess -> setColor(themePref.hiddenColor)
                 file.entity.isDirectory -> setColor(themePref.folderColor)
-                file.entity.extention() == MimeTypes.MIME_APPLICATION_ANDROID_PACKAGE -> setColor(themePref.installColor)
+                file.entity.extension() == MimeTypes.MIME_APPLICATION_ANDROID_PACKAGE -> setColor(themePref.installColor)
                 ArchiveUtils.isArchiveFile(file.entity) -> setColor(themePref.archiveColor)
                 else -> setColor(themePref.textColor)
             }

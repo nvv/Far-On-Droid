@@ -1,6 +1,9 @@
-package com.openfarmanager.android.model
+package com.openfarmanager.android.model.filesystem
 
-interface Entity {
+import android.os.Parcelable
+
+
+interface Entity : Parcelable {
 
     val name: String
 
@@ -18,6 +21,6 @@ interface Entity {
 
 }
 
-fun Entity.extention(): String {
+fun Entity.extension(): String {
     return name.substringAfterLast(".", "")
 }

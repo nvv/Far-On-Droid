@@ -2,6 +2,7 @@ package com.openfarmanager.android.di
 
 import android.content.Context
 import com.openfarmanager.android.App
+import com.openfarmanager.android.core.command.executor.CommandExecutor
 import com.openfarmanager.android.core.filesystem.FileSystemScanner
 import com.openfarmanager.android.core.filesystem.StorageUtils
 import com.openfarmanager.android.theme.ThemePref
@@ -28,5 +29,9 @@ class AppModule {
     @Provides
     @Singleton
     fun provideFileSystemScanner(pref: ThemePref, utils: StorageUtils): FileSystemScanner = FileSystemScanner(pref, utils)
+
+    @Provides
+    @Singleton
+    fun provideCommandExecutor(): CommandExecutor = CommandExecutor()
 
 }

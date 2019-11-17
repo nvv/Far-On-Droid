@@ -1,4 +1,4 @@
-package com.openfarmanager.android.filesystempanel
+package com.openfarmanager.android.filesystempanel.fragments
 
 import android.content.Context
 import android.os.Bundle
@@ -12,17 +12,21 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import com.openfarmanager.android.R
+import com.openfarmanager.android.filesystempanel.fragments.dialogs.ErrorDialogFragment
+import com.openfarmanager.android.filesystempanel.fragments.dialogs.FileActionFragment
 import com.openfarmanager.android.filesystempanel.view.ToastNotification
 import com.openfarmanager.android.filesystempanel.vm.BottomBarVM
 import com.openfarmanager.android.filesystempanel.vm.FileSystemPanelVM
 import com.openfarmanager.android.filesystempanel.vm.MainViewVM
-import com.openfarmanager.android.model.FileEntity
+import com.openfarmanager.android.model.actions.FileAction
+import com.openfarmanager.android.model.filesystem.FileEntity
 import dagger.android.support.AndroidSupportInjection
+import kotlinx.android.synthetic.main.dialog_copy_confirm.view.*
 import kotlinx.android.synthetic.main.main_panel.*
 import java.io.File
 import javax.inject.Inject
 
-class Panel : Fragment() {
+class PanelFragment : Fragment() {
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
@@ -52,8 +56,12 @@ class Panel : Fragment() {
         activity?.let {
             mainVM = ViewModelProviders.of(it, viewModelFactory).get(MainViewVM::class.java)
 
+            mainVM.registerPanelVM(panelVM)
+
             mainVM.activePanelChanged.observe(this, Observer { location ->
-                pathView.setBackgroundResource(if (location == arguments?.getInt(ARG_POSITION)) R.color.colorPrimary else R.color.main_blue)
+                val isActive = location == arguments?.getInt(ARG_POSITION)
+                panelVM.isActive = isActive
+                pathView.setBackgroundResource(if (isActive) R.color.colorPrimary else R.color.main_blue)
             })
 
             bottomBarVM = ViewModelProviders.of(it, viewModelFactory).get(BottomBarVM::class.java)
@@ -81,6 +89,14 @@ class Panel : Fragment() {
             panelVM.handleClick(position, entity)
         }
 
+        fileSystemView.setOnLongClickListener { position, entity ->
+            panelVM.selectItem(position, entity, true)
+
+            activity?.supportFragmentManager?.let {
+                FileActionFragment.newInstance(FileAction.values().toList()).show(it, "actions")
+            }
+        }
+
         panelVM.openDirectory(FileEntity(File("/storage/emulated/0")))
     }
 
@@ -95,8 +111,8 @@ class Panel : Fragment() {
 
         private val ARG_POSITION = "ARG_POSITION"
 
-        fun newInstance(@PanelPosition position: Int): Panel {
-            return Panel().apply {
+        fun newInstance(@PanelPosition position: Int): PanelFragment {
+            return PanelFragment().apply {
                 arguments = Bundle().apply {
                     putInt(ARG_POSITION, position)
                 }

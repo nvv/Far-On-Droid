@@ -1,7 +1,6 @@
 package com.openfarmanager.android.core.filesystem
 
-import com.openfarmanager.android.App
-import com.openfarmanager.android.model.Entity
+import com.openfarmanager.android.model.filesystem.Entity
 import com.openfarmanager.android.theme.ThemePref
 import java.text.Collator
 

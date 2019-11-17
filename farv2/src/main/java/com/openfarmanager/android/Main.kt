@@ -6,20 +6,22 @@ import android.os.Bundle
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentStatePagerAdapter
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import androidx.viewpager.widget.ViewPager
-import com.openfarmanager.android.filesystempanel.Panel
-import com.openfarmanager.android.filesystempanel.vm.BottomBarVM
+import com.openfarmanager.android.filesystempanel.fragments.PanelFragment
+import com.openfarmanager.android.filesystempanel.fragments.dialogs.CommandFragment
+import com.openfarmanager.android.filesystempanel.fragments.dialogs.CopyDialogFragment
+import com.openfarmanager.android.filesystempanel.fragments.dialogs.ErrorDialogFragment
+import com.openfarmanager.android.filesystempanel.fragments.dialogs.ProgressFragment
 import com.openfarmanager.android.filesystempanel.vm.MainViewVM
 import dagger.android.AndroidInjection
 import dagger.android.support.DaggerAppCompatActivity
+import kotlinx.android.synthetic.main.dialog_copy_confirm.view.*
 import kotlinx.android.synthetic.main.main_one_panel.*
-import java.text.FieldPosition
 import javax.inject.Inject
 
 class Main : DaggerAppCompatActivity() {
@@ -50,13 +52,29 @@ class Main : DaggerAppCompatActivity() {
             override fun onPageSelected(position: Int) {
                 val isLeftPanel = position == 0
 
-                mainVM.requestFocus(if (isLeftPanel) Panel.POSITION_LEFT else Panel.POSITION_RIGHT)
+                mainVM.requestFocus(if (isLeftPanel) PanelFragment.POSITION_LEFT else PanelFragment.POSITION_RIGHT)
                 leftPanelSelection.setBackgroundResource(if (isLeftPanel) R.color.yellow else R.color.main_grey);
                 rightPanelSelection.setBackgroundResource(if (!isLeftPanel) R.color.yellow else R.color.main_grey);
             }
         })
 
-        mainVM.requestFocus(Panel.POSITION_LEFT)
+        mainVM.copyAction.observe(this, Observer { arguments ->
+            supportFragmentManager.let {
+                CopyDialogFragment
+                        .newInstance(arguments)
+                        .show(it, "copy")
+            }
+        })
+
+        mainVM.executeCommand.observe(this, Observer { command ->
+            supportFragmentManager.let {
+                CommandFragment
+                        .newInstance(command)
+                        .show(it, "command")
+            }
+        })
+
+        mainVM.requestFocus(PanelFragment.POSITION_LEFT)
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) !=
                 PackageManager.PERMISSION_GRANTED) {
@@ -109,7 +127,7 @@ class Main : DaggerAppCompatActivity() {
         override fun getCount() = 2
 
         override fun getItem(position: Int): Fragment {
-            return if (position == 0) Panel.newInstance(Panel.POSITION_LEFT) else Panel.newInstance(Panel.POSITION_RIGHT)
+            return if (position == 0) PanelFragment.newInstance(PanelFragment.POSITION_LEFT) else PanelFragment.newInstance(PanelFragment.POSITION_RIGHT)
         }
 
     }

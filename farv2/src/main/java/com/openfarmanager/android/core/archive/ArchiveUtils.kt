@@ -7,8 +7,8 @@ import com.openfarmanager.android.core.archive.MimeTypes.MIME_APPLICATION_X_CPIO
 import com.openfarmanager.android.core.archive.MimeTypes.MIME_APPLICATION_X_RAR_COMPRESSED
 import com.openfarmanager.android.core.archive.MimeTypes.MIME_APPLICATION_X_TAR
 import com.openfarmanager.android.core.archive.MimeTypes.MIME_APPLICATION_ZIP
-import com.openfarmanager.android.model.Entity
-import com.openfarmanager.android.model.FileEntity
+import com.openfarmanager.android.model.filesystem.Entity
+import com.openfarmanager.android.model.filesystem.FileEntity
 
 object ArchiveUtils {
 

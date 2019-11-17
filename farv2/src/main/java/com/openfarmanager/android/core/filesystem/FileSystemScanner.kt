@@ -3,9 +3,9 @@ package com.openfarmanager.android.core.filesystem
 import android.os.Build
 import com.openfarmanager.android.core.filesystem.exceptions.OpenDirectoryException
 import com.openfarmanager.android.core.filesystem.exceptions.OpenDirectoryNotAllowed
-import com.openfarmanager.android.model.Entity
-import com.openfarmanager.android.model.FileEntity
-import com.openfarmanager.android.model.UpNavigator
+import com.openfarmanager.android.model.filesystem.Entity
+import com.openfarmanager.android.model.filesystem.FileEntity
+import com.openfarmanager.android.model.filesystem.UpNavigator
 import com.openfarmanager.android.theme.ThemePref
 import java.io.File
 import java.util.*

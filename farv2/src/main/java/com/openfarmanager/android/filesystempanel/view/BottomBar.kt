@@ -21,6 +21,7 @@ import com.openfarmanager.android.di.ViewModelAccessor
 import com.openfarmanager.android.di.ViewModelInjector
 import com.openfarmanager.android.filesystempanel.vm.BottomBarVM
 import com.openfarmanager.android.theme.ThemePref
+import kotlinx.android.synthetic.main.dialog_file_action_menu.*
 import javax.inject.Inject
 
 class BottomBar(context: Context,
@@ -228,8 +229,6 @@ class BottomBar(context: Context,
 
             val view = View.inflate(context, R.layout.dialog_file_action_menu, null)
 
-            val actionsList = view.findViewById(R.id.action_list) as ListView
-
             val items = mutableListOf<String>()
             for (i in 0 until menu.subMenu.size()) {
                 items.add(menu.subMenu.getItem(i).title as String)
@@ -239,14 +238,14 @@ class BottomBar(context: Context,
 
                 override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
                     val item = super.getView(position, convertView, parent)
-                    item.minimumWidth = actionsList.width
+                    item.minimumWidth = actionList.width
                     return item
                 }
             }
 
-            actionsList.adapter = adapter
+            actionList.adapter = adapter
 
-            actionsList.setOnItemClickListener { _, _, position, _ ->
+            actionList.setOnItemClickListener { _, _, position, _ ->
                 dismiss()
                 listener.onActionSelected(menu.subMenu.getItem(position))
             }
