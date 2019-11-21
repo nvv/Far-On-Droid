@@ -1,11 +1,14 @@
-package com.openfarmanager.android.model
+package com.openfarmanager.android.model.filesystem
 
 import android.net.Uri
+import android.os.Parcelable
 import android.webkit.MimeTypeMap
 import com.openfarmanager.android.core.archive.MimeTypes
+import kotlinx.android.parcel.Parcelize
 import java.io.File
 
-open class FileEntity(private val file: File) : Entity {
+@Parcelize
+open class FileEntity(internal val file: File) : Entity {
 
     override val name by lazy { file.name }
 
@@ -23,6 +26,13 @@ open class FileEntity(private val file: File) : Entity {
 
     val mimeType = MimeTypes.getMimeType(MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(file).toString()))
 
+}
+
+class DestinationPath(entity: FileEntity, path: String): FileEntity(entity.file) {
+
+    override val name = path.substringAfterLast("/", "")
+
+    override val path = path
 }
 
 class UpNavigator(file: File) : FileEntity(file) {
